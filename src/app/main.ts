@@ -1,13 +1,15 @@
 import { createApp } from 'vue'
 import './index.css'
-import App from './app/App.vue'
+import App from 'app/App.vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import Router from 'app/router'
 
 const app = createApp(App)
 
 app
 	.use(createPinia())
 	.use(ElementPlus)
+	.use(Router)
 
 app.mount('#app')
