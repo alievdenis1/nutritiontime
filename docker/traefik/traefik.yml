@@ -1,0 +1,43 @@
+# Docker configuration backend
+providers:
+  docker:
+    defaultRule: "Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)"
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "traefik"
+#  file:
+#    filename: dynamic.yml
+#    watch: true
+  http:
+    tls:
+      insecureSkipVerify: true
+
+# API and dashboard configuration
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  http:
+    # Listen on port 80 for incoming requests
+    address: :80
+  https:
+    # Listen on port 80 for incoming requests
+    address: :443
+
+
+certificatesResolvers:
+  letsEncrypt:
+    acme:
+      email: vlad.serednyakov@yandex.ru
+      storage: acme.json
+      # Staging CA Server: https://acme-staging-v02.api.letsencrypt.org/directory  - prod: https://acme-v02.api.letsencrypt.org/directory
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: http
+
+log:
+  level: DEBUG
+
+serversTransport:
+  insecureSkipVerify: true

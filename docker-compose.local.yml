@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  trafficker:
+    image: traefik:v2.7
+    restart: always
+    container_name: traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`nutritiontime-traefic.top`)"
+      - "traefik.http.routers.traefik.tls=false"
+      - "traefik.http.routers.traefik.service=api@internal"
+#      - "traefik.http.middlewares.tfk.basicauth.users=dashboard:$$2y$$10$$NPFjkHeadxwgZ.EY5pKo/.ETsyRSHNaoswfPATUJMljsb7JW4CMfu"
+#      - "traefik.http.routers.traefik.middlewares=tfk"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/traefik/traefik.yml:/traefik.yml:ro
+      - ./docker/traefik/dynamic.yml:/dynamic.yml:ro
+#      - ./docker/traefik/acme.json:/acme.json
+    networks:
+      - traefik
+      - frontend
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+#      args:
+#        APP_WORKDIR: $APP_WORKDIR
+    container_name: nodejs
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.entrypoints=http"
+      - "traefik.http.routers.nginx.rule=Host(`nutritiontime-local.top`)"
+      - "traefik.http.routers.nginx.tls=false"
+      - "traefik.http.services.nginx-service.loadbalancer.server.port=80"
+    #    volumes:
+#      - ${PROJECT_DIR}:${APP_WORKDIR}
+    networks:
+      - frontend
+
+
+networks:
+  traefik:
+    external: true
+  frontend:
+    external: false
+
