@@ -1,0 +1,11 @@
+@mixin use-font($font_name, $file_path_without_ext, $weight: normal, $style: normal) {
+	@font-face {
+		font-family: quote($font_name);
+		src: 	url($file_path_without_ext + '.woff') format('woff'),
+					url($file_path_without_ext + '.woff2') format('woff2'),
+					url($file_path_without_ext + '.ttf')  format('truetype');
+		font-weight: $weight;
+		font-style: $style;
+		font-display: swap;
+	}
+}

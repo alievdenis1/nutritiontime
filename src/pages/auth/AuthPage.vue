@@ -1,7 +1,9 @@
-<template />
+<template>
+	<AuthScreen />
+</template>
 
-<script setup lang='ts'>
-
+<script setup lang="ts">
+import { AuthScreen } from "widgets/auth";
 </script>
 
-<style lang='scss' scoped></style>
+<style lang="scss" scoped></style>

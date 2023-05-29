@@ -10,9 +10,9 @@ module.exports = {
 		sourceType: "module",
 	},
 	extends: [
-		"plugin:@typescript-eslint/recommended",
 		"eslint:recommended",
 		"plugin:vue/vue3-recommended",
+		"plugin:@typescript-eslint/recommended",
 	],
 	plugins: ["@typescript-eslint"],
 	ignorePatterns: ["dist"],

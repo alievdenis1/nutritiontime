@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import eslint from "vite-plugin-eslint";
+import eslint from 'vite-plugin-eslint'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
@@ -17,7 +17,7 @@ export default defineConfig({
 			widgets: fileURLToPath(new URL('./src/widgets', import.meta.url)),
 			features: fileURLToPath(new URL('./src/features', import.meta.url)),
 			entities: fileURLToPath(new URL('./src/entities', import.meta.url)),
-			shared: fileURLToPath(new URL('./src/shared', import.meta.url)),
+			shared: fileURLToPath(new URL('./src/shared', import.meta.url))
 		},
 	}
 })
