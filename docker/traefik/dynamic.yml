@@ -25,3 +25,6 @@ tls:
         - secp256r1
         - x25519
       sniStrict: true
+      defaultCertificate:
+        certFile: path/to/cert.crt
+        keyFile: path/to/cert.key

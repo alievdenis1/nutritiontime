@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 #RUN #cd ../../ && ls -la
 #COPY package*.json ./
 
-COPY . .
+COPY .. .
 
 RUN npm install
 # If you are building your code for production
@@ -21,8 +21,8 @@ RUN npm run build
 FROM nginx:latest
 COPY --from=builder /usr/src/app /usr/share/nginx/html
 
-COPY docker/nginx/conf/nginx.conf /etc/nginx/nginx.conf
-COPY docker/nginx/conf/default.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx/conf/production/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/conf/production/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
