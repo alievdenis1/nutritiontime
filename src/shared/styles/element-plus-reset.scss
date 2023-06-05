@@ -13,14 +13,13 @@
 
 .el-form-item {
 	&__label {
-		color: variables.$color_brown;
-		font-size: variables.$text_size_big;
+		@apply color-brown text-big;
 		margin-bottom: 9px;
 	}
 
 	&.is-error {
 		.el-input__wrapper {
-			border-bottom-color: variables.$color_red !important;
+			@apply border-red;
 			box-shadow: none;
 		}
 	}
