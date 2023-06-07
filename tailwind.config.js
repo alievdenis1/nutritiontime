@@ -2,25 +2,33 @@
 export default {
 	content: [
 		'./index.html',
-		'./src/**/*.{vue,ts}'
+		'./src/**/*.{vue,ts,scss}'
 	],
 	theme: {
-		extend: {},
 		colors: {
+			transparent: 'transparent',
 			black: '#000000',
 			white: '#FFFFFF',
 			brown: '#968D7D',
 			beige: '#FBF3E6',
 			green: '#056760',
 			red: '#E75854',
-			yellow: '#FFD274'
+			yellow: '#FFD274',
+			blue: {
+				DEFAULT: '0069A5',
+				100: '#019FB5'
+			}
 		},
 		fontSize: {
-			base: ['17px', '20px'],
-			sm: ['15px', '18px'],
-			xs: ['12px', '14px'],
-			lg: ['18px', '21px'],
-			title: ['28px', '32px']
+			base: ['16px', '20px'],
+			sm: ['14px', '18px'],
+			xs: ['12px', '16px'],
+			lg: ['18px', '22px'],
+			xl: ['20px', '24px'],
+			xxl: ['28px', '32px']
+		},
+		fontFamily: {
+			sans: ['Roboto', 'sans-serif']
 		}
 	},
 	plugins: [],

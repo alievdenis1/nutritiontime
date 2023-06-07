@@ -10,8 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed, toRefs} from 'vue'
-import {ButtonColors} from './config.ts'
+import { computed, toRefs } from 'vue'
+import { ButtonColors } from './config.ts'
 
 const emit = defineEmits<{
 	(event: 'click')
@@ -44,45 +44,25 @@ const onButtonClicked = () => {
 </script>
 
 <style lang="scss" scoped>
-@use "shared/styles/variables";
-
 .v-button {
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    line-height: 20px;
-    color: variables.$color_white;
-    width: 100%;
-    height: 70px;
-    border-style: solid;
-    border-width: 1px;
-	padding: 0 25px;
+	@apply rounded-[15px] flex items-center justify-center text-base text-white w-full h-[70px]
+		border-[1px] border-solid py-0 px-[25px];
 
     &--green {
-		background: variables.$color_green;
-		border-color: variables.$color_green;
-        box-shadow: 0 3px 2px rgba(237, 216, 194, 0.35);
+		@apply bg-green border-green shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
 
 	&--white {
-		background: variables.$color_white;
-		border-color: variables.$color_white;
-		box-shadow: 0 3px 2px rgba(237, 216, 194, 0.35);
+		@apply bg-white border-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
 	}
 
     &:focus, &:hover {
         &.v-button--green {
-			border-color: variables.$color_green;
-			background: variables.$color_white;
-			color: variables.$color_green;
+			@apply bg-white border-green text-green;
         }
 
 		&.v-button--white {
-			background: variables.$color_white;
-			border-color: variables.$color_black;
-			box-shadow: 0 3px 2px rgba(237, 216, 194, 0.35);
+			@apply bg-white border-black shadow-[0_3px_2px_rgba(237,216,194,0.35)];
 		}
     }
 }

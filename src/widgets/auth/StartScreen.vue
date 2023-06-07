@@ -9,7 +9,6 @@
 			>
 		</div>
 
-
 		<div class="start-screen__image">
 			<img
 				alt=""
@@ -35,7 +34,7 @@
 
 <script setup lang="ts">
 import { VButton } from 'shared/components/Button'
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const onStartButtonClicked = () => {
@@ -46,19 +45,16 @@ const onStartButtonClicked = () => {
 
 <style lang="scss" scoped>
 .start-screen {
-  &__logo {
-    margin-top: 28px;
-  }
+	&__logo {
+		@apply mt-[28px];
+	}
 
-  &__logo, &__image {
-    margin-bottom: 4rem;
-  }
+	&__logo, &__image {
+		@apply mt-16;
+	}
 
-  &__button {
-    display: flex;
-    width: 100%;
-    align-items: end;
-    flex-grow: 1;
-  }
+	&__button {
+		@apply flex w-full items-end grow;
+	}
 }
 </style>

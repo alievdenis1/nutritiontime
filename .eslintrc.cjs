@@ -39,6 +39,11 @@ module.exports = {
 				"CONTENT"
 			],
 			"alphabetical": false
-		}]
+		}],
+		"object-curly-spacing": ["error", "always"],
+		"quotes": ["error", "single"],
+		"no-trailing-spaces": "error",
+		"no-multiple-empty-lines": ["error", { max: 1, maxEOF: 1 }],
+		"semi": ["error", "never"]
 	}
 };

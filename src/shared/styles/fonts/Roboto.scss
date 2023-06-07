@@ -3,17 +3,17 @@
 $font-path: 'shared/assets/fonts/Roboto/';
 
 $black-path: 					$font-path + 'Black/Roboto-Black';
-$black-italic-path: 	$font-path + 'BlackItalic/Roboto-BlackItalic';
+$black-italic-path: 			$font-path + 'BlackItalic/Roboto-BlackItalic';
 $bold-path: 					$font-path + 'Bold/Roboto-Bold';
-$bold-italic-path:		$font-path + 'BoldItalice/Roboto-BoldItalic';
-$italic-path: 				$font-path + 'Italic/Roboto-Italic';
+$bold-italic-path:				$font-path + 'BoldItalice/Roboto-BoldItalic';
+$italic-path: 					$font-path + 'Italic/Roboto-Italic';
 $light-path: 					$font-path + 'Light/Roboto-Light';
-$light-italic-path:		$font-path + 'LightItalic/Roboto-LightItalic';
-$medium-path: 				$font-path + 'Medium/Roboto-Medium';
-$medium-italic-path: 	$font-path + 'MediumItalic/Roboto-MediumItalic';
-$regular-path: 				$font-path + 'Regular/Roboto-Regular';
+$light-italic-path:				$font-path + 'LightItalic/Roboto-LightItalic';
+$medium-path: 					$font-path + 'Medium/Roboto-Medium';
+$medium-italic-path: 			$font-path + 'MediumItalic/Roboto-MediumItalic';
+$regular-path: 					$font-path + 'Regular/Roboto-Regular';
 $thin-path:						$font-path + 'Thin/Roboto-Thin';
-$thin-italic-path:		$font-path + 'ThinItalic/Thin-Italic';
+$thin-italic-path:				$font-path + 'ThinItalic/Thin-Italic';
 
 
 @include font.use-font(Roboto, $black-path, 900, normal);

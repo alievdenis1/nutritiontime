@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router'
 import { DefaultLayout, AuthLayout } from 'app/layouts'
 import StartPage from 'pages/auth/StartPage.vue'
-import SelectAuthTypePage from "pages/auth/SelectAuthTypePage.vue";
+import SelectAuthTypePage from 'pages/auth/SelectAuthTypePage.vue'
 import AuthPage from 'pages/auth/AuthPage.vue'
 
 export default [

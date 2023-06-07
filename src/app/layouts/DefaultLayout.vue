@@ -9,10 +9,9 @@
 </script>
 
 <style lang="scss" scoped>
-@use "shared/styles/variables";
-
 .default-layout {
-	background-color: variables.$color_beige;
-	padding: 50px;
+	@apply bg-beige p-[50px];
+	//background-color: variables.$color_beige;
+	//padding: 50px;
 }
 </style>

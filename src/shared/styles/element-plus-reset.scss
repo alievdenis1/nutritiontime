@@ -1,10 +1,5 @@
-@use "shared/styles/variables";
-
 .el-button > span {
-	width: 100%;
-	align-items: center;
-	text-align: center;
-	justify-content: center;
+	@apply w-full items-center text-center justify-center;
 }
 
 .el-button + .el-button {
@@ -13,43 +8,34 @@
 
 .el-form-item {
 	&__label {
-		@apply color-brown text-big;
-		margin-bottom: 9px;
+		@apply text-brown text-lg mb-9;
 	}
 
 	&.is-error {
 		.el-input__wrapper {
-			@apply border-red;
-			box-shadow: none;
+			@apply border-red shadow-none;
 		}
 	}
 }
 
 .el-input {
-	font-size: 20px;
+	@apply text-xl;
 
 	.el-input__wrapper {
-		box-shadow: none;
-		background-color: transparent;
-		padding: 0 0 15px 0;
-		border-bottom: 0.5px solid variables.$color_brown;
-		border-radius: 0;
+		@apply border-brown rounded-none border-0 border-b-[1px] border-solid p-0 pb-[15px] bg-transparent shadow-none;
 	}
 
 	.el-input__inner {
-		color: variables.$color_green;
-		font-size: variables.$text_size_default;
+		@apply text-green text-base;
 
 		&::placeholder {
-			font-weight: 400;
-			color: variables.$color_brown;
-			opacity: .5;
+			@apply font-normal text-brown opacity-50;
 		}
 	}
 
 	&:focus, &:hover {
 		.el-input__wrapper {
-			border-bottom-color: variables.$color_green;
+			@apply border-b-green;
 		}
 	}
 }

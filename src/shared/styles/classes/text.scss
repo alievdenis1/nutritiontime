@@ -1,6 +1,0 @@
-@use "shared/styles/variables";
-@use "shared/styles/mixins";
-
-.text-description {
-	@include mixins.text-description();
-}

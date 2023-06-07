@@ -51,7 +51,7 @@
 					/>
 				</el-form-item>
 
-				<span class="color-red">
+				<span class="text-red">
 					Забыли пароль?
 				</span>
 			</el-form>
@@ -67,8 +67,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { VButton } from "shared/components/Button";
+import { reactive, ref } from 'vue'
+import { VButton } from 'shared/components/Button'
 
 enum Tabs {
 	Auth = 'auth',
@@ -91,66 +91,49 @@ const onAuthButtonClicked = () => {
 </script>
 
 <style lang="scss" scoped>
-@use "shared/styles/variables";
-
 .auth-screen {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
+	@apply w-full flex flex-col;
 
 	&__header {
-		display: flex;
-		flex-direction: column;
-		background-color: variables.$color_white;
-		padding: 50px 50px 0 50px;
-		box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
-		border-bottom-left-radius: 22px;
-		border-bottom-right-radius: 22px;
+		@apply flex flex-col bg-white p-[50px] pb-0 shadow-[0_4px_30px_rgba(0,0,0,0.06)]
+			rounded-bl-[22px] rounded-br-[22px];
 
 		.auth-screen__logo {
-			display: flex;
-			justify-content: center;
-			margin-bottom: 4rem;
-			margin-top: 2rem;
+			@apply flex justify-center mb-16 mt-8;
 		}
 
 		:deep(.el-tabs) {
 			.el-tabs__header {
-				margin-bottom: 0;
+				@apply mb-0;
 			}
 
 			.el-tabs__nav-wrap::after {
-				background-color: transparent;
+				@apply bg-transparent;
 			}
 
 			.el-tabs__nav-scroll {
-				justify-content: center;
-				display: flex;
+				@apply flex justify-center;
 			}
 
 			.el-tabs__item {
-				color: variables.$color_brown;
-				width: 134px;
+				@apply w-[134px] text-brown;
 
 				&.is-active {
-					color: variables.$color_green;
+					@apply text-green;
 				}
 			}
 
 			.el-tabs__active-bar {
-				background-color: variables.$color_green;
+				@apply bg-green;
 			}
 		}
 	}
 
 	&__body {
-		height: 100%;
-		padding: 50px;
-		display: flex;
-		flex-direction: column;
+		@apply h-full p-[50px] flex flex-col;
 
 		:deep(.el-form) {
-			flex-grow: 1;
+			@apply grow;
 		}
 	}
 }

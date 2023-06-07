@@ -1,5 +1,7 @@
-import authRoutes from './auth.routes.ts'
+import authRoutes from './auth.routes'
+import mainRoutes from './main.routes'
 
 export default [
-	...authRoutes
+	...authRoutes,
+	...mainRoutes
 ]

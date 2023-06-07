@@ -6,9 +6,15 @@
 @import "element-plus/dist/index.css";
 @import "element-plus-reset";
 @import "fonts";
-@import "classes";
 
-* {
-	font-family: Roboto, sans-serif;
-	font-weight: 500;
+//* {
+//	font-family: Roboto, sans-serif;
+//	font-weight: 500;
+//}
+
+.layout {
+	min-width: 100vw;
+	min-height: 100vh;
+	display: flex;
 }
+

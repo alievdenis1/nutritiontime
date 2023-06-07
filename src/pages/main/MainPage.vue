@@ -1,5 +1,7 @@
 <template>
-	q
+	<div>
+		a
+	</div>
 </template>
 
 <script setup lang="ts">

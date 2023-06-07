@@ -9,9 +9,8 @@
 </script>
 
 <style lang="scss" scoped>
-@use "shared/styles/variables";
 
 .auth-layout {
-	background-color: variables.$color_beige;
+	@apply bg-beige;
 }
 </style>

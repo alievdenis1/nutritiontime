@@ -121,17 +121,17 @@
 			</v-button>
 		</div>
 
-		<div class="auth-type-selection__politics text-xs color-brown text-center">
+		<div class="auth-type-selection__politics text-xs text-brown text-center">
 			Продолжая, вы соглашаетесь со следующим:
-			<span class="color-red"> Положения и условия, </span>
-			<span class="color-red"> Политика конфинедциальности </span>
+			<span class="text-red"> Положения и условия, </span>
+			<span class="text-red"> Политика конфинедциальности </span>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { VButton } from "shared/components/Button";
-import { useRouter } from "vue-router";
+import { VButton } from 'shared/components/Button'
+import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const onAuthByEmailButtonClicked = () => {
@@ -140,73 +140,54 @@ const onAuthByEmailButtonClicked = () => {
 </script>
 
 <style lang="scss" scoped>
-@use "shared/styles/variables";
-@use "shared/styles/mixins";
 
 .auth-type-button {
 	&.is-email {
-		color: #056760;
+		@apply text-green;
 	}
 
 	&.is-telegram {
-		color: #019FB5;
+		@apply text-blue-100;
 	}
 
 	&.is-google {
-		color: #E75854;
+		@apply text-red;
 	}
 
 	&.is-facebook {
-		color: #0069A5;
+		@apply text-blue;
 	}
 
 	&.is-apple {
-		color: #968D7D;
+		@apply text-brown;
 	}
 }
 
 .auth-type-selection {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+	@apply w-full flex flex-col items-center;
 
 	&__logo {
-		margin-bottom: 4rem;
-		margin-top: 28px;
+		@apply mb-16 mt-[28px];
 	}
 
 	&__buttons-wrapper {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		flex-grow: 1;
+		@apply w-full flex flex-col items-center grow;
 
 		.auth-type-selection__title {
-			@include mixins.text-regular();
-			color: variables.$color_brown;
-			margin-bottom: 2rem;
+			@apply text-base text-brown mb-8;
 		}
 	}
 
 	.auth-type-button {
-		height: 65px;
+		@apply h-[65px];
+
 		&__description {
-			display: inline-block;
-			line-height: 100%;
-			flex-grow: 1;
-			text-align: left;
-			margin-left: 7px;
+			@apply inline-block grow text-left ml-[7px];
 		}
 
 		& + .auth-type-button {
-			margin-top: 20px;
+			@apply mt-[20px];
 		}
-	}
-
-	.auth-type-selection__politics {
-
 	}
 }
 </style>
