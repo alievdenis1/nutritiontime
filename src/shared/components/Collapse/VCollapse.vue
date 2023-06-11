@@ -121,13 +121,3 @@ const onCollapseTriggerClicked = () => {
 	isCollapsed.value = !isCollapsed.value
 }
 </script>
-
-<style lang="scss" scoped>
-.collapse-wrapper {
-
-}
-
-.collapse-item {
-
-}
-</style>

@@ -8,6 +8,8 @@
 			v-loading="isLoadingDeletePlan || isLoadingCopyPlan"
 			class="flex flex-col"
 		>
+			<v-divider />
+
 			<copy-plan />
 
 			<v-divider />
