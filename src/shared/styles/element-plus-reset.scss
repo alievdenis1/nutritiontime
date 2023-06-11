@@ -44,7 +44,7 @@
 	@apply shadow rounded;
 
 	.el-dialog__header {
-		@apply mr-[0] py-[25px] px-[38px];
+		@apply mr-[0] py-[25px] px-[38px] text-center;
 
 		.el-dialog__title {
 			@apply text-brown;
@@ -67,4 +67,9 @@
 	* {
 		color: var(--el-button-disabled-text-color) !important;
 	}
+}
+
+.el-overlay {
+	backdrop-filter: blur(2.5px);
+	background: rgba(0, 0, 0, 0.5);
 }
