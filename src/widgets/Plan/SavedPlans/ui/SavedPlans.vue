@@ -7,8 +7,11 @@
 		/>
 
 		<saved-plans-list
+			class="mb-[20px]"
 			@action="onSavedPlanActionButtonClicked"
 		/>
+
+		<generate-new-plan />
 	</div>
 </template>
 
@@ -17,6 +20,7 @@ import { SavedPlansList, usePlansStore } from 'entities/Plan'
 import PlanActionsDialog from './PlanActionsDialog.vue'
 import { Plan } from 'entities/Plan/types'
 import { ref } from 'vue'
+import { GenerateNewPlan } from 'features/Plan/generate-new'
 
 const plansStore = usePlansStore()
 plansStore.fetchSavedPlans()
