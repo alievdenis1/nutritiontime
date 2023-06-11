@@ -1,5 +1,5 @@
 <template>
-	<main class="layout p-[50px]">
+	<main class="layout p-[50px] bg-beige">
 		<header-widget class="mb-[36px]" />
 
 		<slot />
@@ -9,5 +9,3 @@
 <script setup lang="ts">
 import { HeaderWidget } from 'widgets/header'
 </script>
-
-<style lang="scss" scoped></style>
