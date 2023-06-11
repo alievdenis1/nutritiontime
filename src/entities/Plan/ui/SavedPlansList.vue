@@ -12,13 +12,18 @@
 					:plan="item"
 				/>
 
-				<el-icon
-					size="16"
-					class="cursor-pointer"
+				<div
+					class="
+						h-[50px] w-[50px] flex items-center justify-center
+						cursor-pointer rounded-[90px]
+						hover:outline-green hover:outline-1 hover:outline
+					"
 					@click="onActionButtonClicked(item)"
 				>
-					<el-icon-more-filled class="text-green" />
-				</el-icon>
+					<el-icon size="16">
+						<el-icon-more-filled class="text-green" />
+					</el-icon>
+				</div>
 			</div>
 		</template>
 	</v-collapse>

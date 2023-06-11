@@ -46,6 +46,10 @@
 	.el-dialog__header {
 		@apply mr-[0] py-[25px] px-[38px];
 
+		.el-dialog__title {
+			@apply text-brown;
+		}
+
 		.el-dialog__headerbtn {
 			@apply right-[0px] rounded-[90px] bg-white h-[56px] w-[56px] top-[-66px] flex items-center justify-center;
 			i {
