@@ -6,15 +6,12 @@
 @import "element-plus/dist/index.css";
 @import "element-plus-reset";
 @import "fonts";
-
-//* {
-//	font-family: Roboto, sans-serif;
-//	font-weight: 500;
-//}
+@import "transitions";
 
 .layout {
 	min-width: 100vw;
 	min-height: 100vh;
 	display: flex;
+	flex-direction: column;
 }
 

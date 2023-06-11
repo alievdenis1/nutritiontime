@@ -1,0 +1,49 @@
+<template>
+	<el-button
+		text
+		class="p-[5px]"
+		@click="onClicked"
+	>
+		<div class="flex row text-default text-green w-full items-center">
+			<el-icon
+				size="17"
+				class="mr-[12px]"
+			>
+				<icon-copy />
+			</el-icon>
+
+			Копировать
+		</div>
+	</el-button>
+</template>
+
+<script setup lang="ts">
+import { Plan } from 'entities/Plan/types'
+import { toRefs } from 'vue'
+import { useCopyPlanStore } from '../model'
+import { IconCopy } from 'shared/components/Icon'
+
+const emit = defineEmits<{
+	(event: 'success'),
+	(event: 'error')
+}>()
+
+const props = defineProps<{
+	planId: Plan['id']
+}>()
+
+const { planId } = toRefs(props)
+
+const store = useCopyPlanStore()
+
+const onClicked = () => {
+	store.copyPlan(planId.value)
+		.then(() => {
+			emit('success')
+		}).catch(() => {
+			emit('error')
+		})
+}
+</script>
+
+<style lang="scss" scoped></style>

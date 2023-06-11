@@ -39,3 +39,13 @@
 		}
 	}
 }
+
+.el-dialog {
+	.el-dialog__header {
+		@apply mr-[0] p-[25px];
+
+		.el-dialog__headerbtn {
+
+		}
+	}
+}

@@ -1,6 +1,8 @@
 <template>
-	<main class="layout main-layout mb-[36px]">
-		<header-widget />
+	<main class="layout p-[50px]">
+		<header-widget class="mb-[36px]" />
+
+		<slot />
 	</main>
 </template>
 
