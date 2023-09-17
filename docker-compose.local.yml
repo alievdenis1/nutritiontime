@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  trafficker:
+    image: traefik:v2.7
+    restart: always
+    container_name: traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.tls=false"
+      - "traefik.http.routers.traefik.service=api@internal"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/traefik/traefik.yml:/traefik.yml:ro
+      - ./docker/traefik/dynamic.yml:/dynamic.yml:ro
+    networks:
+      - traefik
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/nginx/local/Dockerfile
+    container_name: nodejs
+    restart: always
+    labels:
+      - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.entrypoints=http"
+      - "traefik.http.routers.nginx.tls=false"
+      - "traefik.http.services.nginx-service.loadbalancer.server.port=9090"
+    expose:
+      - "9090"
+    volumes:
+      - ${PROJECT_DIR}:/usr/src/app
+      - /usr/src/app/node_modules
+
+    networks:
+      - traefik
+      - frontend
+
+networks:
+  traefik:
+    external: true
+  frontend:
+    external: false
