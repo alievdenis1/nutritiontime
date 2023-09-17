@@ -1,28 +1,19 @@
+# Используем базовый образ Node 16
 FROM node:16 AS builder
 
-RUN mkdir -p /usr/src/app
-# Create app directory
+# Устанавливаем рабочую директорию в контейнере
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-#RUN #cd ../../ && ls -la
-#COPY package*.json ./
+COPY package*.json ./
 
-COPY .. .
-
+# Устанавливаем все зависимости
 RUN npm install
-# If you are building your code for production
-# RUN npm ci --omit=dev
-RUN npm run build
-# Bundle app source
 
-FROM nginx:latest
-COPY --from=builder /usr/src/app /usr/share/nginx/html
+# Копируем все файлы проекта в рабочую директорию контейнера
+COPY . .
 
-COPY docker/nginx/conf/local/nginx.conf /etc/nginx/nginx.conf
-COPY docker/nginx/conf/local/default.conf /etc/nginx/conf.d/default.conf
+# Expose порт 9090, так как это порт, на котором ваше приложение запускается в режиме разработки
+EXPOSE 9090
 
-EXPOSE 80
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Запускаем приложение в режиме разработки
+CMD ["npm", "run", "dev"]
