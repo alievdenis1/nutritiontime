@@ -1,5 +1,5 @@
 <template>
-	<main class="layout default-layout">
+	<main class="layout bg-beige p-[50px]">
 		<slot />
 	</main>
 </template>
@@ -9,9 +9,4 @@
 </script>
 
 <style lang="scss" scoped>
-.default-layout {
-	@apply bg-beige p-[50px];
-	//background-color: variables.$color_beige;
-	//padding: 50px;
-}
 </style>

@@ -17,7 +17,9 @@ export const usePlansStore = defineStore({
 		fetchSavedPlans() {
 			this.isLoadingSavedPlans = true
 			return getSavedPlansList()
-				.then((response) => response.plans)
+				.then((response) => {
+					this.savedPlans = response.plans
+				})
 				.finally(() => {
 					this.isLoadingSavedPlans = false
 				})

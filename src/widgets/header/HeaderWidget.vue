@@ -1,5 +1,5 @@
 <template>
-	<header class="flex items-between justify-center">
+	<header class="flex items-center justify-between w-full">
 		<img
 			src="/image/logo/logo-small.webp"
 			alt="logo"

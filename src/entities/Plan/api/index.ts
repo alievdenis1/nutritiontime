@@ -1,6 +1,6 @@
-import { Plan } from '../types';
-import { emulateRequest } from 'shared/lib/debug';
-import { DEBUG_DATA } from '../@debug';
+import { Plan } from '../types'
+import { emulateRequest } from 'shared/lib/debug'
+import { DEBUG_DATA } from '../@debug'
 
 export type GetSavedPlansResponseDto = {
 	plans: Plan[]

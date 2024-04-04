@@ -124,7 +124,7 @@
 		<div class="auth-type-selection__politics text-xs text-brown text-center">
 			Продолжая, вы соглашаетесь со следующим:
 			<span class="text-red"> Положения и условия, </span>
-			<span class="text-red"> Политика конфинедциальности </span>
+			<span class="text-red"> Политика конфенедциальности </span>
 		</div>
 	</div>
 </template>

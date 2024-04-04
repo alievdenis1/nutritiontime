@@ -1,5 +1,5 @@
 <template>
-	<main class="layout auth-layout">
+	<main class="layout bg-beige">
 		<slot />
 	</main>
 </template>
@@ -9,8 +9,4 @@
 </script>
 
 <style lang="scss" scoped>
-
-.auth-layout {
-	@apply bg-beige;
-}
 </style>

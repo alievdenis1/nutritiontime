@@ -5,6 +5,22 @@ export default {
 		'./src/**/*.{vue,ts,scss}'
 	],
 	theme: {
+		extends: {
+			fontSize: {
+				base: ['16px', '20px'],
+				sm: ['14px', '18px'],
+				xs: ['12px', '16px'],
+				lg: ['18px', '22px'],
+				xl: ['20px', '24px'],
+				xxl: ['28px', '32px']
+			},
+			boxShadow: {
+				DEFAULT: '0px 3px 2px rgba(237, 216, 194, 0.35)'
+			},
+		},
+		fontFamily: {
+			sans: ['Roboto', 'sans-serif']
+		},
 		colors: {
 			transparent: 'transparent',
 			black: '#000000',
@@ -19,16 +35,9 @@ export default {
 				100: '#019FB5'
 			}
 		},
-		fontSize: {
-			base: ['16px', '20px'],
-			sm: ['14px', '18px'],
-			xs: ['12px', '16px'],
-			lg: ['18px', '22px'],
-			xl: ['20px', '24px'],
-			xxl: ['28px', '32px']
-		},
-		fontFamily: {
-			sans: ['Roboto', 'sans-serif']
+		borderRadius: {
+			DEFAULT: '15px',
+			none: 'none'
 		}
 	},
 	plugins: [],
