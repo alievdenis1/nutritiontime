@@ -1,11 +1,10 @@
 import { RouteRecordRaw } from 'vue-router'
 import { MainLayout } from 'app/layouts'
-import MainPage from 'pages/main/MainPage.vue'
 
 export default [
 	{
 		name: 'main',
-		component: () => MainPage,
+		component: () => import('pages/main/MainPage.vue'), // Важно: динасический импорт, чтобы код работал в production при build
 		path: '/',
 		meta: {
 			title: 'Nutrition Time',
