@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vue-tsc && vite build",
+    "build-draft": "vite build",
     "preview": "vite preview",
     "lint": "eslint --config .eslintrc.cjs --ignore-path .eslintignore src/**/*.{js,vue}",
     "lintFix": "eslint --fix --config .eslintrc.cjs --ignore-path .eslintignore src/**/*.{js,vue}"
