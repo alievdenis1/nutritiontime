@@ -1,0 +1,17 @@
+{
+    "ru": {
+        "howToEnter": "Как вы хотите войти?",
+        "email": "Почта",
+        "confirm": "Продолжая, вы соглашаетесь со следующим:",
+        "terms": "Положения и условия",
+        "privacyPolicy": "Политика конфиденциальности"
+
+    },
+    "en": {
+        "howToEnter": "How do you want to enter?",
+        "email": "Email",
+        "confirm": "By continuing, you agree with:",
+        "terms": "Terms and conditions",
+        "privacyPolicy": "Privacy Policy"
+    }
+}

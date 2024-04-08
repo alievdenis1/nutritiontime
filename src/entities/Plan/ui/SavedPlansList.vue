@@ -3,7 +3,7 @@
 		v-loading="isLoadingSavedPlans"
 		:data="savedPlans"
 		title-key="name"
-		title="Сохраненные планы"
+		:title="t('savedPlans')"
 		name-key="id"
 	>
 		<template #item="{ item }">
@@ -35,6 +35,10 @@ import { storeToRefs } from 'pinia'
 import PlanInfo from './PlanInfo.vue'
 import { VCollapse } from 'shared/components/Collapse'
 import { Plan } from '../types'
+import Localization from './SavedPlansList.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
 	(event: 'action', value: Plan)

@@ -11,7 +11,7 @@
 
 		<div class="auth-type-selection__buttons-wrapper">
 			<span class="auth-type-selection__title">
-				Как вы хотите войти?
+				{{ t('howToEnter') }}
 			</span>
 
 			<v-button
@@ -28,7 +28,7 @@
 				>
 
 				<span class="auth-type-button__description">
-					Почта
+					{{ t('email') }}
 				</span>
 
 				<el-icon :size="9">
@@ -122,9 +122,9 @@
 		</div>
 
 		<div class="auth-type-selection__politics text-xs text-brown text-center">
-			Продолжая, вы соглашаетесь со следующим:
-			<span class="text-red"> Положения и условия, </span>
-			<span class="text-red"> Политика конфенедциальности </span>
+			{{ t('confirm') }}
+			<span class="text-red"> {{ t('terms') }} </span>
+			<span class="text-red"> {{ t('privacyPolicy') }} </span>
 		</div>
 	</div>
 </template>
@@ -132,6 +132,10 @@
 <script setup lang="ts">
 import { VButton } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
+import Localization from './AuthTypeSelection.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 const router = useRouter()
 
 const onAuthByEmailButtonClicked = () => {

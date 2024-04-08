@@ -1,0 +1,22 @@
+{
+    "ru": {
+        "login": "Вход",
+        "register": "Регистрация",
+        "email": "Почта",
+        "emailPlaceholder": "Введите Email",
+        "password": "Пароль",
+        "passwordPlaceholder": "Введите пароль",
+        "forgetPassword": "Забыли пароль?",
+        "signInButton": "Войти"
+    },
+    "en": {
+        "login": "Sign In",
+        "register": "Sign Up",
+        "email": "Email",
+        "emailPlaceholder": "Enter Email",
+        "password": "Password",
+        "passwordPlaceholder": "Enter password",
+        "forgetPassword": "Forget password?",
+        "signInButton": "Sign In"
+    }
+}

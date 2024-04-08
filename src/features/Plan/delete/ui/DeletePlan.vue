@@ -12,7 +12,7 @@
 				<el-icon-delete />
 			</el-icon>
 
-			Удалить
+			{{ t('delete') }}
 		</div>
 	</el-button>
 </template>
@@ -21,6 +21,10 @@
 import { toRefs } from 'vue'
 import { useDeletePlanStore } from '../model'
 import { Plan } from 'entities/Plan/types'
+import Localization from './DeletePlan.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 
 const store = useDeletePlanStore()
 
