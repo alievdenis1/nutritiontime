@@ -1,7 +1,7 @@
 <template>
 	<div class="bg-white shadow rounded px-[31px]">
 		<div
-			class="py-[25px] cursor-pointer"
+			class="pt-[32px] pb-[28px] cursor-pointer"
 			@click="onCollapseTriggerClicked"
 		>
 			<slot>
@@ -38,9 +38,19 @@
 						<el-icon-arrow-left-bold class="text-green" />
 					</el-icon>
 
-					<span class="text-lg text-brown grow">
+					<span class="text-lg text-brown">
 						{{ title }}
 					</span>
+					<button
+						class="cursor-pointer bg-[#056760] rounded w-[30px] h-[30px] flex items-center justify-center"
+						@click.stop="$emit('generate')"
+					>
+						<img
+							width="8"
+							src="/image/icons/icon-plus.svg"
+							height="8"
+						>
+					</button>
 				</div>
 			</slot>
 		</div>
@@ -74,9 +84,14 @@
 
 <script setup lang="ts" generic="T extends any">
 import { computed, ref, toRefs } from 'vue'
+import Localization from './VCollapse.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
-	(event: 'change', value: string | number)
+	(event: 'change', value: string | number),
+	(event:'generate')
 }>()
 
 const props = withDefaults(defineProps<{
@@ -96,7 +111,7 @@ const { data, titleKey, idKey, description, title } = toRefs(props)
 const descriptionText = computed<string>(() => {
 	if (description.value !== undefined) return description.value
 
-	let text = `${data.value.length} шт. `
+	let text = `${data.value.length} ${t('count')}. `
 
 	if (data.value) {
 		text += '(' +
