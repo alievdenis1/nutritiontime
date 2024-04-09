@@ -14,12 +14,12 @@
 			>
 				<el-tab-pane
 					:name="Tabs.Auth"
-					label="Вход"
+					:label="t('login')"
 				/>
 
 				<el-tab-pane
 					:name="Tabs.Register"
-					label="Регистрация"
+					:label="t('register')"
 				/>
 			</el-tabs>
 		</div>
@@ -32,27 +32,27 @@
 				@submit.prevent
 			>
 				<el-form-item
-					label="Почта"
+					:label="t('email')"
 					prop="email"
 				>
 					<el-input
 						v-model="authModel.email"
-						placeholder="Введите Email"
+						:placeholder="t('emailPlaceholder')"
 					/>
 				</el-form-item>
 
 				<el-form-item
-					label="Пароль"
+					:label="t('password')"
 					prop="password"
 				>
 					<el-input
 						v-model="authModel.password"
-						placeholder="Введите пароль"
+						:placeholder="t('passwordPlaceholder')"
 					/>
 				</el-form-item>
 
 				<span class="text-red">
-					Забыли пароль?
+					{{ t('forgetPassword') }}
 				</span>
 			</el-form>
 
@@ -60,7 +60,7 @@
 				color="green"
 				@click="onAuthButtonClicked"
 			>
-				Войти
+				{{ t('signInButton') }}
 			</v-button>
 		</div>
 	</div>
@@ -69,6 +69,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { VButton } from 'shared/components/Button'
+import Localization from './AuthScreen.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 
 enum Tabs {
 	Auth = 'auth',

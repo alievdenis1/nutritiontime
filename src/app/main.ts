@@ -4,10 +4,12 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import Router from './router'
 import * as ElementPlusIcons from '@element-plus/icons-vue'
+import { i18n } from '@/shared/lib/i18n'
 
 const app = createApp(App)
 
 app
+	.use(i18n)
 	.use(createPinia())
 	.use(ElementPlus)
 	.use(Router)

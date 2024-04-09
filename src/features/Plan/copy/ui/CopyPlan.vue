@@ -12,7 +12,7 @@
 				<icon-copy />
 			</el-icon>
 
-			Копировать
+			{{ t('copy') }}
 		</div>
 	</el-button>
 </template>
@@ -22,6 +22,10 @@ import { Plan } from 'entities/Plan/types'
 import { toRefs } from 'vue'
 import { useCopyPlanStore } from '../model'
 import { IconCopy } from 'shared/components/Icon'
+import Localization from './CopyPlan.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
 	(event: 'success'),

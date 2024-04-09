@@ -19,14 +19,12 @@
 		</div>
 
 		<div class="start-screen__description text-description text-center">
-			Удобный способ планировать питание
-			в соответствии с вашими предпочтениями
-			и возможностями
+			{{ t('startScreenDesc') }}
 		</div>
 
 		<div class="start-screen__button">
 			<v-button @click="onStartButtonClicked">
-				Начать
+				{{ t('start') }}
 			</v-button>
 		</div>
 	</div>
@@ -35,6 +33,10 @@
 <script setup lang="ts">
 import { VButton } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
+import Localization from './StartScreen.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+const { t } = useTranslation(Localization)
 const router = useRouter()
 
 const onStartButtonClicked = () => {
