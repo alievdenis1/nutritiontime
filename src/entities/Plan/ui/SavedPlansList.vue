@@ -3,8 +3,9 @@
 		v-loading="isLoadingSavedPlans"
 		:data="savedPlans"
 		title-key="name"
-		:title="t('savedPlans')"
+		:title="t('myCollection')"
 		name-key="id"
+		@generate="onGenerateNewPlan"
 	>
 		<template #item="{ item }">
 			<div class="flex row items-center justify-between">
@@ -14,7 +15,7 @@
 
 				<div
 					class="
-						h-[50px] w-[50px] flex items-center justify-center
+						h-[30px] w-[50px] flex items-center justify-center
 						cursor-pointer rounded-[90px]
 						hover:outline-green hover:outline-1 hover:outline
 					"
@@ -46,6 +47,10 @@ const emit = defineEmits<{
 
 const store = usePlansStore()
 const { savedPlans, isLoadingSavedPlans } = storeToRefs(store)
+
+const onGenerateNewPlan = () => {
+	console.log('new plan created')
+}
 
 const onActionButtonClicked = (plan: Plan) => {
 	emit('action', plan)

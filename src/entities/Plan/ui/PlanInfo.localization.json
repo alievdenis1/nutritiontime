@@ -1,10 +1,8 @@
 {
     "ru": {
-        "caloriesPerDay": "ккал/день",
-        "pfc": "БЖУ"
+
     },
     "en": {
-        "caloriesPerDay": "kcal/day",
-        "pfc": "PFC"
+
     }
 }
