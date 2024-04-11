@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tonconnect/ui": "^2.0.0",
+    "@twa-dev/sdk": "^7.0.0",
     "element-plus": "^2.3.4",
     "pinia": "^2.0.36",
     "vue": "^3.2.47",
