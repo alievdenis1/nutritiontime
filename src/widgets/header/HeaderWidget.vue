@@ -87,7 +87,7 @@ onMounted(() => {
 
   console.log('WebApp.initDataUnsafe', WebApp.initDataUnsafe.user)
   let user = WebApp.initDataUnsafe.user
-  WebApp.showAlert('Hey, ' + user.username + '. <br/>Your language is' + user.language_code)
+  WebApp.showAlert('Hey, ' + user.username + '. Your language is' + user.language_code)
   console.log('name', WebApp.initData)
 })
 </script>
