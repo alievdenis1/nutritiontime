@@ -57,14 +57,17 @@
 </template>
 
 <script lang="ts" setup>
-import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
-import { onMounted, ref } from 'vue'
 import Localization from './HeaderWidget.localization.json'
 import { useLocaleStore, useTranslation } from '@/shared/lib/i18n'
+import WebApp from '@twa-dev/sdk'
+
+const { t } = useTranslation(Localization)
+import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
+import { onMounted, ref } from 'vue'
 
 const localeStore = useLocaleStore()
 const languageDropDownOpen = ref(false)
-const { t } = useTranslation(Localization)
+
 const tonConnectUI = ref<TonConnectUI>()
 const unsubscribe = ref()
 const friendlyWalletAddress = ref('')
@@ -81,6 +84,9 @@ onMounted(() => {
   unsubscribe.value = tonConnectUI.value?.onStatusChange(walletInfo => {
     friendlyWalletAddress.value = walletInfo?.account?.address ? toUserFriendlyAddress(walletInfo.account.address) : ''
   })
+
+  console.log('WebApp.initDataUnsafe', WebApp.initDataUnsafe)
+  WebApp.showAlert('Hey there!')
 })
 </script>
 
