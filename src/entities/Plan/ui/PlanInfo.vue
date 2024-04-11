@@ -1,11 +1,13 @@
 <template>
-	<div class="flex flex-col">
+	<div class="flex flex-col font-medium text-[#735F2B] gap-1 h-[28px]">
 		<span
-			class="text-sm font-medium"
-			:class="plan.isActive ? 'text-green' : 'text-brown'"
+			class="text-[15px] leading-[94.95%]"
 		>
 			{{ plan.name }}
 		</span>
+		<p class="text-[10px] opacity-70 leading-[94.95%]">
+			text
+		</p>
 	</div>
 </template>
 

@@ -1,32 +1,25 @@
 <template>
-	<div class="grid w-full rounded-[4px] py-5 px-9 bg-white drop-shadow-[0_3px_2px_rgba(237, 216, 194, 0.35)]">
-		<footer class="flex items-center justify-between">
-			<v-button class="cursor-pointer flex flex-col-reverse items-center gap-[6px]">
-				<span class="text-xs font-medium text-[#968D7D] w-[72px] h-[15px] text-center">
-					{{ t('receipts')}}
-				</span>
+	<div class="grid w-full px-[26px]">
+		<footer class="flex py-3 px-14 items-center justify-between bg-[#6BA78E] rounded-[100px]">
+			<v-button class="cursor-pointer">
 				<img
-					height="15"
-					src="/image/icons/icon-my-reciepts.svg"
-					width="15"
+					height="23"
+					src="/image/icons/icon-home.svg"
+					width="24"
 				>
 			</v-button>
-			<v-button class="cursor-pointer p-5 rotate-45 bg-[#056760] rounded-[15px]">
+			<v-button class="cursor-pointer p-[14.5px] border-solid border border-white rounded-[50%]">
 				<img
-					class="rotate-45"
-					height="15"
+					height="9"
 					src="/image/icons/icon-plus.svg"
 					width="9"
 				>
 			</v-button>
-			<v-button class="cursor-pointer flex flex-col-reverse items-center gap-[6px]">
-				<span class="text-xs font-medium text-[#968D7D] w-[72px] h-[15px] text-center">
-					{{t('search')}}
-				</span>
+			<v-button class="cursor-pointer">
 				<img
-					height="12"
+					height="22"
 					src="/image/icons/icon-search.svg"
-					width="12"
+					width="23"
 				>
 			</v-button>
 		</footer>

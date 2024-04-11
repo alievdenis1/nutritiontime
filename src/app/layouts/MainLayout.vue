@@ -1,5 +1,5 @@
 <template>
-	<main class="layout py-9 px-8 bg-beige">
+	<main class="layout p-[25px] bg-[#FEF6DF]">
 		<header-widget class="mb-[30px]" />
 
 		<slot />
