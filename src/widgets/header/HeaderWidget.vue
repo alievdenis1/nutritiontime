@@ -4,7 +4,7 @@
 			<img
 				alt="Logo"
 				height="34"
-				src="/image/logo/logo-small.webp"
+				src="/image/logo/logo-small.svg"
 				width="178"
 			>
 
@@ -43,11 +43,17 @@
 						v-if="languageDropDownOpen"
 						class="language-dropdown"
 					>
-						<v-button @click="localeStore.setLocale('ru')">
-							Ru
+						<v-button
+							:class="{'active': localeStore.currentLocale == 'ru'}"
+							@click="localeStore.setLocale('ru')"
+						>
+							RUS
 						</v-button>
-						<v-button @click="localeStore.setLocale('en')">
-							En
+						<v-button
+							:class="{'active': localeStore.currentLocale == 'en'}"
+							@click="localeStore.setLocale('en')"
+						>
+							ENG
 						</v-button>
 					</div>
 				</v-button>
@@ -57,17 +63,16 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+import { Locales, useLocaleStore, useTranslation } from '@/shared/lib/i18n'
+import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
 import Localization from './HeaderWidget.localization.json'
-import { useLocaleStore, useTranslation } from '@/shared/lib/i18n'
 import WebApp from '@twa-dev/sdk'
 
-const { t } = useTranslation(Localization)
-import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
-import { onMounted, ref } from 'vue'
-
 const localeStore = useLocaleStore()
-const languageDropDownOpen = ref(false)
+const { t } = useTranslation(Localization)
 
+const languageDropDownOpen = ref(false)
 const tonConnectUI = ref<TonConnectUI>()
 const unsubscribe = ref()
 const friendlyWalletAddress = ref('')
@@ -75,7 +80,7 @@ const friendlyWalletAddress = ref('')
 const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
 
 onMounted(() => {
-  new TonConnectUI({
+  tonConnectUI.value = new TonConnectUI({
     manifestUrl: 'https://alievdenis1.github.io/nutritiolntime/tonconnect-manifest.json',
     buttonRootId: 'ton-connect-button-root',
     language: 'ru'
@@ -85,10 +90,10 @@ onMounted(() => {
     friendlyWalletAddress.value = walletInfo?.account?.address ? toUserFriendlyAddress(walletInfo.account.address) : ''
   })
 
-  console.log('WebApp.initDataUnsafe', WebApp.initDataUnsafe.user)
   let user = WebApp.initDataUnsafe.user
-//   WebApp.showAlert('Hey, ' + user.username + '. Your language is' + user.language_code)
-//   console.log('name', WebApp.initData)
+  if (user && user.language_code) {
+    localeStore.setLocale(user.language_code as Locales)
+  }
 })
 </script>
 
@@ -106,6 +111,31 @@ onMounted(() => {
 }
 
 .language-dropdown {
-  @apply absolute right-0 bg-white text-black;
+  @apply absolute left-0 flex flex-col border border-[#735F2B] text-[#735F2B];
+
+  v-button {
+    padding: 0px 20px;
+    border: 1px solid #735F2B;
+    background: #FEF6DF;
+
+    &:hover {
+      background: #735F2B;
+      color: #ffffff;
+    }
+
+    &.active {
+      background: #735F2B;
+      color: #ffffff;
+    }
+
+    &:first-child {
+      border-radius: 20px 20px 0px 0px;
+    }
+
+    &:nth-child(2) {
+      border-radius: 0px 0px 20px 20px;
+    }
+
+  }
 }
 </style>
