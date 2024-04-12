@@ -8,23 +8,19 @@
 		@generate="onGenerateNewPlan"
 	>
 		<template #item="{ item }">
-			<div class="flex row items-center justify-between">
+			<div class="flex row items-center justify-between w-full">
 				<plan-info
 					:plan="item"
 				/>
 
-				<div
-					class="
-						h-[30px] w-[50px] flex items-center justify-center
-						cursor-pointer rounded-[90px]
-						hover:outline-green hover:outline-1 hover:outline
-					"
+				<v-button
+					class="flex items-center cursor-pointer"
 					@click="onActionButtonClicked(item)"
 				>
-					<el-icon size="16">
-						<el-icon-more-filled class="text-green" />
+					<el-icon size="10">
+						<el-icon-arrow-right class="text-[#735F2B]" />
 					</el-icon>
-				</div>
+				</v-button>
 			</div>
 		</template>
 	</v-collapse>

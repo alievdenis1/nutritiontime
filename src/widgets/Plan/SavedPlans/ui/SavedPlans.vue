@@ -7,7 +7,7 @@
 		/>
 
 		<saved-plans-list
-			class="mb-[28px]"
+			class="mb-8"
 			@action="onSavedPlanActionButtonClicked"
 		/>
 

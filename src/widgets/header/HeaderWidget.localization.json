@@ -1,8 +1,8 @@
 {
     "ru": {
-        "connect": "Подключиться"
+        "subscription": "подписка"
     },
     "en": {
-        "connect": "Connect"
+        "subscription": "subscription"
     }
 }

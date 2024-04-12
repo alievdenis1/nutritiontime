@@ -1,14 +1,14 @@
 <template>
 	<div class="grid">
-		<header class="flex items-center justify-between w-full">
+		<header class="flex items-center gap-5 w-full">
 			<img
 				alt="Logo"
-				height="30"
-				src="/image/logo/logo-only.webp"
-				width="30"
+				height="34"
+				src="/image/logo/logo-small.webp"
+				width="178"
 			>
 
-			<div class="flex items-center gap-4">
+			<div class="flex items-center gap-[15px]">
 				<v-button
 					aria-label="Connect Wallet"
 					class="connect-button"
@@ -16,16 +16,16 @@
 				>
 					<div
 						id="ton-connect-button-root"
-						class="absolute opacity-0 top-0 left-0"
+						class="absolute opacity-0 left-0"
 					/>
-					<span class="wallet-address">
-						{{ friendlyWalletAddress ? shortenAddress(friendlyWalletAddress) : t('connect') }}
-					</span>
 					<img
-						height="14"
+						height="15"
 						src="/image/icons/icon-ton.svg"
-						width="14"
+						width="19"
 					>
+					<span class="wallet-address">
+						{{ friendlyWalletAddress ? shortenAddress(friendlyWalletAddress) : t('subscription') }}
+					</span>
 				</v-button>
 
 				<v-button
@@ -35,9 +35,9 @@
 					@click="languageDropDownOpen = !languageDropDownOpen"
 				>
 					<img
-						height="28"
+						height="25"
 						src="/image/icons/icon-settings.svg"
-						width="28"
+						width="25"
 					>
 					<div
 						v-if="languageDropDownOpen"
@@ -75,7 +75,7 @@ const friendlyWalletAddress = ref('')
 const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
 
 onMounted(() => {
-  tonConnectUI.value = new TonConnectUI({
+  new TonConnectUI({
     manifestUrl: 'https://alievdenis1.github.io/nutritiolntime/tonconnect-manifest.json',
     buttonRootId: 'ton-connect-button-root',
     language: 'ru'
@@ -87,18 +87,18 @@ onMounted(() => {
 
   console.log('WebApp.initDataUnsafe', WebApp.initDataUnsafe.user)
   let user = WebApp.initDataUnsafe.user
-  WebApp.showAlert('Hey, ' + user.username + '. Your language is' + user.language_code)
-  console.log('name', WebApp.initData)
+//   WebApp.showAlert('Hey, ' + user.username + '. Your language is' + user.language_code)
+//   console.log('name', WebApp.initData)
 })
 </script>
 
 <style lang="scss" scoped>
 .connect-button {
-  @apply relative cursor-pointer flex items-center px-3 py-2 gap-2.5 border-solid border-2 border-[#968D7D] rounded-[66px];
+  @apply relative cursor-pointer flex items-center justify-center py-2 px-2.5 gap-2 border-solid border border-[#735F2B] rounded-[30px];
 }
 
 .wallet-address {
-  @apply text-[#968D7D] font-medium;
+  @apply text-[#735F2B] text-xs font-normal;
 }
 
 .settings-button {
