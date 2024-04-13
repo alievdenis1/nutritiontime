@@ -1,5 +1,11 @@
 <template>
 	<div class="flex flex-col items-center gap-4 text-[#735F2B] text-[15px] font-normal">
+		<button
+			class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70"
+			@click="router.push('/')"
+		>
+			&lt; Назад
+		</button>
 		<div class="flex flex-col items-center gap-1">
 			<img
 				class="rounded-[40px]"
@@ -62,6 +68,9 @@ import { ref } from 'vue'
 import RecipeDetail from './RecipeDetail.vue'
 import Localization from './RecipeDetailsList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const { t } = useTranslation(Localization)
 const isDropDownOpen = ref(false)

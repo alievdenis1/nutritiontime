@@ -22,13 +22,12 @@
 	>
 		У вас еще нет ни одного рецепта
 	</div>
-	<a
+	<router-link
 		v-else
 		v-for="card in recipes"
 		:key="card.id"
-		:href="`https://tonviewer.com/${card.address}`"
 		class="bg-white w-full py-[14px] px-[20px] flex items-center justify-between mb-4 rounded-[40px]"
-		target="_blank"
+		:to="`/${card.id}`"
 	>
 		<div class="flex gap-3">
 			<img
@@ -68,7 +67,7 @@
 		</div>
 		<v-button
 			class="cursor-pointer"
-			@click.stop="router.push(`/${card.id}`)"
+			@click="router.push(`/${card.id}`)"
 		>
 			<el-icon
 				class="items-center"
@@ -77,7 +76,7 @@
 				<el-icon-arrow-right-bold class="text-[#735F2B]" />
 			</el-icon>
 		</v-button>
-	</a>
+	</router-link>
 </template>
 
 <script lang="ts" setup>
