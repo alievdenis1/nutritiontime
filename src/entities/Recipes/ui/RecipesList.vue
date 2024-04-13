@@ -26,6 +26,7 @@
 		v-else
 		v-for="card in recipes"
 		:key="card.id"
+		:href="`https://tonviewer.com/${card.address}`"
 		class="bg-white w-full py-[14px] px-[20px] flex items-center justify-between mb-4 rounded-[40px]"
 		target="_blank"
 	>
