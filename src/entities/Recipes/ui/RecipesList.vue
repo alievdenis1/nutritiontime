@@ -58,7 +58,10 @@
 				</div>
 			</div>
 		</div>
-		<v-button class="cursor-pointer">
+		<v-button
+			class="cursor-pointer"
+			@click="router.push(`/${card.id}`)"
+		>
 			<el-icon
 				size="8"
 				class="items-center"
@@ -70,9 +73,11 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import Localization from './RecipesList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 
+const router = useRouter()
 const { t } = useTranslation(Localization)
 
 const recipes = [
