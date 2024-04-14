@@ -110,6 +110,13 @@ onMounted(() => {
   @apply cursor-pointer relative;
 }
 
+#ton-connect-button-root {
+	@apply w-full;
+	:deep([data-tc-connect-button]) {
+		@apply w-full
+	}
+}
+
 .language-dropdown {
   @apply absolute left-0 flex flex-col border border-[#735F2B] text-[#735F2B];
 

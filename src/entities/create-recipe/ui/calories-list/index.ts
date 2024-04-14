@@ -1,0 +1,1 @@
+export { default as CaloriesList } from './CaloriesList.vue'

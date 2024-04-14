@@ -1,0 +1,1 @@
+export { default as CookingInstructions } from './CookingInstructions.vue'

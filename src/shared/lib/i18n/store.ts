@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Locales } from './types'
-import { useI18n } from 'vue-i18n'
+import i18n from './i18n.config'
 
 type State = {
 	currentLocale: Locales
@@ -13,13 +13,11 @@ export const useLocaleStore = defineStore('locale', {
     actions: {
         setLocale(newLocale: Locales) {
             this.currentLocale = newLocale
-            const { locale } = useI18n()
-            locale.value = newLocale
+            i18n.global.locale.value = newLocale
         },
         initializeLocale(initialLocale: Locales) {
             this.currentLocale = initialLocale
-            const { locale } = useI18n()
-            locale.value = initialLocale
+            i18n.global.locale.value = initialLocale
         },
     },
 })

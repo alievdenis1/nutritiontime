@@ -17,9 +17,11 @@
 					class="flex items-center cursor-pointer"
 					@click="onActionButtonClicked(item)"
 				>
-					<el-icon size="10">
-						<el-icon-arrow-right class="text-[#735F2B]" />
-					</el-icon>
+					<img
+						src="/image/icons/icon-more.svg"
+						width="15"
+						class="rotate-90"
+					>
 				</v-button>
 			</div>
 		</template>

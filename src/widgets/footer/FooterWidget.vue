@@ -8,7 +8,10 @@
 					width="24"
 				>
 			</v-button>
-			<v-button class="cursor-pointer p-[14.5px] border-solid border border-white rounded-[50%]">
+			<v-button
+				class="cursor-pointer p-[14.5px] border-solid border border-white rounded-[50%]"
+				@click="router.push('/create-recipe')"
+			>
 				<img
 					height="9"
 					src="/image/icons/icon-plus.svg"
@@ -29,7 +32,9 @@
 <script setup lang="ts">
 import Localization from './FooterWidget.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { t } = useTranslation(Localization)
 </script>
 

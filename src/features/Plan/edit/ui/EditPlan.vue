@@ -1,25 +1,20 @@
 <template>
 	<el-button
 		text
-		class="p-[5px]"
-		disabled
 		@click="onClicked"
 	>
-		<div class="flex row text-default text-green w-full items-center">
-			<el-icon
-				size="15"
-				class="mr-[12px]"
+		<div class="flex row text-default text-[#735F2B] w-full items-center gap-3 font-normal">
+			<img
+				src="/image/icons/icon-pen.svg"
+				width="15"
 			>
-				<icon-pen />
-			</el-icon>
 
-			{{ t('edit') }}
+			{{ t('rename') }}
 		</div>
 	</el-button>
 </template>
 
 <script setup lang="ts">
-import { IconPen } from 'shared/components/Icon'
 import Localization from './EditPlan.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 
