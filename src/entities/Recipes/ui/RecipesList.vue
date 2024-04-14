@@ -22,13 +22,12 @@
 	>
 		У вас еще нет ни одного рецепта
 	</div>
-	<a
+	<router-link
 		v-else
 		v-for="card in recipes"
 		:key="card.id"
-		:href="`https://tonviewer.com/${card.address}`"
 		class="bg-white w-full py-[14px] px-[20px] flex items-center justify-between mb-4 rounded-[40px]"
-		target="_blank"
+		:to="`/${card.id}`"
 	>
 		<div class="flex gap-3">
 			<img
@@ -66,7 +65,10 @@
 				</div>
 			</div>
 		</div>
-		<v-button class="cursor-pointer">
+		<v-button
+			class="cursor-pointer"
+			@click="router.push(`/${card.id}`)"
+		>
 			<el-icon
 				class="items-center"
 				size="8"
@@ -74,7 +76,7 @@
 				<el-icon-arrow-right-bold class="text-[#735F2B]" />
 			</el-icon>
 		</v-button>
-	</a>
+	</router-link>
 </template>
 
 <script lang="ts" setup>
@@ -83,7 +85,9 @@ import { useTranslation } from '@/shared/lib/i18n'
 import { HttpClient, Api } from 'tonapi-sdk-js'
 import { onMounted, ref } from 'vue'
 import { toUserFriendlyAddress } from '@tonconnect/ui'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { t } = useTranslation(Localization)
 
 const recipes = ref([])

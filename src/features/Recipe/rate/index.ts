@@ -1,0 +1,1 @@
+export { default as RecipeRate } from './RecipeRate.vue'
