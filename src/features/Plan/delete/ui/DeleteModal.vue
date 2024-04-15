@@ -1,7 +1,7 @@
 <template>
 	<el-dialog
 		:model-value="isDialogVisible"
-		width="162"
+		width="326"
 		class="remove-dialog"
 		@close="onClose"
 	>
@@ -9,17 +9,17 @@
 			<div class="flex flex-col items-center gap-3">
 				<img
 					src="/image/icons/icon-trash.svg"
-					width="40"
+					width="50"
 				>
 				<div class="text-[#735F2B] flex flex-col">
 					<h4
 						:id="titleId"
 						:class="titleClass"
-						style="color: #735F2B; font-weight: 600; font-size: 15px; "
+						style="color: #735F2B; font-weight: 600; font-size: 18px; "
 					>
 						{{ t('sure') }}
 					</h4>
-					<span class="text-[10px] leading-[9.5px] opacity-70 w-full">
+					<span class="text-[12px] leading-[9.5px] opacity-70 w-full">
 						{{ t('warning') }}
 					</span>
 				</div>
@@ -83,6 +83,6 @@ const onClose = () => {
 
 <style lang="scss" scoped>
 .remove-dialog__button {
-    @apply w-[78px] text-center py-1 border border-solid rounded-[40px] text-[10px] leading-[94.95%] cursor-pointer
+    @apply w-[100px] text-center py-2.5 border border-solid rounded-[40px] text-[12px] leading-[94.95%] cursor-pointer
 }
 </style>
