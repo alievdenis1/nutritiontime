@@ -1,6 +1,6 @@
 <template>
 	<div
-		class=" bg-white rounded-[40px] max-h-[426px] overflow-auto relative scroll-hide"
+		class=" bg-white rounded-[30px] max-h-[426px] overflow-auto relative scroll-hide"
 	>
 		<div
 			class="p-5 cursor-pointer rounded-[40px]"
