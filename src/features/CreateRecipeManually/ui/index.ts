@@ -1,0 +1,1 @@
+export { default as CreateRecipeManuallyForm } from './CreateRecipeManuallyForm.vue'

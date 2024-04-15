@@ -1,18 +1,27 @@
 <template>
 	<el-dialog
 		:model-value="isDialogVisible"
-		:title="plan.name"
+		modal-class="v-dialog-wrapper"
+		width="326"
+		class="bg-[#FEF6DF] flex flex-col gap-0"
 		@close="onClose"
 	>
+		<template #header="{ titleId, titleClass }">
+			<div>
+				<h4
+					:id="titleId"
+					:class="titleClass"
+					style="color: #735F2B; font-weight: 600;"
+				>
+					{{ plan.name }}
+				</h4>
+			</div>
+		</template>
 		<div
 			v-loading="isLoadingDeletePlan || isLoadingCopyPlan"
 			class="flex flex-col"
 		>
-			<v-divider />
-
-			<copy-plan />
-
-			<v-divider />
+			<v-divider/>
 
 			<edit-plan />
 
@@ -25,7 +34,7 @@
 
 <script setup lang="ts">
 import { ref, toRefs, watchEffect } from 'vue'
-import { CopyPlan, useCopyPlanStore } from 'features/Plan/copy'
+import { useCopyPlanStore } from 'features/Plan/copy'
 import { Plan } from 'entities/Plan/types'
 import { VDivider } from 'shared/components/Divider'
 import { EditPlan } from 'features/Plan/edit'
@@ -61,4 +70,5 @@ const onClose = () => {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+</style>

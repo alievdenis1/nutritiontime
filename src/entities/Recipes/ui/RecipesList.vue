@@ -86,11 +86,12 @@ import { HttpClient, Api } from 'tonapi-sdk-js'
 import { onMounted, ref } from 'vue'
 import { toUserFriendlyAddress } from '@tonconnect/ui'
 import { useRouter } from 'vue-router'
+import type { RecipeList } from '../types'
 
 const router = useRouter()
 const { t } = useTranslation(Localization)
 
-const recipes = ref([])
+const recipes = ref<RecipeList>([])
 
 const httpClient = new HttpClient({
   baseUrl: 'https://tonapi.io/',
@@ -105,7 +106,7 @@ const httpClient = new HttpClient({
 const account = '0:e340db898b21f2ba86eca5634ca5c28ca3a7d56be37c40574bca2c7b1a92bc28'
 const collection = ref()
 const client = new Api(httpClient)
-const getCollection = async () => {
+const getCollection = async () =>  {
   const collectionRes = await client.accounts.getAccountNftItems(account)
   collectionRes.nft_items.map(item => {
     recipes.value.push({
@@ -116,7 +117,7 @@ const getCollection = async () => {
       address: toUserFriendlyAddress(item.address),
       time: 30,
       kkal: 150
-    })
+	})
   })
   collection.value = collectionRes
 }

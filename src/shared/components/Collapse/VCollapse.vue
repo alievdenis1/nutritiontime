@@ -1,7 +1,10 @@
 <template>
-	<div class="bg-white rounded-[40px] max-h-[426px] overflow-auto">
+	<div
+		class=" bg-white rounded-[40px] max-h-[426px] overflow-auto relative scroll-hide"
+	>
 		<div
-			class="p-5 cursor-pointer"
+			class="p-5 cursor-pointer rounded-[40px]"
+			:class="{'sticky top-0 bg-white z-10 rounded-b-none': isCollapsed}"
 			@click="onCollapseTriggerClicked"
 		>
 			<slot>
@@ -73,7 +76,7 @@
 		<el-collapse-transition>
 			<div
 				v-show="isCollapsed"
-				class="flex flex-col px-[10px]"
+				class="flex flex-col px-[10px] rounded-[40px]"
 			>
 				<div class="collection bg-[#FFA767] gap-[15px]">
 					<img
@@ -157,6 +160,15 @@ const onCollapseTriggerClicked = () => {
 }
 .collection {
 	@apply pl-8 pr-4 py-[25px] mb-2 rounded-[40px] flex
+}
+
+.scroll-hide::-webkit-scrollbar {
+	display: none;
+}
+
+.scroll-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 </style>

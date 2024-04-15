@@ -1,5 +1,5 @@
 <template>
-	<main class="layout p-[25px] bg-[#FEF6DF] mb-[30px]">
+	<main class="layout p-[25px] bg-[#FEF6DF] pb-[50px]">
 		<header-widget class="mb-[30px]" />
 
 		<slot />

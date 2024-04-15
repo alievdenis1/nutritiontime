@@ -1,6 +1,9 @@
 .el-button > span {
 	@apply w-full items-center text-center justify-center;
 }
+.el-button.is-text {
+	@apply p-5
+}
 
 .el-button + .el-button {
 	margin-left: initial;
@@ -44,7 +47,7 @@
 	@apply shadow rounded;
 
 	.el-dialog__header {
-		@apply mr-[0] py-[25px] px-[38px] text-center;
+		@apply mr-[0] text-center pt-[25px] pb-5;
 
 		.el-dialog__title {
 			@apply text-brown;
@@ -53,13 +56,37 @@
 		.el-dialog__headerbtn {
 			@apply right-[0px] rounded-[90px] bg-white h-[56px] w-[56px] top-[-66px] flex items-center justify-center;
 			i {
-				@apply text-[19px]
+				@apply text-[#968D7D] text-[35px]
 			}
 		}
 	}
 
 	.el-dialog__body {
-		@apply pt-[10px] px-[38px];
+		@apply p-0;
+	}
+}
+
+.el-dialog.dialog-uploader {
+	@apply w-[84px];
+
+	header.el-dialog__header {
+		@apply hidden
+	}
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+}
+
+.el-dialog.remove-dialog {
+	@apply pb-4 rounded-[20px];
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+
+	.el-dialog__header {
+		@apply mr-[0] text-center px-0 pb-[18px];
 	}
 }
 
@@ -72,4 +99,28 @@
 .el-overlay {
 	backdrop-filter: blur(2.5px);
 	background: rgba(0, 0, 0, 0.5);
+}
+
+.el-slider {
+	@apply h-4
+}
+
+.el-slider__runway {
+	@apply h-[2px] bg-[#6BA78E] relative;
+
+	.el-slider__bar {
+		@apply h-full bg-[#735F2B]
+	}
+
+	.el-slider__marks-text {
+		@apply text-[5px] text-[#AB9F80] mt-[-15px]
+	}
+
+	.el-slider__button-wrapper {
+		@apply w-2 h-8 absolute bottom-0;
+
+		.el-slider__button.el-tooltip__trigger.el-tooltip__trigger {
+			@apply h-2 w-2 bg-[#735F2B] border-none
+		}
+	}
 }

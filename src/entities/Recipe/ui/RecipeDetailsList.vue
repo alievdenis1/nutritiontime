@@ -69,12 +69,13 @@ import RecipeDetail from './RecipeDetail.vue'
 import Localization from './RecipeDetailsList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { useRouter } from 'vue-router'
+import type { RecipeSteps } from '../types'
 
 const router = useRouter()
 
 const { t } = useTranslation(Localization)
-const isDropDownOpen = ref(false)
-const recipeSteps = [
+const isDropDownOpen = ref<boolean>(false)
+const recipeSteps = <RecipeSteps[]>[
 	{ id: 1, text: 'Shan first' },
 	{ id: 2, text: 'Shan second' }
 ]

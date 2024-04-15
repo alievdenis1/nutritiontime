@@ -1,8 +1,8 @@
 {
     "ru": {
-        "edit": "Редактировать"
+        "rename": "Переименовать"
     },
     "en": {
-        "edit": "Edit"
+        "rename": "Rename"
     }
 }
