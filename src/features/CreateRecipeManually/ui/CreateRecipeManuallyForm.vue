@@ -1,4 +1,10 @@
 <template>
+	<button
+		class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70 mb-5"
+		@click="router.push('/create-recipe')"
+	>
+		&lt; Назад
+	</button>
 	<form class="form-element mb-6">
 		<span class="text-[15px] font-medium text-[#735F2B]">
 			Intelligence
@@ -38,7 +44,7 @@
 
 		<div class="form-element">
 			<span class="form-element-title">
-				{{  t('calories') }}
+				{{ t('calories') }}
 			</span>
 			<CaloriesList
 				:calories-list="calories"
@@ -97,6 +103,9 @@ import { useTranslation } from '@/shared/lib/i18n'
 
 const { t } = useTranslation(Localization)
 import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const calories = [
 	{ id:1, count: 50 },

@@ -30,12 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import Localization from './FooterWidget.localization.json'
-import { useTranslation } from '@/shared/lib/i18n'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { t } = useTranslation(Localization)
 </script>
 
 <style lang="scss" scoped></style>

@@ -1,4 +1,10 @@
 <template>
+	<button
+		class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70 mb-5"
+		@click="router.push('/')"
+	>
+		&lt; Назад
+	</button>
 	<form class="flex flex-col gap-7 mb-6">
 		<img
 			src="/image/placeholder.png"
@@ -9,7 +15,7 @@
 		<div class="flex flex-col gap-4">
 			<div class="form-element">
 				<span class="form-element-title">
-					{{  t('cuisine') }}
+					{{ t('cuisine') }}
 				</span>
 				<SliderList
 					:data="forges"
@@ -18,7 +24,7 @@
 
 			<div class="form-element">
 				<span class="form-element-title">
-					{{  t('calories') }}
+					{{ t('calories') }}
 				</span>
 				<CaloriesList
 					:calories-list="calories"

@@ -1,4 +1,10 @@
 <template>
+	<button
+		class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70 mb-5"
+		@click="router.push('/create-recipe')"
+	>
+		&lt; Назад
+	</button>
 	<form class="flex flex-col gap-[23px] mb-6">
 		<div class="flex gap-1 text-[#735F2B]">
 			<img
@@ -55,6 +61,9 @@
 <script setup lang="ts">
 import { SuggestedRecipes } from 'entities/create-recipe-gpt/ui/suggested-recipes'
 import { TagsList } from 'entities/create-recipe-gpt/ui/tags-list'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const suggestedRecipes = [
 	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 },
