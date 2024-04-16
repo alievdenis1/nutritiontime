@@ -67,9 +67,9 @@ import { ref, onMounted, computed } from 'vue'
 import { Locales, useLocaleStore, useTranslation } from '@/shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
 import WebApp from '@twa-dev/sdk'
-import { useAuthButton } from 'shared/lib/ton-connect'
-import { useSessionStore } from 'entities/Session'
-import { useTWA } from 'shared/lib/twa'
+import { useAuthButton } from '@/shared/lib/ton-connect'
+import { useSessionStore } from '@/entities/Session'
+import { useTWA } from '@/shared/lib/twa'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
