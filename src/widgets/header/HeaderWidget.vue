@@ -63,33 +63,28 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Locales, useLocaleStore, useTranslation } from '@/shared/lib/i18n'
-import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
 import Localization from './HeaderWidget.localization.json'
 import WebApp from '@twa-dev/sdk'
+import { useAuthButton } from 'shared/lib/ton-connect'
+import { useSessionStore } from 'entities/Session'
+import { useTWA } from 'shared/lib/twa'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
+const sessionStore = useSessionStore()
 
 const languageDropDownOpen = ref(false)
-const tonConnectUI = ref<TonConnectUI>()
-const unsubscribe = ref()
-const friendlyWalletAddress = ref('')
+const friendlyWalletAddress = computed(() => {
+  return sessionStore.walletAddress
+})
 
 const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
 
 onMounted(() => {
-  tonConnectUI.value = new TonConnectUI({
-    manifestUrl: 'https://alievdenis1.github.io/nutritiolntime/tonconnect-manifest.json',
-    buttonRootId: 'ton-connect-button-root',
-    language: 'ru'
-  })
-
-  unsubscribe.value = tonConnectUI.value?.onStatusChange(walletInfo => {
-    friendlyWalletAddress.value = walletInfo?.account?.address ? toUserFriendlyAddress(walletInfo.account.address) : ''
-  })
-
+  useAuthButton()
+  useTWA()
   let user = WebApp.initDataUnsafe.user
   if (user && user.language_code) {
     localeStore.setLocale(user.language_code as Locales)
@@ -111,19 +106,14 @@ onMounted(() => {
 }
 
 #ton-connect-button-root {
-	@apply w-full;
-
-	:deep([data-tc-connect-button]) {
-		@apply w-full;
-
-		div {
-			@apply w-full text-xs
-		}
-	}
+  @apply w-full;
+  :deep([data-tc-connect-button]) {
+    @apply w-full
+  }
 }
 
 .language-dropdown {
-  @apply absolute right-[-10px] top-[28px] z-10 flex flex-col border border-[#735F2B] text-[#735F2B];
+  @apply absolute left-0 flex flex-col border border-[#735F2B] text-[#735F2B];
 
   v-button {
     padding: 0px 20px;
