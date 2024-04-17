@@ -9,10 +9,12 @@
 @import "transitions";
 
 .layout {
-	min-width: 100vw;
-	min-height: 100vh;
+	min-width: 100%;
+	min-height: 100%;
 	display: flex;
 	flex-direction: column;
+	overflow-x: hidden;
+	touch-action: none;
 }
 
 @media screen and (max-width: 400px) {

@@ -57,6 +57,7 @@
 					{{ t('time') }}
 				</span>
 				<InputRange
+					v-model="time"
 					:marks="marks"
 				/>
 			</div>
@@ -73,6 +74,7 @@
 					{{ t('spiciness') }}
 				</span>
 				<InputRange
+					v-model="spiciness"
 					:marks="marks"
 				/>
 			</div>
@@ -82,6 +84,7 @@
 					{{ t('difficulty') }}
 				</span>
 				<InputRange
+					v-model="difficulty"
 					:marks="marks"
 				/>
 			</div>
@@ -110,7 +113,7 @@ import { ProductSearch } from 'entities/create-recipe/ui/product-search'
 import { CaloriesList } from 'entities/create-recipe/ui/calories-list'
 import { SliderList } from 'entities/create-recipe/ui/slider-list'
 import { InputRange } from 'entities/create-recipe/ui/input-range'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Localization from './CreateRecipe.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
@@ -118,6 +121,9 @@ import { useTranslation } from '@/shared/lib/i18n'
 const { t } = useTranslation(Localization)
 
 const router = useRouter()
+const time = ref(0)
+const spiciness = ref(0)
+const difficulty = ref(0)
 
 const forges = [
 	{ id:1, name: 'Italian Cuisine' },

@@ -18,7 +18,7 @@ export default [
 		meta: {
 			title: 'Create Recipe GPT',
 			layout: MainLayout
-		}
+		},
 	},
     {
 		name: 'create-recipe-manual',
@@ -27,6 +27,6 @@ export default [
 		meta: {
 			title: 'Create Recipe Manual',
 			layout: MainLayout
-		}
+		},
 	}
 ] as RouteRecordRaw[]
