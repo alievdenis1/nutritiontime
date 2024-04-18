@@ -107,14 +107,19 @@ onMounted(() => {
 }
 
 #ton-connect-button-root {
-  @apply w-full;
-  :deep([data-tc-connect-button]) {
-    @apply w-full
-  }
+	@apply w-full;
+
+	:deep([data-tc-connect-button]) {
+		@apply w-full;
+
+		div {
+			@apply w-full text-xs
+		}
+	}
 }
 
 .language-dropdown {
-  @apply absolute left-0 flex flex-col border border-[#735F2B] text-[#735F2B];
+  @apply absolute left-[-50px] z-20 flex flex-col border border-[#735F2B] text-[#735F2B];
 
   v-button {
     padding: 0px 20px;
