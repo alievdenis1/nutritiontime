@@ -14,7 +14,7 @@
 			<span class="form-element-title__small">
 				{{ t('nameFood') }}
 			</span>
-			<div class="w-[347px] h-[42px] bg-white rounded-[40px] p-[15px] mb-[11px] flex items-center justify-between">
+			<div class="w-full h-[42px] bg-white rounded-[40px] p-[15px] mb-[11px] flex items-center justify-between">
 				<input
 					class="w-[90%]"
 					type="text"
@@ -78,6 +78,7 @@
 				{{ t('time') }}
 			</span>
 			<InputRange
+				v-model="time"
 				:marks="marks"
 			/>
 		</div>
@@ -102,8 +103,10 @@ import Localization from './CreateRecipeManuallyForm.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 
 const { t } = useTranslation(Localization)
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+const time = ref(0)
 
 const router = useRouter()
 

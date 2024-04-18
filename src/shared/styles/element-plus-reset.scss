@@ -90,6 +90,18 @@
 	}
 }
 
+.el-dialog.cooking-method {
+	@apply rounded-[10px];
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+
+	.el-dialog__header {
+		@apply hidden
+	}
+}
+
 .el-button.is-text.is-disabled {
 	* {
 		color: var(--el-button-disabled-text-color) !important;
@@ -99,6 +111,7 @@
 .el-overlay {
 	backdrop-filter: blur(2.5px);
 	background: rgba(0, 0, 0, 0.5);
+	width: 100%;
 }
 
 .el-slider {

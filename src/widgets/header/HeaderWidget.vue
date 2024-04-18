@@ -6,6 +6,7 @@
 				height="34"
 				src="/image/logo/logo-small.svg"
 				width="178"
+				class="logo-image"
 			>
 
 			<div class="flex items-center gap-[15px]">
@@ -24,7 +25,7 @@
 						width="19"
 					>
 					<span class="wallet-address">
-						{{ friendlyWalletAddress ? shortenAddress(friendlyWalletAddress) : t('subscription') }}
+						{{ friendlyWalletAddress ? '' : t('subscription') }}
 					</span>
 				</v-button>
 
@@ -38,6 +39,7 @@
 						height="25"
 						src="/image/icons/icon-settings.svg"
 						width="25"
+						class="w-full"
 					>
 					<div
 						v-if="languageDropDownOpen"
@@ -95,7 +97,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .connect-button {
-  @apply relative cursor-pointer flex items-center justify-center py-2 px-2.5 gap-2 border-solid border border-[#735F2B] rounded-[30px];
+  @apply relative cursor-pointer max-w-[108px] flex items-center justify-center py-2 px-2.5 gap-2 border-solid border border-[#735F2B] rounded-[30px];
 }
 
 .wallet-address {
@@ -145,5 +147,14 @@ onMounted(() => {
     }
 
   }
+}
+
+@media screen and (max-width: 390px) {
+	.logo-image {
+		@apply max-w-[128px]
+	}
+	header {
+		@apply justify-between
+	}
 }
 </style>
