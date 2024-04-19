@@ -66,7 +66,9 @@
 				<span class="form-element-title">
 					{{ t('cookingMethod') }}
 				</span>
-				<ProductSearch />
+				<ProductSearch
+					v-model="cookingMethod"
+				/>
 			</div>
 
 			<div class="form-element">
@@ -113,7 +115,7 @@ import { ProductSearch } from 'entities/create-recipe/ui/product-search'
 import { CaloriesList } from 'entities/create-recipe/ui/calories-list'
 import { SliderList } from 'entities/create-recipe/ui/slider-list'
 import { InputRange } from 'entities/create-recipe/ui/input-range'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Localization from './CreateRecipe.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
@@ -124,6 +126,11 @@ const router = useRouter()
 const time = ref(0)
 const spiciness = ref(0)
 const difficulty = ref(0)
+const cookingMethod = ref(undefined)
+
+watch( cookingMethod, () => {
+	console.log(cookingMethod)
+})
 
 const forges = [
 	{ id:1, name: 'Italian Cuisine' },

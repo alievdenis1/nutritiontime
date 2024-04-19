@@ -1,7 +1,8 @@
 <template>
 	<div class="flex flex-col text-[#9D8C61] text-[15px] gap-3">
 		<div class="instruction flex items-center justify-between">
-			<span class="ml-[90px]">
+			<div class="opacity-0 w-[17px]"></div>
+			<span>
 				Cooking instructions
 			</span>
 			<v-button class="cursor-pointer">
@@ -14,7 +15,8 @@
 		<div
 			class="instruction flex items-center justify-between"
 		>
-			<span class="ml-[120px]">
+			<div class="opacity-0 w-[17px]"></div>
+			<span>
 				Snan First
 			</span>
 			<v-button class="cursor-pointer">

@@ -5,6 +5,8 @@
 			show-stops
 			:marks="marks"
 			max="75"
+			:model-value="modelValue"
+			@input="emit('update:modelValue', $event)"
 		/>
 	</div>
 </template>
@@ -14,7 +16,10 @@ import type { Marks } from '../../types'
 
 defineProps<{
 	marks: Marks,
+	modelValue: number
 }>()
+
+const emit = defineEmits(['update:modelValue'])
 </script>
 
 <style scoped>

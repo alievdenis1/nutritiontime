@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-[url('/image/placeholder.png')] bg-cover w-[347px] h-[168px] relative rounded-[40px]">
+	<div class="bg-[url('/image/placeholder.png')] bg-cover w-full h-[168px] relative rounded-[40px]">
 		<v-button
 			class="absolute right-[18px] top-[18px] cursor-pointer"
 			@click="isDialogVisible = true"
