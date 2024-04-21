@@ -1,5 +1,5 @@
 <template>
-	<div class="w-[347px] h-[42px] py-[6px] px-3 flex bg-white rounded-[40px] gap-[5px]">
+	<div class="w-full h-[42px] py-[6px] px-3 flex bg-white rounded-[40px] gap-[5px]">
 		<div
 			v-for="tag in tags"
 			:key="tag.id"
