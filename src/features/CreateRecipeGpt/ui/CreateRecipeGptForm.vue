@@ -20,9 +20,9 @@
 			<span class="form-element-title">
 				Name food
 			</span>
-			<div class="w-[347px] h-[42px] bg-white rounded-[40px] p-[15px] mb-[11px] flex items-center justify-between">
+			<div class="w-full h-[42px] bg-white rounded-[40px] p-[15px] mb-[11px] flex items-center justify-between">
+				<div class="opacity-0"></div>
 				<input
-					class="w-[90%]"
 					type="text"
 				>
 				<v-button class="cursor-pointer">

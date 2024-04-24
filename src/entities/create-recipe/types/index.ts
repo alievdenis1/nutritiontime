@@ -13,6 +13,11 @@ export type SliderItem = {
 export type Mark = {
     style: CSSProperties
     label: string
-  }
+}
+
+export type CookingMethod = {
+    id: number,
+    value: string
+}
   
 export type Marks = Record<number, Mark | string>
