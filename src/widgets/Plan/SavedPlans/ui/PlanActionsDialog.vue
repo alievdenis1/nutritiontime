@@ -27,7 +27,7 @@
 
 			<v-divider />
 
-			<delete-plan />
+			<delete-plan :plan-id="plan.id" />
 		</div>
 	</el-dialog>
 </template>

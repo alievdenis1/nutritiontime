@@ -27,7 +27,8 @@
       "widgets/*": ["src/widgets/*"],
       "features/*": ["src/features/*"],
       "entities/*": ["src/entities/*"],
-      "shared/*": ["src/shared/*"]
+      "shared/*": ["src/shared/*"],
+      "element-plus": ["node_modules/element-plus/lib/index.d.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

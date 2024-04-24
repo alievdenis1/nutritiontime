@@ -77,7 +77,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-	(event: 'update:modelValue', chosenMethods)
+	(event: 'update:modelValue', chosenMethods: string[]): void
 }>()
 
 const chooseCookingMethod = (value: string) => {

@@ -113,7 +113,7 @@ const getCollection = async () =>  {
       id: 1,
       title: item.metadata.name,
       desc: item.metadata.description,
-      img: item.previews[1].url,
+      img: item.previews?.[1]?.url,
       address: toUserFriendlyAddress(item.address),
       time: 30,
       kkal: 150

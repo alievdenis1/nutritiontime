@@ -7,10 +7,10 @@
 		/>
 
 		<saved-plans-list
+			:items="plansStore.savedPlans"
 			class="mb-8"
 			@action="onSavedPlanActionButtonClicked"
 		/>
-
 	</div>
 </template>
 

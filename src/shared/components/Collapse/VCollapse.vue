@@ -121,8 +121,8 @@ import { useTranslation } from '@/shared/lib/i18n'
 const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
-	(event: 'change', value: string | number),
-	(event:'generate')
+	(event: 'change', value: string | number): void,
+	(event:'generate'): void
 }>()
 
 const props = withDefaults(defineProps<{

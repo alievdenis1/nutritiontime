@@ -8,14 +8,30 @@
 		@generate="onGenerateNewPlan"
 	>
 		<template #item="{ item }">
-			<div class="flex row items-center justify-between w-full">
+			<div class="flex justify-between items-center">
 				<plan-info
-					:plan="item"
+					:plan="{
+						name: item.name as string,
+						id: item.id as number,
+						isActive: item.isActive as boolean,
+						caloriesPerDay: item.caloriesPerDay as number,
+						proteins: item.proteins as number,
+						fats: item.fats as number,
+						carbohydrates: item.carbohydrates as number
+					}"
 				/>
 
 				<v-button
 					class="flex items-center cursor-pointer"
-					@click="onActionButtonClicked(item)"
+					@click="onActionButtonClicked({
+						name: item.name as string,
+						id: item.id as number,
+						isActive: item.isActive as boolean,
+						caloriesPerDay: item.caloriesPerDay as number,
+						proteins: item.proteins as number,
+						fats: item.fats as number,
+						carbohydrates: item.carbohydrates as number
+					})"
 				>
 					<img
 						src="/image/icons/icon-more.svg"
@@ -33,14 +49,18 @@ import { usePlansStore } from '../model'
 import { storeToRefs } from 'pinia'
 import PlanInfo from './PlanInfo.vue'
 import { VCollapse } from 'shared/components/Collapse'
-import { Plan } from '../types'
+import { type Plan } from '../types'
 import Localization from './SavedPlansList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+
+defineProps<{
+  items: Plan[]
+}>()
 
 const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
-	(event: 'action', value: Plan)
+	(event: 'action', value: Plan): void
 }>()
 
 const store = usePlansStore()
