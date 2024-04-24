@@ -21,7 +21,7 @@
 			v-loading="isLoadingDeletePlan || isLoadingCopyPlan"
 			class="flex flex-col"
 		>
-			<v-divider/>
+			<v-divider />
 
 			<edit-plan />
 
@@ -48,7 +48,7 @@ const { isLoadingDeletePlan } = storeToRefs(deletePlanStore)
 const { isLoadingCopyPlan } = storeToRefs(copyPlanStore)
 
 const emit = defineEmits<{
-	(event: 'update:modelValue', isVisible: boolean)
+	(event: 'update:modelValue', isVisible: boolean): void
 }>()
 
 const props = defineProps<{
