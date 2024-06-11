@@ -19,5 +19,5 @@ export type CookingMethod = {
     id: number,
     value: string
 }
-  
+
 export type Marks = Record<number, Mark | string>
