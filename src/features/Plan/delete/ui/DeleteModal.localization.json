@@ -1,0 +1,10 @@
+{
+    "ru": {
+        "sure": "Вы уверены?",
+        "warning": "не может быть отменено"
+    },
+    "en": {
+        "sure": "Are you sure?",
+        "warning": "the action cannot be undone"
+    }
+}

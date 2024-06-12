@@ -1,0 +1,30 @@
+@use "../mixins/font" as font;
+
+$font-path: 'shared/assets/fonts/Roboto/';
+
+$black-path: 					$font-path + 'Black/Roboto-Black';
+$black-italic-path: 			$font-path + 'BlackItalic/Roboto-BlackItalic';
+$bold-path: 					$font-path + 'Bold/Roboto-Bold';
+$bold-italic-path:				$font-path + 'BoldItalic/Roboto-BoldItalic';
+$italic-path: 					$font-path + 'Italic/Roboto-Italic';
+$light-path: 					$font-path + 'Light/Roboto-Light';
+$light-italic-path:				$font-path + 'LightItalic/Roboto-LightItalic';
+$medium-path: 					$font-path + 'Medium/Roboto-Medium';
+$medium-italic-path: 			$font-path + 'MediumItalic/Roboto-MediumItalic';
+$regular-path: 					$font-path + 'Regular/Roboto-Regular';
+$thin-path:						$font-path + 'Thin/Roboto-Thin';
+$thin-italic-path:				$font-path + 'ThinItalic/Roboto-ThinItalic';
+
+
+@include font.use-font(Roboto, $black-path, 900, normal);
+@include font.use-font(Roboto, $black-italic-path, 900, italic);
+@include font.use-font(Roboto, $bold-path, 700, normal);
+@include font.use-font(Roboto, $bold-italic-path, 700, italic);
+@include font.use-font(Roboto, $medium-path, 500, normal);
+@include font.use-font(Roboto, $medium-italic-path, 500, italic);
+@include font.use-font(Roboto, $italic-path, 400, italic);
+@include font.use-font(Roboto, $regular-path, 400, normal);
+@include font.use-font(Roboto, $light-path, 300, normal);
+@include font.use-font(Roboto, $light-italic-path, 300, italic);
+@include font.use-font(Roboto, $thin-path, 100, normal);
+@include font.use-font(Roboto, $thin-italic-path, 100, italic);

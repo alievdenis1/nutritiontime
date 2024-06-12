@@ -1,0 +1,14 @@
+{
+  "ru": {
+    "male": "Мужчина",
+    "female": "Женщина",
+    "maleAdjective": "Мужской",
+    "femaleAdjective": "Женский"
+  },
+  "en": {
+    "male": "Man",
+    "female": "Woman",
+    "maleAdjective": "Male",
+    "femaleAdjective": "Female"
+  }
+}

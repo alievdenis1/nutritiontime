@@ -1,0 +1,143 @@
+.el-button > span {
+	@apply w-full items-center text-center justify-center;
+}
+.el-button.is-text {
+	@apply p-5
+}
+
+.el-button + .el-button {
+	margin-left: initial;
+}
+
+.el-form-item {
+	&__label {
+		@apply text-brown text-lg mb-9;
+	}
+
+	&.is-error {
+		.el-input__wrapper {
+			@apply border-red shadow-none;
+		}
+	}
+}
+
+.el-input {
+	@apply text-xl;
+
+	.el-input__wrapper {
+		@apply border-brown rounded-none border-0 border-b-[1px] border-solid p-0 pb-[15px] bg-transparent shadow-none;
+	}
+
+	.el-input__inner {
+		@apply text-green text-base;
+
+		&::placeholder {
+			@apply font-normal text-brown opacity-50;
+		}
+	}
+
+	&:focus, &:hover {
+		.el-input__wrapper {
+			@apply border-b-green;
+		}
+	}
+}
+
+.el-dialog {
+	@apply shadow rounded;
+
+	.el-dialog__header {
+		@apply mr-[0] text-center pt-[25px] pb-5;
+
+		.el-dialog__title {
+			@apply text-brown;
+		}
+
+		.el-dialog__headerbtn {
+			@apply right-[0px] rounded-[90px] bg-white h-[56px] w-[56px] top-[-66px] flex items-center justify-center;
+			i {
+				@apply text-[#968D7D] text-[35px]
+			}
+		}
+	}
+
+	.el-dialog__body {
+		@apply p-0;
+	}
+}
+
+.el-dialog.dialog-uploader {
+	@apply w-[84px];
+
+	header.el-dialog__header {
+		@apply hidden
+	}
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+}
+
+.el-dialog.remove-dialog {
+	@apply pb-4 rounded-[20px];
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+
+	.el-dialog__header {
+		@apply mr-[0] text-center px-0 pb-[18px];
+	}
+}
+
+.el-dialog.cooking-method {
+	@apply rounded-[10px];
+
+	.el-dialog__headerbtn {
+		@apply hidden
+	}
+
+	.el-dialog__header {
+		@apply hidden
+	}
+}
+
+.el-button.is-text.is-disabled {
+	* {
+		color: var(--el-button-disabled-text-color) !important;
+	}
+}
+
+.el-overlay {
+	backdrop-filter: blur(2.5px);
+	background: rgba(0, 0, 0, 0.5);
+	width: 100%;
+}
+
+.el-slider {
+	@apply h-4
+}
+
+.el-slider__runway {
+	@apply h-[2px] bg-[#6BA78E] relative;
+
+	.el-slider__stop {
+		@apply h-2 bg-[#AB9F80] w-[1px] absolute top-[-3px]
+	}
+
+	.el-slider__bar {
+		@apply h-full bg-[#735F2B]
+	}
+
+	.el-slider__marks-text {
+		@apply text-[5px] text-[#AB9F80] mt-[-15px]
+	}
+
+	.el-slider__button-wrapper {
+		@apply w-2 h-8 absolute bottom-0;
+
+		.el-slider__button.el-tooltip__trigger.el-tooltip__trigger {
+			@apply h-2 w-2 bg-[#735F2B] border-none
+		}
+	}
+}

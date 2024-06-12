@@ -1,0 +1,10 @@
+{
+    "ru": {
+        "patient": "Пациент",
+        "doctor": "Врач"
+    },
+    "en": {
+        "patient": "Patient",
+        "doctor": "Doctor"
+    }
+}
