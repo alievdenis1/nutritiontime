@@ -55,7 +55,7 @@ const { t } = useTranslation(Localization)
 const store = useDeletePlanStore()
 
 const emit = defineEmits<{
-	(event: 'update:modelValue', isVisible: boolean)
+	(event: 'update:modelValue', isVisible: boolean):void
 }>()
 
 const props = defineProps<{

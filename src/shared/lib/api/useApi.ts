@@ -19,74 +19,75 @@ import { useSessionStore } from 'entities/Session'
  * */
 
 export function useApi<ResponseT, MappedResponseT = ResponseT>({
-	url,
-	options,
-	auth = false
+  url,
+  options,
+  auth = false,
 }: {
-	url: (() => string) | string
-	options?: UseFetchOptions<ResponseDto<ResponseT>, MappedResponseT>,
-	auth?: boolean
+  url: (() => string) | string;
+  options?: UseFetchOptions<ResponseDto<ResponseT>, MappedResponseT>;
+  auth?: boolean;
 }) {
-	const { t } = useTranslation(Localization)
-	const urlPath = computed<string>(() => {
-		const windowLocationOrigin = process.client ? window.location.origin : null
-		const urlPath = typeof url === 'function' ? url() : url
-		return windowLocationOrigin + urlPath
-	})
+  const { t } = useTranslation(Localization)
+  const urlPath = computed<string>(() => {
+    const windowLocationOrigin = process.client ? window.location.origin : null
+    const urlPath = typeof url === 'function' ? url() : url
+    return windowLocationOrigin + urlPath
+  })
 
-	return useFetch(urlPath, {
-		...options,
-		onRequest({ options }): void {
-			if (!auth) {
-				const token = process.client ? localStorage.getItem(ACCESS_TOKEN_KEY) : null
-				options.headers = {
-					authorization: `Bearer ${token}`,
-					...options.headers
-				}
+  return useFetch(urlPath, {
+    ...options,
+    onRequest({ options }): void {
+      if (!auth) {
+        const token = process.client
+          ? localStorage.getItem(ACCESS_TOKEN_KEY)
+          : null
+        options.headers = {
+          authorization: `Bearer ${token}`,
+          ...options.headers,
+        }
 
-				options.headers = { ...options.headers, accept: 'application/json' }
-			}
-		},
-		onResponse({ response }) {
-			if (response.ok) {
-				console.log(response._data.message)
-				if (response._data.message != 'OK') {
-					ElMessage.success(response._data.message)
-				}
-			}
-		},
-		onResponseError({ response }) {
-			const responseErrorMessage = response._data?.messageError?.error
+        options.headers = { ...options.headers, accept: 'application/json' }
+      }
+    },
+    onResponse({ response }) {
+      if (response.ok) {
+        console.log(response._data.message)
+        if (response._data.message != 'OK') {
+          ElMessage.success(response._data.message)
+        }
+      }
+    },
+    onResponseError({ response }) {
+      const responseErrorMessage = response._data?.messageError?.error
 
-			const nativeMessages: Record<number, string> = {
-				401: t('authError'),
-				404: t('pageNotFound'),
-				500: t('serverError')
-			}
+      const nativeMessages: Record<number, string> = {
+        401: t('authError'),
+        404: t('pageNotFound'),
+        500: t('serverError'),
+      }
 
-			const responseError = {
-				message: nativeMessages[response.status]
-			}
+      const responseError = {
+        message: nativeMessages[response.status],
+      }
 
-			const unknownError = t('unknownError')
+      const unknownError = t('unknownError')
 
-			if (typeof responseError.message === 'undefined') {
-				if (responseErrorMessage) responseError.message = responseErrorMessage
-				else responseError.message = unknownError + `: ${response.status}`
-			}
+      if (typeof responseError.message === 'undefined') {
+        if (responseErrorMessage) responseError.message = responseErrorMessage
+        else responseError.message = unknownError + `: ${response.status}`
+      }
 
-			ElMessage.error({ message: responseError.message })
+      ElMessage.error({ message: responseError.message })
 
-			switch (response.status) {
-				case 401: {
-					// throw new UnauthenticatedError('Вы не авторизованы')
-					//временное решение, разобраться почему не работает  throw new
-					const sessionStore = useSessionStore()
-					sessionStore.setAuthorized(false)
-					window.location.href = '/'
-
-				}
-			}
-		}
-	})
+      switch (response.status) {
+        case 401: {
+          // throw new UnauthenticatedError('Вы не авторизованы')
+          //временное решение, разобраться почему не работает  throw new
+          const sessionStore = useSessionStore()
+          sessionStore.setAuthorized(false)
+          window.location.href = '/'
+        }
+      }
+    },
+  })
 }

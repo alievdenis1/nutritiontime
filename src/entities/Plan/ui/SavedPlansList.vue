@@ -40,7 +40,7 @@ import { useTranslation } from '@/shared/lib/i18n'
 const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
-	(event: 'action', value: Plan)
+  (event: 'action', value: Plan): void;
 }>()
 
 const store = usePlansStore()

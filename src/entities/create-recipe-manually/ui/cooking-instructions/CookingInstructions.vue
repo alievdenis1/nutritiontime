@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col text-[#9D8C61] text-[15px] gap-3">
 		<div class="instruction flex items-center justify-between">
-			<div class="opacity-0 w-[17px]"></div>
+			<div class="opacity-0 w-[17px]" />
 			<span>
 				Cooking instructions
 			</span>
@@ -15,7 +15,7 @@
 		<div
 			class="instruction flex items-center justify-between"
 		>
-			<div class="opacity-0 w-[17px]"></div>
+			<div class="opacity-0 w-[17px]" />
 			<span>
 				Snan First
 			</span>

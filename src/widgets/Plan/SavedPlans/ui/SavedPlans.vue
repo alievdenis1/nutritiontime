@@ -10,7 +10,6 @@
 			class="mb-8"
 			@action="onSavedPlanActionButtonClicked"
 		/>
-
 	</div>
 </template>
 

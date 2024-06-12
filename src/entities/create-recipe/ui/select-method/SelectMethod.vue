@@ -23,14 +23,14 @@
 				{{ chosenMethod }}
 				<img
 					class="rotate-45 text-white"
-					src="image/icons/icon-plus.svg"
+					src="/public/image/icons/icon-plus.svg"
 					width="10"
 				>
 			</button>
 		</div>
 		<img
 			width="12"
-			src="image/icons/icon-select.svg"
+			src="/public/image/icons/icon-select.svg"
 		>
 
 		<div
@@ -77,7 +77,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-	(event: 'update:modelValue', chosenMethods)
+    (event: 'update:modelValue', chosenMethods: string[]): void
 }>()
 
 const chooseCookingMethod = (value: string) => {

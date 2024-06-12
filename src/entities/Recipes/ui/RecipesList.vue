@@ -109,15 +109,27 @@ const client = new Api(httpClient)
 const getCollection = async () =>  {
   const collectionRes = await client.accounts.getAccountNftItems(account)
   collectionRes.nft_items.map(item => {
-    recipes.value.push({
-      id: 1,
-      title: item.metadata.name,
-      desc: item.metadata.description,
-      img: item.previews[1].url,
-      address: toUserFriendlyAddress(item.address),
-      time: 30,
-      kkal: 150
-	})
+      if (item.previews && item.previews.length > 0) {
+      recipes.value.push({
+        id: 1,
+        title: item.metadata.name,
+        desc: item.metadata.description,
+        img: item.previews[1].url,
+        address: toUserFriendlyAddress(item.address),
+        time: 30,
+        kkal: 150
+      })
+    } else {
+      recipes.value.push({
+        id: 1,
+        title: item.metadata.name,
+        desc: item.metadata.description,
+        img: 'Картинка по умолчанию',
+        address: toUserFriendlyAddress(item.address),
+        time: 30,
+        kkal: 150
+      })
+    }
   })
   collection.value = collectionRes
 }

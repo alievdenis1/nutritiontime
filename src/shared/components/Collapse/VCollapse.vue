@@ -96,7 +96,7 @@
 				<ul>
 					<li
 						v-for="item in data"
-						:key="item[idKey]"
+						:key="item.id"
 					>
 						<div class="collection bg-[#F8E1BD]">
 							<slot
@@ -117,27 +117,28 @@
 import { computed, ref, toRefs } from 'vue'
 import Localization from './VCollapse.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { Plan } from '@/entities/Plan/types'
 
 const { t } = useTranslation(Localization)
 
-const emit = defineEmits<{
-	(event: 'change', value: string | number),
-	(event:'generate')
+defineEmits<{
+  (event: 'change'): void;
+  (event: 'generate'): void;
 }>()
 
 const props = withDefaults(defineProps<{
-	data: Record<string, T>[],
+	data: Plan[],
 	title: string,
 	titleKey?: string,
 	idKey?: string
 	description?: string
-}>(), {
+}>(),  {
 	titleKey: 'name',
 	idKey: 'id',
 	description: undefined
 })
 
-const { data, titleKey, idKey, description, title } = toRefs(props)
+const { data, titleKey,  description, title } = toRefs(props)
 
 const descriptionText = computed<string>(() => {
 	if (description.value !== undefined) return description.value

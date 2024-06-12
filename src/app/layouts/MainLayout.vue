@@ -4,7 +4,7 @@
 
 		<slot />
 	</main>
-	<footer-widget class="fixed bottom-0"/>
+	<footer-widget class="fixed bottom-0" />
 </template>
 
 <script setup lang="ts">

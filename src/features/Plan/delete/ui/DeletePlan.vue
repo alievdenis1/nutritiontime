@@ -15,7 +15,7 @@
 	</el-button>
 	<DeleteModal
 		v-model="deleteCollectionDialogVisible"
-		:planId="planId"
+		:plan-id="planId"
 	/>
 </template>
 

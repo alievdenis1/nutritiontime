@@ -1,4 +1,3 @@
-
 export type EmulateRequestArguments = {
 	isError?: boolean,
 	milliSeconds?: number
@@ -10,7 +9,7 @@ export const emulateRequest = ({
 }: EmulateRequestArguments = {
 	isError: false,
 	milliSeconds: 1500
-}): Promise<any> => {
+}): Promise<unknown> => {
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
 			if (isError) reject()

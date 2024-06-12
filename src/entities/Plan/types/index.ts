@@ -5,5 +5,6 @@ export type Plan = {
 	caloriesPerDay: number,
 	proteins: number,
 	fats: number,
-	carbohydrates: number
-}
+	carbohydrates: number,
+	[key: string]: string | number | symbol | undefined | boolean
+};

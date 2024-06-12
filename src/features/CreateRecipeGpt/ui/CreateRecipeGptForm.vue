@@ -21,7 +21,7 @@
 				Name food
 			</span>
 			<div class="w-full h-[42px] bg-white rounded-[40px] p-[15px] mb-[11px] flex items-center justify-between">
-				<div class="opacity-0"></div>
+				<div class="opacity-0" />
 				<input
 					type="text"
 				>

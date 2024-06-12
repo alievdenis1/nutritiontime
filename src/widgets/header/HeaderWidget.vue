@@ -83,7 +83,7 @@ const friendlyWalletAddress = computed(() => {
   return sessionStore.walletAddress
 })
 
-const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
+// const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
 
 onMounted(() => {
   useAuthButton()

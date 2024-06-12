@@ -15,7 +15,7 @@
 			</span>
 
 			<v-button
-				color="white"
+				:color="ButtonColors.White"
 				class="auth-type-button is-email"
 				@click="onAuthByEmailButtonClicked"
 			>
@@ -37,7 +37,7 @@
 			</v-button>
 
 			<v-button
-				color="white"
+				:color="ButtonColors.White"
 				class="auth-type-button is-telegram"
 			>
 				<img
@@ -58,7 +58,7 @@
 			</v-button>
 
 			<v-button
-				color="white"
+				:color="ButtonColors.White"
 				class="auth-type-button is-google"
 			>
 				<img
@@ -79,7 +79,7 @@
 			</v-button>
 
 			<v-button
-				color="white"
+				:color="ButtonColors.White"
 				class="auth-type-button is-facebook"
 			>
 				<img
@@ -100,7 +100,7 @@
 			</v-button>
 
 			<v-button
-				color="white"
+				:color="ButtonColors.White"
 				class="auth-type-button is-apple"
 			>
 				<img
@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { VButton } from 'shared/components/Button'
+import { ButtonColors, VButton } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
 import Localization from './AuthTypeSelection.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'

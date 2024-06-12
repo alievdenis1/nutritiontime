@@ -10,7 +10,7 @@
 				width="12"
 			>
 			<span class="text-[10px] text-[#735F2B] leading-[94.95%]">
-				{{  `${item.count} kal` }}
+				{{ `${item.count} kal` }}
 			</span>
 		</v-button>
 	</div>
