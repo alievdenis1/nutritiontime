@@ -7,18 +7,11 @@ import * as ElementPlusIcons from '@element-plus/icons-vue'
 import { i18n } from '@/shared/lib/i18n'
 
 const app = createApp(App)
-<<<<<<< HEAD
 const pinia = createPinia()
 
 app
 	.use(i18n)
 	.use(pinia)
-=======
-
-app
-	.use(i18n)
-	.use(createPinia())
->>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 	.use(ElementPlus)
 	.use(Router)
 

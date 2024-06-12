@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "ru": {
     "male": "Мужчина",
     "female": "Женщина",
@@ -13,18 +12,3 @@
     "femaleAdjective": "Female"
   }
 }
-=======
-    "ru": {
-        "male": "Мужчина",
-        "female": "Женщина",
-        "maleAdjective": "Мужской",
-        "femaleAdjective": "Женский"
-    },
-    "en": {
-        "male": "Мужчина",
-        "female": "Женщина",
-        "maleAdjective": "Мужской",
-        "femaleAdjective": "Женский"
-    }
-}
->>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584

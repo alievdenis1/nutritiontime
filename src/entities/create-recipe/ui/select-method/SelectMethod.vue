@@ -23,22 +23,14 @@
 				{{ chosenMethod }}
 				<img
 					class="rotate-45 text-white"
-<<<<<<< HEAD
 					src="/public/image/icons/icon-plus.svg"
-=======
-					src="image/icons/icon-plus.svg"
->>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 					width="10"
 				>
 			</button>
 		</div>
 		<img
 			width="12"
-<<<<<<< HEAD
 			src="/public/image/icons/icon-select.svg"
-=======
-			src="image/icons/icon-select.svg"
->>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 		>
 
 		<div
@@ -85,11 +77,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-<<<<<<< HEAD
     (event: 'update:modelValue', chosenMethods: string[]): void
-=======
-	(event: 'update:modelValue', chosenMethods: string[]): void
->>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 }>()
 
 const chooseCookingMethod = (value: string) => {
