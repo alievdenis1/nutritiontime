@@ -7,6 +7,10 @@
 		/>
 
 		<saved-plans-list
+<<<<<<< HEAD
+=======
+			:items="plansStore.savedPlans"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 			class="mb-8"
 			@action="onSavedPlanActionButtonClicked"
 		/>

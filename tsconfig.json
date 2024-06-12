@@ -27,7 +27,12 @@
       "widgets/*": ["src/widgets/*"],
       "features/*": ["src/features/*"],
       "entities/*": ["src/entities/*"],
+<<<<<<< HEAD
       "shared/*": ["src/shared/*"]
+=======
+      "shared/*": ["src/shared/*"],
+      "element-plus": ["node_modules/element-plus/lib/index.d.ts"]
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

@@ -54,7 +54,11 @@
 </template>
 
 <script setup lang="ts">
+<<<<<<< HEAD
 import  { Recipe } from '../../types/index'
+=======
+import { type Recipe } from '../../types'
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 
 defineProps<{
 	recipes: Recipe[],

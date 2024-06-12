@@ -4,11 +4,14 @@
     "pageNotFound": "Страница не найдена",
     "serverError": "Ошибка сервера",
     "authError": "Ошибка авторизации"
+<<<<<<< HEAD
   },
   "en": {
     "unknownError": "Unknown error",
     "pageNotFound": "Page not found",
     "serverError": "Server error",
     "authError": "Authorisation error"
+=======
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
   }
 }

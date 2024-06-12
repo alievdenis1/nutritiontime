@@ -15,7 +15,11 @@
 			</span>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.White"
+=======
+				color="white"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				class="auth-type-button is-email"
 				@click="onAuthByEmailButtonClicked"
 			>
@@ -37,7 +41,11 @@
 			</v-button>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.White"
+=======
+				color="white"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				class="auth-type-button is-telegram"
 			>
 				<img
@@ -58,7 +66,11 @@
 			</v-button>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.White"
+=======
+				color="white"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				class="auth-type-button is-google"
 			>
 				<img
@@ -79,7 +91,11 @@
 			</v-button>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.White"
+=======
+				color="white"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				class="auth-type-button is-facebook"
 			>
 				<img
@@ -100,7 +116,11 @@
 			</v-button>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.White"
+=======
+				color="white"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				class="auth-type-button is-apple"
 			>
 				<img
@@ -130,7 +150,11 @@
 </template>
 
 <script setup lang="ts">
+<<<<<<< HEAD
 import { ButtonColors, VButton } from 'shared/components/Button'
+=======
+import { VButton } from 'shared/components/Button'
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 import { useRouter } from 'vue-router'
 import Localization from './AuthTypeSelection.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'

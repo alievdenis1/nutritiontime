@@ -57,7 +57,11 @@
 			</el-form>
 
 			<v-button
+<<<<<<< HEAD
 				:color="ButtonColors.Green"
+=======
+				color="green"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				@click="onAuthButtonClicked"
 			>
 				{{ t('signInButton') }}
@@ -68,7 +72,11 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+<<<<<<< HEAD
 import { ButtonColors, VButton } from 'shared/components/Button'
+=======
+import { VButton } from 'shared/components/Button'
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 import Localization from './AuthScreen.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 

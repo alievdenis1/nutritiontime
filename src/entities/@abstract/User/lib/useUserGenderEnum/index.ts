@@ -5,7 +5,11 @@ import { UserGenderEnum } from '../../config'
 
 export type UserGenderOption = {
     label: string,
+<<<<<<< HEAD
     value:   UserGenderEnum
+=======
+    value: UserGenderEnum
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 }
 
 export const useUserGenderEnum = () => {

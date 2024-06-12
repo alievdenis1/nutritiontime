@@ -14,7 +14,11 @@ import { computed, toRefs } from 'vue'
 import { ButtonColors } from './config.ts'
 
 const emit = defineEmits<{
+<<<<<<< HEAD
 	(event: 'click'):void
+=======
+	(event: 'click')
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 }>()
 
 const props = withDefaults(defineProps<{

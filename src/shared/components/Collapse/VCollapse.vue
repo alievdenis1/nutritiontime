@@ -96,7 +96,11 @@
 				<ul>
 					<li
 						v-for="item in data"
+<<<<<<< HEAD
 						:key="item.id"
+=======
+						:key="item[idKey]"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 					>
 						<div class="collection bg-[#F8E1BD]">
 							<slot
@@ -117,6 +121,7 @@
 import { computed, ref, toRefs } from 'vue'
 import Localization from './VCollapse.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+<<<<<<< HEAD
 import { Plan } from '@/entities/Plan/types'
 
 const { t } = useTranslation(Localization)
@@ -128,17 +133,37 @@ defineEmits<{
 
 const props = withDefaults(defineProps<{
 	data: Plan[],
+=======
+
+const { t } = useTranslation(Localization)
+
+const emit = defineEmits<{
+	(event: 'change', value: string | number): void,
+	(event:'generate'): void
+}>()
+
+const props = withDefaults(defineProps<{
+	data: Record<string, T>[],
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 	title: string,
 	titleKey?: string,
 	idKey?: string
 	description?: string
+<<<<<<< HEAD
 }>(),  {
+=======
+}>(), {
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 	titleKey: 'name',
 	idKey: 'id',
 	description: undefined
 })
 
+<<<<<<< HEAD
 const { data, titleKey,  description, title } = toRefs(props)
+=======
+const { data, titleKey, idKey, description, title } = toRefs(props)
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 
 const descriptionText = computed<string>(() => {
 	if (description.value !== undefined) return description.value

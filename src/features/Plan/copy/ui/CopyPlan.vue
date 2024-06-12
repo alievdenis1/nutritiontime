@@ -28,8 +28,13 @@ import { useTranslation } from '@/shared/lib/i18n'
 const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
+<<<<<<< HEAD
   (event: 'success'): void;
   (event: 'error'): void;
+=======
+	(event: 'success'),
+	(event: 'error')
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 }>()
 
 const props = defineProps<{

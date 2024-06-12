@@ -8,14 +8,40 @@
 		@generate="onGenerateNewPlan"
 	>
 		<template #item="{ item }">
+<<<<<<< HEAD
 			<div class="flex row items-center justify-between w-full">
 				<plan-info
 					:plan="item"
+=======
+			<div class="flex justify-between items-center">
+				<plan-info
+					:plan="{
+						name: item.name as string,
+						id: item.id as number,
+						isActive: item.isActive as boolean,
+						caloriesPerDay: item.caloriesPerDay as number,
+						proteins: item.proteins as number,
+						fats: item.fats as number,
+						carbohydrates: item.carbohydrates as number
+					}"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				/>
 
 				<v-button
 					class="flex items-center cursor-pointer"
+<<<<<<< HEAD
 					@click="onActionButtonClicked(item)"
+=======
+					@click="onActionButtonClicked({
+						name: item.name as string,
+						id: item.id as number,
+						isActive: item.isActive as boolean,
+						caloriesPerDay: item.caloriesPerDay as number,
+						proteins: item.proteins as number,
+						fats: item.fats as number,
+						carbohydrates: item.carbohydrates as number
+					})"
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 				>
 					<img
 						src="/image/icons/icon-more.svg"
@@ -33,6 +59,7 @@ import { usePlansStore } from '../model'
 import { storeToRefs } from 'pinia'
 import PlanInfo from './PlanInfo.vue'
 import { VCollapse } from 'shared/components/Collapse'
+<<<<<<< HEAD
 import { Plan } from '../types'
 import Localization from './SavedPlansList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
@@ -41,6 +68,20 @@ const { t } = useTranslation(Localization)
 
 const emit = defineEmits<{
   (event: 'action', value: Plan): void;
+=======
+import { type Plan } from '../types'
+import Localization from './SavedPlansList.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+
+defineProps<{
+  items: Plan[]
+}>()
+
+const { t } = useTranslation(Localization)
+
+const emit = defineEmits<{
+	(event: 'action', value: Plan): void
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
 }>()
 
 const store = usePlansStore()

@@ -14,8 +14,12 @@
   "dependencies": {
     "@tonconnect/ui": "^2.0.0",
     "@twa-dev/sdk": "^7.0.0",
+<<<<<<< HEAD
     "element-plus": "^2.7.5",
     "nuxt": "^3.12.1",
+=======
+    "element-plus": "^2.3.4",
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
     "pinia": "^2.0.36",
     "tonapi-sdk-js": "^1.0.6",
     "vue": "^3.2.47",
@@ -28,7 +32,11 @@
     "@vitejs/plugin-vue": "^4.1.0",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.57.0",
+<<<<<<< HEAD
     "eslint-import-resolver-typescript": "^3.5.5",
+=======
+    "eslint-import-resolver-typescript": "^3.6.1",
+>>>>>>> 4db838b8ef327e434b610b143407db4e4e5be584
     "eslint-plugin-boundaries": "^3.1.1",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-vue": "^9.12.0",
