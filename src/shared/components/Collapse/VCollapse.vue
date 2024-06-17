@@ -1,10 +1,10 @@
 <template>
 	<div
-		class=" bg-white rounded-[30px] max-h-[426px] overflow-auto relative scroll-hide"
+		class="bg-[#ffffff] rounded-[16px] max-h-[426px] overflow-auto relative scroll-hide"
 	>
 		<div
-			class="p-5 cursor-pointer rounded-[40px]"
-			:class="{'sticky top-0 bg-white z-10 rounded-b-none': isCollapsed}"
+			class="p-5 cursor-pointer"
+			:class="{'sticky top-0 bg-white z-30 rounded-b-none': isCollapsed}"
 			@click="onCollapseTriggerClicked"
 		>
 			<slot>
@@ -23,7 +23,6 @@
 						<span>
 							{{ title }}
 						</span>
-
 						<span>
 							{{ descriptionText }}
 						</span>
@@ -72,33 +71,42 @@
 				</div>
 			</slot>
 		</div>
-
-		<el-collapse-transition>
+		<transition name="slide-fade">
 			<div
 				v-show="isCollapsed"
 				class="flex flex-col px-[10px] rounded-[40px]"
 			>
-				<div class="collection bg-[#FFA767] gap-[15px]">
-					<img
-						width="25"
-						src="/image/icons/icon-favorite.svg"
-						height="27"
-					>
-					<div class="flex flex-col gap-0 py-0.5 text-[#FFEFD8]">
+				<v-input
+					v-model="modelValue"
+					input-text="Поиск"
+				/>
+				<div class="collection bg-[#FFA767]  justify-between">
+					<div class="flex gap-[15px] items-center text-[#FFEFD8]">
+						<img
+							width="25"
+							src="/image/icons/icon-favorite.svg"
+							height="27"
+						>
 						<span class="text-[15px] font-medium leading-[94.95%]">
-							Favorites
+							Понравившиеся
 						</span>
-						<p class="text-[10px] font-medium opacity-70 leading-[94.95%]">
-							text
-						</p>
 					</div>
+					<IconArrow icon-color="#ffffff" />
+				</div>
+				<div class="collection bg-[#F5F5F5]  justify-between">
+					<div class="flex gap-[15px] items-center text-[#363636]">
+						<span class="text-[15px] font-medium leading-[94.95%]">
+							Мои рецепты
+						</span>
+					</div>
+					<IconArrow icon-color="#363636" />
 				</div>
 				<ul>
-					<li
+					<liк
 						v-for="item in data"
 						:key="item.id"
 					>
-						<div class="collection bg-[#F8E1BD]">
+						<div class="collection bg-[#F5F5F5] text-[#363636]">
 							<slot
 								name="item"
 								v-bind="{ item }"
@@ -106,18 +114,21 @@
 								{{ item[titleKey] }}
 							</slot>
 						</div>
-					</li>
+					</liк>
 				</ul>
 			</div>
-		</el-collapse-transition>
+		</transition>
 	</div>
 </template>
 
-<script setup lang="ts" generic="T extends any">
+<script setup lang="ts">
 import { computed, ref, toRefs } from 'vue'
 import Localization from './VCollapse.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { Plan } from '@/entities/Plan/types'
+import VInput from '../Input/VInput.vue'
+import IconArrow from '../Icon/IconArrow.vue'
+const modelValue = ref('')
 
 const { t } = useTranslation(Localization)
 
@@ -153,6 +164,7 @@ const isCollapsed = ref<boolean>(false)
 const onCollapseTriggerClicked = () => {
 	isCollapsed.value = !isCollapsed.value
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -160,7 +172,7 @@ const onCollapseTriggerClicked = () => {
   @apply flex min-w-0 gap-1 text-[#9D8F6B] font-medium text-[15px] leading-[14px];
 }
 .collection {
-	@apply pl-8 pr-4 py-[25px] mb-2 rounded-[40px] flex
+	@apply pl-8 pr-4 py-[16px] mb-2 rounded-[14px] flex
 }
 
 .scroll-hide::-webkit-scrollbar {
@@ -171,5 +183,4 @@ const onCollapseTriggerClicked = () => {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 </style>

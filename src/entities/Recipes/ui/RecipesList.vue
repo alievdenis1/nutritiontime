@@ -1,5 +1,5 @@
 <template>
-	<div class="flex items-center justify-between gap-[10px] mb-4 h-[41px]">
+	<div class="flex items-center justify-between gap-[10px] mt-4 mb-4 h-[41px]">
 		<div>
 			<h2 class="font-bold text-[20px] leading-[19px] text-[#735F2B]">
 				{{ t('todayPlan') }}

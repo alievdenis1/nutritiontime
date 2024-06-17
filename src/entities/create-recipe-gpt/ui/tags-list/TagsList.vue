@@ -1,5 +1,7 @@
 <template>
-	<div class="w-full h-[42px] py-[6px] px-3 flex bg-white rounded-[40px] gap-[5px]">
+	<div
+		class="w-full h-[42px] py-[6px] px-3 flex bg-white rounded-[40px] gap-[5px]"
+	>
 		<div
 			v-for="tag in tags"
 			:key="tag.id"
@@ -14,10 +16,8 @@
 import { Tag } from '../../types'
 
 defineProps<{
-	tags: Tag[],
+  tags: Tag[];
 }>()
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

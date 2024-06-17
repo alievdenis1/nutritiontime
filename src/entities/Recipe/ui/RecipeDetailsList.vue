@@ -1,5 +1,7 @@
 <template>
-	<div class="flex flex-col items-center gap-4 text-[#735F2B] text-[15px] font-normal">
+	<div
+		class="flex flex-col items-center gap-4 text-[#735F2B] text-[15px] font-normal"
+	>
 		<button
 			class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70"
 			@click="router.push('/')"
@@ -33,14 +35,14 @@
 		<div class="w-full">
 			<div class="flex justify-between">
 				<span class="opacity-70">
-					{{ t('reciept') }}
+					{{ t("reciept") }}
 				</span>
 				<v-button
 					class="cursor-pointer"
 					@click="isDropDownOpen = !isDropDownOpen"
 				>
 					<img
-						:class="{ 'rotate-180': isDropDownOpen}"
+						:class="{ 'rotate-180': isDropDownOpen }"
 						height="19"
 						src="/image/icons/icon-arrow-rounded.svg"
 						width="19"
@@ -76,11 +78,9 @@ const router = useRouter()
 const { t } = useTranslation(Localization)
 const isDropDownOpen = ref<boolean>(false)
 const recipeSteps = <RecipeSteps[]>[
-	{ id: 1, text: 'Shan first' },
-	{ id: 2, text: 'Shan second' }
+  { id: 1, text: 'Shan first' },
+  { id: 2, text: 'Shan second' },
 ]
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

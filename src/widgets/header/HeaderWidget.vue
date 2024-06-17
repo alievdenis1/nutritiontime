@@ -71,8 +71,8 @@ import Localization from './HeaderWidget.localization.json'
 import WebApp from '@twa-dev/sdk'
 
 import { useSessionStore } from 'entities/Session'
-import { useTWA } from 'shared/lib/twa'
-import { useAuthButton } from 'shared/lib/ton-connect'
+import { useTWA } from 'entities/Session/api'
+import { useAuthButton } from 'entities/Session/api'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
@@ -158,3 +158,4 @@ onMounted(() => {
 	}
 }
 </style>
+@/features/SessionManagement/ton-connect@/features/SessionManagement/twa
