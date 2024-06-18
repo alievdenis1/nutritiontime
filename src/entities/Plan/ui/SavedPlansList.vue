@@ -11,15 +11,12 @@
 			<div class="flex row items-center justify-between w-full">
 				<plan-info :plan="item" />
 				<div class="flex items-center cursor-pointer gap-4">
-					<v-button @click="onActionButtonEdit(item)">
-						<img :src="`${imgPath}-edit.svg`">
-					</v-button>
-					<v-button @click="onActionButtonSecure(item)">
-						<img :src="securedItems[item.id] ? `${imgPath}-setting-active.svg` : `${imgPath}-setting-no-active.svg`">
-					</v-button>
-					<v-button @click="onActionButtonDelete(item)">
-						<img :src="`${imgPath}-trash.svg`">
-					</v-button>
+					<IconEdit @click="onActionButtonEdit(item)" />
+					<div @click="onActionButtonSecure(item)">
+						<IconSettingActive v-if="securedItems[item.id]" />
+						<IconSettingNoActive v-else />
+					</div>
+					<IconTrach @click="onActionButtonDelete(item)" />
 				</div>
 			</div>
 		</template>
@@ -41,9 +38,12 @@ import Localization from './SavedPlansList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { reactive, ref } from 'vue'
 import VModal from '@/shared/components/Modal/VModal.vue'
-const { t } = useTranslation(Localization)
+import IconTrach from '@/shared/components/Icon/IconTrash.vue'
+import IconSettingActive from '@/shared/components/Icon/IconSettingActive.vue'
+import IconSettingNoActive from '@/shared/components/Icon/IconSettingNoActive.vue'
+import IconEdit from '@/shared/components/Icon/IconEdit.vue'
 
-const imgPath = '../../../../public/image/icons/icon'
+const { t } = useTranslation(Localization)
 
 const modalVisible = ref(false)
 const securedItems = reactive<{ [key: number]: boolean }>({})

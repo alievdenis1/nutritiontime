@@ -24,9 +24,7 @@
 						v-if="currentConfig.headerType === 'image'"
 						class="flex justify-center"
 					>
-						<img
-							:src="`../../../../public/image/icons/${currentConfig.imageContent}`"
-						>
+						<IconBin />
 					</div>
 				</header>
 				<main class="pt-[12px] pl-[16px] pr-[16px]">
@@ -71,6 +69,7 @@ import VButton from '../Button/VButton.vue'
 import { modalConfig } from './index'
 import { ButtonColors } from '../Button/config'
 import VDivider from '../Divider/VDivider.vue'
+import IconBin from '../Icon/IconBin.vue'
 
 const props = withDefaults(defineProps<{
     visible?: boolean,

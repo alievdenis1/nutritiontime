@@ -24,7 +24,6 @@ export const modalConfig: Record<string, ModalConfig> = {
         headerContent: '',
         inputContent: 'Вы уверены что хотите удалить коллекцию?',
         buttonText: 'Удалить',
-        buttonColor: ButtonColors.Red   ,
-        imageContent: 'icon-bin.svg',
+        buttonColor: ButtonColors.Red,
     }
 }
