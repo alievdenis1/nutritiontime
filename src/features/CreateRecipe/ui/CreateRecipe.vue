@@ -20,6 +20,7 @@
 				<SliderList
 					:data="forges"
 				/>
+				/>
 			</div>
 
 			<div class="form-element">

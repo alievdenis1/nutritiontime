@@ -4,10 +4,7 @@
 			class="absolute right-[18px] top-[18px] cursor-pointer"
 			@click="isDialogVisible = true"
 		>
-			<img
-				src="/image/icons/icon-pen.svg"
-				w="17"
-			>
+			<icon-pen />
 		</v-button>
 	</div>
 	<el-dialog
@@ -17,18 +14,12 @@
 	>
 		<div class="flex flex-col">
 			<v-button class="modal-btn">
-				<img
-					src="/image/icons/icon-image.svg"
-					width="13"
-				>
+				<icon-image />
 				Gallery
 			</v-button>
 			<v-divider />
 			<v-button class="modal-btn ">
-				<img
-					src="/image/icons/icon-file.svg"
-					width="13"
-				>
+				<icon-file />
 				File
 			</v-button>
 		</div>
@@ -38,6 +29,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VDivider } from 'shared/components/Divider'
+import { IconFile, IconImage, IconPen } from '@/shared/components/Icon'
 
 const isDialogVisible = ref(false)
 

@@ -6,10 +6,7 @@
 				Cooking instructions
 			</span>
 			<v-button class="cursor-pointer">
-				<img
-					src="/image/icons/icon-pen.svg"
-					width="17"
-				>
+				<icon-pen />
 			</v-button>
 		</div>
 		<div
@@ -20,10 +17,7 @@
 				Snan First
 			</span>
 			<v-button class="cursor-pointer">
-				<img
-					src="/image/icons/icon-plus-rounded.svg"
-					width="17"
-				>
+				<icon-plus-rounded />
 			</v-button>
 		</div>
 
@@ -38,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconPen, IconPlusRounded } from '@/shared/components/Icon'
 
 </script>
 

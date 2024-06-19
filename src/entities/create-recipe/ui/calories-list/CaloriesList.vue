@@ -5,10 +5,7 @@
 			:key="item.id"
 			class="bg-white min-w-[70px] h-[50px] py-[18px] px-[13px] flex gap-1 items-end rounded-[40px] cursor-pointer"
 		>
-			<img
-				src="/image/icons/icon-fire.svg"
-				width="12"
-			>
+			<icon-fire />
 			<span class="text-[10px] text-[#735F2B] leading-[94.95%]">
 				{{ `${item.count} kal` }}
 			</span>
@@ -18,7 +15,7 @@
 
 <script setup lang="ts">
 import type { CaloriesItem } from '../../types'
-
+import { IconFire } from '@/shared/components/Icon'
 defineProps<{
 	caloriesList: CaloriesItem[],
 }>()

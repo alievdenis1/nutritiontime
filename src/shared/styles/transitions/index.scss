@@ -1,9 +1,29 @@
-.group-collapse-enter-active,
-.group-collapse-leave-active {
+// .group-collapse-enter-active,
+// .group-collapse-leave-active {
+// 	transition: all 0.5s ease;
+// }
+
+// .group-collapse-enter-from,
+// .group-collapse-leave-to {
+// 	transform: translateY(-100px);
+// }
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
 	transition: all 0.5s ease;
 }
 
-.group-collapse-enter-from,
-.group-collapse-leave-to {
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+	opacity: 0;
 	transform: translateY(-100px);
+}
+
+.modal-enter-active, 
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.modal-enter, .fade-leave-to {
+  opacity: 0;
 }

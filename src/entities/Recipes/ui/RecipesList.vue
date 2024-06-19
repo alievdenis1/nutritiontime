@@ -1,5 +1,5 @@
 <template>
-	<div class="flex items-center justify-between gap-[10px] mb-4 h-[41px]">
+	<div class="flex items-center justify-between gap-[10px] mt-4 mb-4 h-[41px]">
 		<div>
 			<h2 class="font-bold text-[20px] leading-[19px] text-[#735F2B]">
 				{{ t('todayPlan') }}
@@ -9,11 +9,7 @@
 			</span>
 		</div>
 		<v-button class="cursor-pointer mr-[14px]">
-			<img
-				height="17"
-				src="/image/icons/icon-pen.svg"
-				width="17"
-			>
+			<icon-pen />
 		</v-button>
 	</div>
 	<div
@@ -47,19 +43,11 @@
 				</div>
 				<div class="flex gap-3 text-[#735F2B] items-center font-medium">
 					<span class="flex items-center text-[10px] gap-1">
-						<img
-							height="16"
-							src="/image/icons/icon-clock.svg"
-							width="16"
-						>
+						<icon-clock />
 						{{ `${card.time}min.` }}
 					</span>
 					<span class="flex items-center text-[10px] gap-1">
-						<img
-							height="15"
-							src="/image/icons/icon-fire.svg"
-							width="11"
-						>
+						<icon-fire />
 						{{ `${card.kkal} kkal.` }}
 					</span>
 				</div>
@@ -87,6 +75,7 @@ import { onMounted, ref } from 'vue'
 import { toUserFriendlyAddress } from '@tonconnect/ui'
 import { useRouter } from 'vue-router'
 import type { RecipeList } from '../types'
+import { IconClock, IconFire, IconPen } from '@/shared/components/Icon'
 
 const router = useRouter()
 const { t } = useTranslation(Localization)

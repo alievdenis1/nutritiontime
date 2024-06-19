@@ -1,8 +1,10 @@
 {
     "ru": {
-        "count": "шт"
+        "liked": "Понравившиеся",
+        "MyRecipes": "Мои рецепты"
     },
     "en": {
-        "count": "pc"
+        "liked": "liked",
+        "MyRecipes": "My recipes"
     }
 }

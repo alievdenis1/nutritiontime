@@ -9,12 +9,7 @@
 				class="cursor-pointer"
 				@click="isDropDownOpen = !isDropDownOpen"
 			>
-				<img
-					:class="{ 'rotate-180': isDropDownOpen}"
-					height="19"
-					src="/image/icons/icon-arrow-rounded.svg"
-					width="19"
-				>
+				<icon-arrow-rounded :class="{ 'rotate-180': isDropDownOpen}" />
 			</v-button>
 		</div>
 		<div
@@ -29,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconArrowRounded } from '@/shared/components/Icon'
 import { ref } from 'vue'
 
 defineProps<{

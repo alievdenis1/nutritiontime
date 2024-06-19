@@ -6,12 +6,7 @@
 				class="cursor-pointer"
 				@click="isCommentsOpen = !isCommentsOpen"
 			>
-				<img
-					:class="{ 'rotate-180': isCommentsOpen}"
-					height="19"
-					src="/image/icons/icon-arrow-rounded.svg"
-					width="19"
-				>
+				<icon-arrow-rounded :class="{ 'rotate-180': isCommentsOpen }" />
 			</button>
 		</div>
 		<el-collapse-transition>
@@ -24,11 +19,7 @@
 					<div class="flex items-center gap-[10px]">
 						<div class="flex flex-col items-center gap-[3px]">
 							<span>{{ comment.author }}</span>
-							<img
-								height="20"
-								src="/image/icons/icon-author.svg"
-								width="16"
-							>
+							<icon-author />
 						</div>
 						<p class="text-[#735F2B]">
 							{{ comment.message }}
@@ -50,10 +41,11 @@
 </template>
 
 <script setup lang="ts">
-import { IconFavorite } from 'shared/components/Icon'
+import { IconArrowRounded, IconFavorite } from 'shared/components/Icon'
 import { ref } from 'vue'
 import Localization from './RecipeComments.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { IconAuthor } from '@/shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 

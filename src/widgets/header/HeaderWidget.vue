@@ -19,11 +19,7 @@
 						id="ton-connect-button-root"
 						class="absolute opacity-0 left-0"
 					/>
-					<img
-						height="15"
-						src="/image/icons/icon-ton.svg"
-						width="19"
-					>
+					<icon-ton />
 					<span class="wallet-address">
 						{{ friendlyWalletAddress ? '' : t('subscription') }}
 					</span>
@@ -35,12 +31,7 @@
 					role="button"
 					@click="languageDropDownOpen = !languageDropDownOpen"
 				>
-					<img
-						height="25"
-						src="/image/icons/icon-settings.svg"
-						width="25"
-						class="w-full"
-					>
+					<icon-settings />
 					<div
 						v-if="languageDropDownOpen"
 						class="language-dropdown"
@@ -71,8 +62,9 @@ import Localization from './HeaderWidget.localization.json'
 import WebApp from '@twa-dev/sdk'
 
 import { useSessionStore } from 'entities/Session'
-import { useTWA } from 'shared/lib/twa'
-import { useAuthButton } from 'shared/lib/ton-connect'
+import { useTWA } from 'entities/Session/api'
+import { useAuthButton } from 'entities/Session/api'
+import { IconSettings, IconTon } from '@/shared/components/Icon'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
@@ -158,3 +150,4 @@ onMounted(() => {
 	}
 }
 </style>
+@/features/SessionManagement/ton-connect@/features/SessionManagement/twa

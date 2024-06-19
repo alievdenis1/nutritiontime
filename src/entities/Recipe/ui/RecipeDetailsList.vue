@@ -33,18 +33,13 @@
 		<div class="w-full">
 			<div class="flex justify-between">
 				<span class="opacity-70">
-					{{ t('reciept') }}
+					{{ t("reciept") }}
 				</span>
 				<v-button
 					class="cursor-pointer"
 					@click="isDropDownOpen = !isDropDownOpen"
 				>
-					<img
-						:class="{ 'rotate-180': isDropDownOpen}"
-						height="19"
-						src="/image/icons/icon-arrow-rounded.svg"
-						width="19"
-					>
+					<icon-arrow-rounded :class="{ 'rotate-180': isDropDownOpen }" />
 				</v-button>
 			</div>
 			<div
@@ -70,17 +65,16 @@ import Localization from './RecipeDetailsList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { useRouter } from 'vue-router'
 import type { RecipeSteps } from '../types'
+import { IconArrowRounded } from '@/shared/components/Icon'
 
 const router = useRouter()
 
 const { t } = useTranslation(Localization)
 const isDropDownOpen = ref<boolean>(false)
 const recipeSteps = <RecipeSteps[]>[
-	{ id: 1, text: 'Shan first' },
-	{ id: 2, text: 'Shan second' }
+  { id: 1, text: 'Shan first' },
+  { id: 2, text: 'Shan second' },
 ]
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
