@@ -5,11 +5,7 @@
 		@click="deleteCollectionDialogVisible = true"
 	>
 		<div class="flex row text-default text-[#7C473F] w-full items-center gap-3 font-normal">
-			<img
-				src="/image/icons/icon-trash.svg"
-				width="17"
-			>
-
+			<icon-trash />
 			{{ t('delete') }}
 		</div>
 	</el-button>
@@ -25,6 +21,7 @@ import { Plan } from 'entities/Plan/types'
 import Localization from './DeletePlan.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import DeleteModal from './DeleteModal.vue'
+import { IconTrash } from '@/shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 

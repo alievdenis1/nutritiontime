@@ -7,10 +7,7 @@
 	</button>
 	<form class="flex flex-col gap-[23px] mb-6">
 		<div class="flex gap-1 text-[#735F2B]">
-			<img
-				src="/image/icons/icon-gpt.svg"
-				width="18"
-			>
+			<icon-gpt />
 			<span class="text-[15px] font-medium">
 				ChatGPT
 			</span>
@@ -26,10 +23,7 @@
 					type="text"
 				>
 				<v-button class="cursor-pointer">
-					<img
-						src="/image/icons/icon-pen.svg"
-						width="17"
-					>
+					<icon-pen />
 				</v-button>
 			</div>
 			<v-button class="generate-button self-end">
@@ -59,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconGpt, IconPen } from '@/shared/components/Icon'
 import { SuggestedRecipes } from 'entities/create-recipe-gpt/ui/suggested-recipes'
 import { TagsList } from 'entities/create-recipe-gpt/ui/tags-list'
 import { useRouter } from 'vue-router'

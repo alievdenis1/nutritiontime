@@ -24,7 +24,7 @@
 						v-if="currentConfig.headerType === 'image'"
 						class="flex justify-center"
 					>
-						<IconBin />
+						<icon-bin />
 					</div>
 				</header>
 				<main class="pt-[12px] pl-[16px] pr-[16px]">
@@ -66,24 +66,25 @@
 <script setup lang="ts">
 import { computed,toRefs } from 'vue'
 import VButton from '../Button/VButton.vue'
-import { modalConfig } from './index'
 import { ButtonColors } from '../Button/config'
 import VDivider from '../Divider/VDivider.vue'
 import IconBin from '../Icon/IconBin.vue'
+import { ModalOption } from './config'
+import { modalConfig  } from './index'
 
 const props = withDefaults(defineProps<{
-    visible?: boolean,
-    modalOption: keyof typeof modalConfig,
-    inputValue:string
+	visible?: boolean,
+	modalOption: ModalOption,
+	inputValue: string
 }>(), {
-    visible: false,
-	modalOption: 'edit',
-    inputValue: 'свойтво не определенно'
+	visible: false,
+	modalOption: ModalOption.EDIT,
+	inputValue: ''
 })
 
-const { visible } = toRefs(props)
+const { visible, modalOption, inputValue } = toRefs(props)
 
-const currentConfig = computed(() => modalConfig[props.modalOption])
+const currentConfig = computed(() => modalConfig[modalOption.value])
 
 const emit = defineEmits<{
   (event: 'update:visible', value: boolean): void;

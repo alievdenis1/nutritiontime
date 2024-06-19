@@ -14,25 +14,13 @@
 			</div>
 			<div class="flex items-center gap-2">
 				<v-button class="cursor-pointer">
-					<img
-						src="/image/icons/icon-plus-rounded.svg"
-						width="20"
-						height="20"
-					>
+					<icon-plus-rounded />
 				</v-button>
 				<v-button class="cursor-pointer">
-					<img
-						src="/image/icons/icon-trash.svg"
-						width="20"
-						height="20"
-					>
+					<icon-trash />
 				</v-button>
 				<v-button class="cursor-pointer">
-					<img
-						src="/image/icons/icon-forward.svg"
-						width="20"
-						height="20"
-					>
+					<icon-forward />
 				</v-button>
 			</div>
 		</div>
@@ -40,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconFavorite } from 'shared/components/Icon'
+import { IconFavorite, IconForward, IconPlusRounded, IconTrash } from 'shared/components/Icon'
 import Localization from './RecipeRate.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { ref } from 'vue'

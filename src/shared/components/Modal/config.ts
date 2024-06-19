@@ -1,4 +1,10 @@
-import { ButtonColors } from '../Button'
+import { ButtonColors } from '../Button/config'
+
+export enum ModalOption {
+    EDIT = 'edit',
+    SECURE = 'secure',
+    DELETE = 'delete'
+}
 
 export type ModalConfig = {
     headerType: 'text' | 'image';
@@ -9,3 +15,4 @@ export type ModalConfig = {
     buttonColor: ButtonColors;
     imageContent?: string;
 };
+

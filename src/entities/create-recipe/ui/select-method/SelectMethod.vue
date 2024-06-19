@@ -21,18 +21,10 @@
 				@click.prevent.stop="removeCookingMethod(chosenMethod)"
 			>
 				{{ chosenMethod }}
-				<img
-					class="rotate-45 text-white"
-					src="/public/image/icons/icon-plus.svg"
-					width="10"
-				>
+				<icon-plus />
 			</button>
 		</div>
-		<img
-			width="12"
-			src="/public/image/icons/icon-select.svg"
-		>
-
+		<icon-select />
 		<div
 			class="flex flex-col text-center absolute top-10 left-0 bg-white w-[160px] z-20 rounded-[10px]"
 			:class="{'hidden': !isMethodsListOpen}"
@@ -62,6 +54,7 @@ import type { CookingMethod } from '../../types'
 
 import Localization from './SelectMethod.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { IconPlus, IconSelect } from '@/shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 

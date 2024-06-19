@@ -1,10 +1,8 @@
 <template>
-	<div
-		class="bg-[#ffffff] rounded-[16px] max-h-[426px] overflow-auto relative scroll-hide"
-	>
+	<div class="bg-[#ffffff] rounded-[16px] max-h-[426px] overflow-auto relative scroll-hide">
 		<div
 			class="p-5 cursor-pointer"
-			:class="{'sticky top-0 bg-white z-30 rounded-b-none': isCollapsed}"
+			:class="{ 'sticky top-0 bg-white z-30 rounded-b-none': isCollapsed }"
 			@click="onCollapseTriggerClicked"
 		>
 			<slot>
@@ -13,11 +11,7 @@
 					class="flex row justify-between items-center"
 				>
 					<v-button>
-						<img
-							height="19"
-							src="/image/icons/icon-arrow-rounded.svg"
-							width="19"
-						>
+						<icon-arrow-rounded />
 					</v-button>
 					<div class="collection-title">
 						<span>
@@ -28,11 +22,7 @@
 						</span>
 					</div>
 					<v-button @click.stop="$emit('generate')">
-						<img
-							height="19"
-							src="/image/icons/icon-plus-rounded.svg"
-							width="19"
-						>
+						<icon-plus-rounded />
 					</v-button>
 				</div>
 
@@ -41,11 +31,7 @@
 					class="flex row justify-between items-center"
 				>
 					<v-button class="rotate-90">
-						<img
-							height="19"
-							src="/image/icons/icon-arrow-rounded.svg"
-							width="19"
-						>
+						<icon-arrow-rounded />
 					</v-button>
 					<div class="collection-title">
 						<span>
@@ -61,11 +47,7 @@
 						@click.stop="$emit('generate')"
 					>
 						<v-button>
-							<img
-								height="19"
-								src="/image/icons/icon-plus-rounded.svg"
-								width="19"
-							>
+							<icon-plus-rounded />
 						</v-button>
 					</button>
 				</div>
@@ -82,13 +64,9 @@
 				/>
 				<div class="collection bg-[#FFA767]  justify-between">
 					<div class="flex gap-[15px] items-center text-[#FFEFD8]">
-						<img
-							width="25"
-							src="/image/icons/icon-favorite.svg"
-							height="27"
-						>
+						<icon-favorite />
 						<span class="text-[15px] font-medium leading-[94.95%]">
-							Понравившиеся
+							{{ t('liked') }}
 						</span>
 					</div>
 					<IconArrow icon-color="#ffffff" />
@@ -96,7 +74,7 @@
 				<div class="collection bg-[#F5F5F5]  justify-between">
 					<div class="flex gap-[15px] items-center text-[#363636]">
 						<span class="text-[15px] font-medium leading-[94.95%]">
-							Мои рецепты
+							{{ t('MyRecipes') }}
 						</span>
 					</div>
 					<IconArrow icon-color="#363636" />
@@ -128,13 +106,14 @@ import { useTranslation } from '@/shared/lib/i18n'
 import { Plan } from '@/entities/Plan/types'
 import VInput from '../Input/VInput.vue'
 import IconArrow from '../Icon/IconArrow.vue'
+import { IconArrowRounded, IconFavorite, IconPlusRounded } from '../Icon'
 const modelValue = ref('')
 
 const { t } = useTranslation(Localization)
 
 defineEmits<{
-  (event: 'change'): void;
-  (event: 'generate'): void;
+	(event: 'change'): void;
+	(event: 'generate'): void;
 }>()
 
 const props = withDefaults(defineProps<{
@@ -143,13 +122,13 @@ const props = withDefaults(defineProps<{
 	titleKey?: string,
 	idKey?: string
 	description?: string
-}>(),  {
+}>(), {
 	titleKey: 'name',
 	idKey: 'id',
 	description: undefined
 })
 
-const { data, titleKey,  description, title } = toRefs(props)
+const { data, titleKey, description, title } = toRefs(props)
 
 const descriptionText = computed<string>(() => {
 	if (description.value !== undefined) return description.value
@@ -169,8 +148,9 @@ const onCollapseTriggerClicked = () => {
 
 <style lang="scss" scoped>
 .collection-title {
-  @apply flex min-w-0 gap-1 text-[#9D8F6B] font-medium text-[15px] leading-[14px];
+	@apply flex min-w-0 gap-1 text-[#9D8F6B] font-medium text-[15px] leading-[14px];
 }
+
 .collection {
 	@apply pl-8 pr-4 py-[16px] mb-2 rounded-[14px] flex
 }
@@ -180,7 +160,7 @@ const onCollapseTriggerClicked = () => {
 }
 
 .scroll-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
 </style>

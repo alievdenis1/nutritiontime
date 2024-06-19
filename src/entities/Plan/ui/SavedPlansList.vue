@@ -11,12 +11,12 @@
 			<div class="flex row items-center justify-between w-full">
 				<plan-info :plan="item" />
 				<div class="flex items-center cursor-pointer gap-4">
-					<IconEdit @click="onActionButtonEdit(item)" />
+					<icon-edit @click="onActionButtonEdit(item)" />
 					<div @click="onActionButtonSecure(item)">
-						<IconSettingActive v-if="securedItems[item.id]" />
-						<IconSettingNoActive v-else />
+						<icon-setting-active v-if="securedItems[item.id]" />
+						<icon-setting-no-active v-else />
 					</div>
-					<IconTrach @click="onActionButtonDelete(item)" />
+					<icon-trash @click="onActionButtonDelete(item)" />
 				</div>
 			</div>
 		</template>
@@ -38,16 +38,15 @@ import Localization from './SavedPlansList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { reactive, ref } from 'vue'
 import VModal from '@/shared/components/Modal/VModal.vue'
-import IconTrach from '@/shared/components/Icon/IconTrash.vue'
-import IconSettingActive from '@/shared/components/Icon/IconSettingActive.vue'
-import IconSettingNoActive from '@/shared/components/Icon/IconSettingNoActive.vue'
-import IconEdit from '@/shared/components/Icon/IconEdit.vue'
+import { IconTrash, IconSettingActive, IconEdit,IconSettingNoActive } from '@/shared/components/Icon'
+import { ModalOption } from '@/shared/components/Modal/config'
 
 const { t } = useTranslation(Localization)
 
 const modalVisible = ref(false)
 const securedItems = reactive<{ [key: number]: boolean }>({})
-const mode = ref('')
+
+const mode = ref<ModalOption>(ModalOption.EDIT)
 
 const emit = defineEmits<{
 (event: 'edit', value: Plan): void;
@@ -59,24 +58,21 @@ const store = usePlansStore()
 const { savedPlans, isLoadingSavedPlans } = storeToRefs(store)
 
 const onActionButtonEdit = (plan: Plan) => {
-	mode.value = 'edit'
-    modalVisible.value = true
+	mode.value = ModalOption.EDIT
+	modalVisible.value = true
 	emit('edit', plan)
 }
 
 const onActionButtonSecure = (plan: Plan) => {
 	securedItems[plan.id] = !securedItems[plan.id]
-	// modalVisible.value = true
-	// mode.value = 'secure'
 	emit('secure', plan)
 }
 
 const onActionButtonDelete = (plan: Plan) => {
-	mode.value = 'delete'
+	mode.value = ModalOption.DELETE
 	modalVisible.value = true
 	emit('delete', plan)
 }
-
 const onGenerateNewPlan = () => {
 console.log('Новый план создан')
 }

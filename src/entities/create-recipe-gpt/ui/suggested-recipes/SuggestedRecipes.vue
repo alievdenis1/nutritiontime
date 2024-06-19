@@ -22,19 +22,11 @@
 				</div>
 				<div class="flex gap-3 text-[#735F2B] items-center font-medium">
 					<span class="flex items-center text-[10px] gap-1">
-						<img
-							height="16"
-							src="/image/icons/icon-clock.svg"
-							width="16"
-						>
+						<icon-clock />
 						{{ `${recipe.time}min.` }}
 					</span>
 					<span class="flex items-center text-[10px] gap-1">
-						<img
-							height="15"
-							src="/image/icons/icon-fire.svg"
-							width="11"
-						>
+						<icon-fire />
 						{{ `${recipe.kkal} kkal.` }}
 					</span>
 				</div>
@@ -54,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconClock, IconFire } from '@/shared/components/Icon'
 import  { Recipe } from '../../types/index'
 
 defineProps<{

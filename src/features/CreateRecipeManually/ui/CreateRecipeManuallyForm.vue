@@ -20,10 +20,7 @@
 					type="text"
 				>
 				<v-button class="cursor-pointer">
-					<img
-						src="/image/icons/icon-pen.svg"
-						width="17"
-					>
+					<icon-pen />
 				</v-button>
 			</div>
 		</div>
@@ -105,6 +102,7 @@ import { useTranslation } from '@/shared/lib/i18n'
 const { t } = useTranslation(Localization)
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { IconPen } from '@/shared/components/Icon'
 
 const time = ref(0)
 

@@ -1,8 +1,8 @@
-import { ModalConfig } from './config'
+import { ModalConfig, ModalOption } from './config'
 import { ButtonColors } from '../Button'
 
-export const modalConfig: Record<string, ModalConfig> = {
-    edit: {
+export const modalConfig: Record<ModalOption, ModalConfig> = {
+    [ModalOption.EDIT]: {
         headerType: 'text',
         mainContentType: 'input',
         headerContent: 'Редактировать коллекцию',
@@ -10,7 +10,7 @@ export const modalConfig: Record<string, ModalConfig> = {
         buttonText: 'Сохранить',
         buttonColor: ButtonColors.Green,
     },
-    secure: {
+    [ModalOption.SECURE]: {
         headerType: 'text',
         mainContentType: 'input',
         headerContent: 'Добавить коллекцию',
@@ -18,7 +18,7 @@ export const modalConfig: Record<string, ModalConfig> = {
         buttonText: 'Сохранить',
         buttonColor: ButtonColors.Green,
     },
-    delete: {
+    [ModalOption.DELETE]: {
         headerType: 'image',
         mainContentType: 'text',
         headerContent: '',

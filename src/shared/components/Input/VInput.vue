@@ -10,19 +10,17 @@
 		>
 
 		<div
-			class="absolute right-0 top-0 bg-[#319A6E] py-[19px] flex justify-end rounded-[30px] w-40 cursor-pointer z-10 pr-10"
+			class="absolute right-0 top-0 bg-[#319A6E] py-[18px] flex justify-end rounded-[30px] w-40 cursor-pointer z-10 pr-10"
 			@click="onSearchClick"
 		>
-			<img
-				src="/image/icons/icon-search.svg"
-				alt="Search"
-				class="w-5 h-5"
-			>
+			<IconSearch />
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { IconSearch } from '../Icon'
+
 const props = defineProps<{
    inputText: string,
    modelValue: string,

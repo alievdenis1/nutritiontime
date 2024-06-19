@@ -19,13 +19,7 @@
 				class="auth-type-button is-email"
 				@click="onAuthByEmailButtonClicked"
 			>
-				<img
-					width="23"
-					height="23"
-					class="auth-type-button__icon"
-					src="/image/icons/icon-email.svg"
-					alt="email"
-				>
+				<icon-email />
 
 				<span class="auth-type-button__description">
 					{{ t('email') }}
@@ -40,13 +34,7 @@
 				:color="ButtonColors.White"
 				class="auth-type-button is-telegram"
 			>
-				<img
-					width="23"
-					height="23"
-					class="auth-type-button__icon"
-					src="/image/icons/icon-telegram.svg"
-					alt="email"
-				>
+				<icon-telegram />
 
 				<span class="auth-type-button__description">
 					Telegram
@@ -61,13 +49,7 @@
 				:color="ButtonColors.White"
 				class="auth-type-button is-google"
 			>
-				<img
-					width="23"
-					height="23"
-					class="auth-type-button__icon"
-					src="/image/icons/icon-google.svg"
-					alt="email"
-				>
+				<icon-google />
 
 				<span class="auth-type-button__description">
 					Google
@@ -82,13 +64,7 @@
 				:color="ButtonColors.White"
 				class="auth-type-button is-facebook"
 			>
-				<img
-					width="23"
-					height="23"
-					class="auth-type-button__icon"
-					src="/image/icons/icon-facebook.svg"
-					alt="email"
-				>
+				<icon-facebook />
 
 				<span class="auth-type-button__description">
 					Facebook
@@ -103,13 +79,7 @@
 				:color="ButtonColors.White"
 				class="auth-type-button is-apple"
 			>
-				<img
-					width="23"
-					height="23"
-					class="auth-type-button__icon"
-					src="/image/icons/icon-apple.svg"
-					alt="email"
-				>
+				<icon-apple />
 
 				<span class="auth-type-button__description">
 					Apple ID
@@ -134,6 +104,8 @@ import { ButtonColors, VButton } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
 import Localization from './AuthTypeSelection.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { IconApple, IconEmail, IconFacebook, IconGoogle } from '@/shared/components/Icon'
+import { IconTelegram } from '@/shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 const router = useRouter()

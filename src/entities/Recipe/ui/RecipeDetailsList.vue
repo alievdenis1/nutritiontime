@@ -1,7 +1,5 @@
 <template>
-	<div
-		class="flex flex-col items-center gap-4 text-[#735F2B] text-[15px] font-normal"
-	>
+	<div class="flex flex-col items-center gap-4 text-[#735F2B] text-[15px] font-normal">
 		<button
 			class="text-[#735F2B] font-bold cursor-pointer self-start opacity-70"
 			@click="router.push('/')"
@@ -41,12 +39,7 @@
 					class="cursor-pointer"
 					@click="isDropDownOpen = !isDropDownOpen"
 				>
-					<img
-						:class="{ 'rotate-180': isDropDownOpen }"
-						height="19"
-						src="/image/icons/icon-arrow-rounded.svg"
-						width="19"
-					>
+					<icon-arrow-rounded :class="{ 'rotate-180': isDropDownOpen }" />
 				</v-button>
 			</div>
 			<div
@@ -72,6 +65,7 @@ import Localization from './RecipeDetailsList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { useRouter } from 'vue-router'
 import type { RecipeSteps } from '../types'
+import { IconArrowRounded } from '@/shared/components/Icon'
 
 const router = useRouter()
 

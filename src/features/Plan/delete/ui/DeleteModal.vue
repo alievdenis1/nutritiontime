@@ -7,10 +7,7 @@
 	>
 		<template #header="{ titleId, titleClass }">
 			<div class="flex flex-col items-center gap-3">
-				<img
-					src="/image/icons/icon-trash.svg"
-					width="50"
-				>
+				<icon-trash />
 				<div class="text-[#735F2B] flex flex-col">
 					<h4
 						:id="titleId"
@@ -49,6 +46,7 @@ import { useDeletePlanStore } from '../model'
 import { Plan } from 'entities/Plan/types'
 import Localization from './DeleteModal.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+import { IconTrash } from '@/shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 
