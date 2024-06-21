@@ -1,1 +1,1 @@
-export { default as ReсipesList } from './RecipesList.vue'
+export { default as RecipesList } from './RecipesList.vue'

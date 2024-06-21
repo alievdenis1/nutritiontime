@@ -1,8 +1,10 @@
 {
     "ru": {
-
+        "home": "Главная",
+        "recipes": "Рецепты"
     },
     "en": {
-
+        "home": "Home",
+        "recipes": "Recipes"
     }
 }

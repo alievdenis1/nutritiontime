@@ -1,11 +1,19 @@
-export type RecipeItem = {
-	id: number,
-	title: string,
-	desc: string,
-	img?: string,
-	address: string,
-	time: number,
-	kkal: number
+interface Author {
+	name: string;
+	profile_image: string;
+}
+
+export interface RecipeItem {
+	id: number;
+	image: string;
+	title: string;
+	rating: string;
+	time: string;
+	calories: string;
+	author: Author;
+	comments: number;
+	bookmarked: boolean;
+	liked: boolean;
 }
 
 export type RecipeList = RecipeItem[]

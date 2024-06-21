@@ -1,17 +1,16 @@
 <template>
 	<svg
-		width="15"
-		height="20 "
+		width="12"
+		height="15"
 		viewBox="0 0 40 40"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 	>
 		<path
-			d="M15 10 L25 20 L15 30"
+			d="M10 15 L20 25 L30 15"
 			:stroke="iconColor"
 			stroke-width="5"
 			fill="none"
-			stroke-linecap="round"
 		/>
 	</svg>
 </template>
