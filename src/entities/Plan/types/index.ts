@@ -8,3 +8,10 @@ export type Plan = {
 	carbohydrates: number,
 	[key: string]: string | number | symbol | undefined | boolean
 };
+
+export interface Tab {
+	id: number
+	label: string
+	isActiveEdit: boolean
+	count: number
+}

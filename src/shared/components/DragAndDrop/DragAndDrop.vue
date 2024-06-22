@@ -2,7 +2,7 @@
 	<div class="tabs-container">
 		<div class="tabs-wrapper">
 			<div
-				v-for="(tab) in tabs"
+				v-for="(tab) in items"
 				:key="tab.id"
 				class="tab-column rounded-[100px] px-[16px] py-[12px]"
 				:class="{ 'active-tab': tab.id === selectedTab.id, 'draggable-tab': tab.id === draggableTabId, 'highlight-draggable': tab.id === draggableTabId }"
@@ -41,7 +41,7 @@
 				@click="editAction(contextMenu.tabId)"
 			>
 				<IconEdit class="icon" />
-				Редактировать
+				{{ t('edit') }}
 			</button>
 			<div class="span" />
 			<button
@@ -49,7 +49,7 @@
 				@click="enableDrag(contextMenu.tabId)"
 			>
 				<IconMove class="icon" />
-				Переместить
+				{{ t('move') }}
 			</button>
 			<div class="span" />
 			<button
@@ -57,39 +57,37 @@
 				@click="deleteAction(contextMenu.tabId)"
 			>
 				<IconBin class="icon" />
-				Удалить
+				{{ t('delete') }}
 			</button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import { IconPlus, IconKebab, IconBin, IconMove, IconEdit } from 'shared/components/Icon'
+import { DragTypes } from './types'
+import { useTranslation } from '@/shared/lib/i18n'
+import Localization from './DragAndDrop.localization.json'
 
-interface Tab {
-    id: number
-    label: string
-    isActiveEdit: boolean
-    count: number
-}
+const { t } = useTranslation(Localization)
 
-const tabs = ref<Tab[]>([
-    { id: 1, label: 'Мне понравилось', isActiveEdit: false, count: 5 },
-    { id: 2, label: 'Вкусняшки', isActiveEdit: true, count: 5 },
-    { id: 3, label: 'Красивое', isActiveEdit: true, count: 5 },
-    { id: 4, label: 'Категория 1', isActiveEdit: true, count: 5 },
-    { id: 5, label: 'Категория 2', isActiveEdit: true, count: 5 },
-    { id: 6, label: 'Категория 3', isActiveEdit: true, count: 5 },
-])
+const props = defineProps({
+    items: {
+        type: Array as () => DragTypes[],
+        required: true
+    }
+})
 
-const selectedTab = ref<Tab>(tabs.value[0])
-const draggedTab = ref<Tab | null>(null)
-const draggedOverTab = ref<Tab | null>(null)
+const { items } = toRefs(props)
+
+const selectedTab = ref<DragTypes>(items.value[0])
+const draggedTab = ref<DragTypes | null>(null)
+const draggedOverTab = ref<DragTypes | null>(null)
 const contextMenu = ref<{ visible: boolean, top: number, left: number, tabId: number | null }>({ visible: false, top: 0, left: 0, tabId: null })
 const draggableTabId = ref<number | null>(null)
 
-const onDragStart = (tab: Tab, event: DragEvent) => {
+const onDragStart = (tab: DragTypes, event: DragEvent) => {
     if (tab.id === draggableTabId.value) {
         draggedTab.value = tab
         event.dataTransfer.effectAllowed = 'move'
@@ -97,7 +95,7 @@ const onDragStart = (tab: Tab, event: DragEvent) => {
     }
 }
 
-const onDragOver = (event: DragEvent, tab: Tab) => {
+const onDragOver = (event: DragEvent, tab: DragTypes) => {
     event.preventDefault()
     draggedOverTab.value = tab
 }
@@ -106,15 +104,15 @@ const onDragLeave = () => {
     draggedOverTab.value = null
 }
 
-const onDrop = (event: DragEvent, tab: Tab) => {
+const onDrop = (event: DragEvent, tab: DragTypes) => {
     event.preventDefault()
     const draggedTabId = parseInt(event.dataTransfer.getData('tab-id'))
-    const draggedTabIndex = tabs.value.findIndex(t => t.id === draggedTabId)
-    const targetTabIndex = tabs.value.findIndex(t => t.id === tab.id)
+    const draggedTabIndex = items.value.findIndex(t => t.id === draggedTabId)
+    const targetTabIndex = items.value.findIndex(t => t.id === tab.id)
 
     if (draggedTabIndex !== -1 && targetTabIndex !== -1) {
-        const [movedTab] = tabs.value.splice(draggedTabIndex, 1)
-        tabs.value.splice(targetTabIndex, 0, movedTab)
+        const [movedTab] = items.value.splice(draggedTabIndex, 1)
+        items.value.splice(targetTabIndex, 0, movedTab)
     }
 
     draggedTab.value = null
@@ -122,7 +120,7 @@ const onDrop = (event: DragEvent, tab: Tab) => {
     draggableTabId.value = null
 }
 
-const showContextMenu = (event: MouseEvent, tab: Tab) => {
+const showContextMenu = (event: MouseEvent, tab: DragTypes) => {
     contextMenu.value.visible = true
     contextMenu.value.top = event.clientY + 20
     contextMenu.value.left = event.clientX - 100
@@ -138,7 +136,7 @@ const showContextMenu = (event: MouseEvent, tab: Tab) => {
     window.addEventListener('click', handleClickOutside)
 }
 
-const onTabClick = (tab: Tab) => {
+const onTabClick = (tab: DragTypes) => {
     selectedTab.value = tab
     if (draggableTabId.value !== tab.id) {
         draggableTabId.value = null

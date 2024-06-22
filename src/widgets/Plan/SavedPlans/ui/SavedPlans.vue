@@ -5,12 +5,12 @@
 			@action="onSavedPlanActionButtonClicked"
 			@update:label="handleParentLabelUpdate"
 		/>
-		<RecipesList v-if="selectedLabel == 'Коллекции'" />
+		<RecipesList v-if="selectedLabel == 'Коллекции' || selectedLabel === 'Collections'" />
 		<ContentBlock
-			v-else-if="selectedLabel == 'Мои рецепты'"
+			v-else-if="selectedLabel == 'Мои рецепты' || selectedLabel === 'My recipes'"
 			image="../../../../public/image/CatIllustration.png"
-			text="Здесь будут храниться рецепты, которые вы создали"
-			button-text="Создать свой рецепт"
+			:text="t('createdText')"
+			:button-text="t('createdRecipe')"
 			button-class="bg-[#FFA767] text-white flex-row-reverse"
 			button-icon="green"
 		/>
@@ -21,14 +21,19 @@
 import { PlansTab, usePlansStore } from 'entities/Plan'
 import { Plan } from 'entities/Plan/types'
 import { ref } from 'vue'
-import RecipesList from '../../../../entities/Recipes/ui/RecipesList.vue'
+import RecipesList from '@/entities/Recipes/ui/RecipesList.vue'
 import { ContentBlock } from '@/shared/components/ContentBlock'
+
+import { useTranslation } from '@/shared/lib/i18n'
+import Localization from './Plan.localization.json'
+const { t } = useTranslation(Localization)
+
 const plansStore = usePlansStore()
 plansStore.fetchSavedPlans()
 
 const selectedPlan = ref<Plan | null>(null)
 const isActionsDialogVisible = ref<boolean>(false)
-const selectedLabel = ref<string>('Коллекции')
+const selectedLabel = ref<string>(t('collections'))
 
 const onSavedPlanActionButtonClicked = (plan: Plan) => {
     selectedPlan.value = plan

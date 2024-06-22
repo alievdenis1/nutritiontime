@@ -1,5 +1,8 @@
 <template>
-	<div class="grid">
+	<div
+		ref="target"
+		class="grid"
+	>
 		<header class="flex items-center gap-5 w-full justify-between	">
 			<img
 				alt="Logo"
@@ -52,27 +55,18 @@
 import { ref } from 'vue'
 import { useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
-// import WebApp from '@twa-dev/sdk'
+import { onClickOutside } from '@vueuse/core'
 
-// import { useTWA } from 'entities/Session/api'
-// import { useAuthButton } from 'entities/Session/api'
 import { IconWallet, IconArrow } from '@/shared/components/Icon'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
 
+const target = ref(null)
+
 const languageDropDownOpen = ref(false)
 
-// const shortenAddress = (str: string) => str.length > 10 ? `${str.substr(0, 4)}…${str.substr(-4)}` : str
-
-// onMounted(() => {
-//   useAuthButton()
-//   useTWA()
-//   let user = WebApp.initDataUnsafe.user
-//   if (user && user.language_code) {
-//     localeStore.setLocale(user.language_code as Locales)
-//   }
-// })
+onClickOutside(target, () => languageDropDownOpen.value = false)
 </script>
 
 <style lang="scss" scoped>

@@ -1,10 +1,16 @@
 {
     "ru": {
         "todayPlan": "План на сегодня",
-        "breakfast": "Завтрак"
+        "breakfast": "Завтрак",
+        "liked": "которые вам понравились",
+        "created": "которые вы создали",
+        "goodies": "К вкусняшкам!"
     },
     "en": {
         "todayPlan": "Plan for today",
-        "breakfast": "Breakfast"
+        "breakfast": "Breakfast",
+        "liked": "which you liked",
+        "created": "which you created",
+        "goodies": "To the goodies!"
     }
 }

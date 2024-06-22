@@ -70,8 +70,8 @@
 		<ContentBlock
 			v-if="recipesData.length === 0"
 			image="../../../../public/image/start-screen-image.webp"
-			text="Здесь будут храниться рецепты, которые вам понравились"
-			button-text="К вкусняшкам!"
+			:text="t('liked')"
+			:button-text="t('goodies')"
 			button-class="bg-green-500 text-white"
 			button-icon="green"
 		/>
@@ -82,7 +82,9 @@
 import { ContentBlock } from '@/shared/components/ContentBlock'
 import { recipesData } from '../data/recipes.ts'
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-
+import { useTranslation } from '@/shared/lib/i18n'
+import Localization from './RecipesList.localization.json'
+const { t } = useTranslation(Localization)
 </script>
 
 <style scoped>

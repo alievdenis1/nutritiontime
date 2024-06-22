@@ -13,17 +13,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Tab } from './config'
+import { toRefs } from 'vue'
+import { CategoriesTypes } from './types'
 
-const tabs = ref<Tab[]>([
-	{ name: 'collections', label: 'Коллекции', isActiveTab: true },
-	{ name: 'my-recipes', label: 'Мои рецепты', isActiveTab: false }
-])
+const props = defineProps({
+	tabs: {
+		type: Array as () => CategoriesTypes[],
+		required: true
+	}
+})
+
+const { tabs } = toRefs(props)
 
 const emit = defineEmits(['update:label'])
 
-const selectTab = (tab: Tab) => {
+const selectTab = (tab: CategoriesTypes) => {
 	tabs.value.forEach(t => t.isActiveTab = false)
 	tab.isActiveTab = true
 	emit('update:label', tab.label)

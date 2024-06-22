@@ -1,0 +1,12 @@
+{
+    "ru": {
+        "createdText": "которые вы создали",
+        "createdRecipe": "Создать свой рецепт",
+        "collections" : "Коллекции"
+    },
+    "en": {
+        "createdText": "which you created",
+        "createdRecipe": "Create your own recipe",
+        "collections": "Collections"
+    }
+}

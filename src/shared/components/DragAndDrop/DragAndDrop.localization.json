@@ -1,0 +1,12 @@
+{
+    "ru": {
+        "edit": "Редактировать",
+        "move": "Переместить",
+        "delete":"Удалить"
+    },
+    "en": {
+        "edit": "Edit",
+        "move": "Move",
+        "delete": "delete"
+    }
+}

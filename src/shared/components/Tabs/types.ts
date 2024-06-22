@@ -1,4 +1,4 @@
-export interface Tab {
+export interface CategoriesTypes {
     name: string
     label: string
     isActiveTab: boolean
