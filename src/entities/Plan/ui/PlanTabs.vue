@@ -1,8 +1,12 @@
 <template>
-	<VTabs
-		:tabs="categoryTabs"
-		@update:label="handleTabChange"
-	/>
+	<div class="tabs">
+		<VTabs @update:label="handleTabChange">
+			Коллекции
+		</VTabs>
+		<VTabs @update:label="handleTabChange">
+			Мои рецепты
+		</VTabs>
+	</div>
 	<DragAndDrop
 		v-if="selectedLabel === 'Коллекции' || selectedLabel === 'Collections'"
 		class="mt-[16px] mb-[24px]"
@@ -56,4 +60,13 @@ watchEffect(() => {
 })
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.tabs {
+	display: flex;
+	justify-content: space-around;
+	background-color: #f3f3f3;
+	border-radius: 28px;
+	padding: 8px;
+	gap: 5px;
+}
+</style>

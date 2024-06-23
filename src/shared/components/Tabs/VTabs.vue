@@ -1,49 +1,31 @@
 <template>
-	<div class="tabs-container">
-		<div
-			v-for="tab in tabs"
-			:key="tab.name"
-			:class="['tab', { 'active-tab': tab.isActiveTab }]"
-			class="cursor-pointer flex-1 text-center px-4 py-2 rounded-lg transition-all"
-			@click="selectTab(tab)"
-		>
-			{{ tab.label }}
-		</div>
+	<div
+		class="tab"
+		:class="{ 'active-tab': isActive }"
+		@click="handleClick"
+	>
+		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { toRefs } from 'vue'
-import { CategoriesTypes } from './types'
+import { ref } from 'vue'
 
 const props = defineProps({
-	tabs: {
-		type: Array as () => CategoriesTypes[],
-		required: true
-	}
+	initialActive: Boolean
 })
 
-const { tabs } = toRefs(props)
+const emit  = defineEmits(['update:active'])
 
-const emit = defineEmits(['update:label'])
+const isActive = ref(props.initialActive)
 
-const selectTab = (tab: CategoriesTypes) => {
-	tabs.value.forEach(t => t.isActiveTab = false)
-	tab.isActiveTab = true
-	emit('update:label', tab.label)
+const handleClick = () => {
+	isActive.value = true
+	emit('update:active', { active: true })
 }
 </script>
 
 <style scoped lang="scss">
-.tabs-container {
-	display: flex;
-	justify-content: space-around;
-	background-color: #f3f3f3;
-	border-radius: 28px;
-	padding: 8px;
-	gap: 5px;
-}
-
 .tab {
 	display: flex;
 	justify-content: center;
