@@ -3,6 +3,9 @@ import vue from '@vitejs/plugin-vue'
 import eslint from 'vite-plugin-eslint'
 import { fileURLToPath, URL } from 'node:url'
 
+import tailwind from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
+
 // https://vitejs.dev/config/
 export default defineConfig({
 	base: '/nutritiolntime/',
@@ -11,8 +14,13 @@ export default defineConfig({
 	},
 	plugins: [
 		vue(),
-		eslint()
+		eslint(),
 	],
+	css: {
+		postcss: {
+			plugins: [tailwind(), autoprefixer()],
+		},
+	},
 	resolve: {
 		alias: {
 			'@': fileURLToPath(new URL('./src', import.meta.url)),
