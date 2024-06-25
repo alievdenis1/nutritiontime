@@ -1,49 +1,64 @@
 <template>
-	<div>
-		<plans-tab
-			class="mb-8"
-			@action="onSavedPlanActionButtonClicked"
-			@update:label="handleParentLabelUpdate"
-		/>
-		<RecipesList v-if="selectedLabel == 'Коллекции' || selectedLabel === 'Collections'" />
-		<ContentBlock
-			v-else-if="selectedLabel == 'Мои рецепты' || selectedLabel === 'My recipes'"
-			image="../../../../public/image/CatIllustration.png"
-			:text="t('createdText')"
-			:button-text="t('createdRecipe')"
-			button-class="bg-[#FFA767] text-white flex-row-reverse"
-			button-icon="green"
-		/>
-	</div>
+	<TabsMain default-value="collections">
+		<TabsList>
+			<TabsTrigger value="collections">
+				{{ t('collections') }}
+			</TabsTrigger>
+			<TabsTrigger value="recipes">
+				{{ t('recipes') }}
+			</TabsTrigger>
+		</TabsList>
+		<TabsContent value="collections">
+			<DragAndDrop :items="dragAndDropItems" />
+			<RecipesList :recipes-data="recipesData" />
+			<ContentBlock
+				v-if="recipesData.length === 0"
+				image="../../../../public/image/start-screen-image.webp"
+				:text="t('liked')"
+				:button-text="t('buttonCollection')"
+				button-class="bg-green-500 text-white"
+				:button-icon="IconArrowRight"
+			/>
+		</TabsContent>
+		<TabsContent value="recipes">
+			<ContentBlock
+				class="mt-[65px]"
+				image="../../../../public/image/CatIllustration.png"
+				:text="t('create')"
+				:button-text="t('buttonCreate')"
+				button-class="bg-[#FFA767] text-white flex-row-reverse"
+				:button-icon="IconPlus"
+			/>
+		</TabsContent>
+	</TabsMain>
 </template>
 
 <script setup lang="ts">
-import { PlansTab, usePlansStore } from 'entities/Plan'
-import { Plan } from 'entities/Plan/types'
-import { ref } from 'vue'
+import { usePlansStore } from 'entities/Plan'
 import RecipesList from '@/entities/Recipes/ui/RecipesList.vue'
 import { ContentBlock } from '@/shared/components/ContentBlock'
-
+import { recipesData } from '../data/recipes'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './Plan.localization.json'
+import { ref } from 'vue'
+import { DragAndDrop } from 'shared/components/DragAndDrop'
+import { DragTypes } from 'shared/components/DragAndDrop/types'
+import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { IconArrowRight, IconPlus } from 'shared/components/Icon'
+
 const { t } = useTranslation(Localization)
 
 const plansStore = usePlansStore()
 plansStore.fetchSavedPlans()
 
-const selectedPlan = ref<Plan | null>(null)
-const isActionsDialogVisible = ref<boolean>(false)
-const selectedLabel = ref<string>(t('collections'))
-
-const onSavedPlanActionButtonClicked = (plan: Plan) => {
-    selectedPlan.value = plan
-	isActionsDialogVisible.value = true
-}
-const handleParentLabelUpdate = (label: string) => {
-	selectedLabel.value = label
-	console.log('Label received from ParentComponent:', label)
-}
-
+const dragAndDropItems = ref<DragTypes[]>([
+	{ id: 1, label: 'Мне понравилось', isActiveEdit: false, count: 5 },
+	{ id: 2, label: 'Вкусняшки', isActiveEdit: true, count: 5 },
+	{ id: 3, label: 'Красивое', isActiveEdit: true, count: 5 },
+	{ id: 4, label: 'Красивое', isActiveEdit: true, count: 5 },
+	{ id: 5, label: 'Красивое', isActiveEdit: true, count: 5 },
+	{ id: 6, label: 'Красивое', isActiveEdit: true, count: 5 },
+])
 </script>
 
 <style lang="scss" scoped></style>

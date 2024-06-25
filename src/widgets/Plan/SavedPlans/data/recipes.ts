@@ -1,6 +1,6 @@
 import { RecipeList } from '../types/index'
 
-export const recipesData: RecipeList =[
+export const recipesData: RecipeList = [
     {
         'id': 1,
         'image': '../../../../public/image/recipes1.png',

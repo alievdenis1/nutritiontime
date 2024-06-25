@@ -1,14 +1,14 @@
 <template>
-	<div class="mb-[80px]">
+	<div
+		v-if="recipesData && recipesData.length > 0"
+		class="mb-[80px] mt-[24px]"
+	>
 		<div
 			v-for="recipe in recipesData"
 			:key="recipe.id"
 			class="max-w-md mx-auto rounded-[20px] overflow-hidden md:max-w-2xl mb-4"
 		>
-			<div
-				v-if="recipesData.length !== 0"
-				class="flex  border-custom"
-			>
+			<div class="flex  border-custom">
 				<div class="relative">
 					<img
 						class="h-48 w-48 object-cover rounded-[20px]"
@@ -67,24 +67,18 @@
 				</div>
 			</div>
 		</div>
-		<ContentBlock
-			v-if="recipesData.length === 0"
-			image="../../../../public/image/start-screen-image.webp"
-			:text="t('liked')"
-			:button-text="t('goodies')"
-			button-class="bg-green-500 text-white"
-			button-icon="green"
-		/>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ContentBlock } from '@/shared/components/ContentBlock'
-import { recipesData } from '../data/recipes.ts'
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './RecipesList.localization.json'
-const { t } = useTranslation(Localization)
+import { RecipeItem } from '../types/index'
+
+withDefaults(defineProps<{
+	recipesData: Array<RecipeItem>
+}>(), {
+	recipesData: () => []
+})
 </script>
 
 <style scoped>

@@ -98,8 +98,6 @@ const onDragStart = (tab: DragTypes, event: DragEvent) => {
     if (dataTransfer) {
       dataTransfer.effectAllowed = 'move'
       dataTransfer.setData('tab-id', tab.id.toString())
-    } else {
-      console.error('DragEvent\'s dataTransfer is null.')
     }
   }
 }
@@ -143,11 +141,9 @@ const onDrop = (event: DragEvent, tab: DragTypes) => {
 
 const onTabClick = (tab: DragTypes) => {
   selectedTab.value = tab
-  console.log('Tab clicked:', draggedActive.value)
   if (draggableTabId.value !== tab.id) {
     draggableTabId.value = null
     draggedActive.value = false
-    console.log('Tab clicked:', draggedActive.value)
   }
 }
 

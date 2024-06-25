@@ -1,12 +1,18 @@
 {
     "ru": {
-        "createdText": "которые вы создали",
-        "createdRecipe": "Создать свой рецепт",
-        "collections" : "Коллекции"
+        "liked": "которые вам понравились",
+        "create": "которые вы создали",
+        "buttonCollection": "К вкусняшкам!",
+        "buttonCreate": "Создать свой рецепт",
+        "collections": "Коллекции",
+        "recipes": "Мои рецепты"
     },
     "en": {
-        "createdText": "which you created",
-        "createdRecipe": "Create your own recipe",
-        "collections": "Collections"
+        "liked": "which you liked",
+        "create": "which you created",
+        "buttonCollection": "To the goodies!",
+        "buttonCreate": "Create your own recipe",
+        "collections": "Collections",
+        "recipes": "My recipes"
     }
 }
