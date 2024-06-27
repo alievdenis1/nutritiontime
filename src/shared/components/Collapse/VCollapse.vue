@@ -103,10 +103,10 @@
 import { computed, ref, toRefs } from 'vue'
 import Localization from './VCollapse.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
-import { Plan } from '@/entities/Plan/types'
+import { Plan } from '@/entities/Plan/types/typesPlan'
 import VInput from '../Input/VInput.vue'
 import IconArrow from '../Icon/IconArrow.vue'
-import { IconArrowRounded, IconFavorite, IconPlusRounded } from '../Icon'
+import { IconArrowRounded, IconPlusRounded } from '../Icon'
 const modelValue = ref('')
 
 const { t } = useTranslation(Localization)

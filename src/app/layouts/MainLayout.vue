@@ -1,5 +1,5 @@
 <template>
-	<main class="layout p-[25px] bg-[#F5F5F5] pb-[50px]">
+	<main :class="`layout p-[25px] pb-[50px] bg-mainBg`">
 		<header-widget class="mb-[30px]" />
 
 		<slot />
@@ -10,4 +10,5 @@
 <script setup lang="ts">
 import { HeaderWidget } from 'widgets/header'
 import { FooterWidget } from 'widgets/footer'
+
 </script>

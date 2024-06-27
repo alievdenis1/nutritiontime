@@ -10,18 +10,22 @@
 			cx="10"
 			cy="10"
 			r="9.5"
-			stroke="white"
+			:stroke="iconColor"
 		/>
 		<path
 			d="M16.5 17.5L21.5 22.5"
-			stroke="white"
+			:stroke="iconColor"
 			stroke-linecap="round"
 		/>
 	</svg>
 </template>
 
 <script setup lang="ts">
-
+withDefaults(defineProps<{
+	iconColor: string,
+}>(), {
+	iconColor: '#9F9FA0'
+})
 </script>
 
 <style scoped>

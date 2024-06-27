@@ -31,7 +31,7 @@
 							class="text-[#AB9F80] cursor-pointer"
 							@click="toggleLike"
 						>
-							<icon-favorite :icon-fill="iconFill" />
+							<icon-favorites :icon-fill="iconFill" />
 						</button>
 					</div>
 				</div>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconArrowRounded, IconFavorite } from 'shared/components/Icon'
+import { IconArrowRounded, IconFavorites } from 'shared/components/Icon'
 import { ref } from 'vue'
 import Localization from './RecipeComments.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'

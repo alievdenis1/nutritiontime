@@ -1,4 +1,4 @@
-import { Plan } from '../types'
+import { Plan } from '../types/typesPlan'
 import { emulateRequest } from 'shared/lib/debug'
 import { DEBUG_DATA } from '../@debug'
 

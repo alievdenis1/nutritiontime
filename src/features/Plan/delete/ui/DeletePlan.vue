@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, toRefs } from 'vue'
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import Localization from './DeletePlan.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import DeleteModal from './DeleteModal.vue'

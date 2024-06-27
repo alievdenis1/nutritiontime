@@ -9,7 +9,7 @@
 					class="text-[#AB9F80] cursor-pointer"
 					@click="toggleLike(item.id)"
 				>
-					<icon-favorite :icon-fill="item.liked ? 'nonzero':'evenodd'" />
+					<icon-favorites :icon-fill="item.liked ? 'nonzero':'evenodd'" />
 				</button>
 			</div>
 			<div class="flex items-center gap-2">
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { IconFavorite, IconForward, IconPlusRounded, IconTrash } from 'shared/components/Icon'
+import { IconFavorites, IconForward, IconPlusRounded, IconTrash } from 'shared/components/Icon'
 import Localization from './RecipeRate.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { ref } from 'vue'
