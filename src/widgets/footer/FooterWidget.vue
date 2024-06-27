@@ -1,5 +1,5 @@
 <template>
-	<div class="grid w-full px-[26px] mb-[10px]">
+	<div class="grid w-full px-[16px] mb-[10px]">
 		<footer
 			class="flex py-[8px] px-[16px] items-center gap-[16px] justify-between  rounded-[100px] bg-white shadow-custom"
 		>
@@ -67,7 +67,7 @@ const searchIconColor = computed(() => {
 	justify-content: center;
 	align-items: center;
 	display: flex;
-	padding: 7px 33px;
+	padding: 7px 0;
 	flex-direction: column;
 }
 </style>
