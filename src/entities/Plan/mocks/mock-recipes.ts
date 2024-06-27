@@ -1,6 +1,6 @@
-import { RecipeList } from '../types/index'
+import { RecipeList } from '../ui/type'
 
-export const recipesData: RecipeList = [
+export const mockRecipes: RecipeList = [
     {
         'id': 1,
         'image': '../../../../public/image/recipes1.png',

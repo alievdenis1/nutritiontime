@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ref, toRefs, watchEffect } from 'vue'
 import { useDeletePlanStore } from '../model'
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import Localization from './DeleteModal.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { IconTrash } from '@/shared/components/Icon'

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import { deletePlan } from '../api'
 import { ElMessage } from 'element-plus'
 

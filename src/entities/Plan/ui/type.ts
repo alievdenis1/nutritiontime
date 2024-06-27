@@ -17,4 +17,3 @@ export interface RecipeItem {
 }
 
 export type RecipeList = RecipeItem[]
-

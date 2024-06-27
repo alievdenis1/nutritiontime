@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { ref, toRefs, watchEffect } from 'vue'
 import { useCopyPlanStore } from 'features/Plan/copy'
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import { VDivider } from 'shared/components/Divider'
 import { EditPlan } from 'features/Plan/edit'
 import { DeletePlan, useDeletePlanStore } from 'features/Plan/delete'

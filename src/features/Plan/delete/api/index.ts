@@ -1,4 +1,4 @@
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import { emulateRequest } from 'shared/lib/debug'
 
 export const deletePlan = (planId: Plan['id']) => {

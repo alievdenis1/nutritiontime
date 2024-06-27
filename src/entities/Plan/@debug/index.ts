@@ -1,4 +1,4 @@
-import { Plan } from '../types'
+import { Plan } from '../types/typesPlan'
 
 export const DEBUG_DATA = {
 	SAVED_PLANS_LIST: [

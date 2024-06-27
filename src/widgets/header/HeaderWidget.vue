@@ -1,8 +1,5 @@
 <template>
-	<div
-		ref="target"
-		class="grid"
-	>
+	<div class="grid">
 		<header class="flex items-center gap-5 w-full justify-between	">
 			<img
 				alt="Logo"
@@ -30,6 +27,7 @@
 					/>
 					<div
 						v-if="languageDropDownOpen"
+						ref="target"
 						class="language-dropdown"
 					>
 						<v-button

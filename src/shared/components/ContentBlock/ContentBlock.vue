@@ -23,13 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { DefineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './ContentBlock.localization.json'
 const { t } = useTranslation(Localization)
 
 defineProps<{
-	buttonIcon: DefineComponent,
+	buttonIcon: ReturnType<typeof defineComponent>,
 	buttonClass: string,
 	buttonText: string,
 	text: string,

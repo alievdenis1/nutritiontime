@@ -2,17 +2,25 @@
 	<div class="tabs-container">
 		<div class="tabs-wrapper">
 			<div
-				v-for="(tab) in items"
-				ref="target"
+				v-for="tab in items"
 				:key="tab.id"
+				:data-id="tab.id"
 				class="tab-column rounded-[100px] px-[16px] py-[12px]"
-				:class="{ 'active-tab': tab.id === selectedTab.id, 'draggable-tab': tab.id === draggableTabId, 'highlight-draggable': tab.id === draggableTabId && draggedActive}"
+				:class="{
+					'active-tab': tab.id === selectedTab.id,
+					'draggable-tab': tab.id === draggableTabId,
+					'highlight-draggable': tab.id === draggableTabId && draggedActive,
+					'touch-active': tab.id === draggableTabId && draggedActive,
+				}"
 				:draggable="tab.id === draggableTabId && draggedActive"
 				@dragstart="onDragStart(tab, $event)"
-				@dragover.prevent="onDragOver($event, tab)"
+				@dragover.prevent="onDragOver(tab)"
 				@dragleave="onDragLeave"
 				@drop="onDrop($event, tab)"
 				@click="onTabClick(tab)"
+				@touchstart="onTouchStart(tab, $event)"
+				@touchmove="onTouchMove($event)"
+				@touchend="onTouchEnd"
 			>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
@@ -56,8 +64,8 @@
 
 <script setup lang="ts">
 import { ref, toRefs } from 'vue'
-import { IconPlus, IconKebab, IconBin, IconMove, IconEdit } from 'shared/components/Icon'
 import { DragTypes } from './types'
+import { IconPlus, IconKebab, IconBin, IconMove, IconEdit } from 'shared/components/Icon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,10 +73,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
-import { onClickOutside } from '@vueuse/core'
-
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './DragAndDrop.localization.json'
+
 const { t } = useTranslation(Localization)
 
 const props = defineProps({
@@ -80,16 +87,13 @@ const props = defineProps({
 
 const { items } = toRefs(props)
 
-const selectedTab = ref<DragTypes>(items.value[0])
+const selectedTab = ref(items.value[0])
 const draggedTab = ref<DragTypes | null>(null)
 const draggedOverTab = ref<DragTypes | null>(null)
-const draggedActive = ref<boolean>(false)
-
-const target = ref(null)
-
-onClickOutside(target, () => draggedActive.value = false)
-
+const draggedActive = ref(false)
 const draggableTabId = ref<number | null>(null)
+let touchStartX = 0
+let touchStartY = 0
 
 const onDragStart = (tab: DragTypes, event: DragEvent) => {
   if (tab.id === draggableTabId.value) {
@@ -102,8 +106,7 @@ const onDragStart = (tab: DragTypes, event: DragEvent) => {
   }
 }
 
-const onDragOver = (event: DragEvent, tab: DragTypes) => {
-  event.preventDefault()
+const onDragOver = (tab: DragTypes) => {
   draggedOverTab.value = tab
 }
 
@@ -112,8 +115,6 @@ const onDragLeave = () => {
 }
 
 const onDrop = (event: DragEvent, tab: DragTypes) => {
-  event.preventDefault()
-
   const dataTransfer = event.dataTransfer
   if (!dataTransfer) {
     console.error('DragEvent\'s dataTransfer is null.')
@@ -126,8 +127,8 @@ const onDrop = (event: DragEvent, tab: DragTypes) => {
     return
   }
 
-  const draggedTabIndex = items.value.findIndex(t => t.id === draggedTabId)
-  const targetTabIndex = items.value.findIndex(t => t.id === tab.id)
+  const draggedTabIndex = items.value.findIndex((t) => t.id === draggedTabId)
+  const targetTabIndex = items.value.findIndex((t) => t.id === tab.id)
 
   if (draggedTabIndex !== -1 && targetTabIndex !== -1) {
     const [movedTab] = items.value.splice(draggedTabIndex, 1)
@@ -137,6 +138,7 @@ const onDrop = (event: DragEvent, tab: DragTypes) => {
   draggedTab.value = null
   draggedOverTab.value = null
   draggableTabId.value = null
+  draggedActive.value = false
 }
 
 const onTabClick = (tab: DragTypes) => {
@@ -151,9 +153,54 @@ const enableDragging = (tabId: number) => {
   draggedActive.value = true
   draggableTabId.value = tabId
 }
+
+const onTouchStart = (tab: DragTypes, event: TouchEvent) => {
+  if (tab.id === draggableTabId.value) {
+    draggedTab.value = tab
+    const touch = event.touches[0]
+    touchStartX = touch.clientX
+    touchStartY = touch.clientY
+  }
+}
+
+const onTouchMove = (event: TouchEvent) => {
+  if (!draggedTab.value) return
+  const touch = event.touches[0]
+  const deltaX = touch.clientX - touchStartX
+  const deltaY = touch.clientY - touchStartY
+  const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
+  if (element) {
+    element.style.transform = `translate(${deltaX}px, ${deltaY}px)`
+  }
+}
+
+const onTouchEnd = (event: TouchEvent) => {
+  if (!draggedTab.value) return
+  const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
+  if (element) {
+    element.style.transform = ''
+  }
+  const touch = event.changedTouches[0]
+  const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement
+  if (target && target.classList.contains('tab-column')) {
+    const targetTabId = target.getAttribute('data-id')
+    const targetTab = targetTabId ? items.value.find(tab => tab.id === Number(targetTabId)) : null
+    if (targetTab && draggedTab.value) {
+      onDrop(
+        {
+          dataTransfer: {
+            getData: () => draggedTab.value?.id.toString() || ''
+          }
+        } as unknown as DragEvent,
+        targetTab
+      )
+    }
+  }
+  draggedTab.value = null
+}
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .tabs-container {
   white-space: nowrap;
   display: flex;
@@ -175,6 +222,7 @@ const enableDragging = (tabId: number) => {
 .tabs-wrapper {
   display: flex;
   gap: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-column {
@@ -183,6 +231,7 @@ const enableDragging = (tabId: number) => {
   position: relative;
   z-index: 2;
   align-items: center;
+  -webkit-overflow-scrolling: touch;
 }
 
 .draggable-tab {
@@ -191,12 +240,12 @@ const enableDragging = (tabId: number) => {
 }
 
 .active-tab {
-  background-color: #319A6E1A;
-  color: #319A6E;
+  background-color: #319a6e1a;
+  color: #319a6e;
 }
 
 .highlight-draggable {
-  outline: 2px dashed #319A6E;
+  outline: 2px dashed #319a6e;
   outline-offset: -4px;
 }
 
@@ -205,7 +254,7 @@ const enableDragging = (tabId: number) => {
   border-radius: 8px;
   padding: 14px 16px;
   width: 160px;
-  border: 1px solid #1C1C1C0D;
+  border: 1px solid #1c1c1c0d;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -213,6 +262,10 @@ const enableDragging = (tabId: number) => {
   top: 40px;
   left: -80px;
   z-index: 1000;
+}
+
+.touch-active {
+  touch-action: none;
 }
 
 .menu-item {
@@ -236,6 +289,6 @@ const enableDragging = (tabId: number) => {
 }
 
 .span {
-  border: 0.2px solid #9F9FA0;
+  border: 0.2px solid #9f9fa0;
 }
 </style>

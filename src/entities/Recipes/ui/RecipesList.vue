@@ -11,7 +11,7 @@
 			<div class="flex  border-custom">
 				<div class="relative">
 					<img
-						class="h-48 w-48 object-cover rounded-[20px]"
+						class="h-[140px] w-[140px] object-cover rounded-[20px]"
 						:src="recipe.image"
 						alt="recipe image"
 					>
@@ -24,7 +24,7 @@
 
 				<div class="p-4 flex flex-col justify-between">
 					<div>
-						<h2 class="text-lg font-bold">
+						<h2 class="text-lg font-regular text-sm">
 							{{ recipe.title }}
 						</h2>
 					</div>
@@ -50,7 +50,7 @@
 				<div class="flex justify-center items-center">
 					<div class="flex justify-center items-center gap-[8px] mr-[20px]">
 						<img
-							class="h-10 w-10 rounded-full"
+							class="h-[20px] w-[20px]"
 							:src="recipe.author.profile_image"
 							alt="author image"
 						>
@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-import { RecipeItem } from '../types/index'
+import { RecipeItem } from '../../Plan/ui/type'
 
 withDefaults(defineProps<{
 	recipesData: Array<RecipeItem>

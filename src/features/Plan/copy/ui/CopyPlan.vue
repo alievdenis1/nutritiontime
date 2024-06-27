@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import { toRefs } from 'vue'
 import { useCopyPlanStore } from '../model'
 import { IconCopy } from 'shared/components/Icon'

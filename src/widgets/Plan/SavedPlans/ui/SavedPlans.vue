@@ -1,64 +1,13 @@
 <template>
-	<TabsMain default-value="collections">
-		<TabsList>
-			<TabsTrigger value="collections">
-				{{ t('collections') }}
-			</TabsTrigger>
-			<TabsTrigger value="recipes">
-				{{ t('recipes') }}
-			</TabsTrigger>
-		</TabsList>
-		<TabsContent value="collections">
-			<DragAndDrop :items="dragAndDropItems" />
-			<RecipesList :recipes-data="recipesData" />
-			<ContentBlock
-				v-if="recipesData.length === 0"
-				image="../../../../public/image/start-screen-image.webp"
-				:text="t('liked')"
-				:button-text="t('buttonCollection')"
-				button-class="bg-green-500 text-white"
-				:button-icon="IconArrowRight"
-			/>
-		</TabsContent>
-		<TabsContent value="recipes">
-			<ContentBlock
-				class="mt-[65px]"
-				image="../../../../public/image/CatIllustration.png"
-				:text="t('create')"
-				:button-text="t('buttonCreate')"
-				button-class="bg-[#FFA767] text-white flex-row-reverse"
-				:button-icon="IconPlus"
-			/>
-		</TabsContent>
-	</TabsMain>
+	<div>
+		<PlanTabMain />
+	</div>
 </template>
 
 <script setup lang="ts">
-import { usePlansStore } from 'entities/Plan'
-import RecipesList from '@/entities/Recipes/ui/RecipesList.vue'
-import { ContentBlock } from '@/shared/components/ContentBlock'
-import { recipesData } from '../data/recipes'
-import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './Plan.localization.json'
-import { ref } from 'vue'
-import { DragAndDrop } from 'shared/components/DragAndDrop'
-import { DragTypes } from 'shared/components/DragAndDrop/types'
-import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { IconArrowRight, IconPlus } from 'shared/components/Icon'
-
-const { t } = useTranslation(Localization)
-
-const plansStore = usePlansStore()
-plansStore.fetchSavedPlans()
-
-const dragAndDropItems = ref<DragTypes[]>([
-	{ id: 1, label: 'Мне понравилось', isActiveEdit: false, count: 5 },
-	{ id: 2, label: 'Вкусняшки', isActiveEdit: true, count: 5 },
-	{ id: 3, label: 'Красивое', isActiveEdit: true, count: 5 },
-	{ id: 4, label: 'Красивое', isActiveEdit: true, count: 5 },
-	{ id: 5, label: 'Красивое', isActiveEdit: true, count: 5 },
-	{ id: 6, label: 'Красивое', isActiveEdit: true, count: 5 },
-])
+import { PlanTabMain } from '@/entities/Plan/ui'
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+
+</style>

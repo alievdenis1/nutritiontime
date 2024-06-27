@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { copyPlan } from '../api'
-import { Plan } from 'entities/Plan/types'
+import { Plan } from 'entities/Plan/types/typesPlan'
 import { ElMessage } from 'element-plus'
 
 type State = {
