@@ -1,11 +1,11 @@
 <template>
 	<div>
-		<SavedPlans />
+		<SavedCollections />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { SavedPlans } from 'widgets/Plan/SavedPlans'
+import { SavedCollections } from 'widgets/Collection/SavedCollections'
 </script>
 
 <style lang="scss" scoped></style>
