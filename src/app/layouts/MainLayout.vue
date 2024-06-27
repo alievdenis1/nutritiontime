@@ -1,5 +1,5 @@
 <template>
-	<main :class="`layout p-[25px] pb-[50px] bg-[${BgColor.main}]`">
+	<main :class="`layout p-[25px] pb-[50px] bg-mainBg`">
 		<header-widget class="mb-[30px]" />
 
 		<slot />
@@ -10,5 +10,5 @@
 <script setup lang="ts">
 import { HeaderWidget } from 'widgets/header'
 import { FooterWidget } from 'widgets/footer'
-import { BgColor } from './config'
+
 </script>

@@ -32,6 +32,7 @@ export default {
         sans: ['Roboto', 'sans-serif']
       },
       colors: {
+        mainBg: '#FCFCFC',
         transparent: 'transparent',
         black: '#000000',
         white: '#FFFFFF',
