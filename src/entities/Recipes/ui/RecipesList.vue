@@ -6,7 +6,7 @@
 		<div
 			v-for="recipe in recipesData"
 			:key="recipe.id"
-			class="max-w-md mx-auto rounded-[20px] overflow-hidden md:max-w-2xl mb-4"
+			class="max-w-md mx-auto rounded-[20px] overflow-hidden md:max-w-2xl mb-4 px-[2px] py-[2px]"
 		>
 			<div class="flex  border-custom">
 				<div class="relative">

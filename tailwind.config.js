@@ -37,6 +37,7 @@ export default {
         lightGray: '#F3F3F3',
         darkGray: '#1c1c1c',
         transparent: 'transparent',
+        gray:'#9F9FA0',
         orange: '#FFA767',
         black: '#000000',
         white: '#FFFFFF',
@@ -49,7 +50,6 @@ export default {
           DEFAULT: '0069A5',
           100: '#019FB5'
         },
-        grey: '#808080',
         borderRadius: {
           DEFAULT: '15px',
           none: 'none'

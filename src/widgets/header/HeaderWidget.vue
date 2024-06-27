@@ -22,7 +22,7 @@
 				>
 					{{ t('lang') }}
 					<IconArrow
-						:icon-color="'bg-black'"
+						:icon-color="'#1C1C1C'"
 						:class="{ 'rotate-180': languageDropDownOpen }"
 					/>
 					<div

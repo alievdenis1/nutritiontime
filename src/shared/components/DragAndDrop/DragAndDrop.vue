@@ -51,7 +51,7 @@
 					class="w-[22px]"
 				/>
 				<div>{{ tab.label }}</div>
-				<div class="ml-[6px]">
+				<div class="ml-[6px] text-gray">
 					{{ tab.count }}
 				</div>
 			</div>
