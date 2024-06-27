@@ -1,1 +1,0 @@
-export { default as SuggestedRecipes } from './SuggestedRecipes.vue'

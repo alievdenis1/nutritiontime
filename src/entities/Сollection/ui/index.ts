@@ -1,0 +1,1 @@
+export { default as PlanTabMain } from './CollectionTabMain.vue'

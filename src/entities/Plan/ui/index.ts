@@ -1,1 +1,0 @@
-export { default as PlanTabMain } from './PlanTabMain.vue'

@@ -1,1 +1,0 @@
-export { default as SliderList } from './SliderList.vue'

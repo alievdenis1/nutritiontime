@@ -103,7 +103,7 @@
 import { computed, ref, toRefs } from 'vue'
 import Localization from './VCollapse.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
-import { Plan } from '@/entities/Plan/types/typesPlan'
+import { Collection } from 'entities/Сollection/types/typesCollection.ts'
 import VInput from '../Input/VInput.vue'
 import IconArrow from '../Icon/IconArrow.vue'
 import { IconArrowRounded, IconPlusRounded } from '../Icon'
@@ -117,7 +117,7 @@ defineEmits<{
 }>()
 
 const props = withDefaults(defineProps<{
-	data: Plan[],
+	data: Collection[],
 	title: string,
 	titleKey?: string,
 	idKey?: string

@@ -35,14 +35,7 @@
 			<h3 class="font-medium text-center text-[#735F2B]">
 				Or choose from the suggested ones
 			</h3>
-			<SuggestedRecipes
-				:recipes="suggestedRecipes"
-			/>
 		</div>
-
-		<TagsList
-			:tags="tags"
-		/>
 
 		<v-button
 			class="generate-button w-[235px] h-[54px] self-center"
@@ -54,22 +47,20 @@
 
 <script setup lang="ts">
 import { IconGpt, IconPen } from '@/shared/components/Icon'
-import { SuggestedRecipes } from 'entities/create-recipe-gpt/ui/suggested-recipes'
-import { TagsList } from 'entities/create-recipe-gpt/ui/tags-list'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-const suggestedRecipes = [
-	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 },
-	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 },
-	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 }
-]
-
-const tags = [
-	{ id:1, name: '#Italian' },
-	{ id:2, name: '#Chicken' }
-]
+//
+// const suggestedRecipes = [
+// 	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 },
+// 	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 },
+// 	{ id:1, title: 'Soup with cats', img:'/image/suggested-placeholder.png', desc: 'text', time: 30, kkal: 150 }
+// ]
+//
+// const tags = [
+// 	{ id:1, name: '#Italian' },
+// 	{ id:2, name: '#Chicken' }
+// ]
 </script>
 
 <style scoped>

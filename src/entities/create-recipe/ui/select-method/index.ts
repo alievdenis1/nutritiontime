@@ -1,1 +1,0 @@
-export { default as SelectMethod } from './SelectMethod.vue'
