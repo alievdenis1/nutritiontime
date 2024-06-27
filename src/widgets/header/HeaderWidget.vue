@@ -22,7 +22,7 @@
 				>
 					{{ t('lang') }}
 					<IconArrow
-						:icon-color="'#000'"
+						:icon-color="'bg-black'"
 						:class="{ 'rotate-180': languageDropDownOpen }"
 					/>
 					<div
@@ -31,13 +31,13 @@
 						class="language-dropdown"
 					>
 						<v-button
-							:class="{ 'active': localeStore.currentLocale == 'ru' }"
+							:class="{ 'active': localeStore.currentLocale === 'ru' }"
 							@click="localeStore.setLocale('ru')"
 						>
 							RUS
 						</v-button>
 						<v-button
-							:class="{ 'active': localeStore.currentLocale == 'en' }"
+							:class="{ 'active': localeStore.currentLocale === 'en' }"
 							@click="localeStore.setLocale('en')"
 						>
 							ENG

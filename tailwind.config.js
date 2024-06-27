@@ -33,7 +33,11 @@ export default {
       },
       colors: {
         mainBg: '#FCFCFC',
+        forestGreen: '#319A6E',
+        lightGray: '#F3F3F3',
+        darkGray: '#1c1c1c',
         transparent: 'transparent',
+        orange: '#FFA767',
         black: '#000000',
         white: '#FFFFFF',
         brown: '#968D7D',

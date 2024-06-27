@@ -16,7 +16,7 @@
 						alt="recipe image"
 					>
 					<div
-						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-[#FFFFFF] bg-[#319A6E] rounded-[100px]"
+						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-white bg-forestGreen rounded-[100px]"
 					>
 						{{ recipe.rating }}
 					</div>

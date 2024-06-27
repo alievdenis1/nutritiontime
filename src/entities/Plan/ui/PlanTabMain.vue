@@ -26,7 +26,7 @@
 				image="../../../../public/image/CatIllustration.png"
 				:text="t('create')"
 				:button-text="t('buttonCreate')"
-				button-class="bg-[#FFA767] text-white flex-row-reverse"
+				button-class="bg-orange text-white flex-row-reverse"
 				:button-icon="IconPlus"
 			/>
 		</TabsContent>

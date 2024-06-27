@@ -1,3 +1,10 @@
+<template>
+	<DropdownMenuSeparator
+		v-bind="delegatedProps"
+		:class="cn('-mx-1 my-1 h-px bg-slate-100 dark:bg-slate-800', props.class)"
+	/>
+</template>
+
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
 import {
@@ -17,10 +24,3 @@ const delegatedProps = computed(() => {
 })
 </script>
 
-<template>
-	<DropdownMenuSeparator
-		v-bind="delegatedProps"
-		:class="cn('-mx-1 my-1 h-px bg-slate-100 dark:bg-slate-800', props.class)"
-	/>
-</template>
-@/shared/lib/utils/utils

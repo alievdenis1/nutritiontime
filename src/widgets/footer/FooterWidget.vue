@@ -1,7 +1,7 @@
 <template>
 	<div class="grid w-full px-[26px] mb-[10px]">
 		<footer
-			class="flex py-[8px] px-[16px] items-center gap-[16px] justify-between  rounded-[100px] bg-[#FFFFFF] shadow-custom"
+			class="flex py-[8px] px-[16px] items-center gap-[16px] justify-between  rounded-[100px] bg-white shadow-custom"
 		>
 			<v-button
 				:class="{ 'active': isActive('/') }"
@@ -12,7 +12,7 @@
 				{{ t('home') }}
 			</v-button>
 			<v-button
-				class="cursor-pointer p-[14.5px] bg-[#FFA767] rounded-[50%]"
+				class="cursor-pointer p-[14.5px] bg-orange rounded-[50%]"
 				@click="router.push('/create-recipe')"
 			>
 				<icon-plus :icon-color="'#FFFFFF'" />

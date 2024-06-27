@@ -1,3 +1,14 @@
+<template>
+	<DropdownMenuPortal>
+		<DropdownMenuContent
+			v-bind="forwarded"
+			:class="cn('z-50 min-w-32 overflow-hidden  rounded-[16px] border border-slate-200 bg-white p-1 text-slate-950 shadow-md data-[state=open]:animate-in dat', props.class)"
+		>
+			<slot />
+		</DropdownMenuContent>
+	</DropdownMenuPortal>
+</template>
+
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
 import {
@@ -25,14 +36,3 @@ const delegatedProps = computed(() => {
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
-
-<template>
-	<DropdownMenuPortal>
-		<DropdownMenuContent
-			v-bind="forwarded"
-			:class="cn('z-50 min-w-32 overflow-hidden  rounded-[16px] border border-slate-200 bg-white p-1 text-slate-950 shadow-md data-[state=open]:animate-in dat', props.class)"
-		>
-			<slot />
-		</DropdownMenuContent>
-	</DropdownMenuPortal>
-</template>

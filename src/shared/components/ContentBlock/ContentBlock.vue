@@ -11,7 +11,7 @@
 		</div>
 		<button
 			:class="buttonClass"
-			class="px-[32px] py-[10px] rounded-lg font-semibold flex items-center justify-center gap-[8px] transition duration-300 hover:bg-opacity-90 bg-[#319A6E] rounded-[20px] cursor-pointer"
+			class="px-[32px] py-[10px] rounded-lg font-semibold flex items-center justify-center gap-[8px] transition duration-300 hover:bg-opacity-90 rounded-[20px] cursor-pointer"
 		>
 			<div>{{ buttonText }}</div>
 			<component

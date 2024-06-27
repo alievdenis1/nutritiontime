@@ -56,7 +56,7 @@
 				</div>
 			</div>
 		</div>
-		<v-button class="cursor-pointer px-[13px] py-[13px] rounded-[100px] bg-[#F3F3F3] ml-[8px]">
+		<v-button class="cursor-pointer px-[13px] py-[13px] rounded-[100px] bg-lightGray ml-[8px]">
 			<IconPlus :icon-color="'#319A6E'" />
 		</v-button>
 	</div>
@@ -200,7 +200,7 @@ const onTouchEnd = (event: TouchEvent) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tabs-container {
   white-space: nowrap;
   display: flex;
@@ -209,14 +209,14 @@ const onTouchEnd = (event: TouchEvent) => {
   -ms-overflow-style: none;
   scrollbar-width: none;
   overflow-y: auto;
-}
 
-.tabs-container.visible {
-  overflow-y: visible;
-}
+  &.visible {
+    overflow-y: visible;
+  }
 
-.tabs-container::-webkit-scrollbar {
-  display: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .tabs-wrapper {
@@ -232,21 +232,25 @@ const onTouchEnd = (event: TouchEvent) => {
   z-index: 2;
   align-items: center;
   -webkit-overflow-scrolling: touch;
-}
 
-.draggable-tab {
-  width: 100%;
-  cursor: pointer;
-}
+  &.draggable-tab {
+    width: 100%;
+    cursor: pointer;
+  }
 
-.active-tab {
-  background-color: #319a6e1a;
-  color: #319a6e;
-}
+  &.active-tab {
+    background-color: rgba(49, 154, 110, 0.1);
+    color: #319A6E;
+  }
 
-.highlight-draggable {
-  outline: 2px dashed #319a6e;
-  outline-offset: -4px;
+  &.highlight-draggable {
+    outline: 2px dashed #319A6E;
+    outline-offset: -4px;
+  }
+
+  &.touch-active {
+    touch-action: none;
+  }
 }
 
 .context-menu {
@@ -254,7 +258,7 @@ const onTouchEnd = (event: TouchEvent) => {
   border-radius: 8px;
   padding: 14px 16px;
   width: 160px;
-  border: 1px solid #1c1c1c0d;
+  border: 1px solid rgba(28, 28, 28, 0.05);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -262,10 +266,6 @@ const onTouchEnd = (event: TouchEvent) => {
   top: 40px;
   left: -80px;
   z-index: 1000;
-}
-
-.touch-active {
-  touch-action: none;
 }
 
 .menu-item {
@@ -277,10 +277,10 @@ const onTouchEnd = (event: TouchEvent) => {
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: 14px;
-}
 
-.menu-item .icon {
-  margin-right: 8px;
+  .icon {
+    margin-right: 8px;
+  }
 }
 
 .icon {
@@ -290,5 +290,13 @@ const onTouchEnd = (event: TouchEvent) => {
 
 .span {
   border: 0.2px solid #9f9fa0;
+}
+
+.v-button {
+  cursor: pointer;
+  padding: 13px;
+  border-radius: 100px;
+  background-color: #F3F3F3;
+  margin-left: 8px;
 }
 </style>
