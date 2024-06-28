@@ -13,7 +13,7 @@
 			<RecipesList :recipes-data="mockRecipes" />
 			<ContentBlock
 				v-if="mockRecipes.length === 0"
-				image="../../../../public/image/start-screen-image.webp"
+				:image="addPrefix('/image/start-screen-image.webp')"
 				:text="t('liked')"
 				:button-text="t('buttonCollection')"
 				button-class="bg-green-500 text-white"
@@ -23,7 +23,7 @@
 		<TabsContent value="recipes">
 			<ContentBlock
 				class="mt-[65px]"
-				image="../../../../public/image/CatIllustration.png"
+				:image="addPrefix('/image/CatIllustration.png')"
 				:text="t('create')"
 				:button-text="t('buttonCreate')"
 				button-class="bg-orange text-white flex-row-reverse"
@@ -37,7 +37,7 @@
 import { ref } from 'vue'
 import RecipesList from 'entities/Recipe/ui/RecipesList.vue'
 import { ContentBlock } from 'shared/components/ContentBlock'
-import { mockRecipes } from '../mocks/mock-recipes'
+import { mockRecipes, addPrefix } from '../mocks/mock-recipes'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './Collection.localization.json'
 import { DragAndDrop } from 'shared/components/DragAndDrop'
