@@ -13,7 +13,7 @@
 			<RecipesList :recipes-data="mockRecipes" />
 			<ContentBlock
 				v-if="mockRecipes.length === 0"
-				image="../../../../public/image/start-screen-image.webp"
+				:image="addPrefix('/image/start-screen-image.webp') "
 				:text="t('liked')"
 				:button-text="t('buttonCollection')"
 				button-class="bg-green-500 text-white"
@@ -23,7 +23,7 @@
 		<TabsContent value="recipes">
 			<ContentBlock
 				class="mt-[65px]"
-				image="../../../../public/image/CatIllustration.png"
+				:image="addPrefix('/image/CatIllustration.png')"
 				:text="t('create')"
 				:button-text="t('buttonCreate')"
 				button-class="bg-orange text-white flex-row-reverse"
@@ -44,7 +44,7 @@ import { DragAndDrop } from 'shared/components/DragAndDrop'
 import { DragTypes } from 'shared/components/DragAndDrop/types'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { IconArrowRight, IconPlus } from '@/shared/components/Icon'
-
+import { addPrefix } from '../mocks/mock-recipes'
 const { t } = useTranslation(Localization)
 
 const dragAndDropItems = ref<DragTypes[]>([

@@ -1,16 +1,21 @@
 import { RecipeList } from '../ui/type'
 
+export const addPrefix = (url: string) => {
+    const prefix = '/nutritiolntime'
+    return `${prefix}${url}`
+}
+
 export const mockRecipes: RecipeList = [
     {
         'id': 1,
-        'image': '/image/recipes1.png',
+        'image': addPrefix('/image/recipes1.png'),
         'title': 'Вкуснейший домашний бургер',
         'rating': '5.0',
         'time': '35 мин',
         'calories': '300 ккал',
         'author': {
             'name': 'Денис Алиев',
-            'profile_image': '/image/denis.svg'
+            'profile_image': addPrefix('/image/denis.svg')
         },
         'comments': 0,
         'bookmarked': false,
@@ -18,14 +23,14 @@ export const mockRecipes: RecipeList = [
     },
     {
         'id': 2,
-        'image': '/image/recipes1.png',
+        'image': addPrefix('/image/recipes1.png'),
         'title': 'Вкуснейший домашний бургер',
         'rating': '5.0',
         'time': '35 мин',
         'calories': '300 ккал',
         'author': {
             'name': 'Денис Алиев',
-            'profile_image': '/image/denis.svg'
+            'profile_image': addPrefix('/image/denis.svg')
         },
         'comments': 0,
         'bookmarked': false,
@@ -33,14 +38,14 @@ export const mockRecipes: RecipeList = [
     },
     {
         'id': 3,
-        'image': '/image/recipes1.png',
+        'image': addPrefix('/image/recipes1.png'),
         'title': 'Вкуснейший домашний бургер',
         'rating': '5.0',
         'time': '35 мин',
         'calories': '300 ккал',
         'author': {
             'name': 'Денис Алиев',
-            'profile_image': '/image/denis.svg'
+            'profile_image': addPrefix('/image/denis.svg')
         },
         'comments': 0,
         'bookmarked': false,
@@ -48,14 +53,14 @@ export const mockRecipes: RecipeList = [
     },
     {
         'id': 4,
-        'image': '/image/recipes1.png',
+        'image': addPrefix('/image/recipes1.png'),
         'title': 'Вкуснейший домашний бургер',
         'rating': '5.0',
         'time': '35 мин',
         'calories': '300 ккал',
         'author': {
             'name': 'Денис Алиев',
-            'profile_image': '/image/denis.svg'
+            'profile_image': addPrefix('/image/denis.svg')
         },
         'comments': 0,
         'bookmarked': false,
