@@ -63,8 +63,8 @@ import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'
 import WebApp from '@twa-dev/sdk'
 
-import { useTWA } from '../../entities/Session/api/useTWA'
-import { useAuthButton } from '../../entities/Session/api/useAuthButton'
+import { useTWA } from 'entities/Session/api/useTWA'
+import { useAuthButton } from 'entities/Session/api/useAuthButton'
 
 import { IconWallet, IconArrow } from '@/shared/components/Icon'
 
