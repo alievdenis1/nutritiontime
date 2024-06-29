@@ -9,19 +9,19 @@
 			</TabsTrigger>
 		</TabsList>
 		<TabsContent value="collections">
-			<DragAndDrop :items="dragAndDropItems" />
+			<VDragAndDrop :items="dragAndDropItems" />
 			<RecipesList :recipes-data="mockRecipes" />
-			<ContentBlock
+			<VContentBlock
 				v-if="mockRecipes.length === 0"
 				:image="addPrefix('/image/start-screen-image.webp')"
 				:text="t('liked')"
 				:button-text="t('buttonCollection')"
-				button-class="bg-green-500 text-white"
+				button-class="bg-forestGreen text-white"
 				:button-icon="IconArrowRight"
 			/>
 		</TabsContent>
 		<TabsContent value="recipes">
-			<ContentBlock
+			<VContentBlock
 				class="mt-[65px]"
 				:image="addPrefix('/image/CatIllustration.png')"
 				:text="t('create')"
@@ -36,11 +36,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import RecipesList from 'entities/Recipe/ui/RecipesList.vue'
-import { ContentBlock } from 'shared/components/ContentBlock'
+import { VContentBlock } from 'shared/components/ContentBlock'
 import { mockRecipes, addPrefix } from '../mocks/mock-recipes'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './Collection.localization.json'
-import { DragAndDrop } from 'shared/components/DragAndDrop'
+import { VDragAndDrop } from 'shared/components/DragAndDrop'
 import { DragTypes } from 'shared/components/DragAndDrop/types'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { IconArrowRight, IconPlus } from '@/shared/components/Icon'

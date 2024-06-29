@@ -74,7 +74,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './DragAndDrop.localization.json'
+import Localization from './VDragAndDrop.localization.json'
 
 const { t } = useTranslation(Localization)
 
@@ -229,7 +229,6 @@ const onTouchEnd = (event: TouchEvent) => {
   display: inline-flex;
   justify-content: center;
   position: relative;
-  z-index: 2;
   align-items: center;
   -webkit-overflow-scrolling: touch;
 

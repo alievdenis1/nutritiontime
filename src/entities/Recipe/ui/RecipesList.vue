@@ -73,10 +73,10 @@
 
 <script setup lang="ts">
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-import { RecipeItem } from 'entities/Сollection/ui/type'
+import { CollectionItem } from 'entities/Сollection/ui/type'
 
 withDefaults(defineProps<{
-	recipesData: Array<RecipeItem>
+	recipesData: Array<CollectionItem>
 }>(), {
 	recipesData: () => []
 })
