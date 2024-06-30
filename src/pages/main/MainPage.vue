@@ -1,10 +1,12 @@
 <template>
 	<div>
+		<header-widget class="mb-[30px]" />
 		<SavedCollections />
 	</div>
 </template>
 
 <script setup lang="ts">
+import { HeaderWidget } from 'widgets/header'
 import { SavedCollections } from 'widgets/Collection/SavedCollections'
 </script>
 

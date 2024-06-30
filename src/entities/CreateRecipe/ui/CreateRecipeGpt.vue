@@ -1,11 +1,11 @@
+
 <template>
 	<div>
-		<CreateRecipeGptForm />
+		gpt
 	</div>
 </template>
 
 <script setup lang="ts">
-import { CreateRecipeGptForm } from 'features/CreateRecipeGpt/ui'
 
 </script>
 
