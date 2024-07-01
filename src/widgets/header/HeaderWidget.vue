@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'

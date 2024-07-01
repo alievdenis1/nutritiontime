@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { HeaderWidget } from 'widgets/header'
-import { SavedCollections } from 'widgets/Collection/SavedCollections'
+import { SavedCollections } from '@/widgets/collection'
 </script>
 
 <style lang="scss" scoped></style>

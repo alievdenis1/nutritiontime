@@ -1,11 +1,11 @@
 <template>
 	<div>
-		<PlanTabMain />
+		<CollectionTabMain />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { PlanTabMain } from 'entities/Сollection/ui'
+import { CollectionTabMain } from '@/entities/Сollection/ui'
 </script>
 
 <style scoped>
