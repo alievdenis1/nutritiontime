@@ -1,1 +1,1 @@
-export { default as ContentBlock } from './ContentBlock.vue'
+export { default as VContentBlock } from './VContentBlock.vue'

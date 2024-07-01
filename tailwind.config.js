@@ -25,6 +25,12 @@ export default {
         xl: ['20px', '24px'],
         xxl: ['28px', '32px']
       },
+      borderColor: {
+        'custom-gray': '#1C1C1C0D',
+      },
+      borderWidth: {
+        '1': '1px',
+      },
       boxShadow: {
         DEFAULT: '0px 3px 2px rgba(237, 216, 194, 0.35)'
       },
@@ -36,6 +42,7 @@ export default {
         forestGreen: '#319A6E',
         lightGray: '#F3F3F3',
         darkGray: '#1c1c1c',
+        slateGray:'#535353',
         transparent: 'transparent',
         gray:'#9F9FA0',
         orange: '#FFA767',

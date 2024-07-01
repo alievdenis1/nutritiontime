@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { defineComponent } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './ContentBlock.localization.json'
+import Localization from './VContentBlock.localization.json'
 const { t } = useTranslation(Localization)
 
 defineProps<{

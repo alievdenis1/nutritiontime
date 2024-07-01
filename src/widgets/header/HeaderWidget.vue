@@ -13,8 +13,13 @@
 			>
 
 			<div class="flex items-center gap-[8px]">
-				<v-button class="settings-button py-[10px] px-[16px] ">
+				<v-button class="settings-button py-[10px] px-[16px] relative">
 					<IconWallet />
+
+					<div
+						id="ton-connect-button-root"
+						class="absolute opacity-0 left-0"
+					/>
 				</v-button>
 
 				<v-button
@@ -52,21 +57,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useLocaleStore, useTranslation } from 'shared/lib/i18n'
+import { ref, onMounted } from 'vue'
+import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'
+import WebApp from '@twa-dev/sdk'
+
+import { useTWA } from 'entities/Session/api/useTWA'
+import { useAuthButton } from 'entities/Session/api/useAuthButton'
 
 import { IconWallet, IconArrow } from '@/shared/components/Icon'
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
-
 const target = ref(null)
 
 const languageDropDownOpen = ref(false)
 
 onClickOutside(target, () => languageDropDownOpen.value = false)
+
+onMounted(() => {
+	useAuthButton()
+	useTWA()
+	let user = WebApp.initDataUnsafe.user
+	if (user && user.language_code) {
+		localeStore.setLocale(user.language_code as Locales)
+	}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -115,4 +132,4 @@ onClickOutside(target, () => languageDropDownOpen.value = false)
 		@apply justify-between
 	}
 }
-</style>
+</style>@/shared/components/Message
