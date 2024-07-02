@@ -1,7 +1,7 @@
 <template>
 	<VModal
 		:show="store.isModalCreateOpen"
-		@close="handleClose"
+		@close="store.closeModal"
 	>
 		<div>
 			<div class="flex justify-between mb-[12px] items-center">
@@ -10,7 +10,7 @@
 				</h2>
 				<button
 					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px]"
-					@click="handleClose"
+					@click="store.closeModal"
 				>
 					<IconClose />
 				</button>
@@ -69,17 +69,11 @@ const emit = defineEmits(['close', 'selectMethod'])
 const router = useRouter()
 const { t } = useTranslation(Localization)
 
-const handleClose = () => {
-	store.isModalCreateOpen = false
-	emit('close')
-}
-
 const selectMethod = (tabValue: string) => {
-	if (tabValue === 'ownRecepie') store.defaultValueTabs = tabValue
-	if (tabValue === 'aiRecepie') store.defaultValueTabs = tabValue
+	store.defaultValueTabs = tabValue
 	router.push('/create-recipe')
 	emit('selectMethod', tabValue)
-	handleClose()
+	store.closeModal()
 }
 
 </script>

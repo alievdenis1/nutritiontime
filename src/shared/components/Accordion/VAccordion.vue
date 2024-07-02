@@ -57,6 +57,8 @@ watch(isOpen, (newVal) => {
 }
 
 .accordion-header {
+	font-size: 18px;
+	line-height: 24px;
 	padding: 16px;
 	cursor: pointer;
 	width: 100%;

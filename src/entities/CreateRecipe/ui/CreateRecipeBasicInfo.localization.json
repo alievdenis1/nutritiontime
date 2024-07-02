@@ -7,7 +7,9 @@
             "recipeDescriptionPlaceholder": "Описание рецепта *",
             "dishCategory": "Категория блюда",
             "cuisineNationality": "Национальность кухни",
-            "dietType": "Тип диеты"
+            "dietType": "Тип диеты",
+            "categorySelection": "Выбор категории",
+            "searchCategory": "Поиск категории"
         },
         "en": {
             "basicInformation": "Basic information",
@@ -17,6 +19,8 @@
             "recipeDescriptionPlaceholder": "Recipe description *",
             "dishCategory": "Dish category",
             "cuisineNationality": "Cuisine nationality",
-            "dietType": "Diet type"
+            "dietType": "Diet type",
+            "categorySelection": "Category selection",
+            "searchCategory": "Search category"
         }
     }
