@@ -15,7 +15,7 @@
 					{ 'cursor-not-allowed opacity-50': isCreateRecipeRoute }
 				]"
 				:disabled="isCreateRecipeRoute"
-				@click="openCreationModal"
+				@click="store.openModal"
 			>
 				<icon-plus :icon-color="'#FFFFFF'" />
 			</button>
@@ -43,10 +43,6 @@ import { ModalCreateRecipe } from '@/entities/CreateRecipe/modal-create/ui'
 import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()
-
-const openCreationModal = () => {
-	store.isModalCreateOpen = true
-}
 
 const isCurrentRoute = (route: string) => {
 	return router.currentRoute.value.path === route
