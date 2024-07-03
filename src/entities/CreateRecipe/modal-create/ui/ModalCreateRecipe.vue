@@ -1,7 +1,7 @@
 <template>
 	<VModal
 		:show="store.isModalCreateOpen"
-		@close="handleClose"
+		@close="store.closeModal"
 	>
 		<div>
 			<div class="flex justify-between mb-[12px] items-center">
@@ -10,7 +10,7 @@
 				</h2>
 				<button
 					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px]"
-					@click="handleClose"
+					@click="store.closeModal"
 				>
 					<IconClose />
 				</button>
@@ -19,13 +19,13 @@
 			<div class="space-y-4">
 				<div
 					class="flex items-center justify-between p-4 bg-mainBg rounded-lg cursor-pointer border"
-					@click="selectMethod('manual')"
+					@click="selectMethod('ownRecepie')"
 				>
 					<div class="text-left w-[255px]">
 						<h3 class="font-semibold mb-[8px] text-lg">
 							{{ t('manualCreation') }}
 						</h3>
-						<p class="text-slateGray text-xs	">
+						<p class="text-slateGray text-xs">
 							{{ t('manualDescription') }}
 						</p>
 					</div>
@@ -36,11 +36,12 @@
 				</div>
 				<div
 					class="flex items-center justify-between p-4 bg-mainBg rounded-lg cursor-pointer border"
-					@click="selectMethod('ai')"
+					@click="selectMethod('aiRecepie')"
 				>
 					<div class="text-left w-[255px]">
-						<h3 class="font-semibold mb-[8px] text-lg">
+						<h3 class="flex gap-[8px] font-semibold mb-[8px] text-lg">
 							{{ t('aiCreation') }}
+							<IconAi :icon-color="'#319A6E'" />
 						</h3>
 						<p class="text-gray-600 mr-[8px] text-xs">
 							{{ t('aiDescription') }}
@@ -58,30 +59,27 @@
 
 <script setup lang="ts">
 import { VModal } from 'shared/components/Modal'
-import { IconArrowRight, IconClose } from 'shared/components/Icon'
-import { useModalStore } from '../model/model.ts'
+import { IconArrowRight, IconClose, IconAi } from 'shared/components/Icon'
+import { useModalCreateStore } from '../model/model-store'
 import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './Modal.localization.json'
-const store = useModalStore()
-
+import Localization from './ModalCreateRecipe.localization.json'
+const store = useModalCreateStore()
+import { useRouter } from 'vue-router'
 const emit = defineEmits(['close', 'selectMethod'])
-
+const router = useRouter()
 const { t } = useTranslation(Localization)
 
-const handleClose = () => {
-	store.isModalCreateOpen = false
-	emit('close')
-}
-
-const selectMethod = (method: string) => {
-	emit('selectMethod', method)
-	handleClose()
+const selectMethod = (tabValue: string) => {
+	store.defaultValueTabs = tabValue
+	router.push('/create-recipe')
+	emit('selectMethod', tabValue)
+	store.closeModal()
 }
 
 </script>
 
 <style scoped lang="scss">
-.border{
+.border {
 	border: 1px solid #1C1C1C0D
 }
 </style>

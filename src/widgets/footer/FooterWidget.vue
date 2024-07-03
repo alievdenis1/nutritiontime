@@ -1,30 +1,34 @@
 <template>
 	<div class="grid w-full px-4 mb-2.5">
 		<footer class="flex py-2 px-4 items-center gap-4 justify-between rounded-full bg-white shadow-custom">
-			<v-button
+			<button
 				:class="{ 'active': isCurrentRoute('/') }"
 				class="cursor-pointer flex-grow rounded-full"
 				@click="navigateToHome"
 			>
 				<icon-home :icon-color="homeIconColor" />
 				{{ t('home') }}
-			</v-button>
-			<v-button
+			</button>
+			<button
 				class="cursor-pointer p-3.5 bg-orange rounded-full"
-				@click="openCreationModal"
+				:class="[
+					{ 'cursor-not-allowed opacity-50': isCreateRecipeRoute }
+				]"
+				:disabled="isCreateRecipeRoute"
+				@click="store.openModal"
 			>
 				<icon-plus :icon-color="'#FFFFFF'" />
-			</v-button>
-			<v-button
+			</button>
+			<button
 				:class="{ 'active': isCurrentRoute('/recipes') }"
 				class="cursor-pointer flex-grow rounded-full"
 				@click="navigateToRecipes"
 			>
 				<icon-search :icon-color="searchIconColor" />
 				{{ t('recipes') }}
-			</v-button>
+			</button>
 		</footer>
-		<ModalRecipeCreation />
+		<ModalCreateRecipe />
 	</div>
 </template>
 
@@ -35,18 +39,18 @@ import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
 const { t } = useTranslation(Localization)
-import { ModalRecipeCreation } from '../../entities/Modal/ui'
-import { useModalStore } from 'entities/Modal/model/model.ts'
-const store = useModalStore()
+import { ModalCreateRecipe } from '@/entities/CreateRecipe/modal-create/ui'
+import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
+const store = useModalCreateStore()
 const router = useRouter()
-
-const openCreationModal = () => {
-	store.isModalCreateOpen = true
-}
 
 const isCurrentRoute = (route: string) => {
 	return router.currentRoute.value.path === route
 }
+
+const isCreateRecipeRoute = computed(() => {
+	return router.currentRoute.value.path === '/create-recipe'
+})
 
 const navigateToHome = () => {
 	router.push('/')
@@ -82,5 +86,13 @@ const searchIconColor = computed(() => {
 	display: flex;
 	padding: 7px 0;
 	flex-direction: column;
+}
+
+.cursor-not-allowed {
+	cursor: not-allowed;
+}
+
+.opacity-50 {
+	opacity: 0.5;
 }
 </style>

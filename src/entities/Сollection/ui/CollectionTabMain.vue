@@ -9,7 +9,10 @@
 			</TabsTrigger>
 		</TabsList>
 		<TabsContent value="collections">
-			<VDragAndDrop :items="dragAndDropItems" />
+			<VDragAndDrop
+				:items="dragAndDropItems"
+				class="mt-[16px]"
+			/>
 			<RecipesList :recipes-data="mockRecipes" />
 			<VContentBlock
 				v-if="mockRecipes.length === 0"
