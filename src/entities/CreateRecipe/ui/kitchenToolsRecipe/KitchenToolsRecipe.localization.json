@@ -1,0 +1,26 @@
+{
+    "ru": {
+        "ingredientsTitle": "Кухонный инвентарь",
+        "ingredientsDescription": "То, что понадобится для приготовки блюда. Например, блендер",
+        "addIngredientButton": "Добавить инвентарь",
+        "addIngredientTitle": "Добавление инвентаря",
+        "saveIngredientButton": "Сохранить",
+        "ingredientPlaceholderName": "Название инвентаря",
+        "ingredientPlaceholderQuantity": "Количество, в штуках",
+        "InGrams": "В граммах",
+        "InPieces": "В штуках",
+        "forExampleBlender": "Например, блендер"
+    },
+    "en": {
+        "ingredientsTitle": "Kitchen tools",
+        "ingredientsDescription": "What you need to prepare the dish. For example, blender",
+        "addIngredientButton": "Add inventory",
+        "addIngredientTitle": "Add inventory",
+        "saveIngredientButton": "Save",
+        "ingredientPlaceholderName": "Inventory name",
+        "ingredientPlaceholderQuantity": "Quantity, in pieces",
+        "InGrams": "In grams",
+        "InPieces": "In pieces",
+        "forExampleBlender": "For example, blender"
+    }
+}

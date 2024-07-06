@@ -1,0 +1,1 @@
+export { default as StepByStepRecipe } from './StepByStepRecipe.vue'

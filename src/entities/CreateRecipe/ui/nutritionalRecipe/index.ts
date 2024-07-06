@@ -1,0 +1,1 @@
+export { default as CreateRecipeNutritional } from './CreateRecipeNutritional.vue'

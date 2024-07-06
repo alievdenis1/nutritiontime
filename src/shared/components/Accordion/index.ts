@@ -1,1 +1,1 @@
-export { default as VAccordion } from './VAccordion.vue'
+    export { default as VAccordion } from './VAccordion.vue'

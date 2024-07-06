@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUpdated } from 'vue'
 import { IconArrow } from '@/shared/components/Icon'
 
 defineProps<{
@@ -41,6 +41,15 @@ const toggle = () => {
 	isOpen.value = !isOpen.value
 }
 
+const updateHeight = () => {
+	if (isOpen.value && content.value) {
+		content.value.style.maxHeight = `${content.value.scrollHeight}px`
+	}
+}
+
+onMounted(updateHeight)
+onUpdated(updateHeight)
+
 watch(isOpen, (newVal) => {
 	if (newVal) {
 		content.value?.style.setProperty('max-height', `${content.value.scrollHeight}px`)
@@ -54,12 +63,12 @@ watch(isOpen, (newVal) => {
 .accordion {
 	border: 1px solid #1C1C1C0D;
 	border-radius: 16px;
+	padding: 20px 16px;
 }
 
 .accordion-header {
 	font-size: 18px;
 	line-height: 24px;
-	padding: 16px;
 	cursor: pointer;
 	width: 100%;
 	display: flex;

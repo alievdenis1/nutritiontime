@@ -1,0 +1,22 @@
+{
+    "ru": {
+        "nutritionalValueTitle": "Пищевая ценность",
+        "nutritionalValueDescription": "Рассчитывается автоматически на основе добавленных вами ингредиентов",
+        "caloriesPer100gTitle": "Калорийность, на 100 г.",
+        "caloriesPer100gPlaceholder": "Калорийность на 100 г.",
+        "macronutrientsPer100gTitle": "БЖУ, на 100 г.",
+        "proteinPer100gPlaceholder": "Белки на 100 г.",
+        "fatPer100gPlaceholder": "Жиры на 100 г.",
+        "carbohydratesPer100gPlaceholder": "Углеводы на 100 г."
+    },
+    "en": {
+        "nutritionalValueTitle": "Nutritional value",
+        "nutritionalValueDescription": "Calculated automatically based on the ingredients you added",
+        "caloriesPer100gTitle": "Calories per 100 g.",
+        "caloriesPer100gPlaceholder": "Calories per 100 g.",
+        "macronutrientsPer100gTitle": "Macronutrients per 100 g.",
+        "proteinPer100gPlaceholder": "Protein per 100 g.",
+        "fatPer100gPlaceholder": "Fat per 100 g.",
+        "carbohydratesPer100gPlaceholder": "Carbohydrates per 100 g."
+    }
+}

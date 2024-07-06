@@ -11,4 +11,13 @@ export default [
 			layout: MainLayout
 		}
 	},
+	{
+		name: 'check-recipe',
+		component: () => import('pages/create-recipe/CheckRecipe.vue'),
+		path: '/check-recipe',
+		meta: {
+			title: 'Check Recipe',
+			layout: MainLayout
+		}
+	},
 ] as RouteRecordRaw[]

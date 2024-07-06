@@ -1,0 +1,18 @@
+{
+        "ru": {
+                "recipeReviewTitle": "Проверка рецепта",
+                "howUsersWillSee": "Так рецепт увидят другие пользователи",
+                "reviewDescription": "После публикации мы проверим ваш рецепт (обычно это занимает несколько дней), создадим NFT, чтобы рецепт стал вашей собственностью и вы сможете зарабатывать *name_coin* за каждый просмотр, лайк или комментарий!",
+                "recipeCardPlaceholderTop": "Карточка рецепта для перепроверки",
+                "createNftAndPublishRecipe": "Создать NFT и опубликовать рецепт",
+                "recipeCardPlaceholderButton": "(интерфейс карточки товара, добавится позже)"
+        },
+        "en": {
+                "recipeReviewTitle": "Recipe Review",
+                "howUsersWillSee": "This is how other users will see the recipe",
+                "reviewDescription": "After publication, we will review your recipe (this usually takes a few days), create an NFT so that the recipe becomes your property, and you can earn *name_coin* for every view, like, or comment!",
+                "recipeCardPlaceholderTop": "Recipe card for review",
+                "createNftAndPublishRecipe": "Create NFT and Publish Recipe",
+                "recipeCardPlaceholderButton": "(product card interface, will be added later)"
+        }
+}

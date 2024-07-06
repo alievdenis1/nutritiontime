@@ -1,0 +1,1 @@
+export { default as CreateRecipeGradation } from './CreateRecipeGradation.vue'
