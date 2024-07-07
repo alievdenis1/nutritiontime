@@ -14,7 +14,12 @@
 			>
 				<span class="text-[12px]">{{ ingredient.name }}</span>
 				<div>
-					<span class="text-[#535353] text-xs">{{ ingredient.quantity }}</span>
+					<span class="text-[#535353] text-xs">
+						{{ ingredient.quantity }}
+						{{ ingredient.type ===
+							QuantityType.WEIGHT ?
+								t('unitPieces') : t('unitGrams') }}
+					</span>
 					<button
 						class="text-forestGreen ml-[14px] cursor-pointer"
 						@click="removeIngredient(index)"
@@ -57,7 +62,7 @@
 							type="text"
 							:placeholder="t('ingredientPlaceholderName')"
 							class="border rounded px-[12px] py-4 text-base w-full h-[54px]"
-							:class="{ activeInput: tryToSave && !ingredientName, filledInput: ingredientName.length !== 0, 'pt-[26px]': ingredientName.length !== 0 }"
+							:class="{ activeInput: activeInputName, filledInput: notEmptyIngredientName, 'pt-[26px]': notEmptyIngredientName }"
 						>
 					</div>
 					<div class="text-gray mb-4">
@@ -75,7 +80,7 @@
 							type="text"
 							:placeholder="t('ingredientPlaceholderQuantity')"
 							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
-							:class="{ activeInput: tryToSave && !ingredientQuantity, filledInput: ingredientQuantity.length !== 0, 'pt-[26px]': ingredientQuantity.length !== 0 }"
+							:class="{ activeInput: activeInputQuantity, filledInput: notEmptyIngredientQuantity, 'pt-[26px]': notEmptyIngredientQuantity }"
 							@input="filterNumericInput"
 						>
 					</div>
@@ -93,20 +98,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VModal } from '@/shared/components/Modal'
 import { IconClose, IconPlus } from '@/shared/components/Icon'
 import localization from './KitchenToolsRecipe.localization.json'
+import { QuantityType } from '../types/enum'
 
 const { t } = useTranslation(localization)
 
 const showModal = ref(false)
 const ingredientName = ref<string>('')
 const ingredientQuantity = ref<string>('')
-const ingredients = ref<{ name: string, quantity: string }[]>([])
 const tryToSave = ref(false)
+const activeTab = ref<QuantityType>(QuantityType.WEIGHT)
+const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]>([])
 const ingredientNameInput = ref<HTMLInputElement | null>(null)
 
 const openModal = () => {
@@ -118,7 +125,8 @@ const addIngredient = () => {
     if (ingredientName.value && ingredientQuantity.value) {
         ingredients.value.push({
             name: ingredientName.value,
-            quantity: ingredientQuantity.value + ' шт.'
+            quantity: ingredientQuantity.value,
+			type: activeTab.value
         })
         closeModal()
     }
@@ -140,6 +148,11 @@ const filterNumericInput = (event: Event) => {
     target.value = target.value.replace(/\D/g, '')
     ingredientQuantity.value = target.value
 }
+
+const activeInputName = computed(() => tryToSave.value && !ingredientName.value)
+const notEmptyIngredientName = computed(() => ingredientName.value.length !== 0)
+const activeInputQuantity = computed(() => tryToSave.value && !ingredientQuantity.value)
+const notEmptyIngredientQuantity = computed(() => ingredientQuantity.value.length !== 0)
 
 watch(showModal, (newVal) => {
     if (newVal) {

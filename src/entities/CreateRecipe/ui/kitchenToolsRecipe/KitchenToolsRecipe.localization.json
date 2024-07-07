@@ -1,5 +1,7 @@
 {
     "ru": {
+        "unitGrams": "г.",
+        "unitPieces": "шт.",
         "ingredientsTitle": "Кухонный инвентарь",
         "ingredientsDescription": "То, что понадобится для приготовки блюда. Например, блендер",
         "addIngredientButton": "Добавить инвентарь",
@@ -12,6 +14,8 @@
         "forExampleBlender": "Например, блендер"
     },
     "en": {
+        "unitGrams": "g.",
+        "unitPieces": "pcs.",
         "ingredientsTitle": "Kitchen tools",
         "ingredientsDescription": "What you need to prepare the dish. For example, blender",
         "addIngredientButton": "Add inventory",

@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { CreateRecipeTime } from 'entities/CreateRecipe/ui/timeRecipe'
 import { CreateRecipeNutritional } from 'entities/CreateRecipe/ui/nutritionalRecipe'
-import { CreateRecipeBasicInfo } from 'entities/CreateRecipe/ui/baseRecipe'
+import { CreateRecipeBasicInfo } from 'entities/CreateRecipe/ui/baseRecipe/Index'
 import { TagsRecipe } from 'entities/CreateRecipe/ui/tagsRecipe'
 import { StepByStepRecipe } from 'entities/CreateRecipe/ui/stepByStepRecipe'
 import { CreateRecipeGradation } from 'entities/CreateRecipe/ui/gradationRecipe'

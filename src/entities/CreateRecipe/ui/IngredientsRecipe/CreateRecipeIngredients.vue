@@ -14,7 +14,10 @@
 			>
 				<span class="text-[12px]">{{ ingredient.name }}</span>
 				<div>
-					<span class="text-[#535353] text-xs">{{ ingredient.quantity }}</span>
+					<span class="text-[#535353] text-xs">
+						{{ ingredient.quantity }}
+						{{ ingredient.type === 'weight' ?
+							t('unitGrams') : t('unitPieces') }}</span>
 					<button
 						class="text-forestGreen ml-[14px] cursor-pointer"
 						@click="removeIngredient(index)"
@@ -57,7 +60,7 @@
 							type="text"
 							:placeholder="t('ingredientPlaceholderName')"
 							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
-							:class="{ 'activeInput': tryToSave && !ingredientName, 'filledInput': ingredientName.length !== 0 }"
+							:class="{ activeInput: activeInputName, filledInput: notEmptyIngredientName, 'pt-[26px]': notEmptyIngredientName }"
 						>
 					</div>
 					<div class="relative">
@@ -72,20 +75,20 @@
 							type="text"
 							:placeholder="t('ingredientPlaceholderQuantity')"
 							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
-							:class="{ 'activeInput': tryToSave && !ingredientQuantity, 'filledInput': ingredientQuantity.length !== 0 }"
+							:class="{ activeInput: activeInputQuantity, filledInput: notEmptyIngredientQuantity, 'pt-[26px]': notEmptyIngredientQuantity }"
 							@input="filterNumericInput"
 						>
 					</div>
 					<TabsMain
 						v-model="activeTab"
-						default-value="grams"
+						default-value="weight"
 						class="mb-[20px] mt-[10px]"
 					>
 						<TabsList>
-							<TabsTrigger value="grams">
+							<TabsTrigger :value="QuantityType.WEIGHT">
 								{{ t('InGrams') }}
 							</TabsTrigger>
-							<TabsTrigger value="pieces">
+							<TabsTrigger :value="QuantityType.QUANTITY">
 								{{ t('InPieces') }}
 							</TabsTrigger>
 						</TabsList>
@@ -103,22 +106,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VModal } from '@/shared/components/Modal'
 import { IconClose, IconPlus } from '@/shared/components/Icon'
 import localization from './CreateRecipeIngredients.localization.json'
 import { TabsMain, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { QuantityType } from '../types/enum'
 
 const { t } = useTranslation(localization)
 
 const showModal = ref(false)
 const ingredientName = ref<string>('')
 const ingredientQuantity = ref<string>('')
-const ingredients = ref<{ name: string, quantity: string }[]>([])
+const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]>([])
 const tryToSave = ref(false)
-const activeTab = ref('grams')
+const activeTab = ref<QuantityType>(QuantityType.WEIGHT)
 const ingredientNameInput = ref<HTMLInputElement | null>(null)
 
 const openModal = () => {
@@ -128,10 +132,10 @@ const openModal = () => {
 const addIngredient = () => {
 	tryToSave.value = true
 	if (ingredientName.value && ingredientQuantity.value) {
-		const unit = activeTab.value === 'grams' ? ' г.' : ' шт.'
 		ingredients.value.push({
 			name: ingredientName.value,
-			quantity: ingredientQuantity.value + unit
+			quantity: ingredientQuantity.value,
+			type: activeTab.value
 		})
 		closeModal()
 	}
@@ -150,9 +154,14 @@ const closeModal = () => {
 
 const filterNumericInput = (event: Event) => {
 	const target = event.target as HTMLInputElement
-	target.value = target.value.replace(/\D/g, '')
-	ingredientQuantity.value = target.value
+	const numericValue = target.value.replace(/\D/g, '')
+	ingredientQuantity.value = numericValue
 }
+
+const activeInputName = computed(() => tryToSave.value && !ingredientName.value)
+const notEmptyIngredientName = computed(() => ingredientName.value.length !== 0)
+const activeInputQuantity = computed(() => tryToSave.value && !ingredientQuantity.value)
+const notEmptyIngredientQuantity = computed(() => ingredientQuantity.value.length !== 0)
 
 watch(showModal, (newVal) => {
 	if (newVal) {
@@ -176,5 +185,23 @@ watch(showModal, (newVal) => {
 
 .filledInput {
 	border: 2px solid #319A6E33;
+}
+
+.overflow-x-auto {
+	overflow-x: auto;
+	display: flex;
+	white-space: nowrap;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+	/* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+	/* Safari and Chrome */
 }
 </style>

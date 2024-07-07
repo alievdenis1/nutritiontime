@@ -7,7 +7,7 @@
 				class="step-container mb-4 rounded relative"
 			>
 				<div class="flex justify-between mb-[16px]">
-					<h3>{{ t('step') }} {{ index + 1 }}</h3>
+					<h3>{{ t('step', { idx: index + 1 }) }}</h3>
 					<button @click="removeStep(index)">
 						<IconClose
 							icon-color="#9F9FA0"
@@ -25,7 +25,7 @@
 					</span>
 					<textarea
 						v-model="step.description"
-						:placeholder="t('stepDescription') "
+						:placeholder="t('stepDescription')"
 						class="w-full p-[12px] mb-2 rounded-[4px] h-[122px]"
 						:class="{ 'pt-[32px] ': step.description.length > 0 }"
 					/>
@@ -56,35 +56,35 @@ import { VAddPhoto } from '@/shared/components/AddPhoto'
 import { IconClose, IconPlus } from '@/shared/components/Icon'
 import localization from './StepByStepRecipe.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
+
 const { t } = useTranslation(localization)
 
 interface Step {
-    description: string
-    photo: string | null
+	description: string
+	photo: string | null
 }
 
 const steps = ref<Step[]>([
-    { description: '', photo: null }
+	{ description: '', photo: null }
 ])
 
 const addStep = () => {
-    steps.value.push({ description: '', photo: null })
+	steps.value.push({ description: '', photo: null })
 }
 
 const removeStep = (index: number) => {
-    steps.value.splice(index, 1)
+	steps.value.splice(index, 1)
 }
-
 </script>
 
 <style scoped>
 .step-container {
-    background-color: #f9f9f9;
-    position: relative;
+	background-color: #f9f9f9;
+	position: relative;
 }
 
 textarea {
-    resize: none;
-    border: 1px solid #d1d5db;
+	resize: none;
+	border: 1px solid #d1d5db;
 }
 </style>

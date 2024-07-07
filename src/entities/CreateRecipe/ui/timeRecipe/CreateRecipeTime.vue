@@ -4,17 +4,17 @@
 			<div class="flex flex-col gap-4">
 				<div class="relative">
 					<span
-						v-if="timeInput.length > 0"
+						v-if="kitchenTime.length > 0"
 						class="absolute text-[12px] top-[6px] left-[12px] text-gray"
 					>
 						{{ t('kitchenTimePlaceholder') }}
 					</span>
 					<input
-						v-model="timeInput"
+						v-model="kitchenTime"
 						type="text"
 						:placeholder="t('kitchenTimePlaceholder')"
 						class="border rounded text-base w-full h-[54px]"
-						:class="{ 'padding-filled': timeInput.length > 0, 'padding-empty': timeInput.length === 0 }"
+						:class="{ 'padding-filled': kitchenTime.length > 0, 'padding-empty': kitchenTime.length === 0 }"
 						@input="formatInput"
 					>
 					<p class="text-xs text-gray mt-1">
@@ -23,17 +23,17 @@
 				</div>
 				<div class="relative">
 					<span
-						v-if="timeInput2.length > 0"
+						v-if="cookingTime.length > 0"
 						class="absolute text-[12px] top-[6px] left-[12px] text-gray"
 					>
 						{{ t('cookingTimePlaceholder') }}
 					</span>
 					<input
-						v-model="timeInput2"
+						v-model="cookingTime"
 						type="text"
-						:placeholder="t('cookingTimePlaceholder') "
+						:placeholder="t('cookingTimePlaceholder')"
 						class="border rounded text-base w-full h-[54px]"
-						:class="{ 'padding-filled': timeInput2.length > 0, 'padding-empty': timeInput2.length === 0 }"
+						:class="{ 'padding-filled': cookingTime.length > 0, 'padding-empty': cookingTime.length === 0 }"
 						@input="formatInput"
 					>
 					<p class="text-xs text-gray mt-1">
@@ -53,62 +53,53 @@ import localization from './CreateRecipeTime.localization.json'
 
 const { t } = useTranslation(localization)
 
-const timeInput = ref<string>('')
-const timeInput2 = ref<string>('')
+const kitchenTime = ref<string>('')
+const cookingTime = ref<string>('')
 
 const formatInput = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    let value = target.value.replace(/[^0-9]/g, '')
+	const target = event.target as HTMLInputElement
+	target.value = formatTime(target.value)
 
-    if (value.length <= 2) {
-        target.value = value
-    } else if (value.length <= 4) {
-        target.value = value.slice(0, 2) + ' ч : ' + value.slice(2)
-    } else {
-        target.value = value.slice(0, 2) + ' ч : ' + value.slice(2, 4) + ' мин'
-    }
-
-    if (target.value === timeInput.value) {
-        timeInput.value = target.value
-    } else {
-        timeInput2.value = target.value
-    }
+	if (target === document.activeElement) {
+		if (target.value === kitchenTime.value) {
+			kitchenTime.value = target.value
+		} else {
+			cookingTime.value = target.value
+		}
+	}
 }
 
-watch([timeInput, timeInput2], ([newValue1, newValue2]) => {
-    timeInput.value = formatWatchValue(newValue1)
-    timeInput2.value = formatWatchValue(newValue2)
+watch([kitchenTime, cookingTime], ([newKitchenTime, newCookingTime]) => {
+	kitchenTime.value = formatTime(newKitchenTime)
+	cookingTime.value = formatTime(newCookingTime)
 })
 
-const formatWatchValue = (value: string) => {
-    let formattedValue = value.replace(/[^0-9]/g, '')
-    if (formattedValue.length > 4) {
-        formattedValue = formattedValue.slice(0, 4)
-    }
-    return formatTime(formattedValue)
-}
-
 const formatTime = (value: string) => {
-    if (value.length <= 2) {
-        return value
-    } else if (value.length <= 3) {
-        return value.slice(0, 2) + ' ч : ' + value.slice(2)
-    } else {
-        return value.slice(0, 2) + ' ч : ' + value.slice(2, 4) + ' мин'
-    }
+	let formattedValue = value.replace(/[^0-9]/g, '')
+	if (formattedValue.length > 4) {
+		formattedValue = formattedValue.slice(0, 4)
+	}
+
+	if (formattedValue.length <= 2) {
+		return formattedValue
+	} else if (formattedValue.length <= 3) {
+		return formattedValue.slice(0, 2) + ' ' + t('hour') + ' : ' + formattedValue.slice(2)
+	} else {
+		return formattedValue.slice(0, 2) + ' ' + t('hour') + ' : ' + formattedValue.slice(2, 4) + ' ' + t('minute')
+	}
 }
 </script>
 
 <style scoped>
 .border {
-    border: 1px solid #E1E1E1;
+	border: 1px solid #E1E1E1;
 }
 
 .padding-filled {
-    padding: 26px 0 10px 12px;
+	padding: 26px 0 10px 12px;
 }
 
 .padding-empty {
-    padding: 16px 8px;
+	padding: 16px 8px;
 }
 </style>

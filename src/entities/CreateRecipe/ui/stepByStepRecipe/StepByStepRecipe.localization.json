@@ -1,14 +1,14 @@
 {
     "ru": {
         "stepByStep": "Пошаговый рецепт",
-        "step": "Шаг",
+        "step": "Шаг {{idx}}",
         "addStep": "Добавить шаг",
         "uploadPhoto": "Загрузить фотографию шага",
         "stepDescription": "Описание шага"
     },
     "en": {
         "stepByStep": "Step by step",
-        "step": "Step",
+        "step": "Step {{idx}}",
         "addStep": "Add step",
         "uploadPhoto": "Upload step photo",
         "stepDescription": "Step description"
