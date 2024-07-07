@@ -1,0 +1,3962 @@
+Hello World
+This is probably the simplest possible Tact program. It will provide callers with the classic output "hello world".
+
+Tact lets you write smart contracts. This code defines a single contract named HelloWorld. Smart contracts must be deployed to the blockchain network to be usable, try to deploy this contract by pressing the Deploy button.
+
+Contract deployments usually cost gas. This website deploys to an emulator of TON blockchain, so gas is emulated TON coin (which is free).
+
+If you're unfamilar with terms like contract, deployment and gas, please read this post first. It's a great introduction to all blockchain terminology you will need to learn Tact.
+
+A simple interaction
+Contracts can have getters like greeting(). Getters are special external interface functions that allow users to query information from the contract. Try to call the getter by pressing the Get greeting button. Calling getters is free and does not cost gas.
+
+Don't worry if some things aren't clear now, we will dive into getters in more detail later.
+contract HelloWorld {
+
+    get fun greeting(): String {
+        return "hello world";
+    }
+
+}
+> 📝 Deploying contract:
+Message sent: empty, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003049
+
+> 🔍 Calling getter greeting:
+Return value: "hello world"
+
+A Simple Counter
+This is a simple counter contract that allows users to increment its value.
+
+This contract has a state variable val that persists between contract calls - the counter value. When persisted, this variable is encoded as uint32 - a 32-bit unsigned integer. Contracts pay rent in proportion to the amount of persistent space they consume, so compact representations are encouraged.
+
+State variables should be initialized in init() that runs on deployment of the contract.
+
+Receiving messages
+This contract can receive messages from users.
+
+Unlike getters that are just read-only, messages can do write operations and change the contract's persistent state. Incoming messages are processed in receive() methods as transactions and cost gas for the sender.
+
+After deploying the contract, send the increment message by pressing the Send increment button in order to increase the counter value by one. Afterwards, call the getter value() to see that the value indeed changed.
+
+Info: We will learn more in details about "getter" functions in the next example.
+
+> 📝 Deploying contract:
+Message sent: empty, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003199
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003743
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003743
+
+> 🔍 Calling getter value:
+Return value: 2
+
+The Deployable Trait
+Tact doesn't support classical class inheritance, but contracts can implement traits.
+
+One commonly used trait is Deployable, which implements a simple receiver for the Deploy message. This helps deploy contracts in a standardized manner.
+
+All contracts are deployed by sending them a message. While any message can be used for this purpose, best practice is to use the special Deploy message.
+
+This message has a single field, queryId, provided by the deployer (usually set to zero). If the deployment succeeds, the contract will reply with a DeployOk message and echo the same queryId in the response.
+
+If you're using Tact's auto-generated TypeScript classes to deploy, sending the deploy message should look like:
+
+const msg = { $$type: "Deploy", queryId: 0n };
+await contract.send(sender, { value: toNano(1) }, msg);
+You can see the implementation of the trait here. Notice that the file deploy.tact needs to be imported from the standard library using the import keyword.
+
+// this trait has to be imported
+import "@stdlib/deploy";
+
+// the Deployable trait adds a default receiver for the "Deploy" message
+contract Counter with Deployable {
+
+    val: Int as uint32;
+
+    init() {
+        self.val = 0;
+    }
+
+    receive("increment") {
+        self.val = self.val + 1;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007113
+Message sent: DeployOk, from contract, to deployer, value 0.991691, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003678
+
+> 🔍 Calling getter value:
+Return value: 1
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003678
+
+> 🔍 Calling getter value:
+Return value: 2
+
+Integers
+Tact supports a number of primitive data types that are tailored for smart contract use.
+
+Int is the primary number type. Math in smart contracts is always done with integers and never with floating points since floats are unpredictable.
+
+The runtime type Int is always 257-bit signed, so all runtime calculations are done at 257-bit. This should be large enough for pretty much anything you need as it's large enough to hold the number of atoms in the universe.
+
+Persistent state variables can be initialized inline or inside init(). If you forget to initialize a state variable, the code will not compile.
+
+State costs
+When encoding Int to persistent state, we will usually use smaller representations than 257-bit to reduce storage cost. The persistent state size is specified in every declaration of a state variable after the as keyword.
+
+Storing 1000 257-bit integers in state costs about 0.184 TON per year.
+Storing 1000 32-bit integers only costs 0.023 TON per year by comparison.
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.008681
+Message sent: DeployOk, from contract, to deployer, value 0.990123, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter result:
+Return value: 3001
+
+> 📤 Sending message show all:
+Message sent: "show all", from deployer, to contract, value 1, not bounced
+#DEBUG#: 3001
+#DEBUG#: 59648462366785489467430652908958923083039847914122061688607845508479932379560
+#DEBUG#: 17
+#DEBUG#: 1507998500293440234999
+#DEBUG#: 1000000000
+#DEBUG#: 1230000000
+#DEBUG#: 7242
+#DEBUG#: -203
+Transaction Executed: success, Exit Code: 0, Gas: 0.070887
+
+Integer Operations
+Since all runtime calculations with integers are done at 257-bit, overflows are quite rare. An overflow can happen if the result of a math operation is too big to fit.
+
+For example, multiplying 2^256 by 2^256 will not fit within 257-bit.
+
+Nevertheless, if any math operation overflows, an exception will be thrown, and the transaction will fail. You could say that Tact's math is safe by default.
+
+There is no problem with mixing variables of different state sizes in the same calculation. At runtime, they are all the same type—always 257-bit signed. This is the largest supported integer type, so they all fit.
+
+Decimal Point with Integers
+Arithmetic with dollars, for example, requires two decimal places. How can we represent the number 1.25 if we are only able to work with integers? The solution is to work with cents. In this way, 1.25 becomes 125. We simply remember that the two rightmost digits represent the numbers after the decimal point.
+
+Similarly, working with TON coins requires nine decimal places instead of two. Therefore, the amount of 1.25 TON, which can be represented in Tact as ton("1.25"), is actually the number 1250000000.
+
+We refer to these as nano-tons rather than cents.
+
+import "@stdlib/deploy";
+
+contract Integers with Deployable {
+
+    // contract persistent state variables
+    i1: Int as uint128 = 3001;
+    i2: Int as int32 = 57;
+
+    init() {}
+
+    receive("show ops") {
+        let i: Int = -12; // temporary variable, runtime Int type is always int257 (range -2^256 to 2^256 - 1)
+        dump(i);
+
+        i = self.i1 * 3 + (self.i2 - i);    // basic math expressions
+        dump(i);
+
+        i = self.i1 % 10;                   // modulo (remainder after division), 3001 % 10 = 1
+        dump(i);
+
+        i = self.i1 / 1000;                 // integer division (truncation toward zero), 3001 / 1000 = 3
+        dump(i);
+
+        i = self.i1 >> 3;                   // shift right (divide by 2^n)
+        dump(i);
+
+        i = self.i1 << 2;                   // shift left (multiply by 2^n)
+        dump(i);
+
+        i = min(self.i2, 11);               // minimum between two numbers
+        dump(i);
+
+        i = max(self.i2, 66);               // maximum between two numbers
+        dump(i);
+
+        i = abs(-1 * self.i2);              // absolute value
+        dump(i);
+
+        dump(self.i1 == 3001);
+        dump(self.i1 > 2000);
+        dump(self.i1 >= 3002);
+        dump(self.i1 != 70);
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007181
+Message sent: DeployOk, from contract, to deployer, value 0.991623, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message show ops:
+Message sent: "show ops", from deployer, to contract, value 1, not bounced
+#DEBUG#: -12
+#DEBUG#: 9072
+#DEBUG#: 1
+#DEBUG#: 3
+#DEBUG#: 375
+#DEBUG#: 12004
+#DEBUG#: 11
+#DEBUG#: 66
+#DEBUG#: 57
+#DEBUG#: true
+#DEBUG#: true
+#DEBUG#: false
+#DEBUG#: true
+Transaction Executed: success, Exit Code: 0, Gas: 0.023786
+
+Bools
+This primitive data type can hold the values true or false.
+
+Bool is convenient for boolean and logical operations. It is also useful for storing flags.
+
+The only supported operations with booleans are && || ! - if you try to add them, for example, the code will not compile.
+
+State costs
+Persisting bools to state is very space-efficient, they only take 1-bit. Storing 1000 bools in state costs about 0.00072 TON per year.
+
+import "@stdlib/deploy";
+
+contract Bools with Deployable {
+
+    // contract persistent state variables
+    b1: Bool = true;
+    b2: Bool = false;
+    b3: Bool;
+
+    init() {
+        self.b3 = !self.b2;
+    }
+
+    receive("show all") {
+        dump(self.b1);
+        dump(self.b2);
+        dump(self.b3);
+    }
+
+    receive("show ops") {
+        let b: Bool = true; // temporary variable
+        dump(b);
+
+        b = self.b1 && self.b2 || !self.b3;
+        dump(b);
+
+        dump(self.b1 == true);
+        dump(self.b1 == self.b2);
+        dump(self.b1 != self.b2);
+    }
+
+    get fun result(): Bool {
+        return self.b1;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007225
+Message sent: DeployOk, from contract, to deployer, value 0.991579, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter result:
+Return value: true
+
+> 📤 Sending message show all:
+Message sent: "show all", from deployer, to contract, value 1, not bounced
+#DEBUG#: true
+#DEBUG#: false
+#DEBUG#: true
+Transaction Executed: success, Exit Code: 0, Gas: 0.004602
+
+> 📤 Sending message show ops:
+Message sent: "show ops", from deployer, to contract, value 1, not bounced
+#DEBUG#: true
+#DEBUG#: false
+#DEBUG#: true
+#DEBUG#: false
+#DEBUG#: true
+Transaction Executed: success, Exit Code: 0, Gas: 0.005668
+
+> 🔍 Calling getter result:
+Return value: true
+
+Addresses
+Address is another primitive data type. It represents standard addresses on the TON blockchain. Every smart contract on TON is identifiable by its address. Think of this as a unique id.
+
+TON is divided into multiple chains called workchains. This allows to balance the load more effectively. One of the internal fields of the address is the workchain id:
+
+0 - The standard workchain, for regular users. Your contracts will be here.
+
+-1 - The masterchain, usually for validators. Gas on this chain is significantly more expensive, but you'll probably never use it.
+
+There are multiple ways on TON to represent the same address. Notice in the contract that the bouncable and non-bouncable representations of the same address actually generate the exact same value. Inside the contract, it doesn't matter which representation you use.
+
+State costs
+Most addresses take 264-bit to store (8-bit for the workchain id and 256-bit for the account id). This means that storing 1000 addresses costs about 0.189 TON per year.
+
+import "@stdlib/deploy";
+
+contract Addresses with Deployable {
+
+    // contract persistent state variables
+    // we have three representations of the same address
+    a1: Address = address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"); // bouncable (same foundation wallet)
+    a2: Address = address("UQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqEBI"); // non-bounceable (same foundation wallet)
+    a3: Address;
+
+    a4: Address;
+    a5: Address;
+    a6: Address;
+
+    init() {
+        // this is the third representation of the same address
+        self.a3 = newAddress(0, 0x83dfd552e63729b472fcbcc8c45ebcc6691702558b68ec7527e1ba403a0f31a8); // raw (same foundation wallet)
+
+        // here are a few other important addresses
+        self.a4 = newAddress(0, 0); // the zero address (nobody)
+        self.a5 = myAddress();      // address of this contract
+        self.a6 = sender();         // address of the deployer (the sender during init())
+    }
+
+    receive("show all") {
+        /// addresses cannot currently be dumped
+        /// TODO: https://github.com/tact-lang/tact/issues/16
+        /// dump(self.a1);
+    }
+
+    receive("show ops") {
+        // temporary variable
+        let a: Address = address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"); // bouncable (same foundation wallet)
+
+        dump(a == self.a1);
+        dump(a == self.a2);
+        dump(a == self.a3);
+
+        dump(a == self.a4);
+        dump(a != self.a5);
+    }
+
+    get fun result(): Address {
+        return self.a1;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.013079
+Message sent: DeployOk, from contract, to deployer, value 0.985725, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter result:
+Return value: EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N
+
+> 📤 Sending message show all:
+Message sent: "show all", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.010036
+
+> 📤 Sending message show ops:
+Message sent: "show ops", from deployer, to contract, value 1, not bounced
+#DEBUG#: true
+#DEBUG#: true
+#DEBUG#: true
+#DEBUG#: false
+#DEBUG#: true
+Transaction Executed: success, Exit Code: 0, Gas: 0.01163
+
+> 🔍 Calling getter result:
+Return value: EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N
+
+Strings
+Tact has basic support for strings. Strings support unicode and don't have any special escape characters like \n.
+
+The use of strings in smart contracts should be quite limited. Smart contracts are very exact programs for managing money, they're not intended for interactive CLI.
+
+Strings are immutable. Once a sequence of characters is created, this sequence cannot be modified.
+
+If you need to concatenate strings in run-time, you can use a StringBuilder. This object handles gas efficiently and supports append() of various types to the string.
+
+import "@stdlib/deploy";
+
+contract Strings with Deployable {
+
+    // contract persistent state variables
+    s1: String = "hello world";
+    s2: String = "yes unicode 😀 😅 你好 no escaping"; /// TODO: https://github.com/tact-lang/tact/issues/25 \n \t";
+    s3: String;
+    s4: String;
+    s5: String;
+    s6: String;
+
+    init() {
+        let i1: Int = -12345;
+        let i2: Int = 6780000000; // coins = ton("6.78")
+
+        self.s3 = i1.toString();
+        self.s4 = i1.toFloatString(3);
+        self.s5 = i2.toCoinsString();
+
+        // gas efficient helper to concatenate strings in run-time
+        let sb: StringBuilder = beginString();
+        sb.append(self.s1);
+        sb.append(", your balance is: ");
+        sb.append(self.s5);
+        self.s6 = sb.toString();
+    }
+
+    receive("show all") {
+        dump(self.s1);
+        dump(self.s2);
+        dump(self.s3);
+        dump(self.s4);
+        dump(self.s5);
+        dump(self.s6);
+    }
+
+    receive("show ops") {
+        let s: String = "how are you?"; // temporary variable
+        dump(s);
+
+        /// TODO: https://github.com/tact-lang/tact/issues/24
+        /// dump(self.s1 == "hello world");
+        /// dump(self.s1 != s);
+    }
+
+    get fun result(): String {
+        return self.s1;
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.029684
+Message sent: DeployOk, from contract, to deployer, value 0.96912, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message show all:
+Message sent: "show all", from deployer, to contract, value 1, not bounced
+#DEBUG#: hello world
+#DEBUG#: yes unicode 😀 😅 你好 no escaping
+#DEBUG#: -12345
+#DEBUG#: -12.345
+#DEBUG#: 6.78
+#DEBUG#: hello world, your balance is: 6.78
+Transaction Executed: success, Exit Code: 0, Gas: 0.010498
+
+> 🔍 Calling getter result:
+Return value: "hello world"
+
+> 📤 Sending message show all:
+Message sent: "show all", from deployer, to contract, value 1, not bounced
+#DEBUG#: hello world
+#DEBUG#: yes unicode 😀 😅 你好 no escaping
+#DEBUG#: -12345
+#DEBUG#: -12.345
+#DEBUG#: 6.78
+#DEBUG#: hello world, your balance is: 6.78
+Transaction Executed: success, Exit Code: 0, Gas: 0.010498
+
+> 📤 Sending message show ops:
+Message sent: "show ops", from deployer, to contract, value 1, not bounced
+#DEBUG#: how are you?
+Transaction Executed: success, Exit Code: 0, Gas: 0.010259
+
+Variables
+The most important variables are those that are persisted in state and retain their value between contract executions. They must be defined in the scope of the contract like contractVar1.
+
+Persisting data in state costs gas. The contract must pay rent periodically from its balance. State storage is expensive, about 4 TON per MB per year. If the contract runs out of balance, the data will be deleted. If you need to store large amounts of data, like images, a service like TON Storage would be more suitable.
+
+Persistent state variables can only change in receivers by sending messages as transactions. Sending these transactions will cost gas to users.
+
+Executing getters is read-only, they can access all variables, but cannot change state variables. They are free to execute and don't cost any gas.
+
+Local variables like localVar1 are temporary. They're not persisted to state. You can define them in any function and they will only exist in run-time during the execution of the function. You can change their value in getters too.
+
+
+import "@stdlib/deploy";
+
+contract Variables with Deployable {
+
+    // contract variables are persisted in state and can change their value between transactions
+    // they cost rent per their specified size
+    contractVar1: Int as coins = ton("1.26");
+    contractVar2: Int as uint64;
+
+    init(arg1: Int) {
+        // contract variables support complex initializations that are calculated in run-time
+        self.contractVar2 = min(arg1, pow(2, 64) - 1);
+    }
+
+    // receivers handle incoming messages and can change state
+    receive("increment") {
+        // local variables are temporary, not persisted in state
+        let localVar1: Int = 100 * 1000;
+        localVar1 = localVar1 * 2;
+
+        // contract variables that are persisted in state can only change in receivers
+        self.contractVar1 = self.contractVar1 + 1;
+        self.contractVar2 = self.contractVar2 + 1;
+    }
+
+    // getters are executed by users to query data and can't change state
+    get fun sum(arg1: Int): Int {
+        // local variables are temporary, not persisted in state
+        let localVar1: Int = 100 * 1000;
+        localVar1 = localVar1 * 2;
+
+        // getters can access everything but for read-only operations only
+        return arg1 + self.contractVar1 + localVar1;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.00731
+Message sent: DeployOk, from contract, to deployer, value 0.991494, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter sum:
+Return value: 1260200018
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003874
+
+> 🔍 Calling getter sum:
+Return value: 1260200019
+
+Constants
+Unlike variables, constants cannot change. Their values are calculated in compile-time and cannot change during execution.
+
+Constant initializations must be relatively simple and only rely on values known during compilation. If you add two numbers for example, the compiler will calculate the result during build and put the result in your compiled code.
+
+You can read constants both in receivers and in getters.
+
+Unlike contract variables, constants don't consume space in persistent state. Their values are stored directly in the code cell.
+
+There isn't much difference between constants defined outside of a contract and inside the contract. Those defined outside can be used by other contracts in your project.
+
+import "@stdlib/deploy";
+
+// global constants are calculated in compile-time and can't change
+const GlobalConst1: Int = 1000 + ton("1.24") + pow(10, 9);
+
+contract Constants with Deployable {
+
+    // contract constants are calculated in compile-time and can't change
+    const ContractConst1: Int = 2000 + ton("1.25") + pow(10, 9);
+
+    // if your contract can be in multiple states, constants are an easy alternative to enums
+    const StateUnpaid: Int = 0;
+    const StatePaid: Int = 1;
+    const StateDelivered: Int = 2;
+    const StateDisputed: Int = 3;
+
+    init() {}
+
+    get fun sum(): Int {
+        // you can read the constants anywhere
+        return GlobalConst1 + self.ContractConst1 + self.StatePaid;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006963
+Message sent: DeployOk, from contract, to deployer, value 0.991841, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter sum:
+Return value: 4490003001
+
+Getters
+Getters are special contract functions that allow users to query information from the contract.
+
+Contract methods starting with the prefix get fun are all getters. You can define as many getters are you want. Each getter must also specify its return type - counter() for example returns an Int.
+
+Calling getters is free and does not cost gas. The call is executed by a full node and doesn't go through consensus with all the validators nor is added to a new block.
+
+Getters are read-only, they cannot change the contract persistent state.
+
+If we were to omit the get keyword from the function declaration of a getter, it will stop being a getter. External users would no longer be able call this function and it would essentially become a private method of the contract.
+
+Getters between contracts
+A contract cannot execute a getter of another contract.
+
+Getters are only executable by end-users off-chain. Since contracts are running on-chain, they do not have access to each other's getters.
+
+So, if you can't call a getter, how can two contracts communicate?
+
+The only way for contracts to communicate on-chain is by sending messages to each other. Messages are handled in receivers.
+
+Info: TON Blockchain is an asynchronous blockchain, which means that smart contracts can interact with each other only by sending messages.
+
+import "@stdlib/deploy";
+
+contract Getters with Deployable {
+
+    count: Int as uint32;
+
+    init() {
+        self.count = 17;
+    }
+
+    get fun counter(): Int {
+        return self.count;
+    }
+
+    get fun location(): Address {
+        return myAddress();
+    }
+
+    get fun greeting(): String {
+        return "hello world";
+    }
+
+    get fun sum(a: Int, b: Int): Int {
+        return a + b;
+    }
+
+    get fun and(a: Bool, b: Bool): Bool {
+        return a && b;
+    }
+
+    get fun answer(a: Int): String {
+        let sb: StringBuilder = beginString();
+        sb.append("The meaning of life is ");
+        sb.append(a.toString());
+        return sb.toString();
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007033
+Message sent: DeployOk, from contract, to deployer, value 0.991771, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter counter:
+Return value: 17
+
+> 🔍 Calling getter location:
+Return value: EQB4ASSOiEs2gg3DG6KejHLpULWCD6AR1Ptlu9qakyKG3ev1
+
+> 🔍 Calling getter greeting:
+Return value: "hello world"
+
+> 🔍 Calling getter sum(3,4):
+Return value: 7
+
+> 🔍 Calling getter and(true,false):
+Return value: false
+
+> 🔍 Calling getter answer(42):
+Return value: "The meaning of life is 42"
+
+Receivers and Messages
+In TON, users interact with contracts by sending them messages. Different contracts can only communicate with each other by sending each other messages.
+
+Since users actually use wallet contracts, messages from users are actually messages coming from just another contract.
+
+Sending a message to a contract costs gas and is processed in the course of a transaction. The transaction executes when validators add the transaction to a new block. This can take a few seconds. Messages are also able to change the contract's persistent state.
+
+Receivers
+When designing your contract, make a list of every operation that your contract supports, then, define a message for each operation, and finally, implement a handler for each message containing the logic of what to do when it arrives.
+
+Contract methods named receive() are the handlers that process each incoming message type. Tact will automatically route every incoming message to the correct receiver listening for it according to its type. A message is only handled by one receiver.
+
+Messages are defined using the message keyword. They can carry input arguments. Notice that for integers, you must define the encoding size, just like in state variables. When somebody sends the message, they serialize it over the wire.
+
+import "@stdlib/deploy";
+
+// this message will cause our contract to add an amount to the counter
+message Add {
+    amount: Int as uint32;
+}
+
+// this message will cause our contract to subtract an amount from the counter
+message Subtract {
+    amount: Int as uint32;
+}
+
+// this message will cause our contract to do a complex math operation on the counter
+message MultiMath {
+    add: Int as uint32;
+    subtract: Int as uint32;
+    multiply: Int as uint32;
+}
+
+contract Receivers with Deployable {
+
+    val: Int as int64;
+
+    init() {
+        self.val = 0;
+    }
+
+    // handler for the "Add" message - this is a binary message that has an input argument (amount)
+    receive(msg: Add) {
+        self.val = self.val + msg.amount;
+    }
+
+    // handler for the "Subtract" message - this is a different binary message although its format is identical
+    receive(msg: Subtract) {
+        self.val = self.val - msg.amount;
+    }
+
+    // handler for the "MultiMath" message - this is a binary message that holds multiple input arguments
+    receive(msg: MultiMath) {
+        self.val = self.val + msg.add;
+        self.val = self.val - msg.subtract;
+        self.val = self.val * msg.multiply;
+    }
+
+    // handler for "increment" textual message - this is a textual string message, these cannot carry input arguments
+    receive("increment") {
+        self.val = self.val + 1;
+    }
+
+    // handler for "decrement" textual message - this is a different textual string message, you can have as many as you want
+    receive("decrement") {
+        self.val = self.val - 1;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007486
+Message sent: DeployOk, from contract, to deployer, value 0.991318, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004069
+
+> 📤 Sending message decrement:
+Message sent: "decrement", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004128
+
+> 📤 Sending message Add{3}:
+Message sent: Add, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003165
+
+> 📤 Sending message Subtract{2}:
+Message sent: Subtract, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003268
+
+> 📤 Sending message MultiMath{1,0,2}:
+Message sent: MultiMath, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003611
+
+> 📤 Sending message MultiMath{0,3,3}:
+Message sent: MultiMath, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003611
+
+Textual Messages
+Most of the messages we saw in the previous example were defined with the message keyword. They are considered binary messages. This means that when somebody wants to send them, they serialize them into bits and bytes of binary data.
+
+The disadvantage with binary messages is that they're not human readable.
+
+Hardware wallets and blind signing
+When working with dangerous contracts that handle a lot of money, users are encouraged to use hardware wallets like Ledger. Hardware wallets cannot decode binary messages to confirm to the user what they're actually signing.
+
+Tact supports textual messages for this reason, since they're human readable and can easily be confirmed with users, eliminating phishing risks.
+
+Textual messages are limited because they cannot contain arguments. Future versions of Tact will add this functionality.
+
+Using the comment field
+If you've ever made a transfer using a TON wallet, you probably noticed that you can add a comment (also known as a memo or a tag). This is how textual messages are sent.
+
+Receivers for textual messages just define the string that they expect. Tact automatically does string matching and calls the matching receiver when a comment message arrives.
+
+import "@stdlib/deploy";
+
+contract Receivers with Deployable {
+
+    val: Int as int64;
+
+    init() {
+        self.val = 0;
+    }
+
+    // this receiver is called when the string "increment" is received in an incoming string comment message
+    receive("increment") {
+        self.val = self.val + 1;
+    }
+
+    // this receiver is called when the string "decrement" is received in an incoming string comment message
+    receive("decrement") {
+        self.val = self.val - 1;
+    }
+
+    // this receiver is called when the string "increment by 2" is received in an incoming string comment message
+    receive("increment by 2") {
+        self.val = self.val + 2;
+    }
+
+    // if none of the previous receivers match the comment string, this one is called
+    receive(msg: String) {
+        dump("unknown textual message received:");
+        dump(msg);
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+}> 📝 Deploying contract:
+ Message sent: Deploy, from deployer, to contract, value 1, not bounced
+ Transaction Executed: success, Exit Code: 0, Gas: 0.007113
+ Message sent: DeployOk, from contract, to deployer, value 0.991691, not bounced
+ Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+ > 🔍 Calling getter value:
+ Return value: 0
+
+ > 📤 Sending message increment:
+ Message sent: "increment", from deployer, to contract, value 1, not bounced
+ Transaction Executed: success, Exit Code: 0, Gas: 0.003814
+
+ > 📤 Sending message decrement:
+ Message sent: "decrement", from deployer, to contract, value 1, not bounced
+ Transaction Executed: success, Exit Code: 0, Gas: 0.003909
+
+ > 📤 Sending message increment by 2:
+ Message sent: "increment by 2", from deployer, to contract, value 1, not bounced
+ Transaction Executed: success, Exit Code: 0, Gas: 0.004084
+
+ > 📤 Sending message increment by 3:
+ Message sent: "increment by 3", from deployer, to contract, value 1, not bounced
+ #DEBUG#: unknown textual message received:
+ #DEBUG#: increment by 3
+ Transaction Executed: success, Exit Code: 0, Gas: 0.004332
+
+ > 🔍 Calling getter value:
+ Return value: 2
+ Structs
+ Structs allow you to combine multiple primitives together in a more semantic way. They're a great tool to make your code more readable.
+
+ Structs can define complex data types that contain multiple fields of different types. They can also be nested.
+
+ Structs can also include both default fields and optional fields. This can be quite useful when you have many fields but don't want to keep respecifying them.
+
+ Structs are also useful as return values from getters or other internal functions. They effectively allow a single getter to return multiple return values.
+
+ The order of fields does not matter. Unlike other languages, Tact does not have any padding between fields.
+
+ Info: You can check more "Optionals" examples here: Optionals
+ Structs vs. messages
+ Structs and messages are almost identical with the only difference that messages have a 32-bit header containing their unique numeric id. This allows messages to be used with receivers since the contract can tell different types of messages apart based on this id.
+ import "@stdlib/deploy";
+
+ struct Point {
+     x: Int as int64;
+     y: Int as int64;
+ }
+
+ struct Params {
+     name: String = "Satoshi";   // default value
+     age: Int? = null;           // optional field
+     point: Point;               // nested structs
+ }
+
+ message Add {
+     point: Point;               // message can hold a struct
+ }
+
+ contract Structs with Deployable {
+
+     // contract persistent state variables
+     s1: Point;
+     s2: Params;
+
+     init() {
+         self.s1 = Point{x: 2, y: 3};
+         self.s2 = Params{point: self.s1};
+     }
+
+     receive("show ops") {
+         // temporary variable
+         let s: Point = Point{x: 4, y: 5};
+
+         self.s1 = s;
+     }
+
+     receive(msg: Add) {
+         self.s1.x = self.s1.x + msg.point.x;
+         self.s1.y = self.s1.y + msg.point.y;
+     }
+
+     get fun point(): Point {
+         return self.s1;
+     }
+
+     get fun params(): Params {
+         return self.s2;
+     }
+ }
+
+import "@stdlib/deploy";
+
+struct Point {
+    x: Int as int64;
+    y: Int as int64;
+}
+
+struct Params {
+    name: String = "Satoshi";   // default value
+    age: Int? = null;           // optional field
+    point: Point;               // nested structs
+}
+
+message Add {
+    point: Point;               // message can hold a struct
+}
+
+contract Structs with Deployable {
+
+    // contract persistent state variables
+    s1: Point;
+    s2: Params;
+
+    init() {
+        self.s1 = Point{x: 2, y: 3};
+        self.s2 = Params{point: self.s1};
+    }
+
+    receive("show ops") {
+        // temporary variable
+        let s: Point = Point{x: 4, y: 5};
+
+        self.s1 = s;
+    }
+
+    receive(msg: Add) {
+        self.s1.x = self.s1.x + msg.point.x;
+        self.s1.y = self.s1.y + msg.point.y;
+    }
+
+    get fun point(): Point {
+        return self.s1;
+    }
+
+    get fun params(): Params {
+        return self.s2;
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.008325
+Message sent: DeployOk, from contract, to deployer, value 0.990479, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter point:
+Return value: {$$type: "Point", x: 2, y: 3}
+
+> 🔍 Calling getter params:
+Return value: {$$type: "Params", name: "Satoshi", age: null, point: {$$type: "Point", x: 2, y: 3}}
+
+> 📤 Sending message show ops:
+Message sent: "show ops", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005451
+
+> 📤 Sending message Add{Point{1,-1}}:
+Message sent: Add, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004795
+
+> 🔍 Calling getter point:
+Return value: {$$type: "Point", x: 5, y: 4}
+
+> 🔍 Calling getter params:
+Return value: {$$type: "Params", name: "Satoshi", age: null, point: {$$type: "Point", x: 2, y: 3}}
+
+Message Sender
+Every incoming message is sent from some contract that has an address.
+
+You can query the address of the message sender by calling sender(). Alternatively, the address is also available through context().sender.
+
+The sender during execution of the init() method of the contract is the address who deployed the contract.
+
+Authenticating messages
+The main way to authenticate an incoming message, particularly for priviliges actions, is to verify the sender. This field is secure and impossible to fake.
+
+Info: More detail about context can find in here: context()
+import "@stdlib/deploy";
+
+contract MessageSender with Deployable {
+
+    deployer: Address;
+    lastSender: Address;
+
+    init() {
+        self.deployer = sender(); // sender() of init is who deployed the contract
+        self.lastSender = newAddress(0, 0); // zero address
+    }
+
+    receive("who") {
+        if (sender() == self.deployer) {
+            dump("deployer");
+        } else {
+            dump("not deployer!");
+        }
+    }
+
+    receive("hello") {
+        if (sender() != self.lastSender) {
+            self.lastSender = sender();
+            dump("hello new sender!");
+        }
+    }
+}
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.009259
+Message sent: DeployOk, from contract, to deployer, value 0.989545, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message who (from deployer):
+Message sent: "who", from deployer, to contract, value 1, not bounced
+#DEBUG#: deployer
+Transaction Executed: success, Exit Code: 0, Gas: 0.005703
+
+> 📤 Sending message who (from sender 2):
+Message sent: "who", from sender 2, to contract, value 1, not bounced
+#DEBUG#: not deployer!
+Transaction Executed: success, Exit Code: 0, Gas: 0.005703
+
+> 📤 Sending message hello (from deployer):
+Message sent: "hello", from deployer, to contract, value 1, not bounced
+#DEBUG#: hello new sender!
+Transaction Executed: success, Exit Code: 0, Gas: 0.005902
+
+> 📤 Sending message hello (from sender 2):
+Message sent: "hello", from sender 2, to contract, value 1, not bounced
+#DEBUG#: hello new sender!
+Transaction Executed: success, Exit Code: 0, Gas: 0.005902
+
+Throwing Errors
+Processing an incoming message in a transaction isn't always successful. The contract may encounter some error and fail.
+
+This can be due to an explicit decision of the contract author, usually by writing a require() on a condition that isn't met, or this may happen implicitly due to some computation error in run-time, like a math overflow.
+
+When an error is thrown, the transaction reverts. This means that all persistent state changes that took place during this transaction, even those that happened before the error was thrown, are all reverted and return to their original values.
+
+Notifying the sender about the error
+How would the sender of the incoming message know that the message they had sent was rejected due to an error?
+
+All communication is via messages, so naturally the sender should receive a message about the error. TON will actually return the original message back to the sender and mark it as bounced - just like a snail mail letter that couldn't be delivered.
+
+import "@stdlib/deploy";
+
+message Divide {
+    by: Int as uint32;
+}
+
+contract Errors with Deployable {
+
+    val: Int as int64;
+
+    init() {
+        self.val = 0;
+    }
+
+    // not meeting the condition will raise an error, revert the transaction and all state changes
+    receive("increment") {
+        self.val = self.val + 1;
+        require(self.val < 5, "Counter is too high");
+    }
+
+    // any exceptions during execution will also revert the transaction and all state changes
+    receive(msg: Divide) {
+        self.val = 4;
+        self.val = self.val / msg.by;
+    }
+
+    // advanced: revert the transaction and return a specific non-zero exit code manually
+    // https://ton.org/docs/learn/tvm-instructions/tvm-exit-codes
+    receive("no access") {
+        throw(132);
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+}
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007216
+Message sent: DeployOk, from contract, to deployer, value 0.991588, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003992
+
+> 📤 Sending message Divide{2}:
+Message sent: Divide, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.003209
+
+> 📤 Sending message Divide{0}:
+Message sent: Divide, from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 4, Gas: 0.002449
+🔴 Error message: Integer overflow
+
+Message sent: error, from contract, to deployer, value 0.996551, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message no access:
+Message sent: "no access", from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 132, Gas: 0.003193
+🔴 Error message: Access denied
+
+Message sent: error, from contract, to deployer, value 0.995807, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 2
+
+Receiving TON Coins
+Every contract has a TON coin balance. This balance is used to pay ongoing rent for storage and should not run out otherwise the contract may be deleted. You can store extra coins in the balance for any purpose.
+
+Every incoming message normally carries some TON coin value sent by the sender. This value is used to pay gas for handling this message. Unused excess will stay in the contract balance. If the value doesn't cover the gas cost, the transaction will revert.
+
+You can query the contract balance with myBalance() - note that the value is in nano-tons (like cents, just with 9 decimals). The balance already contains the incoming message value.
+
+Info: More detail about myBalance() can be found here: myBalance()
+Refunding senders
+If the transaction reverts, unused excess value will be sent back to sender on the bounced message.
+
+You can also refund the excess if the transaction succeeds by sending it back using self.reply() in a response message. This is the best way to guarantee senders are only paying for the exact gas that their message consumed.
+
+import "@stdlib/deploy";
+
+contract ReceiveCoins with Deployable {
+
+    val: Int as int64;
+
+    init() {
+        self.val = 0;
+    }
+
+    // receive empty messages, these are usually simple TON coin transfers to the contract
+    receive() {
+        dump("empty message received");
+        // revert the transaction if balance is growing over 3 TON
+        require(myBalance() <= ton("3"), "Balance getting too high");
+    }
+
+    receive("increment") {
+        // print how much TON coin were sent with this message
+        dump(context().value);
+        self.val = self.val + 1;
+    }
+
+    receive("refunding increment") {
+        // print how much TON coin were sent with this message
+        dump(context().value);
+        self.val = self.val + 1;
+        // return all the unused excess TON coin value on the message back to the sender (with a textual string message)
+        self.reply("increment refund".asComment());
+    }
+
+    get fun balance(): Int {
+        return myBalance(); // in nano-tons (like cents, just with 9 decimals)
+    }
+}
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007371
+Message sent: DeployOk, from contract, to deployer, value 0.991433, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter balance:
+Return value: 0
+
+> 📤 Sending message 1 TON:
+Message sent: empty, from deployer, to contract, value 1, not bounced
+#DEBUG#: empty message received
+Transaction Executed: success, Exit Code: 0, Gas: 0.003178
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+#DEBUG#: 1000000000
+Transaction Executed: success, Exit Code: 0, Gas: 0.008467
+
+> 📤 Sending message refunding increment:
+Message sent: "refunding increment", from deployer, to contract, value 1, not bounced
+#DEBUG#: 1000000000
+Transaction Executed: success, Exit Code: 0, Gas: 0.01171
+Message sent: "increment refund", from contract, to deployer, value 0.98703, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter balance:
+Return value: 1988354999
+
+Messages Between Contracts
+Different contracts can communicate with each other only by sending messages. This example showcases two separate contracts working in tandem:
+
+Counter - A simple counter that can increment only by 1.
+BulkAdder - This contract instructs Counter to increment multiple times.
+Click the Deploy button to deploy both contracts. To make the counter reach 5, send the Reach message to BulkAdder by clicking the Send Reach{5} button.
+
+Observe the number of messages exchanged between the two contracts. Each message is processed as a separate transaction. Also note that BulkAdder cannot call a getter on Counter; it must send a query message instead.
+
+Who's Paying for Gas
+By default, the original sender is responsible for covering the gas costs of the entire cascade of messages they initiate. This is funded by the original TON coin value sent with the first Reach message.
+
+Internally, this is managed by each message handler forwarding the remaining excess TON coin value to the next message it sends.
+
+Challenge: Try to modify the code to refund the original sender any unused excess gas.
+
+import "@stdlib/deploy";
+
+message CounterValue {
+    value: Int as uint32;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// this is our famous Counter contract, we've seen it before
+// this contract is very annoying, it only allows to increment +1 at a time!
+
+contract Counter with Deployable {
+
+    val: Int as uint32;
+
+    init() {
+        self.val = 0;
+    }
+
+    // step 6: this contract allows anyone to ask it to increment by 1 (ie. the other contract)
+    receive("increment") {
+        self.val = self.val + 1;
+        self.reply(CounterValue{value: self.val}.toCell());
+    }
+
+    // step 3: this contract replies with its current value to anyone asking (ie. the other contract)
+    receive("query") {
+        self.reply(CounterValue{value: self.val}.toCell());
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+}
+
+message Reach {
+    counter: Address;
+    target: Int as uint32;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// let's write a second helper contract to make our lives a little easier
+// it will keep incrementing the previous contract as many times as we need!
+
+contract BulkAdder with Deployable {
+
+    target: Int as uint32;
+
+    init() {
+        self.target = 0;
+    }
+
+    // step 1: users will send this message to tell us what target value we need to reach
+    receive(msg: Reach) {
+        self.target = msg.target;
+        // step 2: this contract will query the current counter value from the other contract
+        send(SendParameters{
+            to: msg.counter,
+            value: 0, /// TODO: https://github.com/tact-lang/tact/issues/31
+            mode: SendRemainingValue + SendIgnoreErrors, /// TODO: issues/31
+            body: "query".asComment()
+        });
+    }
+
+    // step 4: the other contract will tell us what is its current value by sending us this message
+    receive(msg: CounterValue) {
+        if (msg.value < self.target) {
+            // step 5: if its value is too low, send it another message to increment it by +1 more
+            send(SendParameters{
+                to: sender(),
+                value: 0, /// TODO: same issue 31
+                mode: SendRemainingValue + SendIgnoreErrors, /// TODO: https://github.com/tact-lang/tact/issues/31
+                body: "increment".asComment()
+            });
+        }
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to Counter, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007113
+Message sent: DeployOk, from Counter, to deployer, value 0.991691, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+Message sent: Deploy, from deployer, to BulkAdder, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007323
+Message sent: DeployOk, from BulkAdder, to deployer, value 0.991481, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message Reach{5}:
+Message sent: Reach, from deployer, to BulkAdder, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006255
+Message sent: "query", from BulkAdder, to Counter, value 0.992573, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007676
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.983733, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006099
+Message sent: "increment", from BulkAdder, to Counter, value 0.97643, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007545
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.967721, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006099
+Message sent: "increment", from BulkAdder, to Counter, value 0.960418, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007545
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.951709, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006099
+Message sent: "increment", from BulkAdder, to Counter, value 0.944406, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007545
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.935697, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006099
+Message sent: "increment", from BulkAdder, to Counter, value 0.928394, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007545
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.919685, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006099
+Message sent: "increment", from BulkAdder, to Counter, value 0.912382, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007545
+Message sent: CounterValue, from Counter, to BulkAdder, value 0.903673, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.00336
+
+Sending TON Coins
+This contract allows to withdraw TON coins from its balance. Notice that only the deployer is permitted to do that, otherwise this money could be stolen.
+
+The withdrawn funds are sent as value on an outgoing message to the sender. It's a good idea to set the bounce flag explicitly to true (although this also the default), so if the outgoing message fails for any reason, the money would return to the contract.
+
+Contracts need to have a non-zero balance so they can pay storage costs occasionally, otherwise they may get deleted. This contract can make sure you always leave 0.01 TON which is enough to store 1 KB of state for 2.5 years.
+
+The intricate math
+myBalance() is the contract balance including the value for gas sent on the incoming message. myBalance() - context().value is the balance without the value for gas sent on the incoming message.
+
+Send mode SendRemainingValue will add to the outgoing value any excess left from the incoming message after all gas costs are deducted from it.
+
+Send mode SendRemainingBalance will ignore the outgoing value and send the entire balance of the contract. Note that this will not leave any balance for storage costs so the contract may be deleted.
+
+Info: More details for different sending modes can check here
+import "@stdlib/deploy";
+
+message Withdraw {
+    amount: Int as coins;
+}
+
+contract SendCoins with Deployable {
+
+    const MinTonForStorage: Int = ton("0.01"); // enough for 1 KB of storage for 2.5 years
+    deployer: Address;
+
+    init() {
+        self.deployer = sender();
+    }
+
+    // accept incoming TON transfers
+    receive() {
+        dump("funds received");
+    }
+
+    // this will withdraw the entire balance of the contract and leave 0
+    receive("withdraw all") {
+        require(sender() == self.deployer, "Only deployer is allowed to withdraw");
+        send(SendParameters{
+            to: sender(),
+            bounce: true,
+            value: 0,
+            mode: SendRemainingBalance + SendIgnoreErrors
+        });
+    }
+
+    // this will withdraw the entire balance but leave 0.01 for storage rent costs
+    receive("withdraw safe") {
+        require(sender() == self.deployer, "Only deployer is allowed to withdraw");
+        send(SendParameters{
+            to: sender(),
+            bounce: true,
+            value: myBalance() - context().value - self.MinTonForStorage,
+            mode: SendRemainingValue + SendIgnoreErrors
+        });
+    }
+
+    // this will withdraw a specific amount but leave 0.01 for storage rent costs
+    receive(msg: Withdraw) {
+        require(sender() == self.deployer, "Only deployer is allowed to withdraw");
+        let amount: Int = min(msg.amount, myBalance() - context().value - self.MinTonForStorage);
+        require(amount > 0, "Insufficient balance");
+        send(SendParameters{
+            to: sender(),
+            bounce: true,
+            value: amount,
+            mode: SendRemainingValue + SendIgnoreErrors
+        });
+    }
+
+    get fun balance(): String {
+        return myBalance().toCoinsString();
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007736
+Message sent: DeployOk, from contract, to deployer, value 0.991068, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter balance:
+Return value: "0"
+
+> 📤 Sending message 1 TON:
+Message sent: empty, from deployer, to contract, value 1, not bounced
+#DEBUG#: funds received
+Transaction Executed: success, Exit Code: 0, Gas: 0.003748
+
+> 📤 Sending message withdraw all:
+Message sent: "withdraw all", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007539
+Message sent: empty, from contract, to deployer, value 1.987713, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message withdraw safe:
+Message sent: "withdraw safe", from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 5, Gas: 0.005092
+🔴 Error message: Integer out of expected range
+
+Message sent: error, from contract, to deployer, value 0.993908, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message Withdraw{1 TON}:
+Message sent: Withdraw, from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 54615, Gas: 0.003485
+🔴 Error message: Insufficient balance
+
+Message sent: error, from contract, to deployer, value 0.995515, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+Emitting Logs
+It is sometimes useful to emit events from the contract in order to indicate that certain things happened.
+
+This data can later be analyzed off-chain and indexed by using RPC API to query all transactions sent to the contract.
+
+Consider for example a staking contract that wants to indicate how much time passed before users unstaked for analytics purposes. By analyzing this data, the developer can think of improvements to the product.
+
+One way to achieve this is by sending messages back to the sender using self.reply() or by sending messages to the zero address. These two methods work, but they are not the most efficient in terms of gas.
+
+The emit() function will output a message (binary or textual) from the contract. This message does not actually have a recipient and is very gas-efficient because it doesn't actually need to be delivered.
+
+The messages emitted in this way are still recorded on the blockchain and can be analyzed by anyone at any later time.
+
+import "@stdlib/deploy";
+
+message TransferEvent {
+    amount: Int as coins;
+    recipient: Address;
+}
+
+message StakeEvent {
+    amount: Int as coins;
+}
+
+contract Emit with Deployable {
+
+    init() {}
+
+    receive("action") {
+        // handle action here
+        // ...
+        // emit log that the action was handled
+        emit("Action handled".asComment());
+    }
+
+    receive("transfer") {
+        // handle transfer here
+        // ...
+        // emit log that the transfer happened
+        emit(TransferEvent{amount: ton("1.25"), recipient: sender()}.toCell());
+    }
+
+    receive("stake") {
+        // handle stake here
+        // ...
+        // emit log that stake happened
+        emit(StakeEvent{amount: ton("0.007")}.toCell());
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007051
+Message sent: DeployOk, from contract, to deployer, value 0.991753, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message action:
+Message sent: "action", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004881
+Log emitted: "Action handled", from contract
+
+> 📤 Sending message transfer:
+Message sent: "transfer", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006178
+Log emitted: TransferEvent, from contract
+
+> 📤 Sending message stake:
+Message sent: "stake", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005813
+Log emitted: StakeEvent, from contract
+
+If Statements
+Tact supports if statements in a similar syntax to most programming languages that you're used to. Curly braces are required though, so you can't leave them out.
+
+The condition of the statement can be any boolean expression.
+
+There is no switch statement in Tact. If you need to need to handle a group of outcomes separately, follow the else if pattern you can see in the third example.
+
+import "@stdlib/deploy";
+
+contract IfStatements with Deployable {
+
+    val: Int as int32;
+
+    init() {
+        self.val = 17;
+    }
+
+    receive("check1") {
+        if (self.val > 10) {
+            dump("larger than 10");
+        }
+    }
+
+    receive("check2")  {
+        if (self.val > 100) {
+            dump("larger than 100");
+        } else {
+            dump("smaller than 100");
+        }
+    }
+
+    receive("check3") {
+        if (self.val > 1000) {
+            dump("larger than 1000");
+        } else if (self.val > 500) {
+            dump("between 500 and 1000");
+        } else {
+            dump("smaller than 500");
+        }
+    }
+}
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007121
+Message sent: DeployOk, from contract, to deployer, value 0.991683, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message check1:
+Message sent: "check1", from deployer, to contract, value 1, not bounced
+#DEBUG#: larger than 10
+Transaction Executed: success, Exit Code: 0, Gas: 0.003945
+
+> 📤 Sending message check2:
+Message sent: "check2", from deployer, to contract, value 1, not bounced
+#DEBUG#: smaller than 100
+Transaction Executed: success, Exit Code: 0, Gas: 0.004162
+
+> 📤 Sending message check3:
+Message sent: "check3", from deployer, to contract, value 1, not bounced
+#DEBUG#: smaller than 500
+Transaction Executed: success, Exit Code: 0, Gas: 0.004492
+
+Loops
+Tact does not support traditional for loops, but its loop statements are equivalent and can easily implement the same things. Also note that Tact does not support break and continue statements in loops like some languages.
+
+The repeat loop statement input number must fit within an int32, otherwise an exception will be thrown.
+
+The condition of the while and until loop statements can be any boolean expression.
+
+Smart contracts consume gas for execution. The amount of gas is proportional to the number of iterations. The last example iterates too many times and reverts due to an out of gas exception.
+
+
+contract Loops with Deployable {
+
+    init() {}
+
+    receive("loop1") {
+        let sum: Int = 0;
+        let i: Int = 0;
+        repeat (10) {               // repeat exactly 10 times
+            i = i + 1;
+            sum = sum + i;
+        }
+        dump(sum);
+    }
+
+    receive("loop2") {
+        let sum: Int = 0;
+        let i: Int = 0;
+        while (i < 10) {            // loop while a condition is true
+            i = i + 1;
+            sum = sum + i;
+        }
+        dump(sum);
+    }
+
+    receive("loop3") {
+        let sum: Int = 0;
+        let i: Int = 0;
+        do {                        // loop until a condition is true
+            i = i + 1;
+            sum = sum + i;
+        } until (i >= 10);
+        dump(sum);
+    }
+
+    > 📝 Deploying contract:
+    Message sent: Deploy, from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.007051
+    Message sent: DeployOk, from contract, to deployer, value 0.991753, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+    > 📤 Sending message loop1:
+    Message sent: "loop1", from deployer, to contract, value 1, not bounced
+    #DEBUG#: 55
+    Transaction Executed: success, Exit Code: 0, Gas: 0.006461
+
+    > 📤 Sending message loop2:
+    Message sent: "loop2", from deployer, to contract, value 1, not bounced
+    #DEBUG#: 55
+    Transaction Executed: success, Exit Code: 0, Gas: 0.007103
+
+    > 📤 Sending message loop3:
+    Message sent: "loop3", from deployer, to contract, value 1, not bounced
+    #DEBUG#: 55
+    Transaction Executed: success, Exit Code: 0, Gas: 0.007199
+
+    > 📤 Sending message out of gas:
+    Message sent: "out of gas", from deployer, to contract, value 1, not bounced
+    Transaction Executed: error, Exit Code: -14, Gas: 1
+    🔴 Error message: Out of gas error
+
+    Functions
+    To make your code more readable and promote code reuse, you're encouraged to divide it into functions.
+
+    Functions in Tact start with the fun keyword. Functions can receive multiple input arguments and can optionally return a single output value. You can return a struct if you want to return multiple values.
+
+    Global static functions are defined outside the scope of contracts. You can call them from anywhere, but they can't access the contract or any of the contract state variables.
+
+    Contract methods are functions that are defined inside the scope of a contract. You can call them only from other contract methods like receivers and getters. They can access the contract's state variables.
+
+    Functions
+    To make your code more readable and promote code reuse, you're encouraged to divide it into functions.
+
+    Functions in Tact start with the fun keyword. Functions can receive multiple input arguments and can optionally return a single output value. You can return a struct if you want to return multiple values.
+
+    Global static functions are defined outside the scope of contracts. You can call them from anywhere, but they can't access the contract or any of the contract state variables.
+
+    Contract methods are functions that are defined inside the scope of a contract. You can call them only from other contract methods like receivers and getters. They can access the contract's state variables.
+
+    > 📝 Deploying contract:
+    Message sent: Deploy, from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.007475
+    Message sent: DeployOk, from contract, to deployer, value 0.991329, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+    > 🔍 Calling getter result:
+    Return value: 5
+
+    > 📤 Sending message priviliged:
+    Message sent: "priviliged", from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.004762
+
+    > 📤 Sending message best L1:
+    Message sent: "best L1", from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.010456
+    Message sent: "TON", from contract, to deployer, value 0.988388, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+    Optionals
+    Optionals are variables or struct fields that can be null and don't necessarily hold a value. They are useful to reduce state size when the variable isn't necessarily used.
+
+    You can make any variable optional by adding ? after its type.
+
+    Optional variables that are not defined hold the null value. You cannot access them without checking for null first.
+
+    If you're certain an optional variable is not null, append to the end of its name !! to access its value. Trying to access the value without !! will result in a compilation error.
+
+    import "@stdlib/deploy";
+
+    struct StrctOpts {
+        sa: Int?;
+        sb: Bool?;
+        sc: Address?;
+    }
+
+    message MsgOpts {
+        ma: Int?;
+        mb: Bool?;
+        mc: Address?;
+        md: StrctOpts?;
+    }
+
+    contract Optionals with Deployable {
+
+        ca: Int?;
+        cb: Bool?;
+        cc: Address?;
+        cd: StrctOpts?;
+
+        init(a: Int?, b: Bool?, c: Address?) {
+            self.ca = a;
+            self.cb = b;
+            self.cc = c;
+            self.cd = StrctOpts{sa: null, sb: true, sc: null};
+        }
+
+        receive(msg: MsgOpts) {
+            let i: Int = 12;
+            if (msg.ma != null) {
+                i = i + msg.ma!!; // !! tells the compiler this can't be null
+                self.ca = i;
+            }
+        }
+
+        get fun optInt(): Int? {
+            return self.ca;
+        }
+
+        get fun optIntVal(): Int {
+            if (self.ca == null) {
+                return -1;
+            } else {
+                return self.ca!!; // !! tells the compiler this can't be null
+            }
+        }
+
+        get fun optNested(): Int? {
+            if (self.cd != null && (self.cd!!).sa != null) {
+                return (self.cd!!).sa!!; // !! tells the compiler this can't be null
+            } else {
+                return null;
+            }
+        }
+    }
+
+    > 📝 Deploying contract:
+    Message sent: Deploy, from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.010126
+    Message sent: DeployOk, from contract, to deployer, value 0.988678, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+    > 🔍 Calling getter optInt:
+    Return value: null
+
+    > 🔍 Calling getter optIntVal:
+    Return value: -1
+
+    > 🔍 Calling getter optNested:
+    Return value: null
+
+    > 📤 Sending message MsgOpts{ma:5}:
+    Message sent: MsgOpts, from deployer, to contract, value 1, not bounced
+    Transaction Executed: success, Exit Code: 0, Gas: 0.008026
+
+    > 🔍 Calling getter optNested:
+    Return value: null
+
+    > 🔍 Calling getter optIntVal:
+    Return value: 17
+
+
+Maps
+Maps are a dictionary type that can hold an arbitrary number of items, each under a different key.
+
+The keys in maps can either be an Int type or an Address type.
+
+You can check if a key is found in the map by calling the get() method. This will return null if the key is missing or the value if the key is found. Replace the value under a key by calling the set() method.
+
+Integers in maps stored in state currently use the largest integer size (257-bit). Future versions of Tact will let you optimize the encoding size.
+
+Limit the number of items
+Maps are designed to hold a limited number of items. Only use a map if you know the upper bound of items that it may hold. It's also a good idea to write a test to add the maximum number of elements to the map and see how gas behaves under stress.
+
+import "@stdlib/deploy";
+
+struct TokenInfo {
+    ticker: String;
+    decimals: Int;
+}
+
+// messages can contain maps
+message Replace {
+    items: map<Int, Address>;
+}
+
+contract Maps with Deployable {
+
+    // maps with Int as key
+    mi1: map<Int, TokenInfo>;
+    mi2: map<Int, Bool>;
+    mi3: map<Int, Int>;
+    mi4: map<Int, Address>;
+
+    // maps with Address as key
+    ma1: map<Address, TokenInfo>;
+    ma2: map<Address, Bool>;
+    ma3: map<Address, Int>;
+    ma4: map<Address, Address>;
+
+    init(arg: map<Int, Bool>) {
+        // no need to initialize maps if they're empty
+        self.mi2 = arg;
+    }
+
+    receive("set keys") {
+        // keys are Int
+        self.mi1.set(17, TokenInfo{ticker: "SHIB", decimals: 9});
+        self.mi2.set(0x9377433ff21832, true);
+        self.mi3.set(pow(2,240), pow(2,230));
+        self.mi4.set(-900, address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"));
+        // keys are Address
+        self.ma1.set(address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"), TokenInfo{ticker: "DOGE", decimals: 18});
+        self.ma2.set(address("UQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqEBI"), true);
+        self.ma3.set(address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"), ton("1.23"));
+        self.ma4.set(address("UQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqEBI"), myAddress());
+    }
+
+    receive("delete keys") {
+        // keys are Int
+        self.mi1.set(17, null);
+        self.mi2.set(0x9377433ff21832, null);
+        self.mi3.set(pow(2,240), null);
+        self.mi4.set(-900, null);
+        // keys are Address
+        self.ma1.set(address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"), null);
+        self.ma2.set(address("UQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqEBI"), null);
+        self.ma3.set(address("EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N"), null);
+        self.ma4.set(address("UQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqEBI"), null);
+    }
+
+    receive("clear") {
+        self.mi1 = emptyMap();
+        self.mi2 = emptyMap();
+        self.mi3 = emptyMap();
+        self.mi4 = emptyMap();
+        self.ma1 = emptyMap();
+        self.ma2 = emptyMap();
+        self.ma3 = emptyMap();
+        self.ma4 = emptyMap();
+    }
+
+    receive(msg: Replace) {
+        // replace all items in the map with those coming in the message
+        self.mi4 = msg.items;
+    }
+
+    // if the key is not found, the get() method returns null
+    get fun oneItem(key: Int): Address? {
+        return self.mi4.get(key);
+    }
+
+    get fun itemCheck(): String {
+        if (self.mi1.get(17) == null) {
+            return "not found";
+        }
+        let item: TokenInfo = self.mi1.get(17)!!; // !! tells the compiler this can't be null
+        return item.ticker;
+    }
+
+    // you can return maps from getters
+    get fun allItems(): map<Address, TokenInfo> {
+        return self.ma1;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.00887
+Message sent: DeployOk, from contract, to deployer, value 0.989934, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter oneItem(-900):
+Return value: null
+
+> 🔍 Calling getter itemCheck:
+Return value: "not found"
+
+> 🔍 Calling getter allItems:
+Return value: {}
+
+> 📤 Sending message set keys:
+Message sent: "set keys", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.01546
+
+> 📤 Sending message delete keys:
+Message sent: "delete keys", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.010084
+
+> 📤 Sending message clear:
+Message sent: "clear", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006347
+
+> 📤 Sending message Replace{{-900:my}}:
+Message sent: Replace, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005181
+
+> 🔍 Calling getter itemCheck:
+Return value: "not found"
+
+> 🔍 Calling getter allItems:
+Return value: {}
+
+Arrays
+You can implement simple arrays in Tact by using the map type.
+
+To create an array, define a map with an Int type as the key. This key will represent the index in the array. Additionally, include a variable to keep track of the number of items in the array.
+
+The example contract records the last five timestamps when the timer message was received. These timestamps are stored in a cyclical array, implemented as a map.
+
+Limit the Number of Items
+Maps are designed to hold a limited number of items. Only use a map if you know the maximum number of items it will contain. It's also a good idea to write a test to populate the map with its maximum number of elements and observe how gas consumption behaves under stress.
+
+If the number of items is unbounded and could potentially grow into the billions, you will need to architect your contract differently. We will discuss unbounded arrays later, under the topic of contract sharding.
+
+import "@stdlib/deploy";
+
+// this contract records the last 5 timestamps of when "timer" message was received
+contract Arrays with Deployable {
+
+    const MaxSize: Int = 5;
+    arr: map<Int, Int>; // this is our array implemented with a map
+    arrLength: Int as uint8 = 0;
+    arrStart: Int as uint8 = 0; // our array is cyclic
+
+    init() {}
+
+    // push an item to the end of the array
+    fun arrPush(item: Int) {
+        if (self.arrLength < self.MaxSize) {
+            self.arr.set(self.arrLength, item);
+            self.arrLength = self.arrLength + 1;
+        } else {
+            self.arr.set(self.arrStart, item);
+            self.arrStart = (self.arrStart + 1) % self.MaxSize;
+        }
+    }
+
+    // iterate over all items in the array and dump them
+    fun arrPrint() {
+        let i: Int = self.arrStart;
+        repeat (self.arrLength) {
+            dump(self.arr.get(i)!!); // !! tells the compiler this can't be null
+            i = (i + 1) % self.MaxSize;
+        }
+    }
+
+    // record the timestamp when each "timer" message is received
+    receive("timer") {
+        let timestamp: Int = now();
+        self.arrPush(timestamp);
+    }
+
+    receive("dump") {
+        self.arrPrint();
+    }
+
+    get fun length(): Int {
+        return self.arrLength;
+    }
+
+    get fun map(): map<Int, Int> {
+        return self.arr;
+    }
+}
+
+
+
+If the number of items is unbounded and can potentially grow to billions, you'll need to architect your contract differently. We will discuss unbounded maps later on under the topic of contract sharding.
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007225
+Message sent: DeployOk, from contract, to deployer, value 0.991579, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter length:
+Return value: 0
+
+> 🔍 Calling getter map:
+Return value: {}
+
+> 📤 Sending message timer:
+Message sent: "timer", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005081
+
+> 📤 Sending message dump:
+Message sent: "dump", from deployer, to contract, value 1, not bounced
+#DEBUG#: 1720180582
+Transaction Executed: success, Exit Code: 0, Gas: 0.009151
+
+> 🔍 Calling getter map:
+Return value: { 0: 1720180582 }
+
+Current Time
+Many blockchains rely on the current block number to give a sense of progress to contracts. This approach isn't well suited for TON because contracts on TON can run on multiple workchains and those may have different block seqnos.
+
+In TON, the best practice is to rely on the current time instead, which is available by calling now(). Standard unix time is returned, meaning the number of seconds since 1 January 1970.
+
+Transactions are not executed until validators add them to a new block. The current time will therefore be the timestamp of the new block when called in the context of a receiver.
+
+If you need to store the time in state or encode it in a message, use Int as uint32.
+
+If you need to compare two points in time simply subtract the earlier from the later. This will give you the number of seconds between the two. Divide by 60 to get the difference in minutes, by 60 * 60 to get the difference in hours and by 24 * 60 * 60 to get the difference in days.
+
+import "@stdlib/deploy";
+
+contract CurrentTime with Deployable {
+
+    deployTime: Int as uint32;
+
+    init() {
+        self.deployTime = now(); // returns unix time, the number of seconds since the epoch
+    }
+
+    receive("wait 10s") {
+        require(now() - self.deployTime > 10, "Did not wait long enough");
+        dump("thanks for waiting 10 seconds");
+    }
+
+    receive("wait 10d") {
+        require(now() - self.deployTime > 10*24*60*60, "Did not wait long enough");
+        dump("thanks for waiting 10 days");
+    }
+
+    get fun unixTime(): Int {
+        return now();
+    }
+
+    get fun stringTime(): String {
+        let sb: StringBuilder = beginString();
+        sb.append(now().toString());
+        sb.append(" seconds elapsed since 1 January 1970");
+        return sb.toString();
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007121
+Message sent: DeployOk, from contract, to deployer, value 0.991683, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter unixTime:
+Return value: 1720180633
+
+> 🔍 Calling getter stringTime:
+Return value: "1720180633 seconds elapsed since 1 January 1970"
+
+> 📤 Sending message wait 10s:
+Message sent: "wait 10s", from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 58790, Gas: 0.003142
+🔴 Error message: Did not wait long enough
+
+Message sent: error, from contract, to deployer, value 0.995858, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message wait 10d:
+Message sent: "wait 10d", from deployer, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 58790, Gas: 0.003334
+🔴 Error message: Did not wait long enough
+
+Message sent: error, from contract, to deployer, value 0.995666, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter unixTime:
+Return value: 1720180636
+
+> 🔍 Calling getter stringTime:
+Return value: "1720180636 seconds elapsed since 1 January 1970"
+
+Decimal Point
+All numbers in Tact are integers. Floating point types are not used in smart contracts because they're unpredictable.
+
+Arithmetics with dollars, for example, requires 2 decimal places. How can we represent the number 1.25 if we can only work with integers? The answer is to work with cents. So 1.25 becomes 125. We just remember that the two lowest digits are coming after the decimal point.
+
+In the same way, working with TON coins has 9 decimal places instead of 2. So the amount 1.25 TON is actually the number 1250000000 - we call these nano-tons instead of cents.
+
+Calculating interest
+This example calculates the earned interest over a deposit of 500 TON coins. The yearly interest rate in the example is 3.25%.
+
+Since we can't hold the number 3.25 we will use thousandth of a percent as unit (percent-mille). So 3.25% becomes 3250 (3.25 * 1000).
+
+On withdraw, to calculate earned interest, we multiply the amount by the fraction of a year that passed (duration in seconds divided by total seconds in a year) and then by the interest rate divided by 100,000 (100% in percent-mille, meaning 100 * 1000).
+
+Info: Notice that total is returned in nano-tons.
+
+import "@stdlib/deploy";
+
+message Deposit {
+    amount: Int as coins; // nano-tons
+}
+
+message Withdraw {
+    amount: Int as coins; // nano-tons
+}
+
+const SecondsPerYear: Int = 365 * 24 * 60 * 60;
+
+contract Interest with Deployable {
+
+    interestPercent: Int as int32;
+    depositTime: Int as uint32 = 0;  // seconds since the epoch
+    depositAmount: Int as coins = 0; // nano-tons
+    totalEarned: Int as coins = 0;   // nano-tons
+
+    init() {
+        self.interestPercent = 3250; // 3.25% yearly interest rate in percent-mille
+    }
+
+    receive(msg: Deposit) {
+        require(self.depositAmount == 0, "No multiple deposits");
+        self.depositTime = now();
+        self.depositAmount = msg.amount;
+    }
+
+    receive(msg: Withdraw) {
+        require(msg.amount >= self.depositAmount, "Cannot withdraw more than deposit");
+        self.depositAmount = self.depositAmount - msg.amount;
+        let durationSeconds: Int = now() - self.depositTime;
+        let earned: Int = msg.amount * durationSeconds * self.interestPercent / SecondsPerYear / 100000;
+        dump(earned);
+        self.totalEarned = self.totalEarned + earned;
+    }
+
+    get fun total(): Int {
+        return self.totalEarned; // in nano-tons
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007437
+Message sent: DeployOk, from contract, to deployer, value 0.991367, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter total:
+Return value: 0
+
+> 📤 Sending message Deposit{500}:
+Message sent: Deposit, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.0035
+
+> 📤 Sending message Withdraw{500}:
+Message sent: Withdraw, from deployer, to contract, value 1, not bounced
+#DEBUG#: 0
+Transaction Executed: success, Exit Code: 0, Gas: 0.005487
+
+> 🔍 Calling getter total:
+Return value: 0
+
+The Ownable Trait
+Tact allows you to add common boilerplate behaviors to your contract by using traits.
+
+The Ownable trait allows the contract to set an owner role, which can have higher priviliges from everybody else.
+
+For example, if your contract allows upgrades, it would make sense to limit upgrades to the owner only, otherwise anyone could break the contract.
+
+Be aware that dapps are supposed to be decentralized and an owner role is by definition centralized. If you're building a dapp, try to minimize reliance on Ownable.
+
+Note that this trait doesn't allow the owner to transfer ownership to a different owner.
+
+How to use Ownable
+Define a state variable named owner: Address and call self.requireOwner() in priviliged receivers.
+
+Info: The Ownable trait is defined in the standard library
+
+// this trait has to be imported
+import "@stdlib/ownable";
+import "@stdlib/deploy";
+
+// the Ownable trait can limit certain actions to the owner only
+contract Counter with Deployable, Ownable {
+
+    owner: Address; // The Ownable trait requires you to add this exact state variable
+    val: Int as uint32;
+
+    init() {
+        self.owner = sender(); // we can initialize owner to any value we want, the deployer in this case
+        self.val = 0;
+    }
+
+    // this message is available to anyone
+    receive("increment") {
+        self.val = self.val + 1;
+    }
+
+    // this message in only available to the owner
+    receive("double") {
+        self.requireOwner();
+        self.val = self.val * 2;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+
+    // get fun owner(): Address is added automatically to query who the owner is
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007537
+Message sent: DeployOk, from contract, to deployer, value 0.991267, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter owner:
+Return value: EQB1QjlaBDaOHdkQJB0wjjiQfCkdh5PmzDN5gM1_aBaIGyCh
+
+> 📤 Sending message increment (from deployer):
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004628
+
+> 📤 Sending message increment (from sender 2):
+Message sent: "increment", from sender 2, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004628
+
+> 📤 Sending message double (from deployer):
+Message sent: "double", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004946
+
+> 📤 Sending message double (from sender 2):
+Message sent: "double", from sender 2, to contract, value 1, not bounced
+Transaction Executed: error, Exit Code: 132, Gas: 0.003744
+🔴 Error message: Access denied
+
+Message sent: error, from contract, to sender 2, value 0.995256, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter owner:
+Return value: EQB1QjlaBDaOHdkQJB0wjjiQfCkdh5PmzDN5gM1_aBaIGyCh
+
+> 🔍 Calling getter value:
+Return value: 4
+
+The Ownable-Transferable Trait
+The Ownable-Transferable trait is almost identical to the Ownable trait that we covered in the previous example.
+
+It adds one important feature which is the ability for the owner to transfer ownership to a new owner. This can also be used to renounce ownership completely by transferring ownership to an unusable address like the zero address.
+
+If you're building a dapp and aiming for decentralization, always prefer this trait over Ownable. At some point in the dapps future, when you consider the owner role no longer unnecessary, you will be able to renounce ownership and make the dapp fully decentralized.
+
+How to use OwnableTransferable
+Use it in a contract just like Ownable. Define a state variable named owner: Address and call self.requireOwner() in priviliged receivers.
+
+Your contract will automatically handle the ChangeOwner{newOwner: Address} message which allows the owner to transfer ownership.
+
+Info: The OwnableTransferable trait is defined in the standard library
+
+// this trait has to be imported
+import "@stdlib/ownable";
+import "@stdlib/deploy";
+
+// the OwnableTransferable trait can limit certain actions to the owner only
+contract Counter with Deployable, OwnableTransferable {
+
+    owner: Address; // The OwnableTransferable trait requires you to add this exact state variable
+    val: Int as uint32;
+
+    init() {
+        self.owner = sender(); // we can initialize owner to any value we want, the deployer in this case
+        self.val = 0;
+    }
+
+    // this message is available to anyone
+    receive("increment") {
+        self.val = self.val + 1;
+    }
+
+    // this message in only available to the owner
+    receive("double") {
+        self.requireOwner();
+        self.val = self.val * 2;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+
+    // receive(msg: ChangeOwner) is added automatically to transfer ownership
+    // get fun owner(): Address is added automatically to query who the owner is
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007537
+Message sent: DeployOk, from contract, to deployer, value 0.991267, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter owner:
+Return value: EQB1QjlaBDaOHdkQJB0wjjiQfCkdh5PmzDN5gM1_aBaIGyCh
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message ChangeOwner{sender 2} (from deployer):
+TypeError: Cannot convert undefined to a BigInt
+
+> 📤 Sending message ChangeOwner{deployer} (from sender 2):
+TypeError: Cannot convert undefined to a BigInt
+
+> 🔍 Calling getter owner:
+Return value: EQB1QjlaBDaOHdkQJB0wjjiQfCkdh5PmzDN5gM1_aBaIGyCh
+
+> 🔍 Calling getter value:
+Return value: 0
+
+The Stoppable Trait
+Tact allows you to add common boilerplate behaviors to your contract by using traits.
+
+The Stoppable trait allows the contract to allow an owner role to stop the contract.
+
+Consider for example a protocol where users can deposit funds, like a staking service or a compounding vault. If somebody discovers a security issue, we may want to stop the contract from accepting funds from new users.
+
+Note that this trait doesn't allow to resume the contract after it has been stopped.
+
+This trait implicitly adds the Ownable trait. Note that the Ownable trait doesn't allow the owner to transfer ownership to a different owner. To allow changing ownership, also add the OwnableTransferable trait.
+
+How to use Stoppable
+Define state variables named owner: Address and stopped: Bool and call self.requireNotStopped() on actions that should be stopped.
+
+Info: The stoppable trait is defined in the standard library
+
+// this trait has to be imported
+import "@stdlib/stoppable";
+import "@stdlib/ownable";
+import "@stdlib/deploy";
+
+// the Stoppable trait allows the owner to stop the contract which can limit certain actions
+contract Counter with Deployable, Stoppable {
+
+    owner: Address; // The Stoppable trait requires you to add this exact state variable
+    stopped: Bool;  // The Stoppable trait requires you to add this exact state variable
+    val: Int as uint32;
+
+    init() {
+        self.owner = sender(); // we can initialize owner to any value we want, the deployer in this case
+        self.stopped = false;
+        self.val = 0;
+    }
+
+    // this message will only work until the contract was stopped
+    receive("increment") {
+        self.requireNotStopped();
+        self.val = self.val + 1;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+
+    // receive("Stop") is added automatically to allow owner to stop the contract
+    // get fun stopped(): Bool is added automatically to query if contract is stopped
+    // get fun owner(): Address is added automatically to query who the owner is
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007615
+Message sent: DeployOk, from contract, to deployer, value 0.991189, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter stopped:
+Return value: false
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004946
+
+> 📤 Sending message Stop:
+Message sent: "Stop", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.008627
+Message sent: "Stopped", from contract, to deployer, value 0.990185, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter stopped:
+Return value: true
+
+> 🔍 Calling getter value:
+Return value: 1
+
+The Resumable Trait
+The Resumable trait is almost identical to the Stoppable trait that we covered in the previous example.
+
+It adds one important feature which is the ability for the owner to resume a stopped contract.
+
+The Stoppable trait by itself may be a little dangerous because the owner cannot change their mind. If you're not sure which trait to use, use this one.
+
+This trait implicitly adds the Ownable and Stoppable traits. Note that the Ownable trait doesn't allow the owner to transfer ownership to a different owner. To allow changing ownership, also add the OwnableTransferable trait.
+
+How to use Resumable
+Define state variables named owner: Address and stopped: Bool and call self.requireNotStopped() on actions that should be stopped.
+
+Info: The OwnableTransferable trait is defined in the standard library
+
+// this trait has to be imported
+import "@stdlib/stoppable";
+import "@stdlib/ownable";
+import "@stdlib/deploy";
+
+// the Resumable trait allows the owner to stop/resume the contract which can limit certain actions
+contract Counter with Deployable, Resumable {
+
+    owner: Address; // The Resumable trait requires you to add this exact state variable
+    stopped: Bool;  // The Resumable trait requires you to add this exact state variable
+    val: Int as uint32;
+
+    init() {
+        self.owner = sender(); // we can initialize owner to any value we want, the deployer in this case
+        self.stopped = false;
+        self.val = 0;
+    }
+
+    // this message will only work as long as the contract is not stopped
+    receive("increment") {
+        self.requireNotStopped();
+        self.val = self.val + 1;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+
+    // receive("Resume") is added automatically to allow owner to resume the contract
+    // receive("Stop") is added automatically to allow owner to stop the contract
+    // get fun stopped(): Bool is added automatically to query if contract is stopped
+    // get fun owner(): Address is added automatically to query who the owner is
+}
+
+ 📝 Deploying contract:
+Message sent: empty, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007615
+TypeError: p is not iterable
+
+> 🔍 Calling getter stopped:
+Return value: false
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.004946
+TypeError: p is not iterable
+
+> 📤 Sending message Stop:
+Message sent: "Stop", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.00884
+TypeError: p is not iterable
+
+> 📤 Sending message Resume:
+Message sent: "Resume", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.008645
+TypeError: p is not iterable
+
+> 🔍 Calling getter stopped:
+Return value: false
+
+> 🔍 Calling getter value:
+Return value: 1
+
+Writing Your Own Trait
+Tact doesn't support classical class inheritance and instead introduces the concept of traits. Traits are similar to simplified base classes that potentially add state variables, receivers, getters or contract methods.
+
+Contracts can rely on multiple traits. Extract logic into a trait if you have multiple contracts that share this logic.
+
+The Trackable trait
+This example shows how to write a new trait that adds simple analytics behavior to any contract.
+
+This trait also makes use of the virtual keyword which lets the contract relying on the trait override some of the trait's behaviors. In the example, the default filter behavior ignores messages from owner in the analytics.
+
+The contract relying on the trait can change this default behavior by specifying the override keyword and providing a new implementation to this method. In our case, the custom filter is to have no filters.
+
+import "@stdlib/deploy";
+import "@stdlib/ownable";
+
+/////////////////////////////////////////////////////////////////////////////
+// this trait adds basic analytics to any contract to track how popular it is
+
+trait Trackable with Ownable {          // your new trait may rely on other traits
+
+    // Storage
+
+    owner: Address;
+    numMessagesReceived: Int;           // your new trait may add state variables but should not specify their size
+
+    // Receivers
+
+    receive("reset stats") {            // your new trait may handle specific messages
+        self.requireOwner();
+        self.numMessagesReceived = 0;
+        self.reply("reset done".asComment());
+    }
+
+    // Getters
+
+    get fun stats(): Int {              // your new trait may add getters
+        return self.numMessagesReceived;
+    }
+
+    // Methods
+
+    fun receivedNewMessage() {          // your new trait may define new contract methods
+        if (self.filterMessage()) {
+            self.numMessagesReceived = self.numMessagesReceived + 1;
+        }
+    }
+
+    virtual fun filterMessage(): Bool { // virtual functions can be overridden by users of this trait
+        // the default filtering behavior is to ignore messages sent by the owner
+        if (sender() == self.owner) {
+            return false;
+        }
+        return true;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// this Counter contract is going to use our new trait to add analytics to it
+
+contract Counter with Deployable, Trackable {
+
+    owner: Address;                     // The Trackable trait requires this exact state variable
+    numMessagesReceived: Int as uint64; // The Trackable trait requires this exact state variable
+    val: Int as uint32;
+
+    init() {
+        self.owner = sender(); // we can initialize owner to any value we want, the deployer in this case
+        self.numMessagesReceived = 0;
+        self.val = 0;
+    }
+
+    receive("increment") {
+        self.receivedNewMessage(); // here we are using our trait
+        self.val = self.val + 1;
+    }
+
+    get fun value(): Int {
+        return self.val;
+    }
+
+    // the trait allows us to override the default filtering behavior
+    override fun filterMessage(): Bool {
+        // our contract's custom filtering behavior is to remove all filters and count all messages
+        return true;
+    }
+
+    // receive("reset stats") is added automatically to allow owner to reset the stats
+    // get fun stats(): Int is added automatically to query the stats
+    // get fun owner(): Address is added automatically to query who the owner is
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007267
+Message sent: DeployOk, from contract, to deployer, value 0.991537, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 0
+
+> 🔍 Calling getter stats:
+Return value: 0
+
+> 📤 Sending message increment:
+Message sent: "increment", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005107
+
+> 📤 Sending message reset stats:
+Message sent: "reset stats", from deployer, to contract, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007922
+Message sent: "reset done", from contract, to deployer, value 0.990866, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter value:
+Return value: 1
+
+> 🔍 Calling getter stats:
+Return value: 0
+
+Calculate Contract Address
+When a contract is deployed to the chain, it receives an address by which users can refer to it and send it transactions.
+
+In this example, we have two different contracts: Todo1 and Todo2. They are deployed separately and each gets its own unique address. As we've seen before, a contract can always know its own address by running myAddress().
+
+The special bit in this example is that each contract can also get the address of the other contract by running contractAddress(stateInit).
+
+How is the contract address generated?
+Contract addresses on TON are derived from the initial code of the contract (the compiled bytecode) and the initial data of the contract (the arguments of init).
+
+Both contracts don't have any constructor arguments, so their initial data is the identical. Their addresses are different because their code is different.
+
+The combination of the inital code and the initial data is called the stateInit of the contract. Tact gives easy access to the stateInit using the initOf statement.
+
+import "@stdlib/deploy";
+
+// first contract
+contract Todo1 with Deployable {
+
+    seqno: Int as uint64 = 1; // the code specifies the index (sequence number)
+
+    init() {}
+
+    get fun myAddress(): Address {
+        return myAddress();
+    }
+
+    get fun otherAddress(): Address {
+        let init: StateInit = initOf Todo2();
+        return contractAddress(init);
+    }
+}
+
+// second contract
+contract Todo2 with Deployable {
+
+    seqno: Int as uint64 = 2; // the code specifies the index (sequence number)
+
+    init() {}
+
+    get fun myAddress(): Address {
+        return myAddress();
+    }
+
+    get fun otherAddress(): Address {
+        let init: StateInit = initOf Todo1();
+        return contractAddress(init);
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to Todo1, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007025
+Message sent: DeployOk, from Todo1, to deployer, value 0.991779, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+Message sent: Deploy, from deployer, to Todo2, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007025
+Message sent: DeployOk, from Todo2, to deployer, value 0.991779, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter Todo1.myAddress:
+Return value: EQDN-m9I9wQvz6o1ZY1XQ_R99lCHUkgekzdA5t-s5vp5SqwZ
+
+> 🔍 Calling getter Todo1.otherAddress:
+Return value: EQAMSmLe3OKVpavihoR4-Rcl-6DCtFIUF4AaWpmDJUYFExE4
+
+> 🔍 Calling getter Todo2.myAddress:
+Return value: EQAMSmLe3OKVpavihoR4-Rcl-6DCtFIUF4AaWpmDJUYFExE4
+
+> 🔍 Calling getter Todo2.otherAddress:
+Return value: EQDN-m9I9wQvz6o1ZY1XQ_R99lCHUkgekzdA5t-s5vp5SqwZ
+
+Multiple Contract Instances
+Instead of duplicating the code for the two contracts like in the previous example, we can write the code once and still deploy two separate instances. Each instance will have its own unique address.
+
+We can do this by adding an argument to init(). When deploying the contract, we need to specify its init arguments. In this example we deploy twice, the first with the argument 1 and the second is deployed with 2.
+
+We mentioned earlier that contract addresses on TON are derived from the initial code of the contract (the compiled bytecode) and the initial data of the contract (the arguments of init).
+
+Since we wrote the code once, the initial code is now identical. By adding an contructor argument, we've made the initial data different. This is why we're going to get two different addresses.
+
+import "@stdlib/deploy";
+
+// we're going to have multiple instances of this contract, each with a different seqno
+contract Todo with Deployable {
+
+    seqno: Int as uint64;
+
+    // when deploying an instance, we must specify its index (sequence number)
+    init(seqno: Int) {
+        self.seqno = seqno;
+    }
+
+    // each instance can calculate the address of every other instance
+    get fun addressOf(otherSeqno: Int): Address {
+        let init: StateInit = initOf Todo(otherSeqno);
+        return contractAddress(init);
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to Todo(1), value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006972
+Message sent: DeployOk, from Todo(1), to deployer, value 0.991832, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+Message sent: Deploy, from deployer, to Todo(2), value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006972
+Message sent: DeployOk, from Todo(2), to deployer, value 0.991832, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter addressOf(1):
+Return value: EQBQ4FnK2MI1_ucOtyf8LV9KUsDEM5LDzKiyKDd0MIFSBQaP
+
+> 🔍 Calling getter addressOf(2):
+Return value: EQBjOlYEO5HwsY4oLE9teHOj9tlgEjQ-tOlM15bk3K51hDes
+
+A Contract Deploying Another
+Contracts are not necessarily only deployed by users, they can also be deployed by other contracts.
+
+In this example, when pressing the Deploy button, we only deploy one contract instance - the one with constructor argument 1.
+
+The second instance (with constructor argument 2) will be deployed by the first contract instance when it receives the deploy 2nd message. Send this message to the first instance by pressing the Send "deploy 2nd" to 1 button.
+
+Messages containing state init
+The combination of the inital code and the initial data of a contract is called the stateInit of the contract.
+
+When sending any message to a contract, we can attach its stateInit by specifying the code and data fields of the message. This will deploy the contract if it has not already been deployed. If the contract has already been deployed, these fields will be ignored.
+
+Notice that in this example, we piggyback the deployment on the indentify message.
+
+import "@stdlib/deploy";
+
+// we're going to have multiple instances of this contract, each with a different seqno
+contract Todo with Deployable {
+
+    seqno: Int as uint64;
+
+    // when deploying an instance, we must specify its index (sequence number)
+    init(seqno: Int) {
+        self.seqno = seqno;
+    }
+
+    // this message handler will just debug print the seqno so we can see when it's called
+    receive("identify") {
+        dump(self.seqno);
+    }
+
+    // this message handler will cause the contract to deploy the second instance
+    receive("deploy 2nd") {
+        let init: StateInit = initOf Todo(2);
+        let address: Address = contractAddress(init);
+        send(SendParameters{
+            to: address,
+            value: ton("0.1"),              // pay for message, the deployment and give some TON for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // attaching the state init will cause the message to deploy
+            data: init.data,
+            body: "identify".asComment()    // we must piggyback the deployment on another message
+        });
+    }
+}
+> 📤 Sending message "identify" to 1:
+Error: Contract is not deployed, please deploy by pressing the 'Deploy' button
+
+> 📤 Sending message "identify" to 2:
+Error: Contract is not deployed, please deploy by pressing the 'Deploy' button
+
+> 📤 Sending message "deploy 2nd" to 1:
+Error: Contract is not deployed, please deploy by pressing the 'Deploy' button
+
+Parent-Child Relationship
+A very common design pattern in Tact is implementing two contracts with a parent-child relationship.
+
+Under this pattern, we would normally have a single instance parent which is deployed by the user. This is the TodoParent contract in this example.
+
+The child contract TodoChild will have multiple instances. These instances will normally be deployed by the parent by sending the parent a message.
+
+Try this out. Press the Send "deploy another" to parent button multiple times to send the message to the parent and instruct it to deploy more and more children.
+
+Also notice how we can omit the Deployable trait from the children. This trait is mostly useful for contracts that users deploy. Since the user only deploys the parent, omitting the trait from the children will explain our intent to readers.
+
+Unbounded data structures
+An interesting property of this pattern is that the number of potential children is unbounded! We can have an infinite number of children.
+
+In general, inifinite data structures that can actually scale to billions are very difficult to implement on blockchain efficiently. This pattern showcases the power of TON.
+
+
+import "@stdlib/deploy";
+
+// we have multiple instances of the children
+contract TodoChild {
+
+    seqno: Int as uint64;
+
+    // when deploying an instance, we must specify its index (sequence number)
+    init(seqno: Int) {
+        self.seqno = seqno;
+    }
+
+    // this message handler will just debug print the seqno so we can see when it's called
+    receive("identify") {
+        dump(self.seqno);
+    }
+}
+
+// we have one instance of the parent
+contract TodoParent with Deployable {
+
+    numChildren: Int as uint64;
+
+    init() {
+        self.numChildren = 0;
+    }
+
+    // this message handler will cause the contract to deploy another child
+    receive("deploy another") {
+        self.numChildren = self.numChildren + 1;
+        let init: StateInit = initOf TodoChild(self.numChildren);
+        send(SendParameters{
+            to: contractAddress(init),
+            value: ton("0.1"),              // pay for message, the deployment and give some TON for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // attaching the state init will cause the message to deploy
+            data: init.data,
+            body: "identify".asComment()    // we must piggyback the deployment on another message
+        });
+    }
+
+    get fun numChildren(): Int {
+        return self.numChildren;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007113
+Message sent: DeployOk, from TodoParent, to deployer, value 0.991691, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter numChildren:
+Return value: 0
+
+> 📤 Sending message "deploy another" to parent:
+Message sent: "deploy another", from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.012814
+Message sent: "identify", from TodoParent, to TodoChild(1), value 0.093243, not bounced
+#DEBUG#: 1
+Transaction Executed: success, Exit Code: 0, Gas: 0.005343
+
+Communicating with Children
+In a parent-child relationship, the user would normally just deploy the parent. This is what's happening here when you press the Deploy button.
+
+In this example, the user is only supposed to communicate with the parent. You can send the parent contract a message by pressing the Send greet 3 button.
+
+This message will instruct the parent to send its own HiFromParent message to the first 3 children. Every child will respond to the greeting by sending the parent its own HiFromChild back.
+
+How can parent know if a child is deployed?
+You can't send a message to a contract until it is deployed. How can the parent guarantee that they're not communicating with a child that wasn't deployed yet?
+
+The best practice is to include the stateInit on every message. This way, if the child isn't deployed, it will be. If the child is already deployed, this field will be ignored.
+
+This is called lazy deployment.
+
+import "@stdlib/deploy";
+
+message HiFromParent {
+    greeting: String;
+}
+
+message HiFromChild {
+    fromSeqno: Int as uint64;
+    greeting: String;
+}
+
+// we have multiple instances of the children
+contract TodoChild {
+
+    seqno: Int as uint64;
+
+    // when deploying an instance, we must specify its index (sequence number)
+    init(seqno: Int) {
+        self.seqno = seqno;
+    }
+
+    receive(msg: HiFromParent) {
+        dump(self.seqno);
+        dump("😃 handling hi from parent");
+        self.reply(HiFromChild{fromSeqno: self.seqno, greeting: "sup"}.toCell());
+    }
+}
+
+// we have one instance of the parent
+contract TodoParent with Deployable {
+
+    init() {}
+
+    receive("greet 3") {
+        let i: Int = 0;
+        repeat (3) {
+            i = i + 1;
+            let init: StateInit = initOf TodoChild(i);
+            send(SendParameters{
+                to: contractAddress(init),
+                body: HiFromParent{greeting: "darling"}.toCell(),
+                value: ton("0.1"),              // pay for message and potential deployment
+                mode: SendIgnoreErrors,
+                code: init.code,                // if child is not deployed, also deploy it
+                data: init.data
+            });
+        }
+    }
+
+    receive(msg: HiFromChild) {
+        dump("😑 handling hi from child");
+        dump(msg.fromSeqno);
+    }
+}
+
+
+
+    receive("greet 3") {
+        let i: Int = 0;
+        repeat (3) {
+            i = i + 1;
+            let init: StateInit = initOf TodoChild(i);
+            send(SendParameters{
+                to: contractAddress(init),
+                body: HiFromParent{greeting: "darling"}.toCell(),
+                value: ton("0.1"),              // pay for message and potential deployment
+                mode: SendIgnoreErrors,
+                code: init.code,                // if child is not deployed, also deploy it
+                data: init.data
+            });
+        }
+    }
+
+    receive(msg: HiFromChild) {
+        dump("😑 handling hi from child");
+        dump(msg.fromSeqno);
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007236
+Message sent: DeployOk, from TodoParent, to deployer, value 0.991568, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message greet 3:
+Message sent: "greet 3", from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.033801
+Message sent: HiFromParent, from TodoParent, to TodoChild(1), value 0.090735, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(2), value 0.090735, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(3), value 0.090735, not bounced
+#DEBUG#: 1
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.009432
+Message sent: HiFromChild, from TodoChild(1), to TodoParent, value 0.079983, not bounced
+#DEBUG#: 2
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.009432
+Message sent: HiFromChild, from TodoChild(2), to TodoParent, value 0.079983, not bounced
+#DEBUG#: 3
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.009432
+Message sent: HiFromChild, from TodoChild(3), to TodoParent, value 0.079983, not bounced
+#DEBUG#: 😑 handling hi from child
+#DEBUG#: 1
+Transaction Executed: success, Exit Code: 0, Gas: 0.004881
+#DEBUG#: 😑 handling hi from child
+#DEBUG#: 2
+Transaction Executed: success, Exit Code: 0, Gas: 0.004881
+#DEBUG#: 😑 handling hi from child
+#DEBUG#: 3
+Transaction Executed: success, Exit Code: 0, Gas: 0.004881
+
+Authenticating Children
+If you look closely at the previous example you will notice that it is somewhat dangerous.
+
+What happens if some user tries to send a HiFromChild message and impersonate a child? What happens if some user tries to send a HiFromParent message and impersonate the parent?
+
+To add authentication that messages came from where we think they came from, we simply need to add require() in the beginning of every protected receiver and make sure that the sender is who we expect it is.
+
+It is best practice to add this authentication to every message coming from a parent and every message coming from a child.
+
+Let's try to hack this contract
+Try pressing the Send HiFromChild{1} button. This will send the parent an impersonated HiFromChild message, but from some user, not from a real child.
+
+Since this code is now protected, it will notice that the sender is incorrect and reject the message with an access denied error.
+
+Info: Having a error break in the `Send HiFromChild{1}` button is expected. Because only the message from the child can be accepted.
+
+import "@stdlib/deploy";
+
+message HiFromParent {
+    greeting: String;
+}
+
+message HiFromChild {
+    fromSeqno: Int as uint64;
+    greeting: String;
+}
+
+// we have multiple instances of the children
+contract TodoChild {
+
+    parent: Address; // we added this variable so a child always knows who the parent is
+    seqno: Int as uint64;
+
+    // when deploying an instance, we must specify its index (sequence number)
+    init(parent: Address, seqno: Int) {
+        require(sender() == parent, "not the parent");
+        self.parent = parent;
+        self.seqno = seqno;
+    }
+
+    receive(msg: HiFromParent) {
+        require(sender() == self.parent, "Access denied");  // only the real parent can get here
+
+        dump(self.seqno);
+        dump("😃 handling hi from parent");
+        self.reply(HiFromChild{fromSeqno: self.seqno, greeting: "sup"}.toCell());
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007154
+Message sent: DeployOk, from TodoParent, to deployer, value 0.99165, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message greet 3:
+Message sent: "greet 3", from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.03525
+Message sent: HiFromParent, from TodoParent, to TodoChild(1), value 0.089392, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(2), value 0.089392, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(3), value 0.089392, not bounced
+#DEBUG#: 1
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010741
+Message sent: HiFromChild, from TodoChild(1), to TodoParent, value 0.077331, not bounced
+#DEBUG#: 2
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010741
+Message sent: HiFromChild, from TodoChild(2), to TodoParent, value 0.077331, not bounced
+#DEBUG#: 3
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010741
+Message sent: HiFromChild, from TodoChild(3), to TodoParent, value 0.077331, not bounced
+#DEBUG#: 1
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+#DEBUG#: 2
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+#DEBUG#: 3
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+
+> 📤 Sending message HiFromChild{1}:
+Message sent: HiFromChild, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: error, Exit Code: 49469, Gas: 0.007931
+🔴 Error message: Access denied
+
+Message sent: error, from TodoParent, to deployer, value 0.991069, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message greet 3:
+Message sent: "greet 3", from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.03525
+Message sent: HiFromParent, from TodoParent, to TodoChild(1), value 0.089392, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(2), value 0.089392, not bounced
+Message sent: HiFromParent, from TodoParent, to TodoChild(3), value 0.089392, not bounced
+#DEBUG#: 1
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010283
+Message sent: HiFromChild, from TodoChild(1), to TodoParent, value 0.077789, not bounced
+#DEBUG#: 2
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010283
+Message sent: HiFromChild, from TodoChild(2), to TodoParent, value 0.077789, not bounced
+#DEBUG#: 3
+#DEBUG#: 😃 handling hi from parent
+Transaction Executed: success, Exit Code: 0, Gas: 0.010283
+Message sent: HiFromChild, from TodoChild(3), to TodoParent, value 0.077789, not bounced
+#DEBUG#: 1
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+#DEBUG#: 2
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+#DEBUG#: 3
+#DEBUG#: 😑 handling hi from child
+Transaction Executed: success, Exit Code: 0, Gas: 0.010289
+
+Unbounded Arrays - Todo List
+In general, infinite data structures that can grow to billions of elements are very difficult to implement on a blockchain. As the contract's persistent state grows in size, read and write operations become more expensive in terms of gas. In extreme cases, they may cost more than a transaction's gas limit, rendering the contract unusable.
+
+Therefore, it's important to design contracts with an upper bound on state size. So, how would we implement a to-do list that can scale to billions of items?
+
+Infinitely scalable todo list
+The secret to achieving infinite scalability on TON lies in sharding the data across multiple contracts. We can utilize the parent-child design pattern to achieve this.
+
+In this example, each new todo item is deployed as a new child contract. Users interact with the child contracts through the TodoParent contract.
+
+When the user sends the NewTodo message to the parent, the parent deploys a new child to hold the new item. If users want to query the item details, they can call the parent getter todoAddress() and then call the details() getter on the child.
+
+Info: This example also handles gas efficiently. The excess gas from every operation is refunded to the original sender.
+
+import "@stdlib/deploy";
+import "@stdlib/ownable";
+
+message NewTodo {
+    task: String;
+}
+
+message NewTodoResponse {
+    seqno: Int as uint256;
+}
+
+message CompleteTodo {
+    seqno: Int as uint256;
+}
+
+// users are supposed to interact with this parent contract only
+contract TodoParent with Deployable, Ownable {
+
+    owner: Address;
+    numTodos: Int as uint256 = 0;
+
+    init() {
+        self.owner = sender(); // set the owner as the deployer
+    }
+
+    // anybody can add a new todo, not just the owner
+    receive(msg: NewTodo) {
+        self.numTodos = self.numTodos + 1;
+        let init: StateInit = initOf TodoChild(myAddress(), self.numTodos);
+        send(SendParameters{
+            to: contractAddress(init),
+            body: InternalSetTask{task: msg.task}.toCell(),
+            value: ton("0.02"),             // pay for the deployment and leave some TON in the child for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // prepare the initial code when deploying the child contract
+            data: init.data
+        });
+        self.reply(NewTodoResponse{seqno: self.numTodos}.toCell()); // this will return excess gas to sender
+    }
+
+    // only the owner can mark a todo as completed
+    receive(msg: CompleteTodo) {
+        self.requireOwner();
+        require(msg.seqno <= self.numTodos, "Todo does not exist");
+        send(SendParameters{ // this will forward excess gas
+            to: contractAddress(initOf TodoChild(myAddress(), msg.seqno)),
+            body: InternalComplete{excess: sender()}.toCell(),
+            value: 0, /// TODO: https://github.com/tact-lang/tact/issues/31
+            mode: SendRemainingValue + SendIgnoreErrors /// TODO: issues/31
+        });
+    }
+
+    get fun numTodos(): Int {
+        return self.numTodos;
+    }
+
+    get fun todoAddress(seqno: Int): Address {
+        return contractAddress(initOf TodoChild(myAddress(), seqno));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+// child contract - internal interface that users shouldn't access directly
+
+message InternalSetTask {
+    task: String;
+}
+
+message InternalComplete {
+    excess: Address;
+}
+
+struct TodoDetails {
+    task: String;
+    completed: Bool;
+}
+
+contract TodoChild {
+
+    parent: Address;
+    seqno: Int as uint256;
+    task: String = "";
+    completed: Bool = false;
+
+    init(parent: Address, seqno: Int) {
+        self.parent = parent;
+        self.seqno = seqno;
+    }
+
+    receive(msg: InternalSetTask) {
+        require(sender() == self.parent, "Parent only");
+        self.task = msg.task;
+    }
+
+    receive(msg: InternalComplete) {
+        require(sender() == self.parent, "Parent only");
+        self.completed = true;
+        send(SendParameters{ // this will return excess gas to original sender
+            to: msg.excess,
+            value: 0, /// TODO: https://github.com/tact-lang/tact/issues/31
+            mode: SendRemainingBalance + SendIgnoreErrors /// TODO: issues/31
+        });
+    }
+
+     get fun details(): TodoDetails {
+        return TodoDetails{
+            task: self.task,
+            completed: self.completed
+        };
+    }
+}
+
+Info: This example also handles gas efficiently. The excess gas from every operation is refunded to the original sender.
+ Authenticating ChildrenUnbounded Maps - Simplified Token
+All Examples
+
+
+import "@stdlib/deploy";
+import "@stdlib/ownable";
+
+message NewTodo {
+    task: String;
+}
+
+message NewTodoResponse {
+    seqno: Int as uint256;
+}
+
+message CompleteTodo {
+    seqno: Int as uint256;
+}
+
+// users are supposed to interact with this parent contract only
+contract TodoParent with Deployable, Ownable {
+
+    owner: Address;
+    numTodos: Int as uint256 = 0;
+
+    init() {
+        self.owner = sender(); // set the owner as the deployer
+    }
+
+    // anybody can add a new todo, not just the owner
+    receive(msg: NewTodo) {
+        self.numTodos = self.numTodos + 1;
+        let init: StateInit = initOf TodoChild(myAddress(), self.numTodos);
+        send(SendParameters{
+            to: contractAddress(init),
+            body: InternalSetTask{task: msg.task}.toCell(),
+            value: ton("0.02"),             // pay for the deployment and leave some TON in the child for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // prepare the initial code when deploying the child contract
+            data: init.data
+        });
+        self.reply(NewTodoResponse{seqno: self.numTodos}.toCell()); // this will return excess gas to sender
+    }
+
+    // only the owner can mark a todo as completed
+    receive(msg: CompleteTodo) {
+        self.requireOwner();
+        require(msg.seqno <= self.numTodos, "Todo does not exist");
+        send(SendParameters{ // this will forward excess gas
+            to: contractAddress(initOf TodoChild(myAddress(), msg.seqno)),
+            body: InternalComplete{excess: sender()}.toCell(),
+            value: 0, /// TODO: https://github.com/tact-lang/tact/issues/31
+            mode: SendRemainingValue + SendIgnoreErrors /// TODO: issues/31
+        });
+    }
+
+    get fun numTodos(): Int {
+        return self.numTodos;
+    }
+
+    get fun todoAddress(seqno: Int): Address {
+        return contractAddress(initOf TodoChild(myAddress(), seqno));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+// child contract - internal interface that users shouldn't access directly
+
+message InternalSetTask {
+    task: String;
+}
+
+message InternalComplete {
+    excess: Address;
+}
+
+struct TodoDetails {
+    task: String;
+    completed: Bool;
+}
+
+contract TodoChild {
+
+    parent: Address;
+    seqno: Int as uint256;
+    task: String = "";
+    completed: Bool = false;
+
+    init(parent: Address, seqno: Int) {
+        self.parent = parent;
+        self.seqno = seqno;
+    }
+
+    receive(msg: InternalSetTask) {
+        require(sender() == self.parent, "Parent only");
+        self.task = msg.task;
+    }
+
+    receive(msg: InternalComplete) {
+        require(sender() == self.parent, "Parent only");
+        self.completed = true;
+        send(SendParameters{ // this will return excess gas to original sender
+            to: msg.excess,
+            value: 0, /// TODO: https://github.com/tact-lang/tact/issues/31
+            mode: SendRemainingBalance + SendIgnoreErrors /// TODO: issues/31
+        });
+    }
+
+     get fun details(): TodoDetails {
+        return TodoDetails{
+            task: self.task,
+            completed: self.completed
+        };
+    }
+}
+
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.007755
+Message sent: DeployOk, from TodoParent, to deployer, value 0.991049, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter numTodos:
+Return value: 0
+
+> 🔍 Calling getter details(todoAddress(2)):
+Error: Trying to run get method on non-active contract
+
+> 📤 Sending message NewTodo{"bla"}:
+Message sent: NewTodo, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.018643
+Message sent: InternalSetTask, from TodoParent, to TodoChild(1), value 0.01021, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005227
+
+> 📤 Sending message CompleteTodo{2}:
+Message sent: CompleteTodo, from deployer, to TodoParent, value 1, not bounced
+Transaction Executed: error, Exit Code: 11456, Gas: 0.003371
+🔴 Error message: Todo does not exist
+
+Message sent: error, from TodoParent, to deployer, value 0.995629, bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+Unbounded Maps - Simplified Token
+In general, inifinite data structures that can actually grow to billions of elements are very difficult to implement on blockchain. As the contract persistent state grows in size, read and write operations become more expensive in gas. In the extreme, they may cost more than a transaction gas limit, rendering the contract unusable.
+
+It is therefore important to design contracts to have an upper bound on state size. If so, how would we implement a token with a map of balances that can scale to billions of holders?
+
+Infinitely scalable balance map
+The secret of infinite scalability on TON is sharding the data across multiple contracts. We can apply the parent-child design pattern to do just this.
+
+In this example, we hold the balance of every holder in a separate child contract.
+
+To transfer tokens, the owner sends the Transfer message to the child contract holding their own balance. This will cause the child to deploy its sibling - the child contract holding the recipient's balance - by sending it the InternalAddTokens message.
+
+This example also handles gas efficiently. The excess gas from every operation is refunded to the original sender.
+
+
+import "@stdlib/deploy";
+
+struct Metadata {
+    symbol: String;
+    totalSupply: Int;
+}
+
+message Transfer {
+    amount: Int as coins;
+    to: Address;
+}
+
+// the token parent, mostly used to query general metadata and get children addresses
+contract TokenParent with Deployable {
+
+    symbol: String;
+    totalSupply: Int as coins;
+
+    init() {
+        self.symbol = "SHIB";
+        self.totalSupply = 500 * pow(10,9);
+        self.mint(self.totalSupply, sender()); // mint the entire total supply to deployer
+    }
+
+    fun mint(amount: Int, to: Address) {
+        let init: StateInit = initOf TokenChild(myAddress(), to);
+        send(SendParameters{
+            to: contractAddress(init),
+            body: InternalAddTokens{amount: amount, origin: myAddress()}.toCell(),
+            value: ton("0.03"),             // pay for the deployment and leave some TON in the child for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // deploy the child if needed
+            data: init.data
+        });
+    }
+
+    get fun metadata(): Metadata {
+        return Metadata{symbol: self.symbol, totalSupply: self.totalSupply};
+    }
+
+    get fun childAddress(owner: Address): Address {
+        return contractAddress(initOf TokenChild(myAddress(), owner));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+// child contract - the Transfer message is sent by users directly to a child
+
+message InternalAddTokens {
+    amount: Int as coins;
+    origin: Address;
+}
+
+contract TokenChild {
+
+    parent: Address;
+    owner: Address;         // every child holds the balance of a different owner
+    balance: Int as coins;  // this is the balance of the owner
+
+    init(parent: Address, owner: Address) {
+        self.parent = parent;
+        self.owner = owner;
+        self.balance = 0;
+    }
+
+    // sent by users to initiate a new transfer
+    receive(msg: Transfer) {
+        require(sender() == self.owner, "Access denied");
+        require(self.balance >= msg.amount, "Insufficient balance");
+        self.balance = self.balance - msg.amount;
+        let init: StateInit = initOf TokenChild(self.parent, msg.to);
+        send(SendParameters{
+            to: contractAddress(init),
+            body: InternalAddTokens{amount: msg.amount, origin: self.owner}.toCell(),
+            value: ton("0.03"),             // pay for the deployment and leave some TON in the child for storage
+            mode: SendIgnoreErrors,
+            code: init.code,                // deploy the child if needed
+            data: init.data
+        });
+        self.reply("transferred".asComment());
+    }
+
+    // internal message sent by one child to another to update balances
+    receive(msg: InternalAddTokens) {
+        if (msg.origin == self.parent) { // tokens originate in a mint
+            require(sender() == self.parent, "Parent only");
+        } else { // tokens originate in a Transfer
+            require(sender() == contractAddress(initOf TokenChild(self.parent, msg.origin)), "Sibling only");
+        }
+        self.balance = self.balance + msg.amount;
+    }
+
+     get fun balance(): Int {
+        return self.balance;
+    }
+}
+
+> 📝 Deploying contract:
+Message sent: Deploy, from deployer, to TokenParent, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.018741
+Message sent: InternalAddTokens, from TokenParent, to TokenChild(deployer), value 0.015291, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.006243
+
+> 🔍 Calling getter metadata:
+Return value: {$$type: "Metadata", symbol: "SHIB", totalSupply: 500000000000}
+
+> 🔍 Calling getter balance(childAddress(deployer)):
+Return value: 500000000000
+
+> 🔍 Calling getter balance(childAddress(user2)):
+Error: Trying to run get method on non-active contract
+
+> 📤 Sending message Transfer{100,user2} (from deployer):
+Message sent: Transfer, from deployer, to TokenChild(deployer), value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.019572
+Message sent: InternalAddTokens, from TokenChild(deployer), to TokenChild(user2), value 0.015291, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.011627
+
+> 📤 Sending message Transfer{100,deployer} (from user2):
+Message sent: Transfer, from user2, to TokenChild(user2), value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.019572
+Message sent: InternalAddTokens, from TokenChild(user2), to TokenChild(deployer), value 0.015291, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.011254
+
+> 🔍 Calling getter metadata:
+Return value: {$$type: "Metadata", symbol: "SHIB", totalSupply: 500000000000}
+
+> 🔍 Calling getter balance(childAddress(deployer)):
+Return value: 500000000000
+
+> 🔍 Calling getter balance(childAddress(user2)):
+Return value: 0
+
+Jetton Token - Fungible Tokens
+This is a general Jetton implementation example from zero to one. Although we didn't devote much space to detailing Jetton Content, remember, there are two ways to implement Jetton Token Data, as outlined in TEP-64.
+
+Infinitely Scalable Balance Map
+In this example, we launch the Jetton Root Token which introduces the Jetton trait below, having a limitation of max_supply upon deployment.
+
+The minting process has two different methods:
+
+Send the text message "Mint: 100" to mint the token.
+Send the Mint message with the amount to mint the token.
+Close the Mint Function
+In this example, we set the functionality for turn-off the minting process. The string text message with Owner: MintClose method is used to close the minting process. The method is only enable to the owner of the contract.
+
+Transfer
+Notice that the Jetton Token standard also implements the Transfer method below. The Transfer method is the most important method in the Jetton Token Standard, allowing you to transfer the token to another account.
+
+Excess gas from every operation is refunded to the original sender.
+
+Info: TEP-74 is the Jetton Token Standard. Detail can check here
+
+import "@stdlib/ownable";
+
+message Mint {
+    amount: Int;
+    receiver: Address;
+}
+
+contract SampleJetton with Jetton {
+    totalSupply: Int as coins;
+    owner: Address;
+    content: Cell;
+    mintable: Bool;
+
+    max_supply: Int as coins;
+
+    init(owner: Address, content: Cell, max_supply: Int) {
+        self.totalSupply = 0;
+        self.owner = owner;
+        self.mintable = true;
+        self.content = content;
+
+        self.max_supply = max_supply; // Initial Setting for max_supply
+    }
+
+    receive(msg: Mint) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Not Owner");
+        require(self.mintable, "Can't Mint Anymore");
+        self.mint(msg.receiver, msg.amount, self.owner); // (to, amount, response_destination)
+    }
+
+    receive("Mint: 100") { // Public Minting
+        let ctx: Context = context();
+        require(self.mintable, "Can't Mint Anymore");
+        self.mint(ctx.sender, 100, self.owner);
+    }
+
+    receive("Owner: MintClose") {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Not Owner");
+        self.mintable = false;
+    }
+}
+
+struct JettonData {
+    totalSupply: Int;
+    mintable: Bool;
+    owner: Address;
+    content: Cell;
+    walletCode: Cell;
+}
+
+// ============================================================================================================ //
+@interface("org.ton.jetton.master")
+trait Jetton with Ownable {
+
+    totalSupply: Int; // Already set initially
+    mintable: Bool;
+    owner: Address;
+    content: Cell;
+
+    max_supply: Int; // This is not in the TEP-74 interface
+
+    receive(msg: TokenUpdateContent) {
+        self.requireOwner();                // Allow changing content only by owner
+        self.content = msg.content;         // Update content
+    }
+
+    receive(msg: TokenBurnNotification) {
+        self.requireWallet(msg.owner);                     // Check wallet
+        self.totalSupply = self.totalSupply - msg.amount; // Update supply
+
+        if (msg.response_destination != null) { // Cashback
+            send(SendParameters{
+                to: msg.response_destination!!,
+                value: 0,
+                bounce: false,
+                mode: SendRemainingValue + SendIgnoreErrors,
+                body: TokenExcesses{
+                    queryId: msg.queryId
+                }.toCell()
+            });
+        }
+    }
+
+    // @to The Address receive the Jetton token after minting
+    // @amount The amount of Jetton token being minted
+    // @response_destination The previous owner address
+    fun mint(to: Address, amount: Int, response_destination: Address) {
+        require(self.totalSupply + amount <= self.max_supply, "The total supply will be overlapping.");
+        self.totalSupply = self.totalSupply + amount; // Update total supply
+
+        let winit: StateInit = self.getJettonWalletInit(to); // Create message
+        send(SendParameters{
+            to: contractAddress(winit),
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue,
+            body: TokenTransferInternal{
+                queryId: 0,
+                amount: amount,
+                from: myAddress(),
+                response_destination: response_destination,
+                forward_ton_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell(),
+            code: winit.code,
+            data: winit.data
+        });
+    }
+
+    fun requireWallet(owner: Address) {
+        let ctx: Context = context();
+        let winit: StateInit = self.getJettonWalletInit(owner);
+        require(contractAddress(winit) == ctx.sender, "Invalid sender");
+    }
+
+    virtual fun getJettonWalletInit(address: Address): StateInit {
+        return initOf JettonDefaultWallet(myAddress(), address);
+    }
+
+    // ====== Get Methods ====== //
+    get fun get_jetton_data(): JettonData {
+        let code: Cell = self.getJettonWalletInit(myAddress()).code;
+        return JettonData{
+            totalSupply: self.totalSupply,
+            mintable: self.mintable,
+            owner: self.owner,
+            content: self.content,
+            walletCode: code
+        };
+    }
+
+    get fun get_wallet_address(owner: Address): Address {
+        let winit: StateInit = self.getJettonWalletInit(owner);
+        return contractAddress(winit);
+    }
+}
+// ============================================================ //
+@interface("org.ton.jetton.wallet")
+contract JettonDefaultWallet {
+    const minTonsForStorage: Int = ton("0.01");
+    const gasConsumption: Int = ton("0.01");
+
+    balance: Int;
+    owner: Address;
+    master: Address;
+
+    init(master: Address, owner: Address) {
+        self.balance = 0;
+        self.owner = owner;
+        self.master = master;
+    }
+
+    receive(msg: TokenTransfer) { // 0xf8a7ea5
+        let ctx: Context = context(); // Check sender
+        require(ctx.sender == self.owner, "Invalid sender");
+
+        // Gas checks
+        let fwdFee: Int = ctx.readForwardFee() + ctx.readForwardFee();
+        let final: Int =  2 * self.gasConsumption + self.minTonsForStorage + fwdFee;
+        require(ctx.value > min(final, ton("0.01")), "Invalid value!!");
+
+        // Update balance
+        self.balance = self.balance - msg.amount;
+        require(self.balance >= 0, "Invalid balance");
+
+        let init: StateInit = initOf JettonDefaultWallet(self.master, msg.destination);
+        let walletAddress: Address = contractAddress(init);
+        send(SendParameters{
+                to: walletAddress,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: false,
+                body: TokenTransferInternal{
+                    queryId: msg.queryId,
+                    amount: msg.amount,
+                    from: self.owner,
+                    response_destination: msg.response_destination,
+                    forward_ton_amount: msg.forward_ton_amount,
+                    forward_payload: msg.forward_payload
+                }.toCell(),
+                code: init.code,
+                data: init.data
+            });
+    }
+
+    receive(msg: TokenTransferInternal) { // 0x178d4519
+        let ctx: Context = context();
+
+        if (ctx.sender != self.master) {
+            let sinit: StateInit = initOf JettonDefaultWallet(self.master, msg.from);
+            require(contractAddress(sinit) == ctx.sender, "Invalid sender!");
+        }
+
+        // Update balance
+        self.balance = self.balance + msg.amount;
+        require(self.balance >= 0, "Invalid balance");
+
+        // Get value for gas
+        let msgValue: Int = self.msgValue(ctx.value);
+        let fwdFee: Int = ctx.readForwardFee();
+        msgValue = msgValue - msg.forward_ton_amount - fwdFee;
+
+         // 0x7362d09c - notify the new owner of JettonToken that the transfer is complete
+        if (msg.forward_ton_amount > 0) {
+            send(SendParameters{
+                to: self.owner,
+                value: msg.forward_ton_amount,
+                mode: SendPayGasSeparately + SendIgnoreErrors,
+                bounce: false,
+                body: TokenNotification {
+                    queryId: msg.queryId,
+                    amount: msg.amount,
+                    from: msg.from,
+                    forward_payload: msg.forward_payload
+                }.toCell()
+            });
+        }
+
+        // 0xd53276db -- Cashback to the original Sender
+        if (msg.response_destination != null) {
+            send(SendParameters {
+                to: msg.response_destination,
+                value: msgValue,
+                bounce: false,
+                body: TokenExcesses {
+                    queryId: msg.queryId
+                }.toCell(),
+                mode: SendIgnoreErrors
+            });
+        }
+    }
+
+    receive(msg: TokenBurn) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Invalid sender");  // Check sender
+
+        self.balance = self.balance - msg.amount; // Update balance
+        require(self.balance >= 0, "Invalid balance");
+
+        let fwdFee: Int = ctx.readForwardFee(); // Gas checks
+        require(ctx.value > fwdFee + 2 * self.gasConsumption + self.minTonsForStorage, "Invalid value - Burn");
+
+        // Burn tokens
+        send(SendParameters{
+            to: self.master,
+            value: 0,
+            mode: SendRemainingValue,
+            bounce: true,
+            body: TokenBurnNotification{
+                queryId: msg.queryId,
+                amount: msg.amount,
+                owner: self.owner,
+                response_destination: self.owner
+            }.toCell()
+        });
+    }
+
+    get fun msgValue(value: Int): Int {
+        let msgValue: Int = value;
+        let tonBalanceBeforeMsg: Int = myBalance() - msgValue;
+        let storageFee: Int = self.minTonsForStorage - min(tonBalanceBeforeMsg, self.minTonsForStorage);
+        msgValue = msgValue - (storageFee + self.gasConsumption);
+        return msgValue;
+    }
+
+    bounced(src: bounced<TokenTransferInternal>) {
+        self.balance = self.balance + src.amount;
+    }
+
+    bounced(src: bounced<TokenBurnNotification>) {
+        self.balance = self.balance + src.amount;
+    }
+
+    get fun get_wallet_data(): JettonWalletData {
+        return JettonWalletData{
+            balance: self.balance,
+            owner: self.owner,
+            master: self.master,
+            walletCode: (initOf JettonDefaultWallet(self.master, self.owner)).code
+        };
+    }
+}
+
+struct JettonWalletData {
+    balance: Int;
+    owner: Address;
+    master: Address;
+    walletCode: Cell;
+}
+
+message(0xf8a7ea5) TokenTransfer {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    destination: Address;
+    response_destination: Address;
+    custom_payload: Cell?;
+    forward_ton_amount: Int as coins;
+    forward_payload: Slice as remaining; // Comment Text message when Transfer the jetton
+}
+
+message(0x178d4519) TokenTransferInternal {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    from: Address;
+    response_destination: Address;
+    forward_ton_amount: Int as coins;
+    forward_payload: Slice as remaining; // Comment Text message when Transfer the jetton
+}
+
+message(0x7362d09c) TokenNotification {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    from: Address;
+    forward_payload: Slice as remaining; // Comment Text message when Transfer the jetton
+}
+
+message(0x595f07bc) TokenBurn {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    owner: Address;
+    response_destination: Address;
+}
+
+message(0x7bdd97de) TokenBurnNotification {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    owner: Address;
+    response_destination: Address?;
+}
+
+message(0xd53276db) TokenExcesses {
+    queryId: Int as uint64;
+}
+
+message TokenUpdateContent {
+    content: Cell;
+}
+
+> 📝 Deploying contract:
+Message sent: "Mint: 100", from deployer, to JettonRoot, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.01875
+Message sent: TokenTransferInternal, from JettonRoot, to JettonWallet(deployer), value 0.959265, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.012251
+Message sent: TokenExcesses, from JettonWallet(deployer), to deployer, value 0.916083832, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 🔍 Calling getter CirculatingSupply:
+Return value: 100
+
+> 🔍 Calling getter balance(JettonWallet(deployer)):
+Return value: 100
+
+> 🔍 Calling getter balance(JettonWallet(user2)):
+Error: Trying to run get method on non-active contract
+
+> 🔍 Calling getter mintable:
+Return value: true
+
+> 📤 Sending message Mint: 100:
+Message sent: "Mint: 100", from deployer, to JettonRoot, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.018391
+Message sent: TokenTransferInternal, from JettonRoot, to JettonWallet(deployer), value 0.959624, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.011876
+Message sent: TokenExcesses, from JettonWallet(deployer), to deployer, value 0.926442832, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message Mint: 100(user2):
+Message sent: "Mint: 100", from user2, to JettonRoot, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.018391
+Message sent: TokenTransferInternal, from JettonRoot, to JettonWallet(user2), value 0.959624, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.012251
+Message sent: TokenExcesses, from JettonWallet(user2), to deployer, value 0.916442832, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.000409
+
+> 📤 Sending message Owner: MintClose(admin):
+Message sent: "Owner: MintClose", from deployer, to JettonRoot, value 1, not bounced
+Transaction Executed: success, Exit Code: 0, Gas: 0.005493
+
+> 🔍 Calling getter CirculatingSupply:
+Return value: 300
+
+> 🔍 Calling getter balance(JettonWallet(deployer)):
+Return value: 200
+
+> 🔍 Calling getter balance(JettonWallet(user2)):
+Return value: 100
+
+> 🔍 Calling getter mintable:
+Return value: false
+
+
+

@@ -1,0 +1,164 @@
+6: Тестирование, развертывание и мониторинг смарт-контрактов на TON
+
+Тестирование смарт-контрактов
+
+а) Юнит-тестирование с использованием TON Sandbox:
+typescriptCopyimport { Blockchain, SandboxContract } from '@ton-community/sandbox';
+import { MyContract } from '../wrappers/MyContract'; // Сгенерированный wrapper для вашего контракта
+
+describe('MyContract', () => {
+    let blockchain: Blockchain;
+    let myContract: SandboxContract<MyContract>;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        myContract = blockchain.openContract(await MyContract.fromInit());
+        await myContract.send(blockchain.sender, { value: '1000000000' }, { $$type: 'Deploy' });
+    });
+
+    it('should increment counter', async () => {
+        await myContract.send(blockchain.sender, { value: '1000000000' }, 'increment');
+        const result = await myContract.getCounter();
+        expect(result).toEqual(1);
+    });
+});
+б) Интеграционное тестирование:
+typescriptCopyimport { NetworkProvider } from 'ton-core';
+import { MyContract } from '../wrappers/MyContract';
+
+describe('MyContract Integration', () => {
+    let provider: NetworkProvider;
+    let myContract: MyContract;
+
+    beforeAll(async () => {
+        provider = await NetworkProvider.fromUrl('https://testnet.toncenter.com/api/v2/jsonRPC');
+        // Подготовка и развертывание контракта на тестовой сети
+    });
+
+    it('should interact with other contracts', async () => {
+        // Тест взаимодействия с другими контрактами в сети
+    });
+});
+
+Развертывание смарт-контрактов
+
+а) Использование TON CLI для развертывания:
+bashCopyton-cli deploy -n testnet -w path/to/wallet.json path/to/MyContract.tvc '{"initialValue": 0}'
+б) Развертывание через скрипт:
+typescriptCopyimport { TonClient, WalletContractV4, internal } from "ton";
+import { MyContract } from "../wrappers/MyContract";
+
+async function deploy() {
+    const client = new TonClient({ endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC' });
+    const wallet = WalletContractV4.create({ workchain: 0, publicKey: '<your-public-key>' });
+
+    const myContract = MyContract.fromInit(<initial-params>);
+    const deployResult = await client.sendExternalMessage(wallet, internal({
+        to: myContract.address,
+        value: '1000000000',
+        bounce: false,
+        body: MyContract.deployMessage(<deploy-params>)
+    }));
+
+    console.log('Contract deployed at:', myContract.address.toString());
+}
+
+deploy().catch(console.error);
+
+Мониторинг и анализ смарт-контрактов
+
+а) Отслеживание событий контракта:
+typescriptCopyimport { TonClient, Address } from "ton";
+
+async function monitorEvents(contractAddress: string) {
+    const client = new TonClient({ endpoint: 'https://toncenter.com/api/v2/jsonRPC' });
+    const address = Address.parse(contractAddress);
+
+    const stream = await client.getTransactionStream(address);
+    for await (const transaction of stream) {
+        if (transaction.outMessages.length > 0) {
+            console.log('Event:', transaction.outMessages[0].body);
+        }
+    }
+}
+
+monitorEvents('<your-contract-address>').catch(console.error);
+б) Анализ использования газа:
+typescriptCopyimport { TonClient, Address } from "ton";
+
+async function analyzeGasUsage(contractAddress: string) {
+    const client = new TonClient({ endpoint: 'https://toncenter.com/api/v2/jsonRPC' });
+    const address = Address.parse(contractAddress);
+
+    const transactions = await client.getTransactions(address, { limit: 100 });
+    let totalGas = 0n;
+
+    for (const tx of transactions) {
+        totalGas += tx.totalFees;
+    }
+
+    console.log('Average gas usage:', totalGas / BigInt(transactions.length));
+}
+
+analyzeGasUsage('<your-contract-address>').catch(console.error);
+
+Обновление смарт-контрактов
+
+Для обновляемых контрактов:
+tactCopycontract UpgradeableContract {
+    owner: Address;
+    implementation: Address;
+
+    receive("upgrade") {
+        require(sender() == self.owner, "Not authorized");
+        self.implementation = context().sender;
+    }
+
+    receive(msg: Slice) {
+        send(SendParameters{
+            to: self.implementation,
+            value: 0,
+            mode: SendRemainingValue,
+            body: msg
+        });
+    }
+}
+
+Лучшие практики безопасности
+
+
+Используйте проверку require() для всех входных данных
+Ограничивайте доступ к критическим функциям
+Избегайте рекурсивных вызовов между контрактами
+Используйте временные блокировки для критических операций
+Регулярно проводите аудит кода
+Используйте паттерн Checks-Effects-Interactions
+
+
+Оптимизация производительности
+
+
+Минимизируйте количество операций записи в хранилище
+Используйте эффективные структуры данных (например, map вместо массивов для больших наборов данных)
+Ограничивайте размер сообщений и объем обрабатываемых данных
+Используйте пакетные операции, где это возможно
+
+
+Взаимодействие с внешними данными
+
+Используйте оракулы для получения внешних данных:
+tactCopycontract DataConsumer {
+    oracle: Address;
+
+    receive("requestData") {
+        send(SendParameters{
+            to: self.oracle,
+            value: ton("0.1"),
+            body: "getData".asComment()
+        });
+    }
+
+    receive("dataResponse") {
+        // Обработка данных от оракула
+    }
+}

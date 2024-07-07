@@ -1,0 +1,198 @@
+Децентрализованная биржа (DEX)
+
+Базовая структура простого DEX на Tact:
+tactCopycontract SimpleDEX {
+    owner: Address;
+    pairs: map<Address, LiquidityPair>;
+
+    struct LiquidityPair {
+        token0: Address;
+        token1: Address;
+        reserve0: Int as uint128;
+        reserve1: Int as uint128;
+    }
+
+    message AddLiquidity {
+        token0Amount: Int as uint128;
+        token1Amount: Int as uint128;
+    }
+
+    message Swap {
+        amountIn: Int as uint128;
+        tokenIn: Address;
+        tokenOut: Address;
+    }
+
+    receive(msg: AddLiquidity) {
+        // Логика добавления ликвидности
+    }
+
+    receive(msg: Swap) {
+        // Логика свопа токенов
+    }
+
+    // Другие методы...
+}
+
+Мультисиг кошелек
+
+Реализация кошелька с мультиподписью:
+tactCopycontract MultisigWallet {
+    owners: map<Address, Bool>;
+    requiredSignatures: Int as uint8;
+    transactions: map<Int, PendingTx>;
+    nonce: Int as uint32;
+
+    struct PendingTx {
+        to: Address;
+        value: Int as coins;
+        data: Cell;
+        signers: map<Address, Bool>;
+    }
+
+    message ProposeTransaction {
+        to: Address;
+        value: Int as coins;
+        data: Cell;
+    }
+
+    message ConfirmTransaction {
+        txId: Int as uint32;
+    }
+
+    receive(msg: ProposeTransaction) {
+        require(self.owners.get(sender()) ?? false, "Not an owner");
+        let txId: Int = self.nonce;
+        self.nonce += 1;
+        self.transactions.set(txId, PendingTx{
+            to: msg.to,
+            value: msg.value,
+            data: msg.data,
+            signers: emptyMap()
+        });
+    }
+
+    receive(msg: ConfirmTransaction) {
+        // Логика подтверждения транзакции
+    }
+
+    // Другие методы...
+}
+
+Оракул для внешних данных
+
+Контракт для получения внешних данных через оракул:
+tactCopycontract PriceOracle {
+    owner: Address;
+    prices: map<String, Int as uint32>;
+    lastUpdateTime: Int as uint32;
+
+    message UpdatePrice {
+        asset: String;
+        price: Int as uint32;
+    }
+
+    receive(msg: UpdatePrice) {
+        require(sender() == self.owner, "Only owner can update prices");
+        self.prices.set(msg.asset, msg.price);
+        self.lastUpdateTime = now();
+    }
+
+    get fun getPrice(asset: String): Int {
+        return self.prices.get(asset) ?? 0;
+    }
+
+    get fun getLastUpdateTime(): Int {
+        return self.lastUpdateTime;
+    }
+}
+
+Интеграция с внешними системами
+
+а) Отправка HTTP-запросов (через оракул):
+tactCopycontract ExternalDataConsumer {
+    oracle: Address;
+
+    message RequestData {
+        url: String;
+        callback: String;
+    }
+
+    receive("fetchExternalData") {
+        send(SendParameters{
+            to: self.oracle,
+            value: ton("0.1"),
+            body: RequestData{
+                url: "https://api.example.com/data",
+                callback: "onDataReceived"
+            }.toCell()
+        });
+    }
+
+    receive("onDataReceived") {
+        // Обработка полученных данных
+    }
+}
+б) Взаимодействие с другими блокчейнами (через мост):
+tactCopycontract CrossChainBridge {
+    bridgeContract: Address;
+
+    message BridgeTransfer {
+        targetChain: String;
+        recipient: Address;
+        amount: Int as coins;
+    }
+
+    receive(msg: BridgeTransfer) {
+        // Логика проверки и подготовки транзакции
+        send(SendParameters{
+            to: self.bridgeContract,
+            value: msg.amount,
+            body: BridgeTransfer{
+                targetChain: msg.targetChain,
+                recipient: msg.recipient,
+                amount: msg.amount
+            }.toCell()
+        });
+    }
+}
+
+Управление DAO (Decentralized Autonomous Organization)
+
+tactCopycontract SimpleDAO {
+    proposals: map<Int, Proposal>;
+    members: map<Address, Bool>;
+    nextProposalId: Int as uint32;
+
+    struct Proposal {
+        description: String;
+        voteCount: Int as uint32;
+        executed: Bool;
+    }
+
+    message CreateProposal {
+        description: String;
+    }
+
+    message Vote {
+        proposalId: Int as uint32;
+    }
+
+    receive(msg: CreateProposal) {
+        require(self.members.get(sender()) ?? false, "Not a member");
+        let id: Int = self.nextProposalId;
+        self.nextProposalId += 1;
+        self.proposals.set(id, Proposal{
+            description: msg.description,
+            voteCount: 0,
+            executed: false
+        });
+    }
+
+    receive(msg: Vote) {
+        require(self.members.get(sender()) ?? false, "Not a member");
+        // Логика голосования
+    }
+
+    // Другие методы для выполнения предложений и управления членством
+}

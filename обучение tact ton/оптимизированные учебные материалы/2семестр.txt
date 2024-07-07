@@ -1,0 +1,71 @@
+2: Продвинутые концепции Tact и работа с данными
+
+Структуры и сообщения
+
+Структуры позволяют группировать связанные данные:
+tactCopystruct Point {
+    x: Int as int32;
+    y: Int as int32;
+}
+Сообщения используются для взаимодействия между контрактами:
+tactCopymessage Transfer {
+    amount: Int as coins;
+    to: Address;
+}
+
+Мапы (словари)
+
+Мапы используются для хранения пар ключ-значение:
+tactCopycontract MapExample {
+    balances: map<Address, Int as coins>;
+
+    fun addBalance(addr: Address, amount: Int) {
+        self.balances.set(addr, (self.balances.get(addr) ?? 0) + amount);
+    }
+}
+
+Опциональные значения
+
+Используйте ? для обозначения опциональных значений:
+tactCopyfun getBalance(addr: Address): Int? {
+    return self.balances.get(addr);
+}
+
+Циклы и условные операторы
+
+tactCopyfun processUsers(users: map<Address, Int>) {
+    let i: Int = 0;
+    while (i < 10) {
+        // ...
+        i += 1;
+    }
+
+    if (users.isEmpty()) {
+        // ...
+    } else {
+        // ...
+    }
+}
+
+Работа с временем
+
+Используйте now() для получения текущего времени:
+tactCopyfun isExpired(deadline: Int): Bool {
+    return now() > deadline;
+}
+
+Обработка ошибок
+
+Используйте require() для проверки условий:
+tactCopyfun withdraw(amount: Int) {
+    require(amount <= self.balance, "Insufficient funds");
+    // ...
+}
+
+Эмиссия событий
+
+Используйте emit() для логирования важных событий:
+tactCopyfun transfer(to: Address, amount: Int) {
+    // ... логика перевода
+    emit(TransferCompleted{to: to, amount: amount}.toCell());
+}

@@ -1,0 +1,145 @@
+4: Паттерны проектирования, безопасность и оптимизация смарт-контрактов
+
+Паттерн Ownable
+
+Этот паттерн позволяет ограничить доступ к определенным функциям только для владельца контракта:
+tactCopyimport "@stdlib/ownable";
+
+contract MyContract with Ownable {
+    owner: Address;
+
+    init() {
+        self.owner = sender();
+    }
+
+    receive("adminAction") {
+        self.requireOwner();
+        // Выполнение админского действия
+    }
+}
+
+Паттерн Upgradeable
+
+Позволяет обновлять логику контракта без изменения его адреса:
+tactCopycontract UpgradeableProxy {
+    implementation: Address;
+    owner: Address;
+
+    receive("upgrade") {
+        require(sender() == self.owner, "Not authorized");
+        self.implementation = context().sender;
+    }
+
+    receive(msg: Slice) {
+        send(SendParameters{
+            to: self.implementation,
+            value: 0,
+            mode: SendRemainingValue,
+            body: msg
+        });
+    }
+}
+
+Паттерн Factory
+
+Используется для создания новых экземпляров контрактов:
+tactCopycontract TokenFactory {
+    nextTokenId: Int as uint32 = 0;
+
+    fun createToken(name: String, symbol: String): Address {
+        let tokenId: Int = self.nextTokenId;
+        self.nextTokenId = self.nextTokenId + 1;
+
+        let init: StateInit = initOf Token(name, symbol, tokenId);
+        return new Token{stateInit: init, value: ton("0.1")}(name, symbol, tokenId);
+    }
+}
+
+Безопасность смарт-контрактов
+
+а) Проверка входных данных:
+tactCopyreceive("transfer") {
+    let amount: Int = context().value;
+    require(amount > 0, "Invalid amount");
+    require(amount <= self.balance, "Insufficient funds");
+    // ...
+}
+б) Защита от атак повторного воспроизведения:
+tactCopycontract Protected {
+    seqno: Int as uint32 = 0;
+
+    receive("action") {
+        require(msg.seqno == self.seqno, "Invalid seqno");
+        self.seqno = self.seqno + 1;
+        // Выполнение действия
+    }
+}
+в) Ограничение доступа:
+tactCopycontract AccessControl {
+    owner: Address;
+    admins: map<Address, Bool>;
+
+    fun requireAdmin() {
+        require(self.admins.get(sender()) ?? false, "Not an admin");
+    }
+
+    receive("adminAction") {
+        self.requireAdmin();
+        // Выполнение админского действия
+    }
+}
+
+Оптимизация газа
+
+а) Минимизация хранения данных:
+tactCopy// Вместо
+data: Int as uint256;
+// Используйте
+data: Int as uint32;
+б) Эффективное использование map:
+tactCopy// Вместо частых обновлений
+fun incrementCounter(addr: Address) {
+    let current: Int = self.counters.get(addr) ?? 0;
+    self.counters.set(addr, current + 1);
+}
+
+// Используйте локальную переменную
+fun incrementCounterOptimized(addr: Address) {
+    let current: Int = self.counters.get(addr) ?? 0;
+    let newValue: Int = current + 1;
+    // Здесь может быть дополнительная логика
+    self.counters.set(addr, newValue);
+}
+в) Оптимизация циклов:
+tactCopy// Избегайте неограниченных циклов
+fun processItems(items: map<Int, Int>) {
+    let keys: map<Int, Bool> = items.keys();
+    let i: Int = 0;
+    while (i < min(keys.length(), 100)) {  // Ограничение на 100 итераций
+        // Обработка
+        i += 1;
+    }
+}
+
+Работа с большими объемами данных
+
+Используйте паттерн "родитель-ребенок" для работы с большими объемами данных:
+tactCopycontract DataParent {
+    nextChildId: Int as uint32 = 0;
+
+    fun createChild(data: String): Address {
+        let childId: Int = self.nextChildId;
+        self.nextChildId += 1;
+        return new DataChild{value: ton("0.1")}(childId, data);
+    }
+}
+
+contract DataChild {
+    id: Int as uint32;
+    data: String;
+
+    init(id: Int, data: String) {
+        self.id = id;
+        self.data = data;
+    }
+}

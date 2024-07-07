@@ -1,0 +1,73 @@
+Проверка отправителя сообщения
+
+Часто смарт-контракт должен выполнять некоторые функции только при вызове от владельца. Для этого используется trait Ownable из стандартной библиотеки:
+import "@stdlib/ownable";
+import "@stdlib/deploy";
+contract MyContract with Deployable, Ownable {
+owner: Address;
+someState: Int;
+Copyinit() {
+    self.owner = sender(); // владельцем будет тот, кто задеплоил контракт
+    self.someState = 0;
+}
+
+receive("protected_func") {
+    self.requireOwner();  // вызов доступен только владельцу
+    // некоторый защищенный код 
+}
+
+receive("public_func") {  
+    // этот вызов доступен всем
+}
+}
+
+Отправка сообщений
+
+// отправка сообщения с монетами и произвольными данными
+send(SendParameters{
+to: receiver_address,
+value: ton("1.5"), // отправляем 1.5 TON
+bounce: true,
+body: begin_cell().store_uint(100, 32).end_cell()
+});
+// пересылка всех оставшихся денег
+send(SendParameters{
+to: receiver_address,
+value: 0, // отдельно монеты не отправляем
+mode: SendRemainingValue + SendIgnoreErrors,
+body: "Остаток на твоем счету".asComment()
+});
+
+Преобразование типов
+
+let num = 12345;
+let numStr: String = num.toString();  // "12345"
+let bigNum: Int = numStr.toInt();     // 12345
+let addr: Address = newAddress(0, 0x1234...);
+let addrStr: String = addr.toString();  // "0:1234..."
+// Slice <-> Cell
+let c: Cell = begin_cell().store_uint(0, 8).end_cell();
+let s: Slice = c.asSlice();
+let c2: Cell = s.asCell();
+
+Генерация случайных чисел
+
+// сгенерировать случайный Int
+let randomInt: Int = randomInt();
+// случайное число от 0 до 99 включительно
+let randomInRange: Int = math.random(0, 99);
+
+Перебрасывание исключений
+
+if (condition) {
+// выбросить исключение с кодом 100
+throw(100);
+}
+// то же самое с условием
+if (x >= 0) {
+nativeThrowIf(101, x < 0);
+}
+// исключение если НЕ выполнено
+if (x >= 0) {
+nativeThrowUnless(102, x >= 0);
+}

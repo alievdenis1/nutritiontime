@@ -1,0 +1,124 @@
+Межконтрактное взаимодействие
+
+В TON контракты взаимодействуют через асинхронные сообщения. Вот пример отправки сообщения:
+tactCopycontract Sender {
+    fun sendMessage(to: Address, amount: Int) {
+        send(SendParameters{
+            to: to,
+            value: amount,
+            mode: SendIgnoreErrors,
+            body: "Hello".asComment()
+        });
+    }
+}
+Получение сообщений:
+tactCopycontract Receiver {
+    receive(msg: String) {
+        if (msg == "Hello") {
+            // Обработка приветствия
+        }
+    }
+}
+
+Jetton (стандарт fungible токенов в TON)
+
+Базовая структура Jetton контракта:
+tactCopycontract JettonMaster {
+    totalSupply: Int as coins;
+    owner: Address;
+    content: Cell;
+
+    init(owner: Address, content: Cell) {
+        self.totalSupply = 0;
+        self.owner = owner;
+        self.content = content;
+    }
+
+    receive("Mint") {
+        // Логика минтинга
+    }
+
+    // Другие методы...
+}
+
+contract JettonWallet {
+    balance: Int as coins;
+    owner: Address;
+    master: Address;
+
+    // Методы для трансфера, получения баланса и т.д.
+}
+
+NFT (Non-Fungible Tokens)
+
+Базовая структура NFT контракта:
+tactCopycontract NFTCollection {
+    owner: Address;
+    nextItemIndex: Int as uint32;
+
+    init(owner: Address) {
+        self.owner = owner;
+        self.nextItemIndex = 0;
+    }
+
+    receive("Mint") {
+        // Логика минтинга NFT
+    }
+
+    // Другие методы...
+}
+
+contract NFTItem {
+    collection: Address;
+    index: Int as uint32;
+    owner: Address;
+
+    // Методы для трансфера, получения информации и т.д.
+}
+
+Обработка газа и ценности (value)
+
+При отправке сообщений важно правильно управлять газом:
+tactCopyfun sendWithValue(to: Address, amount: Int) {
+    send(SendParameters{
+        to: to,
+        value: amount,
+        mode: SendRemainingValue + SendIgnoreErrors,
+        body: "Payment".asComment()
+    });
+}
+
+Работа с адресами
+
+Получение адреса текущего контракта:
+tactCopylet myAddr: Address = myAddress();
+Получение адреса отправителя:
+tactCopylet sender: Address = sender();
+
+Персистентное хранение и оптимизация
+
+Оптимизация хранения для экономии газа:
+tactCopycontract OptimizedStorage {
+    value: Int as uint32;  // Использует только 32 бита вместо 257
+    map: map<Address, Int as uint16>;  // Ограничивает значения до 16 бит
+}
+
+Обработка ошибок и откаты транзакций
+
+tactCopyreceive("Transfer") {
+    let amount: Int = context().value;
+    require(amount > 0, "Invalid amount");
+
+    if (self.balance < amount) {
+        self.reply("Insufficient funds".asComment());
+    } else {
+        // Выполнение перевода
+    }
+}
+
+Эмиссия событий и логирование
+
+tactCopyfun importantAction(param: Int) {
+    // Выполнение действия
+    emit(ActionPerformed{param: param}.toCell());
+}
