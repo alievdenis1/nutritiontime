@@ -7,11 +7,6 @@ const MAX_PLAYERS: Int = 10000;
 const TOP_PLAYERS_COUNT: Int = 10;
 const POVEL_DUREV_ADDRESS: Address = address("EQB02DJ0cdUD4iQDRbBv4aYG3htePHBRK1tGeRtCnatescK0");
 
-// Jetton operation codes
-const MINT: Int = 21;
-const INTERNAL_TRANSFER: Int = 0x178d4519;
-const BURN: Int = 0x595f07bc;
-
 struct PlayerData {
     reputation: Int as uint16;
     energy: Int as uint8;
@@ -52,6 +47,11 @@ message DistributeRewards {
     queryId: Int as uint64;
 }
 
+message UpdateScore {
+    player: Address;
+    newScore: Int as uint32;
+}
+
 contract GameMaster with Deployable, OwnableTransferable {
     owner: Address;
     players: map<Address, PlayerData>;
@@ -59,17 +59,21 @@ contract GameMaster with Deployable, OwnableTransferable {
     weeklyPool: Int as coins;
     lastWeeklyDistribution: Int as uint32;
     totalPlayers: Int as uint32;
-    topPlayers: map<Int, Address>;
+    marketplaceAddress: Address;
+    leaderboardAddress: Address;
+    leaderboardData: map<Int, Address>;
+    lastLeaderboardUpdate: Int as uint32;
 
-    init() {
+    init(marketplaceAddress: Address, leaderboardAddress: Address) {
         self.owner = sender();
         self.weeklyPool = 0;
         self.lastWeeklyDistribution = now();
         self.totalPlayers = 0;
-        self.initializeUpgrades();
-    }
+        self.marketplaceAddress = marketplaceAddress;
+        self.leaderboardAddress = leaderboardAddress;
+        self.lastLeaderboardUpdate = 0;
 
-    fun initializeUpgrades() {
+        // Initialize upgrades directly in the constructor
         self.upgrades.set(0, UpgradeData{
         name: "Programming Courses",
         cost: ton("50"),
@@ -102,6 +106,40 @@ contract GameMaster with Deployable, OwnableTransferable {
         });
     }
 
+    fun getTopPlayer(index: Int): Address? {
+        require(index >= 0 && index < TOP_PLAYERS_COUNT, "Invalid index");
+
+        // Обновляем данные лидерборда, если прошло достаточно времени
+        if (now() - self.lastLeaderboardUpdate > 3600) { // Обновляем каждый час
+            self.updateLeaderboardData();
+        }
+
+        return self.leaderboardData.get(index);
+    }
+
+    fun updateLeaderboardData() {
+        send(SendParameters{
+        to: self.leaderboardAddress,
+        value: ton("0.01"),
+        mode: SendIgnoreErrors,
+        body: "GetTopPlayers".asComment()
+        });
+    }
+
+    receive("TopPlayersData") {
+        let slice: Slice = context().raw;
+        let count: Int = min(slice.loadUint(8), TOP_PLAYERS_COUNT);
+
+        repeat(count) {
+            let index: Int = slice.loadUint(8);
+            let player: Address = slice.loadAddress();
+            self.leaderboardData.set(index, player);
+        }
+
+        self.lastLeaderboardUpdate = now();
+    }
+
+
     receive(msg: Register) {
         require(self.totalPlayers < MAX_PLAYERS, "Maximum number of players reached");
         require(self.players.get(msg.playerAddress) == null, "Player already registered");
@@ -118,7 +156,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         };
         self.players.set(msg.playerAddress, newPlayer);
         self.totalPlayers = self.totalPlayers + 1;
-        self.updateTopPlayers(msg.playerAddress, newPlayer.rating);
+        self.updateLeaderboard(msg.playerAddress, newPlayer.rating);
         self.sendTokens(msg.playerAddress, ton("100"));
     }
 
@@ -127,6 +165,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         require(playerOpt != null, "Player not found");
         let player: PlayerData = playerOpt!!;
         require(self.canPerformAction(player), "No actions left today");
+        require(msg.actionType >= 0 && msg.actionType <= 2, "Invalid action type");
 
         if (msg.actionType == 0) {
             // Develop
@@ -149,7 +188,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         player.actionsToday = player.actionsToday + 1;
         player.lastActionTime = now();
         self.players.set(msg.playerAddress, player);
-        self.updateTopPlayers(msg.playerAddress, player.rating);
+        self.updateLeaderboard(msg.playerAddress, player.rating);
         self.weeklyPool = self.weeklyPool + ton("10");
     }
 
@@ -163,6 +202,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         let upgrade: UpgradeData = upgradeOpt!!;
 
         require((player.upgrades & (1 << msg.upgradeId)) == 0, "Upgrade already purchased");
+        require(player.energy >= 10, "Not enough energy");
 
         self.sendTokens(myAddress(), upgrade.cost);
         self.weeklyPool = self.weeklyPool + upgrade.cost;
@@ -180,7 +220,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         player.upgrades = player.upgrades | (1 << msg.upgradeId);
         player.rating = player.rating + 5;
         self.players.set(msg.playerAddress, player);
-        self.updateTopPlayers(msg.playerAddress, player.rating);
+        self.updateLeaderboard(msg.playerAddress, player.rating);
     }
 
     receive(msg: LaunchProject) {
@@ -204,7 +244,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         }
 
         self.players.set(msg.playerAddress, player);
-        self.updateTopPlayers(msg.playerAddress, player.rating);
+        self.updateLeaderboard(msg.playerAddress, player.rating);
     }
 
     receive(msg: DistributeRewards) {
@@ -216,7 +256,7 @@ contract GameMaster with Deployable, OwnableTransferable {
 
         let i: Int = 0;
         repeat (TOP_PLAYERS_COUNT) {
-            let playerAddressOpt: Address? = self.topPlayers.get(i);
+            let playerAddressOpt: Address? = self.getTopPlayer(i);
             if (playerAddressOpt != null) {
                 self.sendTokens(playerAddressOpt!!, playerReward);
             }
@@ -240,12 +280,12 @@ contract GameMaster with Deployable, OwnableTransferable {
         value: 0,
         mode: SendRemainingValue,
         body: beginCell()
-        .storeUint(MINT, 32)
+        .storeUint(21, 32)  // op::mint()
         .storeUint(0, 64)  // query_id
         .storeAddress(to)
         .storeCoins(amount)
         .storeRef(beginCell()
-        .storeUint(INTERNAL_TRANSFER, 32)
+        .storeUint(0x178d4519, 32)  // op::internal_transfer()
         .storeUint(0, 64)  // query_id
         .storeCoins(amount)
         .storeAddress(myAddress())  // from_address
@@ -265,7 +305,7 @@ contract GameMaster with Deployable, OwnableTransferable {
         value: 0,
         mode: SendRemainingValue,
         body: beginCell()
-        .storeUint(BURN, 32)
+        .storeUint(0x595f07bc, 32)  // op::burn()
         .storeUint(0, 64)  // query_id
         .storeCoins(amount)
         .storeAddress(myAddress())  // response_destination
@@ -274,35 +314,16 @@ contract GameMaster with Deployable, OwnableTransferable {
         });
     }
 
-    fun updateTopPlayers(address: Address, rating: Int) {
-        let i: Int = 0;
-        let inserted: Bool = false;
-
-        repeat (TOP_PLAYERS_COUNT) {
-            if (!inserted) {
-                let currentTopPlayerOpt: Address? = self.topPlayers.get(i);
-                if (currentTopPlayerOpt == null) {
-                    self.topPlayers.set(i, address);
-                    inserted = true;
-                } else {
-                    let currentTopPlayerData: PlayerData? = self.players.get(currentTopPlayerOpt!!);
-                    if (currentTopPlayerData != null && rating > currentTopPlayerData!!.rating) {
-                        // Shift down all players below
-                        let j: Int = TOP_PLAYERS_COUNT - 1;
-                        while (j > i) {
-                            let prevPlayerOpt: Address? = self.topPlayers.get(j - 1);
-                            if (prevPlayerOpt != null) {
-                                self.topPlayers.set(j, prevPlayerOpt!!);
-                            }
-                            j = j - 1;
-                        }
-                        self.topPlayers.set(i, address);
-                        inserted = true;
-                    }
-                }
-            }
-            i = i + 1;
-        }
+    fun updateLeaderboard(address: Address, rating: Int) {
+        send(SendParameters{
+        to: self.leaderboardAddress,
+        value: ton("0.01"),
+        mode: SendIgnoreErrors,
+        body: UpdateScore{
+        player: address,
+        newScore: rating
+        }.toCell()
+        });
     }
 
     get fun getPlayerData(address: Address): PlayerData? {
@@ -315,9 +336,5 @@ contract GameMaster with Deployable, OwnableTransferable {
 
     get fun getWeeklyPool(): Int {
         return self.weeklyPool;
-    }
-
-    get fun getTopPlayers(): map<Int, Address> {
-        return self.topPlayers;
     }
 }
