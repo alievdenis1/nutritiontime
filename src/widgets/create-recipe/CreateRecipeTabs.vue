@@ -26,26 +26,57 @@
 		</TabsList>
 		<TabsContent
 			value="ownRecepie"
-			class="flex gap-[16px] flex-col mt-[16px]"
+			class="flex gap-[16px] flex-col mt-[16px] mb-[80px]"
 		>
 			<CreateRecipeBasicInfo />
 			<CreateRecipeGradation />
+			<CreateRecipeTime />
+			<CreateRecipeIngredients />
+			<CreateRecipeNutritional />
+			<StepByStepRecipe />
+			<KitchenToolsRecipe />
+			<TagsRecipe />
+			<v-button
+				:color="ButtonColors.Green"
+				@click="CheckRecipe"
+			>
+				<div class="flex gap-[12px] items-center">
+					<div>{{ t('further') }}</div>
+					<IconArrowRight icon-color="#FFFFFF" />
+				</div>
+			</v-button>
 		</TabsContent>
 		<TabsContent value="aiRecepie">
-			<CreateRecipeGpt />
+			gpt
 		</TabsContent>
 	</TabsMain>
 </template>
 
 <script setup lang="ts">
-import { CreateRecipeBasicInfo, CreateRecipeGpt, CreateRecipeGradation } from 'entities/CreateRecipe/ui'
+import { CreateRecipeTime } from 'entities/CreateRecipe/ui/timeRecipe'
+import { CreateRecipeNutritional } from 'entities/CreateRecipe/ui/nutritionalRecipe'
+import { CreateRecipeBasicInfo } from 'entities/CreateRecipe/ui/baseRecipe/Index'
+import { TagsRecipe } from 'entities/CreateRecipe/ui/tagsRecipe'
+import { StepByStepRecipe } from 'entities/CreateRecipe/ui/stepByStepRecipe'
+import { CreateRecipeGradation } from 'entities/CreateRecipe/ui/gradationRecipe'
+import { CreateRecipeIngredients } from 'entities/CreateRecipe/ui/IngredientsRecipe'
+import { KitchenToolsRecipe } from 'entities/CreateRecipe/ui/kitchenToolsRecipe'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { ButtonColors, VButton } from '@/shared/components/Button'
 import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateRecipeTabs.localization.json'
 import { IconAi, IconArrowRight } from '@/shared/components/Icon'
 const store = useModalCreateStore()
 const { t } = useTranslation(localizations)
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const CheckRecipe = () => {
+	router.push({ path: 'check-recipe' })
+}
 </script>
 
 <style scoped></style>

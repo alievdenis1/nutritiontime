@@ -1,0 +1,1 @@
+export { default as CreateRecipeIngredients } from './CreateRecipeIngredients.vue'

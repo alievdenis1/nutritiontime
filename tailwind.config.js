@@ -7,7 +7,6 @@ export default {
     './app/**/*.{ts,tsx,vue}',
     './src/**/*.{ts,tsx,vue}',
   ],
-  prefix: '',
   theme: {
     container: {
       center: true,
@@ -39,13 +38,14 @@ export default {
         sans: ['Roboto', 'sans-serif']
       },
       colors: {
+        disabled: '#319A6E1A',
         mainBg: '#FCFCFC',
         forestGreen: '#319A6E',
         lightGray: '#F3F3F3',
         darkGray: '#1c1c1c',
-        slateGray:'#535353',
+        slateGray: '#535353',
         transparent: 'transparent',
-        gray:'#9F9FA0',
+        gray: '#9F9FA0',
         orange: '#FFA767',
         black: '#000000',
         white: '#FFFFFF',
@@ -78,6 +78,37 @@ export default {
         },
       },
     },
-    plugins: [],
-  }
+    plugins: [
+      function ({ addUtilities }) {
+        addUtilities({
+          '.custom-border': {
+            border: '1px solid #E1E1E1',
+          },
+          '.custom-scrollbar': {
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': {
+              width: '4px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#F3F3F3',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#319A6E',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#1c1c1c',
+            },
+          },
+          '.no-scrollbar': {
+            '-ms-overflow-style': 'none',
+            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': {
+              display: 'none',
+            },
+          },
+        })
+      },
+    ],
+  },
 }

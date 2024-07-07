@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<VAccordion :title="t('spicinessAndDifficulty')">
-			<div class="gradation-selector flex flex-col gap-6 p-4">
+			<div class="flex flex-col gap-6 mt-[20px]">
 				<div class="gradation-group flex flex-col gap-[12px]">
 					<h3 class="text-sm font-semibold text-darkGray">
 						{{ t('spiciness') }}
@@ -65,10 +65,6 @@ const selectDifficulty = (level: number) => {
 </script>
 
 <style scoped>
-.gradation-selector {
-    padding: 16px;
-}
-
 .gradation-buttons button {
     width: 62px;
     height: 32px;
