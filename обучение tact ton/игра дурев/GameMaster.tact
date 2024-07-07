@@ -14,8 +14,9 @@ struct PlayerData {
     devSkills: Int as uint8;
     lastActionTime: Int as uint32;
     actionsToday: Int as uint8;
-    upgrades: Int as uint8;
+    upgrades: Int as uint16;
     rating: Int as uint32;
+    balance: Int as coins;
 }
 
 struct UpgradeData {
@@ -52,6 +53,10 @@ message UpdateScore {
     newScore: Int as uint32;
 }
 
+message UpdateCode {
+    newCode: Cell;
+}
+
 contract GameMaster with Deployable, OwnableTransferable {
     owner: Address;
     players: map<Address, PlayerData>;
@@ -63,6 +68,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     leaderboardAddress: Address;
     leaderboardData: map<Int, Address>;
     lastLeaderboardUpdate: Int as uint32;
+    paused: Bool;
 
     init(marketplaceAddress: Address, leaderboardAddress: Address) {
         self.owner = sender();
@@ -72,8 +78,8 @@ contract GameMaster with Deployable, OwnableTransferable {
         self.marketplaceAddress = marketplaceAddress;
         self.leaderboardAddress = leaderboardAddress;
         self.lastLeaderboardUpdate = 0;
+        self.paused = false;
 
-        // Initialize upgrades directly in the constructor
         self.upgrades.set(0, UpgradeData{
         name: "Programming Courses",
         cost: ton("50"),
@@ -106,11 +112,19 @@ contract GameMaster with Deployable, OwnableTransferable {
         });
     }
 
+    receive("TogglePause") {
+        require(sender() == self.owner, "Only owner can toggle pause");
+        self.paused = !self.paused;
+    }
+
+    fun assertNotPaused() {
+        require(!self.paused, "Contract is paused");
+    }
+
     fun getTopPlayer(index: Int): Address? {
         require(index >= 0 && index < TOP_PLAYERS_COUNT, "Invalid index");
 
-        // Обновляем данные лидерборда, если прошло достаточно времени
-        if (now() - self.lastLeaderboardUpdate > 3600) { // Обновляем каждый час
+        if (now() - self.lastLeaderboardUpdate > 3600) {
             self.updateLeaderboardData();
         }
 
@@ -139,8 +153,8 @@ contract GameMaster with Deployable, OwnableTransferable {
         self.lastLeaderboardUpdate = now();
     }
 
-
     receive(msg: Register) {
+        self.assertNotPaused();
         require(self.totalPlayers < MAX_PLAYERS, "Maximum number of players reached");
         require(self.players.get(msg.playerAddress) == null, "Player already registered");
 
@@ -152,7 +166,8 @@ contract GameMaster with Deployable, OwnableTransferable {
         lastActionTime: now(),
         actionsToday: 0,
         upgrades: 0,
-        rating: 10
+        rating: 10,
+        balance: ton("100")
         };
         self.players.set(msg.playerAddress, newPlayer);
         self.totalPlayers = self.totalPlayers + 1;
@@ -161,6 +176,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     receive(msg: PerformAction) {
+        self.assertNotPaused();
         let playerOpt: PlayerData? = self.players.get(msg.playerAddress);
         require(playerOpt != null, "Player not found");
         let player: PlayerData = playerOpt!!;
@@ -168,21 +184,16 @@ contract GameMaster with Deployable, OwnableTransferable {
         require(msg.actionType >= 0 && msg.actionType <= 2, "Invalid action type");
 
         if (msg.actionType == 0) {
-            // Develop
             player.devSkills = min(player.devSkills + 1, 255);
             player.energy = max(player.energy - 10, 0);
             player.rating = player.rating + 1;
         } else if (msg.actionType == 1) {
-            // Network
             player.reputation = min(player.reputation + 1, 65535);
             player.energy = max(player.energy - 10, 0);
             player.rating = player.rating + 1;
         } else if (msg.actionType == 2) {
-            // Rest
             player.health = min(player.health + 10, 255);
             player.energy = min(player.energy + 10, 255);
-        } else {
-            require(false, "Invalid action type");
         }
 
         player.actionsToday = player.actionsToday + 1;
@@ -193,6 +204,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     receive(msg: BuyUpgrade) {
+        self.assertNotPaused();
         let playerOpt: PlayerData? = self.players.get(msg.playerAddress);
         require(playerOpt != null, "Player not found");
         let player: PlayerData = playerOpt!!;
@@ -203,7 +215,9 @@ contract GameMaster with Deployable, OwnableTransferable {
 
         require((player.upgrades & (1 << msg.upgradeId)) == 0, "Upgrade already purchased");
         require(player.energy >= 10, "Not enough energy");
+        require(player.balance >= upgrade.cost, "Insufficient funds");
 
+        player.balance = player.balance - upgrade.cost;
         self.sendTokens(myAddress(), upgrade.cost);
         self.weeklyPool = self.weeklyPool + upgrade.cost;
 
@@ -224,6 +238,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     receive(msg: LaunchProject) {
+        self.assertNotPaused();
         let playerOpt: PlayerData? = self.players.get(msg.playerAddress);
         require(playerOpt != null, "Player not found");
         let player: PlayerData = playerOpt!!;
@@ -248,6 +263,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     receive(msg: DistributeRewards) {
+        self.assertNotPaused();
         require(sender() == self.owner, "Only owner can distribute rewards");
         require(now() - self.lastWeeklyDistribution >= 7 * SECONDS_IN_DAY, "Too early for distribution");
 
@@ -275,6 +291,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     fun sendTokens(to: Address, amount: Int) {
+        require(amount > 0, "Amount must be positive");
         send(SendParameters{
         to: POVEL_DUREV_ADDRESS,
         value: 0,
@@ -300,6 +317,7 @@ contract GameMaster with Deployable, OwnableTransferable {
     }
 
     fun burnTokens(amount: Int) {
+        require(amount > 0, "Amount must be positive");
         send(SendParameters{
         to: POVEL_DUREV_ADDRESS,
         value: 0,
@@ -323,6 +341,22 @@ contract GameMaster with Deployable, OwnableTransferable {
         player: address,
         newScore: rating
         }.toCell()
+        });
+    }
+
+    receive(msg: UpdateCode) {
+        require(sender() == self.owner, "Only owner can update code");
+
+        // Подготавливаем контракт к обновлению
+        self.owner = sender(); // Сохраняем текущего владельца
+        // Здесь можно добавить дополнительную логику подготовки к обновлению
+
+        // Отправляем сообщение для фактического обновления кода
+        send(SendParameters{
+        to: myAddress(), // Отправляем сообщение самому контракту
+        value: 0,
+        mode: SendRemainingValue,
+        body: beginCell().storeUint(0x12345678, 32).storeRef(msg.newCode).endCell()
         });
     }
 
