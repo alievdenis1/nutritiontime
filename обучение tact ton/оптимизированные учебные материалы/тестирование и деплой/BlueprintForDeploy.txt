@@ -1,0 +1,380 @@
+Использование Blueprint для развертывания контрактов
+
+📚Чтение Заметок
+Как вы помните, в самом начале нашего путешествия по программированию FunC мы быстро заметили, что существует отличная библиотека/инструмент под названием Blueprint.
+
+Blueprint поддерживается командой TonTech, официально поддерживаемой Фондом TON. Мы создали наши пользовательские скрипты с нуля, чтобы убедиться, что вы полностью понимаете, что именно происходит под капотом в проектах, сгенерированных Blueprint.
+
+Даже рекомендуется начинать каждый из ваших новых проектов со следующей команды:
+
+npm create ton@latest
+Эта команда будет использовать Blueprint для создания нового проекта для вас с кодом для всех этапов, которые мы прошли в главе 3, охватывая жизненный цикл разработки контракта.
+
+В этой главе мы не собираемся немного оптимизировать настройку нашего проекта, поэтому он будет работать точно так же, как проекты, созданные с помощью Blueprint. А именно, мы собираемся немного обновить наш проект с точки зрения компиляции и развертывания, чтобы он использовал компоненты, импортированные из Blueprint.
+
+Делегирование процесса компиляции в Blueprint
+Прежде всего, нам нужно будет обновить наш файл package.json. С этого момента мы оставим там только один тест. Мы делаем это, потому что, как упоминалось ранее, компиляция и развертывание будут обрабатываться компонентами, импортированными из Blueprint.
+
+Скрипты, часть вашего файла package.json теперь будет выглядеть следующим образом:
+
+"scripts": {
+"test": "jest",
+}
+Однако, если мы запустим команду yarn test сейчас - она просто запустит тесты по контракту без предварительной компиляции. Давайте это исправим.
+
+Как я уже упоминал, мы будем использовать набор компиляции от Blueprint, так что давайте установим эту удивительную библиотеку:
+
+yarn add @ton/blueprint --dev
+В нашем файле tests/main.spec.ts мы должны внести некоторые важные обновления. Вот как это выглядело раньше (мы цитируем здесь только начальную часть, перед фактическими тестами):
+
+Мы сделаем 3 обновления:
+
+Функция компиляции импорта из библиотеки @ton-blueprint
+Реализуйте хук beforeAll шутки, чтобы скомпилировать наш код и предоставить ячейку кода для остальных хуков и тестов
+Обновите хук beforeEach, чтобы использовать ячейку кода, предоставленную крючком beforeAll.
+Вот как наш код будет преобразовываться после внесения этих изменений:
+
+Мы вносим эти изменения, чтобы вы привыкли к коду, который будет сгенерирован в случае, если вы запустите npm create ton@latest. Мы переносим процесс компиляции в библиотеку Blueprint.
+Тем не менее, нам нужно будет предоставить Blueprint еще одну вещь - конфигурацию компилятора. Для этого просто создайте новый файл в папке wrappers и назовите его MainContract.compile.ts. Вот содержимое этого файла:
+
+import { CompilerConfig } from "@ton/blueprint";
+
+export const compile: CompilerConfig = {
+targets: ["contracts/main.fc"],
+};
+На этом этапе вы можете просто удалить файл сценариев компиляции (scripts/compile.ts) и запустить тест yarn в корне вашего проекта. Вы увидите, что наши тесты теперь выполняются должным образом! Поздравляем!
+
+Делегирование процесса развертывания в Blueprint
+Следующее, что нам нужно сделать, это обновить наш сценарий развертывания, используя суперспособности Blueprint. Быстрый отказ от ответственности - мы собираемся использовать нашу обертку MainContract и ее метод .createFromConfig. Таким образом, мы можем легко установить первоначальное состояние нашего контракта перед его развертыванием.
+
+Blueprint предлагает удивительные функции для развертывания. Он интерактивно просит нас выбрать сеть (testnet/mainnet), а также тип кошелька, с которым мы хотим развернуть наш контракт. Эта функция очень удобна после того, как вы часто разрабатываете и развертываете.
+
+Одна вещь, которую нам нужно сделать перед обновлением нашего сценария развертывания, это создать новый метод на нашей обертке под названием sendDeploy. Как вы помните, нам нужно использовать обертку для взаимодействия с нашим контрактом. Вот как выглядит код нашего метода:
+
+async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
+await provider.internal(via, {
+value,
+sendMode: SendMode.PAY_GAS_SEPARATELY,
+body: beginCell().endCell(),
+});
+}
+Как вы помните, развертывание контракта так же просто, как отправить его первоначальные данные и код на заранее определенный адрес. В главе 3 мы сочиняли это вручную, чтобы вы могли глубоко понять, как это работает. Теперь, в целях оптимизации, мы переделируем это в нашу обертку и Blueprint.
+
+Мы полностью заменим наш код новым, чтобы он соответствовал функциональности Blueprint.
+
+Вот как выглядят наши скрипты scripts/deploy.ts сейчас:
+
+Как вы можете видеть - это намного проще, и мы делим Blueprint так много вещей, с которыми нам приходилось иметь дело раньше.
+
+Одна из самых крутых вещей заключается в том, что теперь мы можем использовать тот же метод .createFromConfig нашей обертки, чтобы инициировать контракт, который мы собираемся развернуть вместе с данными начального состояния через объект конфигурации, который мы передаем в него.
+
+Еще две вещи, которые заслуживают объяснения, связаны с содержимым объекта конфигурации.
+
+Как вы помните, наши первоначальные данные контракта должны иметь три параметра - текущую встречную стоимость (номер), самый последний отправитель (адрес) и адрес "владельца" контракта - тот, кто может вывести средства.
+Потому что мы собираемся использовать этот контракт в цепочке - я установил свой реальный адрес тестовой сети для обоих полей. Это позволит мне вывести средства позже.
+
+Адрес функции помогает нам разобрать строковый адрес в правильный тип адреса, как наши запросы конфигурации
+Функциональность основного развертывания обрабатывается поставщиком типа NetworkProvider, который передается Blueprint в функцию запуска, когда Blueprint запускает наш сценарий развертывания.
+
+Все ваши скрипты должны экспортировать функцию запуска, если вы хотите, чтобы они работали с Blueprint
+
+Давайте вернемся к методу .sendDeploy нашей обертки на секунду. Всгляните на параметры тела. Вы можете видеть, что мы отправляем пустую ячейку в качестве тела сообщения. Что касается логики нашего контракта, если тело сообщения не имеет установленного кода операции - сообщение будет возвращено, даже если контракт будет успешно развернут. Вы увидите такое поведение через несколько мгновений.
+Развертывание контракта с помощью Blueprint
+Давайте перейдем к корню нашего проекта и запустим команду:
+
+yarn blueprint run
+Вы ожидаете увидеть что-то подобное после выполнения этой команды:
+
+markokhman$ yarn blueprint run
+
+yarn run v1.22.11
+
+? Choose file to use (Use arrow keys)
+❯ deploy
+onchaintest
+
+Вы увидите, что Blueprint предлагает нам через командную строку выбрать сценарий, который мы хотим запустить. На данный момент у нас все еще есть скрипт onchaintest.ts, поэтому он также предлагается нам для выполнения, так как Blueprint улавливает все доступные скрипты из папки скриптов. На данный момент мы не собираемся создавать какие-либо тесты onchain, потому что в следующей главе мы собираемся создать реальный веб-интерфейс для взаимодействия с нашим контрактом. На данный момент вы можете просто удалить файл scripts/onchaintest.ts.
+Выберите сценарий deploy.
+
+Вам будет предложено выбрать сеть сейчас:
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use? (Use arrow keys)
+❯ mainnet
+testnet
+Выберите сеть testnet.
+
+markokhman$ yarn blueprint run
+
+yarn run v1.22.11
+
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use?
+? Which network do you want to use? testnet
+? Which wallet are you using? (Use arrow keys)
+❯ TON Connect compatible mobile wallet (example: Tonkeeper)
+Create a ton:// deep link
+Tonhub wallet
+Mnemonic
+Теперь вам предлагается выбрать, с каким кошельком вы хотите развернуть свой контракт. В главе 3 мы использовали только один кошелек (TON Whales' Tonhub) и самым простым образом - создавали глубокую ссылку.
+
+Blueprint позволяет использовать кошельки любого типа с лучшими в классе сессиями. А именно, это работает таким образом, что вы разрешаете своему локальному проекту запрашивать транзакции из вашего кошелька, а затем утверждать их.
+
+Для этого урока мы снова будем использовать Tonhub для тестовой сети и основной сети.
+
+Приложение кошелька Tonhub.
+Вам будет предложено отсканировать QR-код и авторизовать приложение для взаимодействия с вашим кошельком (запросить транзакции).
+
+После сканирования QR-кода и авторизации в вашем приложении вам будет предложено подписать транзакцию внутри приложения Tonhub. Когда вы закончите, вы увидите следующие выходные данные в командной строке:
+
+Поздравляем! Вы узнали еще один способ развертывания своих контрактов :) И это довольно эффективно.
+
+
+Using Blueprint to deploy contracts
+BitStake Capital CRYPTO
+BitStake Capital CRYPTO
+
+·
+Follow
+
+7 min read
+·
+May 9, 2024
+
+
+
+
+
+📚Lecture Notes
+As you remember, in the very begining of our FunC programming journey, we’ve quickly noted that there is a great library/tool called Blueprint.
+
+Blueprint is maintained by the TonTech team, officially supported by TON Foundation. We’ve created our custom scripts from scratch in order to make sure that you completely understand what exactly happens under the hood in projects generated by Blueprint.
+
+It’s even recommended to start every of your new projects with following command:
+
+npm create ton@latest
+This command will use Blueprint to generate a new project for you with code for all the phases that we went through in Chapter 3, while covering the contract development lifecycle.
+
+In this chapter we are not going to slightly optimise our project’s setup, so it would work exactly like projects generated with Blueprint. Namely, we are going to slightly update our project in terms of compilation and deployment, so it would use components imported from Blueprint.
+
+Delegating compilation process to Blueprint
+First of all — we will need to update our package.json file. From no on, we will only leave there one sript - test. We do this, because, as mentioned before, the compilation and deployment will be handled by components imported from Blueprint.
+
+Scripts part of your package.json file will now look like this:
+
+"scripts": {
+    "test": "jest",
+}
+However, if we will run the yarn test command now - it will simply run tests on the contract without pre-compiling it. Let's fix that.
+
+As I’ve mentioned — we will use compilation suite from Blueprint, so let’s install this amazing library:
+
+yarn add @ton/blueprint --dev
+In our tests/main.spec.ts file we have to make some important updates. This is how it was looking before (we quote here only the beginning part, before actual tests):
+
+import { Cell, toNano } from "ton-core";
+import { hex } from "../build/main.compiled.json";
+import { Blockchain, SandboxContract, TreasuryContract } from "@ton/sandbox";
+import { MainContract } from "../wrappers/MainContract";
+import "@ton/test-utils";
+describe("main.fc contract tests", () => {
+  let blockchain: Blockchain;
+  let myContract: SandboxContract<MainContract>;
+  let initWallet: SandboxContract<TreasuryContract>;
+  let ownerWallet: SandboxContract<TreasuryContract>;
+  beforeEach(async () => {
+    blockchain = await Blockchain.create();
+    initWallet = await blockchain.treasury("initWallet");
+    ownerWallet = await blockchain.treasury("ownerWallet");
+    const codeCell = Cell.fromBoc(Buffer.from(hex, "hex"))[0];
+    myContract = blockchain.openContract(
+      await MainContract.createFromConfig(
+        {
+          number: 0,
+          address: initWallet.address,
+          owner_address: ownerWallet.address,
+        },
+        codeCell
+      )
+    );
+  });
+
+
+  // ... the rest of testing code
+ }
+We will make 3 updates to it:
+
+Import compile function from @ton-blueprint library
+Implement jest’s beforeAll hook to compile our code and provide a code cell to the rest of hooks and tests
+Update the beforeEach hook to use the code cell provided by beforeAll hook.
+This is how our code will transform after those changes are made:
+
+// ...other library imports
+import { compile } from "@ton/blueprint";
+describe("main.fc contract tests", () => {
+  let blockchain: Blockchain;
+  let myContract: SandboxContract<MainContract>;
+  let initWallet: SandboxContract<TreasuryContract>;
+  let ownerWallet: SandboxContract<TreasuryContract>;
+  let codeCell: Cell;
+  beforeAll(async () => {
+    codeCell = await compile("MainContract");
+  });
+  beforeEach(async () => {
+    blockchain = await Blockchain.create();
+    initWallet = await blockchain.treasury("initWallet");
+    ownerWallet = await blockchain.treasury("ownerWallet");
+    myContract = blockchain.openContract(
+      await MainContract.createFromConfig(
+        {
+          number: 0,
+          address: initWallet.address,
+          owner_address: ownerWallet.address,
+        },
+        codeCell
+      )
+    );
+  });
+
+ // ... the rest of testing code
+}
+We are doing this changes so you would get used to code that would be generated in case you run npm create ton@latest. We are deligating the compilation process to the Blueprint library.
+
+However, we will need to provide Blueprint with one more thing — compiler config. To do so, simply create a new file in wrappers folder and call it MainContract.compile.ts. Here is the contents of this file:
+
+import { CompilerConfig } from "@ton/blueprint";
+export const compile: CompilerConfig = {
+  targets: ["contracts/main.fc"],
+};
+At this point you can simply remove the compile scripts file (scripts/compile.ts) and run yarn test in the root of your project. You will see that our tests are now executing properly! Congratulations!
+
+Delegating the deployment process to Blueprint
+Next thing we need to do is to update our deploy script use Blueprint’s superpowers. Quick disclaimer — we are going to use our wrapper MainContract and it’s method .createFromConfig. This way we can easily set the initial state of our contract before deploying it.
+
+Blueprint is bringing amazing features for deployment. It is interactively asking us to choose network (testnet/mainnet) as well as type of wallet that we want to deploy our contract with. This functionality is very handy once you develop and deploy often.
+
+One thing we need to do before updating our deploy script is to create a new method on our wrapper called sendDeploy. As you remember, we need to use a wrapper to interact with our contract. This is what our method’s code looks like:
+
+async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
+    await provider.internal(via, {
+      value,
+      sendMode: SendMode.PAY_GAS_SEPARATELY,
+      body: beginCell().endCell(),
+    });
+}
+As you remember, deploying a contract is as simple as sending it’s initial data and code to it’s pre-determined address. In Chapter 3 we were composing this manually, so you would understand in depth how it works. Now, for sake of optimisation, we deligate this to our wrapper and Blueprint.
+
+We will completely replace our code with new, so it would comply with Blueprint’s functionality.
+
+Here is how our scripts/deploy.ts looks like now:
+
+import { address, toNano } from "ton-core";
+import { MainContract } from "../wrappers/MainContract";
+import { compile, NetworkProvider } from "@ton/blueprint";
+export async function run(provider: NetworkProvider) {
+  const myContract = MainContract.createFromConfig(
+    {
+      number: 0,
+      address: address("kQDU69xgU6Mj-iNDHYsWWuNx7yRPQC_bNZNCpq5yVc7LiE7D"),
+      owner_address: address(
+        "kQDU69xgU6Mj-iNDHYsWWuNx7yRPQC_bNZNCpq5yVc7LiE7D"
+      ),
+    },
+    await compile("MainContract")
+  );
+  const openedContract = provider.open(myContract);
+  openedContract.sendDeploy(provider.sender(), toNano("0.05"));
+  await provider.waitForDeploy(myContract.address);
+}
+As you can see — it is much simpler and we are deligating Blueprint so many things that we had to deal with before.
+
+One of coolest things is that now we can use the same .createFromConfig method of our wrapper to initiate the contract that we are going to deploy along with the initial state data via config object that we pass into it.
+
+Two more things worth of explanations are related to the contents of the config object.
+
+As you remember, our initial data of the contract has to have three params — current counter value (number), the most recent sender (address) and contract’s “owner” address — the one who is able to withdraw funds. Because we are going to use this contract on-chain — I’ve set my real testnet address for both fields. This will enable me to withdraw funds later on.
+function address is helping us to parse a string address into a proper type of Address as our config requests
+Core deploy functionality is handled by provider of type NetworkProvider that is passed by Blueprint into the run function when Blueprint is triggering our deploy script.
+
+All your scripts have to export run function if you want them to work with Blueprint
+
+Let’s jump back to .sendDeploy method of our wrapper for a second. Have a look at body param. You can see that we are sending an empty cell as message body. As of the logic of our contract, if the message body has no operation code set to it — the message will be bounced even though the contract will be successfully deployed. You will see this behaviour in a few moments.
+
+Deploying contract with help of Blueprint
+Let’s get to the root of our project and run a command:
+
+yarn blueprint run
+You would expect to see something like this in it after running this command:
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+? Choose file to use (Use arrow keys)
+❯ deploy
+  onchaintest
+You will see that Blueprint is prompting us via command line to choose the script we want to run. At this moment we still have script onchaintest.ts, so it’s also offered to us for execution as Blueprint is catching all available scripts from scripts folder. We are not going to create any onchain tests at the moment, because in next chapter we are going to create real web interface for interacting with our contract. You can simply remove file scripts/onchaintest.ts for now.
+
+Choose script deploy.
+
+You will be prompted to choose network now:
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use? (Use arrow keys)
+❯ mainnet
+  testnet
+Choose network testnet.
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use?
+? Which network do you want to use? testnet
+? Which wallet are you using? (Use arrow keys)
+❯ TON Connect compatible mobile wallet (example: Tonkeeper)
+  Create a ton:// deep link
+  Tonhub wallet
+  Mnemonic
+Now you’re prompted to choose which wallet you would like to deploy your contract with. In Chapter 3 we were using only one wallet (TON Whales’ Tonhub) and in the most simple manner — creating a deep link.
+
+Blueprint enables you to use any type of wallets with best in class sessions keeping. Namely, it works in a way that you are authorizing your local project to request transactions from your wallet and then approve them.
+
+For this tutorial we are going to use Tonhub for testnet and mainnet again.
+
+Tonhub wallet app.
+
+You will be asked to scan the QR code and authorize your app to interact with your wallet (request transactions).
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use? (Use arrow keys)
+? Which network do you want to use? mainnet
+? Which wallet are you using?
+? Which wallet are you using? Tonhub wallet
+ton://connect/GzhvQ-zwLhYNxzlEPEf-hP63kgR_0_O8vXsM8mSqQ-0?endpoint=connect.tonhubapi.com
+Connected to wallet at address: EQC7zjln0_fghMQg0A-ZhYFar3DU1bDW9A4Vi5Go5uu-tAHe
+
+After scanning the QR code and authorizing in your app — you will be requested to sign a transaction inside of the Tonhub application. When done — you will see following output in command line:
+
+markokhman$ yarn blueprint run
+yarn run v1.22.11
+? Choose file to use (Use arrow keys)
+? Choose file to use deploy
+? Which network do you want to use?
+? Which network do you want to use? testnet
+? Which wallet are you using?
+? Which wallet are you using? Tonhub wallet
+Connected to wallet at address: EQDU69xgU6Mj-iNDHYsWWuNx7yRPQC_bNZNCpq5yVc7LiPVJ
+Contract deployed at address EQCS7PUYXVFI-4uvP1_vZsMVqLDmzwuimhEPtsyQKIcdeNPu
+You can view it at https://testnet.tonscan.org/address/EQCS7PUYXVFI-4uvP1_vZsMVqLDmzwuimhEPtsyQKIcdeNPu
+✨  Done in 19.84s.
+Congratulations! You’ve learned one more way to deploy your contracts :) And it’s quite an effecient one.

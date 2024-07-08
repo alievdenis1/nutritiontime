@@ -1,0 +1,2439 @@
+JettonExample.spec.ts
+import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees } from '@ton-community/sandbox';
+import { Cell, beginCell, toNano } from 'ton-core';
+import { ExampleNFTCollection, RoyaltyParams } from '../wrappers/NFTExample_ExampleNFTCollection';
+import { ExampleJettonMaster, JettonBurn } from '../wrappers/JettonExample_ExampleJettonMaster';
+import { ExampleJettonWallet, JettonTransfer } from '../wrappers/JettonExample_ExampleJettonWallet';
+import '@ton-community/test-utils';
+
+describe('NFTExample', () => {
+    let blockchain: Blockchain;
+    let owner: SandboxContract<TreasuryContract>;
+    let alice: SandboxContract<TreasuryContract>;
+    let jettonMaster: SandboxContract<ExampleJettonMaster>;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        owner = await blockchain.treasury('owner');
+        alice = await blockchain.treasury('alice');
+        const jetton_content: Cell = beginCell().endCell();
+        jettonMaster = blockchain.openContract(await ExampleJettonMaster.fromInit(owner.address, jetton_content));
+        const deployResult = await jettonMaster.send(
+            owner.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployResult.transactions).toHaveTransaction({
+            from: owner.address,
+            to: jettonMaster.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nFTCollection are ready to use
+    });
+
+    it('should mint 1 token to Alice', async () => {
+        // Mint 1 token to Alice
+        const mintyResult = await jettonMaster.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint:1'
+        );
+        //printTransactionFees(mintyResult.transactions);
+
+        // Check that Alice send "Mint:1" msg to JettonMaster
+        expect(mintyResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check that JettonMaster send 1 token to Alice's jetton wallet
+        const aliceWalletAddress = await jettonMaster.getGetWalletAddress(alice.address);
+        expect(mintyResult.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: aliceWalletAddress,
+            success: true,
+        });
+
+        // Check that Alice's jetton wallet send JettonExcesses msg to Alice
+        expect(mintyResult.transactions).toHaveTransaction({
+            from: aliceWalletAddress,
+            to: alice.address,
+            success: true,
+        });
+
+        // Check that Alice's jetton wallet balance is 1
+        const aliceJettonContract = blockchain.openContract(await ExampleJettonWallet.fromAddress(aliceWalletAddress));
+        const aliceBalanceAfter = (await aliceJettonContract.getGetWalletData()).balance;
+        expect(aliceBalanceAfter).toEqual(0n + 1000000000n);
+    });
+
+    it('should Alice send 1 token to Bob', async () => {
+        // Mint 1 token to Alice first to build her jetton wallet
+        await jettonMaster.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint:1'
+        );
+        // Alice's jetton wallet address
+        const aliceWalletAddress = await jettonMaster.getGetWalletAddress(alice.address);
+        // Alice's jetton wallet
+        const aliceJettonContract = blockchain.openContract(await ExampleJettonWallet.fromAddress(aliceWalletAddress));
+
+        // Mint 1 token to Bob first to build his jetton wallet
+        const bob = await blockchain.treasury('bob');
+        const mintyResult = await jettonMaster.send(
+            bob.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint:1'
+        );
+        // Bob's jetton wallet address
+        const bobWalletAddress = await jettonMaster.getGetWalletAddress(bob.address);
+        // Bob's jetton wallet
+        const bobJettonContract = blockchain.openContract(await ExampleJettonWallet.fromAddress(bobWalletAddress));
+        const bobBalanceBefore = (await bobJettonContract.getGetWalletData()).balance;
+
+        // Alice transfer 1 token to Bob
+        const jettonTransfer: JettonTransfer = {
+            $$type: 'JettonTransfer',
+            query_id: 0n,
+            amount: 1n,
+            destination: bob.address,
+            response_destination: bob.address,
+            custom_payload: null,
+            forward_ton_amount: 0n,
+            forward_payload: beginCell().endCell(),
+        };
+        const transfterResult = await aliceJettonContract.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            jettonTransfer
+        );
+        //printTransactionFees(transfterResult.transactions);
+
+        // Check that Alice send JettonTransfer msg to her jetton wallet
+        expect(transfterResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: aliceWalletAddress,
+            success: true,
+        });
+
+        // Check that Alice's jetton wallet send JettonInternalTransfer msg to Bob's jetton wallet
+        expect(transfterResult.transactions).toHaveTransaction({
+            from: aliceWalletAddress,
+            to: bobWalletAddress,
+            success: true,
+        });
+
+        // Check that Bob's jetton wallet send JettonExcesses msg to Bob
+        expect(transfterResult.transactions).toHaveTransaction({
+            from: bobWalletAddress,
+            to: bob.address,
+            success: true,
+        });
+
+        // Check that Bob's jetton wallet balance is added 1
+        const bobBalanceAfter = (await bobJettonContract.getGetWalletData()).balance;
+        expect(bobBalanceAfter).toEqual(bobBalanceBefore + 1n);
+    });
+
+    it('should Alice burn 1 token', async () => {
+        // Mint 1 token to Alice first to build her jetton wallet
+        const mintyResult = await jettonMaster.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint:1'
+        );
+
+        const jettonBurn: JettonBurn = {
+            $$type: 'JettonBurn',
+            query_id: 0n,
+            amount: 1n,
+            response_destination: alice.address,
+            custom_payload: null,
+        };
+
+        // Alice's jetton wallet address
+        const aliceWalletAddress = await jettonMaster.getGetWalletAddress(alice.address);
+        // Alice's jetton wallet
+        const aliceJettonContract = blockchain.openContract(await ExampleJettonWallet.fromAddress(aliceWalletAddress));
+        // Alice's jetton wallet balance before burning
+        const aliceBalanceBefore = (await aliceJettonContract.getGetWalletData()).balance;
+
+        // Alice burn 1 token
+        const burnResult = await aliceJettonContract.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            jettonBurn
+        );
+        //printTransactionFees(burnResult.transactions);
+
+        // Check that Alice send JettonBurn msg to her jetton wallet
+        expect(burnResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: aliceWalletAddress,
+            success: true,
+        });
+
+        // Check that Alice's jetton wallet send JettonBurnNotification msg to JettonMaster
+        expect(burnResult.transactions).toHaveTransaction({
+            from: aliceWalletAddress,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check that JettonMaster send JettonExcesses msg to Alice
+        expect(burnResult.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: alice.address,
+            success: true,
+        });
+
+        // Check that Alice's jetton wallet balance is subtracted 1
+        const aliceBalanceAfter = (await aliceJettonContract.getGetWalletData()).balance;
+        expect(aliceBalanceAfter).toEqual(aliceBalanceBefore - 1n);
+    });
+});
+
+tests/NFTExample.spec.ts
+import { Blockchain, SandboxContract, TreasuryContract } from '@ton-community/sandbox';
+import { Cell, beginCell, toNano } from 'ton-core';
+import { ExampleNFTCollection, RoyaltyParams } from '../wrappers/NFTExample_ExampleNFTCollection';
+import '@ton-community/test-utils';
+
+const OFFCHAIN_TAG = 0x01;
+const BASE_URL = 'https://s.getgems.io/nft-staging/c/628f6ab8077060a7a8d52d63/';
+
+describe('NFTExample', () => {
+    let blockchain: Blockchain;
+    let deployer: SandboxContract<TreasuryContract>;
+    let collectionContent: Cell;
+    let royaltyParams: RoyaltyParams;
+    let nftCollection: SandboxContract<ExampleNFTCollection>;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        deployer = await blockchain.treasury('deployer');
+        const collectionContent = beginCell().storeInt(OFFCHAIN_TAG, 8).storeStringRefTail(BASE_URL).endCell();
+        royaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 4n,
+            denominator: 100n,
+            destination: deployer.address,
+        };
+        const initCode = await ExampleNFTCollection.fromInit(deployer.address, collectionContent, royaltyParams);
+        nftCollection = blockchain.openContract(initCode);
+
+        const deployResult = await nftCollection.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: nftCollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nFTCollection are ready to use
+    });
+
+    it('Should get collection metadata successfully', async () => {
+        const collectionData = await nftCollection.getGetCollectionData();
+        const parser = collectionData.collection_content.beginParse();
+        const offchainTag = parser.loadUint(8).toString();
+        const metadata = parser.loadStringTail().toString();
+        expect(offchainTag).toEqual('1');
+        expect(metadata).toEqual('https://s.getgems.io/nft-staging/c/628f6ab8077060a7a8d52d63/meta.json');
+    });
+
+    it('should mint NFT successfully', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        const mintResult = await nftCollection.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.5'),
+            },
+            'Mint'
+        );
+
+        expect(mintResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: nftCollection.address,
+            deploy: false,
+            success: true,
+        });
+
+        // Check Index
+        const after_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        expect(after_index).toEqual(before_index + 1n);
+    });
+});
+
+NFTFractionalizeExample.spec.ts
+import { Blockchain, SandboxContract, TreasuryContract } from '@ton-community/sandbox';
+import { FNFTCollection, FractionParams, RoyaltyParams } from '../wrappers/FNFT_FNFTCollection';
+import '@ton-community/test-utils';
+import { sha256_sync } from 'ton-crypto';
+import { Cell, Dictionary, beginCell, toNano } from 'ton-core';
+import { ExampleJettonMaster } from '../wrappers/JettonExample_ExampleJettonMaster';
+
+const OFFCHAIN_TAG = 0x01;
+const BASE_URL = 'https://s.getgems.io/nft-staging/c/628f6ab8077060a7a8d52d63/';
+
+describe('NFTFractoinalizeExample', () => {
+    let blockchain: Blockchain;
+    let deployer: SandboxContract<TreasuryContract>;
+    let collectionContent: Cell;
+    let nftcollection: SandboxContract<FNFTCollection>;
+    let royaltyParams: RoyaltyParams;
+
+    const ONCHAIN_CONTENT_PREFIX = 0x00;
+    const SNAKE_PREFIX = 0x00;
+    const CELL_MAX_SIZE_BYTES = Math.floor((1023 - 8) / 8);
+
+    function bufferToChunks(buff: Buffer, chunkSize: number) {
+        let chunks: Buffer[] = [];
+        while (buff.byteLength > 0) {
+            chunks.push(buff.slice(0, chunkSize));
+            buff = buff.slice(chunkSize);
+        }
+        return chunks;
+    }
+
+    function makeSnakeCell(data: Buffer) {
+        const chunks = bufferToChunks(data, 127);
+
+        if (chunks.length === 0) {
+            return beginCell().endCell();
+        }
+
+        if (chunks.length === 1) {
+            return beginCell().storeBuffer(chunks[0]).endCell();
+        }
+
+        let curCell = beginCell();
+
+        for (let i = chunks.length - 1; i >= 0; i--) {
+            const chunk = chunks[i];
+
+            curCell.storeBuffer(chunk);
+
+            if (i - 1 >= 0) {
+                const nextCell = beginCell();
+                nextCell.storeRef(curCell);
+                curCell = nextCell;
+            }
+        }
+
+        return curCell.endCell();
+    }
+
+    const toKey = (key: string) => {
+        return BigInt(`0x${sha256_sync(key).toString('hex')}`);
+    };
+
+    function buildOnchainMetadata(data: { name: string; description: string; symbol: string }): Cell {
+        let dict = Dictionary.empty(Dictionary.Keys.BigUint(256), Dictionary.Values.Cell());
+        Object.entries(data).forEach(([key, value]) => {
+            dict.set(toKey(key), makeSnakeCell(Buffer.from(value, 'utf8')));
+        });
+
+        return beginCell().storeInt(ONCHAIN_CONTENT_PREFIX, 8).storeDict(dict).endCell();
+    }
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        deployer = await blockchain.treasury('deployer');
+        royaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 4n,
+            denominator: 100n,
+            destination: deployer.address,
+        };
+        collectionContent = beginCell().storeInt(OFFCHAIN_TAG, 8).storeStringRefTail(BASE_URL).endCell();
+        nftcollection = blockchain.openContract(
+            await FNFTCollection.fromInit(deployer.address, collectionContent, royaltyParams)
+        );
+
+        const deployResult = await nftcollection.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: nftcollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nFTCollection are ready to use
+    });
+
+    it('TEST', async () => {
+        const jettonParams = {
+            name: 'F-TonDynasty #1',
+            description: '1',
+            symbol: 'F-TDT #1',
+        };
+        const onchainContent = buildOnchainMetadata(jettonParams);
+        console.log('onchainContent:\n', onchainContent);
+        let contentCell: Cell = (await nftcollection.getDebugFractionParam(1n)).jetton_content;
+        console.log('contentCell:\n', contentCell);
+        expect(contentCell.toString()).toEqual(onchainContent.toString());
+    });
+});
+
+tests/NftAuctionExample.spec.ts
+import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees } from '@ton-community/sandbox';
+import { Address, beginCell, toNano } from 'ton-core';
+import {
+    AuctionInfo,
+    ExampleNFTAuctionMarket,
+    SetUpAuction,
+} from '../wrappers/NftAuctionExample_ExampleNFTAuctionMarket';
+import { ExampleNFTAuction } from '../wrappers/NftAuctionExample_ExampleNFTAuction';
+import { ExampleNFTCollection, RoyaltyParams, Transfer } from '../wrappers/NFTExample_ExampleNFTCollection';
+import { ExampleNFTItem } from '../wrappers/NFTExample_ExampleNFTItem';
+import '@ton-community/test-utils';
+
+describe('NFTAuctionExample', () => {
+    let blockchain: Blockchain;
+    let nftAuctionMarket: SandboxContract<ExampleNFTAuctionMarket>;
+    let nftAuction: SandboxContract<ExampleNFTAuction>;
+    let nftCollection: SandboxContract<ExampleNFTCollection>;
+    let owner: SandboxContract<TreasuryContract>;
+    let alice: SandboxContract<TreasuryContract>;
+    let transferMsg: Transfer;
+    let setUpAuction: SetUpAuction;
+    const minTonsForStorage = toNano('0.03');
+    const gasConsumption = toNano('0.03');
+
+    async function mintNftToAlice(
+        nftCollection: SandboxContract<ExampleNFTCollection>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        return await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('0.5'),
+            },
+            'Mint'
+        );
+    }
+
+    async function transferNftToAuctionMarket(
+        nftCollection: SandboxContract<ExampleNFTCollection>,
+        nftAuctionMarket: SandboxContract<ExampleNFTAuctionMarket>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const nftItem = blockchain.openContract(await ExampleNFTItem.fromAddress(nftId0Address)); // For now this NFT contract is owned by Alice
+
+        const payload = beginCell().endCell(); // This transfer doesn't set auction at the same time
+        transferMsg = {
+            $$type: 'Transfer',
+            query_id: 0n,
+            new_owner: nftAuctionMarket.address,
+            response_destination: Address.parse('EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c'),
+            custom_payload: beginCell().endCell(),
+            forward_amount: toNano('0.5'),
+            forward_payload: payload,
+        };
+
+        return await nftItem.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            transferMsg
+        );
+    }
+
+    async function setupNftAuction(
+        nftCollection: SandboxContract<ExampleNFTCollection>,
+        nftAuctionMarket: SandboxContract<ExampleNFTAuctionMarket>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+
+        const reservePrice = toNano('10');
+        const buyNowPrice = toNano('100');
+        const auctionPeriod = 1000n;
+
+        setUpAuction = {
+            $$type: 'SetUpAuction',
+            nftAddress: nftId0Address,
+            reservePrice: reservePrice,
+            buyNowPrice: buyNowPrice,
+            auctionPeriod: auctionPeriod,
+            beneficiary: null,
+        };
+
+        return await nftAuctionMarket.send(
+            alice.getSender(),
+            {
+                value: toNano('0.2'),
+            },
+            setUpAuction
+        );
+    }
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        owner = await blockchain.treasury('owner');
+        alice = await blockchain.treasury('alice'); // The creator of the NFT collection
+
+        nftAuctionMarket = blockchain.openContract(await ExampleNFTAuctionMarket.fromInit(owner.address));
+
+        const royalty_params: RoyaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 800n,
+            denominator: 1000n,
+            destination: owner.address,
+        };
+        const content = beginCell().endCell();
+        nftCollection = blockchain.openContract(
+            await ExampleNFTCollection.fromInit(alice.address, content, royalty_params)
+        );
+
+        // Deploy NftAuctionMarket contract
+        const deployMarketResult = await nftAuctionMarket.send(
+            owner.getSender(),
+            {
+                value: toNano('5'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployMarketResult.transactions).toHaveTransaction({
+            from: owner.address,
+            to: nftAuctionMarket.address,
+            deploy: true,
+            success: true,
+        });
+
+        // Deploy NftCollection contract
+        const deployCollectionResult = await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployCollectionResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nftAuctionExample are ready to use
+    });
+
+    it('should mint a NFT to Alice', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        //printTransactionFees(mintResult.transactions);
+
+        // Check Alice send mint message to NftCollection
+        expect(mintResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            success: true,
+        });
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: nftId0Address,
+            success: true,
+        });
+
+        // Check that the NFT id 0 sended a Excesses msg to Alice
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftId0Address,
+            to: alice.address,
+            success: true,
+        });
+
+        const nftItem = blockchain.openContract(await ExampleNFTItem.fromAddress(nftId0Address));
+        // Check that the NFT id 0 owner is Alice
+        const nftItemOwner = (await nftItem.getGetNftData()).owner_address;
+        expect(nftItemOwner.toString()).toEqual(alice.address.toString());
+
+        // Check Index
+        const after_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        expect(after_index).toEqual(before_index + 1n);
+    });
+
+    it('should Alice transfers NFT to NFT Auction Market', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const nftItem = blockchain.openContract(await ExampleNFTItem.fromAddress(nftId0Address)); // For now this NFT contract is owned by Alice
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+        //printTransactionFees(transferResult.transactions);
+
+        // Check Alice send transfer message to NftItem
+        expect(transferResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftItem.address,
+            success: true,
+        });
+
+        // Check that the NFT id 0 sended a OwnershipAssigned msg to NftAuctionMarket
+        expect(transferResult.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: nftAuctionMarket.address,
+            success: true,
+        });
+
+        // Check that the NFT Id 0 owner is NftAuctionMarket contract
+        const nftItemOwner = (await nftItem.getGetNftData()).owner_address;
+        expect(nftItemOwner.toString()).toEqual(nftAuctionMarket.address.toString());
+    });
+
+    it('should Alice initiate an NFT auction', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+        const setUpAuctionResult = await setupNftAuction(nftCollection, nftAuctionMarket, alice);
+        //printTransactionFees(setUpAuctionResult.transactions);
+
+        // Check Alice send SetUpAuction message to NftAuctionMarket
+        expect(setUpAuctionResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftAuctionMarket.address,
+            success: true,
+        });
+
+        //const auctionInfo: AuctionInfo = await nftAuctionMarket.getGetAuctionInfo(alice.address, nftId0Address);
+        const nftAuctionAddress: Address = await nftAuctionMarket.getGetNftAuctionAddress(nftId0Address, alice.address);
+        nftAuction = blockchain.openContract(await ExampleNFTAuction.fromAddress(nftAuctionAddress));
+
+        // Check NftAuctionMarket send SetUpAuction message to NftAuction
+        expect(setUpAuctionResult.transactions).toHaveTransaction({
+            from: nftAuctionMarket.address,
+            to: nftAuctionAddress,
+            success: true,
+        });
+
+        // Check Nft Auction is initialized which means that the auction was successfully created
+        const isInit = await nftAuction.getGetIsInitialized();
+        expect(isInit).toEqual(1n);
+    });
+
+    it('should not Alice initiate another NFT auction while the current auction is still ongoing.', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+        const setUpAuctionResult = await setupNftAuction(nftCollection, nftAuctionMarket, alice);
+        const setUpAuctionResult2 = await setupNftAuction(nftCollection, nftAuctionMarket, alice);
+        expect(setUpAuctionResult2.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftAuctionMarket.address,
+            success: false,
+            exitCode: 58706, // Auction already started
+        });
+    });
+
+    it('should Alice initiate an NFT auction and allow bidding until the auction ends', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+        const setUpAuctionResult = await setupNftAuction(nftCollection, nftAuctionMarket, alice);
+        //printTransactionFees(setUpAuctionResult.transactions);
+
+        //const auctionInfo: AuctionInfo = await nftAuctionMarket.getGetAuctionInfo(alice.address, nftId0Address);
+        const nftAuctionAddress: Address = await nftAuctionMarket.getGetNftAuctionAddress(nftId0Address, alice.address);
+        nftAuction = blockchain.openContract(await ExampleNFTAuction.fromAddress(nftAuctionAddress));
+        /* Start to make bids */
+
+        // Seller bid his own NFT auction
+        const bidmoney = toNano('5');
+        const SellerBuyResult = await nftAuction.send(
+            alice.getSender(),
+            {
+                value: bidmoney,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer1BuyResult.transactions);
+
+        // Check buyer1 send Bid message to NftAuction
+        expect(SellerBuyResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftAuction.address,
+            success: false,
+            exitCode: 37031, // Seller cannot bid
+        });
+
+        // First bid: bid value is not enough to start the auction
+        let buyer1 = await blockchain.treasury('buyer1');
+        const bidmoney1 = toNano('5');
+        const buyer1BuyResult = await nftAuction.send(
+            buyer1.getSender(),
+            {
+                value: bidmoney1,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer1BuyResult.transactions);
+
+        // Check buyer1 send Bid message to NftAuction
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: buyer1.address,
+            to: nftAuction.address,
+            success: true,
+        });
+
+        // Check NftAuction send bid money back to previous NftHighestBidder.
+        // In this case, previous NftHighestBidder is Alice(Seller), but the highest bid is 0 in the beginning.
+        // Therefore, Nft Auction Contract will not send the money back to Alice
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: nftAuctionAddress,
+            to: alice.address,
+            success: false,
+        });
+
+        const firstBidAuctionEnd = await nftAuction.getGetAuctionEnd();
+        // Check auctionEnd of Nft Auction is still 0 (Because the bid price is < reserve price)
+        expect(firstBidAuctionEnd).toEqual(0n);
+
+        // Second bid: Bid is too low -> exid code 1007
+        let buyer2 = await blockchain.treasury('buyer2');
+        const bidmoney2 = toNano('5');
+        const buyer2BuyResult = await nftAuction.send(
+            buyer2.getSender(),
+            {
+                value: bidmoney1,
+            },
+            'Bid'
+        );
+        // Bid failed with 1007 because the bid is too low
+        expect(buyer2BuyResult.transactions).toHaveTransaction({
+            from: buyer2.address,
+            to: nftAuction.address,
+            success: false,
+            exitCode: 3724, // Bid is too low
+        });
+
+        // Third bid: Bid is enough to start the auction and it becomes the highest bid
+        let buyer3 = await blockchain.treasury('buyer3');
+        const bidmoney3 = toNano('15');
+        const buyer3BuyResult = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: bidmoney3,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer2BuyResult.transactions);
+        // Check auctionEnd of Nft Auction is not 0 (Because the bid price is > reserve price) => auction is started
+        // The auctionEnd should be the current time + auctionPeriod
+        const secondBidAuctionEnd = await nftAuction.getGetAuctionEnd();
+        expect(secondBidAuctionEnd).not.toEqual(0n);
+
+        // Check buyer1 receive money back from NftAuction
+        expect(buyer3BuyResult.transactions).toHaveTransaction({
+            from: nftAuctionAddress,
+            to: buyer1.address,
+            success: true,
+            value: bidmoney1 - minTonsForStorage - gasConsumption, // bid 5 ton, 0.06 ton is the fee => receive 4.94 ton back
+        });
+
+        const settleAuctionResult = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            'settleAuction'
+        );
+        //printTransactionFees(settleAuctionResult.transactions);
+
+        expect(settleAuctionResult.transactions).toHaveTransaction({
+            from: buyer3.address,
+            to: nftAuction.address,
+            exitCode: 45065, // Auction not yet ended.
+        });
+        blockchain.now = Math.floor(Date.now() / 1000) + 2 * 24 * 60 * 60;
+
+        const settleAuctionResult2 = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            'settleAuction'
+        );
+        //printTransactionFees(settleAuctionResult2.transactions);
+
+        // Check buyer2 send settleAuction message to NftAuction
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: buyer3.address,
+            to: nftAuction.address,
+            success: true,
+        });
+
+        // Check NftAuction contract send winning bid money to Seller (Alice)
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: alice.address,
+            success: true,
+        });
+
+        // Check NftAuction send transfer nft msg to NftAuctionMarket
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: nftAuctionMarket.address,
+            success: true,
+        });
+
+        // Check NftAuctionMarket send transfer nft msg to NftItem
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuctionMarket.address,
+            to: nftId0Address,
+            success: true,
+        });
+
+        // Check NftItem transfer to Buyer2
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftId0Address,
+            to: buyer3.address,
+            success: true,
+        });
+
+        // Bid after auction ended
+        let buyer4 = await blockchain.treasury('buyer4');
+        const bidmoney4 = toNano('15');
+        const buyer4BuyResult = await nftAuction.send(
+            buyer4.getSender(),
+            {
+                value: bidmoney4,
+            },
+            'Bid'
+        );
+        expect(buyer4BuyResult.transactions).toHaveTransaction({
+            from: buyer4.address,
+            to: nftAuction.address,
+            success: false,
+            exitCode: 46984, // Auction ended
+        });
+    });
+
+    it('should Alice initiate an NFT auction and have it immediately bought out at the buynow price', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const transferResult = await transferNftToAuctionMarket(nftCollection, nftAuctionMarket, alice);
+        const setUpAuctionResult = await setupNftAuction(nftCollection, nftAuctionMarket, alice);
+        //printTransactionFees(setUpAuctionResult.transactions);
+        //const auctionInfo: AuctionInfo = await nftAuctionMarket.getGetAuctionInfo(alice.address, nftId0Address);
+        const nftAuctionAddress: Address = await nftAuctionMarket.getGetNftAuctionAddress(nftId0Address, alice.address);
+        nftAuction = blockchain.openContract(await ExampleNFTAuction.fromAddress(nftAuctionAddress));
+        /* Start to make bids */
+        // First bid
+        let buyer1 = await blockchain.treasury('buyer1');
+        const bidmoney1 = toNano('101');
+        const buyer1BuyResult = await nftAuction.send(
+            buyer1.getSender(),
+            {
+                value: bidmoney1,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer1BuyResult.transactions);
+
+        // Check buyer1 send Bid message to NftAuction
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: buyer1.address,
+            to: nftAuction.address,
+            success: true,
+        });
+
+        // Check NftAuction contract send winning bid money to Seller (Alice)
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: nftAuctionAddress,
+            to: alice.address,
+            success: true,
+        });
+
+        // Check NftAuction send transfer nft msg to NftAuctionMarket
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: nftAuctionMarket.address,
+            success: true,
+        });
+
+        // Check NftAuctionMarket send transfer nft msg to NftItem
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: nftAuctionMarket.address,
+            to: nftId0Address,
+            success: true,
+        });
+
+        // Check NftItem transfer to Buyer2
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: nftId0Address,
+            to: buyer1.address,
+            success: true,
+        });
+    });
+
+    // TODO: 1. Test ReviseSetUpAuction with reservePrice and buyNowPrice
+    // TODO: 2. Test EndAuction
+    // TODO: 3. Error test -> increase coverage
+    // TODO: 4. Test set up auction when transfer NFT to NFT Auction Market
+});
+
+NFTEnforceRoyalty/Fractionalize.spec.ts
+import {
+    Blockchain,
+    SandboxContract,
+    TreasuryContract,
+    prettyLogTransaction,
+    prettyLogTransactions,
+    printTransactionFees,
+} from '@ton-community/sandbox';
+import { Address, Cell, beginCell, toNano } from 'ton-core';
+import { BuyAll, FNFTCollection, RoyaltyParams } from '../../wrappers/FNFTEnforce_FNFTCollection';
+import { NFTFractionWallet } from '../../wrappers/FNFTEnforce_NFTFractionWallet';
+import { NFTFraction } from '../../wrappers/FNFTEnforce_NFTFraction';
+import { FNFTItem } from '../../wrappers/FNFTEnforce_FNFTItem';
+import { buildJettonContent, buildNFTCollectionContent } from '../../utils/ton-tep64';
+import '@ton-community/test-utils';
+import { QuotaShop } from '../../wrappers/FNFTEnforce_QuotaShop';
+import { NFTItemAuction } from '../../wrappers/FNFTEnforce_NFTItemAuction';
+import exp from 'constants';
+
+describe('NFTExample', () => {
+    let blockchain: Blockchain;
+    let alan: SandboxContract<TreasuryContract>;
+    let jacky: SandboxContract<TreasuryContract>;
+    let author: SandboxContract<TreasuryContract>;
+    let nftCollection: SandboxContract<FNFTCollection>;
+    let nftItem: SandboxContract<FNFTItem>;
+    let quotaShop: SandboxContract<QuotaShop>;
+    let royaltyParams: RoyaltyParams;
+    let collectionContent: Cell;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        alan = await blockchain.treasury('alan');
+        jacky = await blockchain.treasury('jacky');
+        author = await blockchain.treasury('author');
+        collectionContent = buildNFTCollectionContent();
+        royaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 1n,
+            denominator: 100n,
+            destination: author.address,
+        };
+        nftCollection = blockchain.openContract(
+            await FNFTCollection.fromInit(alan.address, collectionContent, royaltyParams, author.address)
+        );
+        const deployResult = await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployResult.transactions).toHaveTransaction({
+            from: alan.address,
+            to: nftCollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {});
+
+    it('Should Alan mint NFT#1 and full transfer to Jacky', async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        // Alan mint NFT#1
+        const mintResult = await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+
+        // Check Alan send a transaction to NFTCollection
+        expect(mintResult.transactions).toHaveTransaction({
+            from: alan.address,
+            to: nftCollection.address,
+            deploy: false,
+            success: true,
+        });
+
+        // Check NFTCollection deploys a new NFTItem
+        const nftItemAddr = await nftCollection.getGetNftAddressByIndex(beforeItemIndex);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: nftItemAddr,
+            deploy: true,
+            success: true,
+        });
+
+        // Check NFTCollection deploys a new QuotaShop
+        const quotaShopAddr = await nftCollection.getDebugGetQuotashopAddressByIndex(beforeItemIndex);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: quotaShopAddr,
+            deploy: true,
+            success: true,
+        });
+
+        // Check NFTCollection index increased by 1
+        const afterItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+        expect(afterItemIndex).toEqual(beforeItemIndex + 1n);
+
+        // Should Alan be the owner of NFT#1
+        const nftItem = blockchain.openContract(FNFTItem.fromAddress(nftItemAddr));
+        const owner = await nftItem.getOwner();
+        expect(owner.toString()).toEqual(alan.address.toString());
+
+        // Should Author issue quota to QuotaShop #1
+        quotaShop = blockchain.openContract(QuotaShop.fromAddress(quotaShopAddr));
+        const quotaIssueTx = await quotaShop.send(
+            author.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'IssueQuota',
+                amount: 1n,
+                price: toNano('0.01'),
+            }
+        );
+        expect(quotaIssueTx.transactions).toHaveTransaction({
+            from: author.address,
+            to: quotaShopAddr,
+            deploy: false,
+            success: true,
+        });
+
+        // Buy one quota from QuotaShop#1 should increase the NFT item #1 quota by 1
+        const quotaBefore = await nftItem.getDebugGetQuota();
+        quotaShop = blockchain.openContract(QuotaShop.fromAddress(quotaShopAddr));
+        const buyResult = await quotaShop.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'BuyQuota',
+                amount: 1n,
+            }
+        );
+        // Check Alan send a transaction to QuotaShop
+        expect(buyResult.transactions).toHaveTransaction({
+            from: alan.address,
+            to: quotaShopAddr,
+            deploy: false,
+            success: true,
+        });
+
+        // Check QuotaShop send IncreaseQuota to NFTItem
+        expect(buyResult.transactions).toHaveTransaction({
+            from: quotaShopAddr,
+            to: nftItemAddr,
+            deploy: false,
+            success: true,
+        });
+
+        // Check NFTItem quota repay to alan
+        expect(buyResult.transactions).toHaveTransaction({
+            from: nftItemAddr,
+            to: alan.address,
+            deploy: false,
+            success: true,
+        });
+
+        // Check NFTItem quota increased by 1
+        const quotaAfter = await nftItem.getDebugGetQuota();
+        expect(quotaAfter).toEqual(quotaBefore + 1n);
+
+        // Check transfer NFT Item to Jacky
+        const transferResult = await nftItem.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: alan.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+        expect(transferResult.transactions).toHaveTransaction({
+            from: alan.address,
+            to: nftItemAddr,
+            deploy: false,
+            success: true,
+        });
+
+        // Check NFTItem owner changed to Jacky
+        const ownerAfter = await nftItem.getOwner();
+        expect(ownerAfter.toString()).toEqual(jacky.address.toString());
+    });
+
+    it('Should Alan mint NFT#1 and transfer it, 99% fraction goes to Jacky and 1% to Author', async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+        // Alan mint NFT#1
+        await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+        nftItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+
+        // Alan transfer NFT#1 to Jacky
+        const fractionTx = await nftItem.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: alan.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        expect(fractionTx.transactions).toHaveTransaction({
+            from: alan.address,
+            to: nftItem.address,
+            deploy: false,
+            success: true,
+        });
+
+        const jettonMaster = blockchain.openContract(
+            NFTFraction.fromAddress(await nftItem.getDebugGetJettonMasterAddress())
+        );
+
+        expect(fractionTx.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: jettonMaster.address,
+            deploy: true,
+            success: true,
+        });
+
+        // Check author receive 1% fraction (jetton)
+        const authorJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(author.address))
+        );
+        const authorJettonCount = await authorJettonWallet.getDebugGetBalance();
+        expect(authorJettonCount).toEqual(toNano('1'));
+
+        // Check jacky receive 99% fraction (jetton)
+        const jackyJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(jacky.address))
+        );
+        const jackyJettonCount = await jackyJettonWallet.getDebugGetBalance();
+        expect(jackyJettonCount).toEqual(toNano('99'));
+    });
+
+    it('Should Author transfer NFT#1 no need to pay royalty', async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        await nftCollection.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+
+        nftItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+
+        // Author Transfer NFT#1 to Jacky
+        const transferTx = await nftItem.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: author.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // Check the owner of NFT#1 is Jacky
+        const owner = await nftItem.getOwner();
+        expect(owner.toString()).toEqual(jacky.address.toString());
+    });
+
+    it('Should Jacky transfer NFT fraction to Alan with 1% royalty, Alan receive 99*0.99 ', async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        // Alan mint NFT#1
+        await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+
+        nftItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+
+        // Alan transfer NFT#1 to Jacky
+        await nftItem.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: alan.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // Check jacky receive 99% fraction (jetton)
+        const jettonMaster = blockchain.openContract(
+            NFTFraction.fromAddress(await nftItem.getDebugGetJettonMasterAddress())
+        );
+        const jackyJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(jacky.address))
+        );
+        const jackyJettonCount = await jackyJettonWallet.getDebugGetBalance();
+        expect(jackyJettonCount).toEqual(toNano('99'));
+
+        // Jacky transfer NFT fraction to Alan with 1% royalty
+        const transferTx = await jackyJettonWallet.send(
+            jacky.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'JettonTransfer',
+                query_id: 0n,
+                amount: toNano('99'),
+                destination: alan.address,
+                response_destination: jacky.address,
+                custom_payload: null,
+                forward_ton_amount: toNano('0'),
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // Check Alan receive 99*0.99, however we can't check the exact amount because of the fee
+        // So we check the amount is greater than 90
+        const alanJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(alan.address))
+        );
+        const alanJettonCount = await alanJettonWallet.getDebugGetBalance();
+        expect(alanJettonCount).toBeGreaterThan(toNano('90'));
+    });
+
+    it("Should author receive 100% nft fraction and compose it back to NFT#1, update NFT#1's nonce", async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        // Alan mint NFT#1
+        await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+
+        nftItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+
+        // Alan transfer NFT#1 to jacky
+        await nftItem.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: alan.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // jacky transfer NFT fraction to author
+        const jettonMaster = blockchain.openContract(
+            NFTFraction.fromAddress(await nftItem.getDebugGetJettonMasterAddress())
+        );
+        const jackyJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(jacky.address))
+        );
+        await jackyJettonWallet.send(
+            jacky.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'JettonTransfer',
+                query_id: 0n,
+                amount: toNano('99'),
+                destination: author.address,
+                response_destination: jacky.address,
+                custom_payload: null,
+                forward_ton_amount: toNano('0'),
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // Check author receive 100% fraction (jetton)
+        const authorJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(author.address))
+        );
+        const authorJettonCount = await authorJettonWallet.getDebugGetBalance();
+        expect(authorJettonCount).toEqual(toNano('100'));
+
+        // Check author compose fraction back to NFT#1
+        const oldNullifier = await nftItem.getDebugGetNullifier();
+        const composeTx = await authorJettonWallet.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Redeem'
+        );
+
+        expect(composeTx.transactions).toHaveTransaction({
+            from: authorJettonWallet.address,
+            to: jettonMaster.address,
+            deploy: false,
+            success: true,
+        });
+
+        expect(composeTx.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: nftItem.address,
+            deploy: false,
+            success: true,
+        });
+
+        expect(composeTx.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: author.address,
+            deploy: false,
+            success: true,
+        });
+
+        // Check author get NFT item back
+        const authorNFTItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+        const authorNFTItemOwner = await authorNFTItem.getOwner();
+        expect(authorNFTItemOwner.toString()).toEqual(author.address.toString());
+
+        // Check NFT#1 nullifier increased by 1
+        const newNullifier = await nftItem.getDebugGetNullifier();
+        expect(newNullifier).toEqual(oldNullifier + 1n);
+    });
+
+    it('Should Anyone with fraction token can set up an auction to buy all token', async () => {
+        const beforeItemIndex = (await nftCollection.getGetCollectionData()).next_item_index;
+
+        // Alan mint NFT#1
+        await nftCollection.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+
+        nftItem = blockchain.openContract(
+            FNFTItem.fromAddress(await nftCollection.getGetNftAddressByIndex(beforeItemIndex))
+        );
+
+        // Alan transfer NFT#1 to Jacky
+        await nftItem.send(
+            alan.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Transfer',
+                query_id: 0n,
+                new_owner: jacky.address,
+                response_destination: alan.address,
+                custom_payload: beginCell().endCell(),
+                forward_amount: 0n,
+                forward_payload: beginCell().endCell(),
+            }
+        );
+
+        // Check jacky receive 99% fraction (jetton)
+        const jettonMaster = blockchain.openContract(
+            NFTFraction.fromAddress(await nftItem.getDebugGetJettonMasterAddress())
+        );
+        const jackyJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(jacky.address))
+        );
+        const jackyJettonCount = await jackyJettonWallet.getDebugGetBalance();
+        expect(jackyJettonCount).toEqual(toNano('99'));
+
+        const auctionInfo: BuyAll = {
+            $$type: 'BuyAll',
+            reserve_price: toNano('0.1'),
+        };
+        // Send BuyAll msg to Jacky's wallet to set up an auction
+        const buyAllRusult = await jackyJettonWallet.send(
+            jacky.getSender(),
+            {
+                value: toNano('105'),
+            },
+            auctionInfo
+        );
+        //printTransactionFees(buyAllRusult.transactions);
+
+        // Check Jacky's wallet send BuyAllToken to Jacky
+        expect(buyAllRusult.transactions).toHaveTransaction({
+            from: jacky.address,
+            to: jackyJettonWallet.address,
+            success: true,
+        });
+
+        // Check Jacky's wallet send BuyAllToken Jetton Master
+        // It will check the reserve price is enough or not
+        expect(buyAllRusult.transactions).toHaveTransaction({
+            from: jackyJettonWallet.address,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check Jetton Master send FractionTrade to NFTItem
+        expect(buyAllRusult.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: nftItem.address,
+            success: true,
+        });
+
+        const auctionAdderess = await nftItem.getDebugNftAuctionAddress();
+        const nftAuction = blockchain.openContract(NFTItemAuction.fromAddress(auctionAdderess));
+
+        // Check NftItem Deploy a NftAuction
+        expect(buyAllRusult.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: auctionAdderess,
+            success: true,
+        });
+
+        // buyer1 bid to NftAuction
+        let buyer1 = await blockchain.treasury('buyer1');
+        const bidmoney1 = toNano('5');
+        const buyer1BuyResult = await nftAuction.send(
+            buyer1.getSender(),
+            {
+                value: bidmoney1,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer1BuyResult.transactions);
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: buyer1.address,
+            to: auctionAdderess,
+            success: false,
+            exitCode: 18526,
+        });
+
+        // buyer2 bid to NftAuction
+        let buyer2 = await blockchain.treasury('buyer2');
+        const bidmoney2 = toNano('50');
+        const buyer2BuyResult = await nftAuction.send(
+            buyer2.getSender(),
+            {
+                value: bidmoney2,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer2BuyResult.transactions);
+
+        // Check buyer2 send Bid message to NftAuction
+        expect(buyer2BuyResult.transactions).toHaveTransaction({
+            from: buyer2.address,
+            to: auctionAdderess,
+            success: true,
+        });
+
+        // Check auctionEnd of Nft Auction is not 0 (Because the bid price is > reserve price) => auction is started
+        // The auctionEnd should be the current time + auctionPeriod
+        const secondBidAuctionEnd = await nftAuction.getGetAuctionEnd();
+        expect(secondBidAuctionEnd).not.toEqual(0n);
+
+        // After auction ended, buyer2 to send settleAuction to NftAuction
+        const settleAuctionResult = await nftAuction.send(
+            buyer2.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'settleAuction'
+        );
+        //printTransactionFees(settleAuctionResult.transactions);
+        expect(settleAuctionResult.transactions).toHaveTransaction({
+            from: buyer2.address,
+            to: nftAuction.address,
+            exitCode: 45065, // Auction not yet ended.
+        });
+
+        // Auction Ended
+        blockchain.now = Math.floor(Date.now() / 1000) + 2 * 24 * 60 * 60;
+        const settleAuctionResult2 = await nftAuction.send(
+            buyer2.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'settleAuction'
+        );
+        //printTransactionFees(settleAuctionResult2.transactions);
+
+        // Check buyer2 send settleAuction message to NftAuction
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: buyer2.address,
+            to: nftAuction.address,
+            success: true,
+        });
+
+        // Check NftAuction contract send winning bid money to NFT Item
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: nftItem.address,
+            success: true,
+        });
+
+        // Check NFT Item contract send winning bid money to Seller (Jetton Master)
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check auction contract send Transfer msg to NFT Item
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: nftItem.address,
+            success: true,
+        });
+
+        // Check new owner of NFT Item is buyer2
+        const newOwner: Address = await nftItem.getDebugGetOwner();
+        expect(newOwner.toString()).toEqual(buyer2.address.toString());
+
+        // Jacky want to withdraw his fraction to Ton
+        const withdrawResult = await jackyJettonWallet.send(
+            jacky.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Withdraw'
+        );
+        //printTransactionFees(withdrawResult.transactions);
+
+        // Check Jacky wallet send Burn msg to Jetton Master
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: jackyJettonWallet.address,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check jetton master send the Jacky's ratio of total bid money to Jacky
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: jacky.address,
+            success: true,
+        });
+
+        const authorJettonWallet = blockchain.openContract(
+            NFTFractionWallet.fromAddress(await jettonMaster.getGetWalletAddress(author.address))
+        );
+        const author_before_balance = await author.getBalance();
+
+        // Author can use his fraction to exchange for Ton (It's one way of earning royalty)
+        const authorWithdrawResult = await authorJettonWallet.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Withdraw'
+        );
+        const author_after_balance = await author.getBalance();
+
+        // Check author wallet send Burn msg to Jetton Master
+        expect(authorWithdrawResult.transactions).toHaveTransaction({
+            from: authorJettonWallet.address,
+            to: jettonMaster.address,
+            success: true,
+        });
+
+        // Check jetton master send the author's ratio of total bid money to author
+        expect(authorWithdrawResult.transactions).toHaveTransaction({
+            from: jettonMaster.address,
+            to: author.address,
+            success: true,
+        });
+
+        // Author earn his nft royalty
+        expect(author_after_balance).toBeGreaterThan(author_before_balance);
+    });
+});
+
+tests/NFTEnforceRoyalty/NFTEnforceAuction.spec.ts
+import {
+    Blockchain,
+    SandboxContract,
+    TreasuryContract,
+    prettyLogTransactions,
+    printTransactionFees,
+} from '@ton-community/sandbox';
+import { Address, beginCell, toNano } from 'ton-core';
+import { FNFTCollection, RoyaltyParams, Trade } from '../../wrappers/FNFTEnforce_FNFTCollection';
+import { FNFTItem } from '../../wrappers/FNFTEnforce_FNFTItem';
+import { NFTItemAuction } from '../../wrappers/FNFTEnforce_NFTItemAuction';
+import '@ton-community/test-utils';
+
+describe('NFTAuctionExample', () => {
+    let blockchain: Blockchain;
+    let nftCollection: SandboxContract<FNFTCollection>;
+    let owner: SandboxContract<TreasuryContract>;
+    let author: SandboxContract<TreasuryContract>;
+    let alice: SandboxContract<TreasuryContract>;
+    let nftAuction: SandboxContract<NFTItemAuction>;
+    // let transferMsg: Transfer;
+    // let setUpAuction: SetUpAuction;
+    const minTonsForStorage = toNano('0.03');
+    const gasConsumption = toNano('0.03');
+
+    async function mintNftToAlice(
+        nftCollection: SandboxContract<FNFTCollection>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        return await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+    }
+
+    async function sendTradeMsg(
+        nftCollection: SandboxContract<FNFTCollection>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const nftItem = blockchain.openContract(await FNFTItem.fromAddress(nftId0Address));
+        const reservePrice = toNano('10');
+        const buyNowPrice = toNano('100');
+        const auctionPeriod = 1000n;
+        const trader: Trade = {
+            $$type: 'Trade',
+            reserve_price: reservePrice,
+            buynow_price: buyNowPrice,
+            auction_period: auctionPeriod,
+            beneficiary: null,
+        };
+        return await nftItem.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            trader
+        );
+    }
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        owner = await blockchain.treasury('owner');
+        alice = await blockchain.treasury('alice'); // The creator of the NFT collection
+        author = await blockchain.treasury('author');
+        const royalty_params: RoyaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 800n,
+            denominator: 1000n,
+            destination: owner.address,
+        };
+        const content = beginCell().endCell();
+
+        nftCollection = blockchain.openContract(
+            await FNFTCollection.fromInit(alice.address, content, royalty_params, author.address)
+        );
+        // Deploy NftCollection contract
+        const deployCollectionResult = await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployCollectionResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nftAuctionExample are ready to use
+    });
+
+    it('should mint a NFT to Alice', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        //printTransactionFees(mintResult.transactions);
+
+        // Check Alice send mint message to NftCollection
+        expect(mintResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            success: true,
+        });
+        // printTransactionFees(mintResult.transactions);
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: nftId0Address,
+            success: true,
+        });
+
+        // Check that the NFT id 0 sended a Excesses msg to Alice
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftId0Address,
+            to: alice.address,
+            success: true,
+        });
+
+        const nftItem = blockchain.openContract(await FNFTItem.fromAddress(nftId0Address));
+        // Check that the NFT id 0 owner is Alice
+        const nftItemOwner = (await nftItem.getGetNftData()).owner_address;
+        expect(nftItemOwner.toString()).toEqual(alice.address.toString());
+
+        // Check Index
+        const after_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        expect(after_index).toEqual(before_index + 1n);
+    });
+
+    it('should Alice send Trade Msg to her NFT Item', async () => {
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        const nftItem = blockchain.openContract(await FNFTItem.fromAddress(nftId0Address));
+        const reservePrice = toNano('10');
+        const buyNowPrice = toNano('100');
+        const auctionPeriod = 1000n;
+        const trader: Trade = {
+            $$type: 'Trade',
+            reserve_price: reservePrice,
+            buynow_price: buyNowPrice,
+            auction_period: auctionPeriod,
+            beneficiary: null,
+        };
+        const tradeResult = await sendTradeMsg(nftCollection, alice);
+        //printTransactionFees(tradeResult.transactions);
+        // Check Alice send Trade message to NftItem
+        expect(tradeResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftId0Address,
+            success: true,
+        });
+        // Check that nft item send Trade message to NftAuction
+        let nftAuctionAddress = await nftItem.getDebugNftAuctionAddress();
+        nftAuction = blockchain.openContract(await NFTItemAuction.fromAddress(nftAuctionAddress));
+        expect(tradeResult.transactions).toHaveTransaction({
+            from: nftId0Address,
+            to: nftAuctionAddress,
+            success: true,
+        });
+        const initialized = await nftAuction.getGetIsInitialized();
+        expect(initialized).toEqual(1n);
+        // buyer1 bid to NftAuction
+        let buyer1 = await blockchain.treasury('buyer1');
+        const bidmoney1 = toNano('5');
+        const buyer1BuyResult = await nftAuction.send(
+            buyer1.getSender(),
+            {
+                value: bidmoney1,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer1BuyResult.transactions);
+        // Check buyer1 send Bid message to NftAuction
+        expect(buyer1BuyResult.transactions).toHaveTransaction({
+            from: buyer1.address,
+            to: nftAuction.address,
+            success: true,
+        });
+        // Second bid: Bid is too low -> exid code 1007
+        let buyer2 = await blockchain.treasury('buyer2');
+        const bidmoney2 = toNano('5');
+        const buyer2BuyResult = await nftAuction.send(
+            buyer2.getSender(),
+            {
+                value: bidmoney2,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer2BuyResult.transactions);
+        // Bid failed with 1007 because the bid is too low
+        expect(buyer2BuyResult.transactions).toHaveTransaction({
+            from: buyer2.address,
+            to: nftAuction.address,
+            success: false,
+            exitCode: 3724, // Bid is too low
+        });
+        // Third bid: Bid is enough to start the auction and it becomes the highest bid
+        let buyer3 = await blockchain.treasury('buyer3');
+        const bidmoney3 = toNano('15');
+        const buyer3BuyResult = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: bidmoney3,
+            },
+            'Bid'
+        );
+        //printTransactionFees(buyer2BuyResult.transactions);
+        // Check auctionEnd of Nft Auction is not 0 (Because the bid price is > reserve price) => auction is started
+        // The auctionEnd should be the current time + auctionPeriod
+        const secondBidAuctionEnd = await nftAuction.getGetAuctionEnd();
+        expect(secondBidAuctionEnd).not.toEqual(0n);
+        // Check buyer1 receive money back from NftAuction
+        expect(buyer3BuyResult.transactions).toHaveTransaction({
+            from: nftAuctionAddress,
+            to: buyer1.address,
+            success: true,
+        });
+        const settleAuctionResult = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'settleAuction'
+        );
+        //printTransactionFees(settleAuctionResult.transactions);
+        expect(settleAuctionResult.transactions).toHaveTransaction({
+            from: buyer3.address,
+            to: nftAuction.address,
+            exitCode: 45065, // Auction not yet ended.
+        });
+        blockchain.now = Math.floor(Date.now() / 1000) + 2 * 24 * 60 * 60;
+        const settleAuctionResult2 = await nftAuction.send(
+            buyer3.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'settleAuction'
+        );
+        printTransactionFees(settleAuctionResult2.transactions);
+        prettyLogTransactions(settleAuctionResult2.transactions);
+        // Check buyer2 send settleAuction message to NftAuction
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: buyer3.address,
+            to: nftAuction.address,
+            success: true,
+        });
+        // Check NftAuction contract send winning bid money to Seller (Alice)
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: alice.address,
+            success: true,
+        });
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftAuction.address,
+            to: nftItem.address,
+            success: true,
+        });
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: buyer3.address,
+            success: true,
+        });
+        const newOwner: Address = await nftItem.getDebugGetOwner();
+        expect(newOwner.toString()).toEqual(buyer3.address.toString());
+        const nftAuthor = await nftItem.getDebugGetRoyaltyDestination();
+        expect(settleAuctionResult2.transactions).toHaveTransaction({
+            from: nftItem.address,
+            to: nftAuthor,
+            success: true,
+        });
+    });
+});
+
+tests/NFTEnforceRoyalty/Quotashop.spec.ts
+import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees, prettyLogTransactions } from '@ton-community/sandbox';
+import { FNFTCollection, FractionParams, RoyaltyParams } from '../../wrappers/FNFTEnforce_FNFTCollection';
+import { FNFTItem } from '../../wrappers/FNFTEnforce_FNFTItem';
+import { QuotaShop, IssueQuota, IncreaseQuota, BuyQuota } from '../../wrappers/FNFTEnforce_QuotaShop';
+import '@ton-community/test-utils';
+import { Cell, Dictionary, beginCell, toNano, Address, SenderArguments } from 'ton-core';
+
+
+describe('QuotaShop', () => {
+    let blockchain: Blockchain;
+    let nftCollection: SandboxContract<FNFTCollection>;
+    let nftItem: SandboxContract<FNFTItem>;
+    let owner: SandboxContract<TreasuryContract>;
+    let author: SandboxContract<TreasuryContract>;
+    let alice: SandboxContract<TreasuryContract>;
+    let quotaShop: SandboxContract<QuotaShop>;
+    // let transferMsg: Transfer;
+    // let setUpAuction: SetUpAuction;
+    const minTonsForStorage = toNano('0.03');
+    const gasConsumption = toNano('0.03');
+
+    async function mintNftToAlice(
+        nftCollection: SandboxContract<FNFTCollection>,
+        alice: SandboxContract<TreasuryContract>
+    ) {
+        return await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            'Mint'
+        );
+    }
+
+    async function sendIssueQuota(
+        author: SandboxContract<TreasuryContract>,
+        quotaShopAddress: Address
+    ) {
+        const issueQuota: IssueQuota = {
+            $$type: 'IssueQuota',
+            amount: 1n,
+            price: toNano('100')
+        };
+        let quotaShop = blockchain.openContract(await QuotaShop.fromAddress(quotaShopAddress));
+        return await quotaShop.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            issueQuota
+        );
+    }
+
+    async function sendBuyQuota(
+        alice: SandboxContract<TreasuryContract>,
+        quotaShopAddress: Address
+    ) {
+        const buyQuota: BuyQuota = {
+            $$type: 'BuyQuota',
+            amount: 1n,
+        };
+        let quotaShop = blockchain.openContract(await QuotaShop.fromAddress(quotaShopAddress));
+        return await quotaShop.send(
+            alice.getSender(),
+            {
+                value: toNano('105'),
+            },
+            buyQuota
+        );
+    }
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        owner = await blockchain.treasury('owner');
+        alice = await blockchain.treasury('alice'); // The creator of the NFT collection
+        author = await blockchain.treasury('author');
+        const royalty_params: RoyaltyParams = {
+            $$type: 'RoyaltyParams',
+            numerator: 800n,
+            denominator: 1000n,
+            destination: owner.address,
+        };
+        const content = beginCell().endCell();
+
+        nftCollection = blockchain.openContract(
+            await FNFTCollection.fromInit(alice.address, content, royalty_params, author.address)
+        );
+        // Deploy NftCollection contract
+        const deployCollectionResult = await nftCollection.send(
+            alice.getSender(),
+            {
+                value: toNano('1'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployCollectionResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {});
+
+    it('should deploy QuotaShop', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        //printTransactionFees(mintResult.transactions);
+
+        // Check Alice send mint message to NftCollection
+        expect(mintResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: nftCollection.address,
+            success: true,
+        });
+        printTransactionFees(mintResult.transactions);
+        prettyLogTransactions(mintResult.transactions);
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: nftId0Address,
+            success: true,
+        });
+
+        // Check that the QuotaShop was deployed
+        let quotaShopAddress: Address = await nftCollection.getDebugGetQuotashopAddressByIndex(nftId);
+        expect(mintResult.transactions).toHaveTransaction({
+            from: nftCollection.address,
+            to: quotaShopAddress,
+            success: true,
+        });
+    });
+    it('should issue quota', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+        //printTransactionFees(mintResult.transactions);
+        printTransactionFees(mintResult.transactions);
+        prettyLogTransactions(mintResult.transactions);
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+
+        let quotaShopAddress: Address = await nftCollection.getDebugGetQuotashopAddressByIndex(nftId);
+        quotaShop = blockchain.openContract(await QuotaShop.fromAddress(quotaShopAddress));
+
+        // Issue quota
+        const issueQuotaResult = await sendIssueQuota(author, quotaShopAddress);
+        printTransactionFees(issueQuotaResult.transactions);
+        prettyLogTransactions(issueQuotaResult.transactions);
+        expect(issueQuotaResult.transactions).toHaveTransaction({
+            from: author.address,
+            to: quotaShopAddress,
+            success: true,
+        });
+
+        // Check that the quota was issued
+        const quotaPrice = await quotaShop.getDebugGetQuotaPrice();
+        expect(quotaPrice).toEqual(toNano('100'));
+
+        const quotaAmount = await quotaShop.getDebugGetQuotaAmount();
+        expect(quotaAmount).toEqual(1n);
+    });
+
+    it('should increase quota', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+
+        let quotaShopAddress: Address = await nftCollection.getDebugGetQuotashopAddressByIndex(nftId);
+        quotaShop = blockchain.openContract(await QuotaShop.fromAddress(quotaShopAddress));
+
+        // Issue quota
+        const issueQuotaResult = await sendIssueQuota(author, quotaShopAddress);
+        const quotaPrice = await quotaShop.getDebugGetQuotaPrice();
+        const quotaAmount = await quotaShop.getDebugGetQuotaAmount();
+
+        // Buy quota
+        const buyQuotaResult = await sendBuyQuota(alice, quotaShopAddress);
+        printTransactionFees(buyQuotaResult.transactions);
+        prettyLogTransactions(buyQuotaResult.transactions);
+        expect(buyQuotaResult.transactions).toHaveTransaction({
+            from: alice.address,
+            to: quotaShopAddress,
+            success: true,
+        });
+
+        // Check that the quota was increased
+        nftItem = blockchain.openContract(await FNFTItem.fromAddress(nftId0Address));
+        const quota = await nftItem.getDebugGetQuota();
+        expect(quota).toEqual(1n);
+    });
+
+    it('should withdraw', async () => {
+        const before_index = (await nftCollection.getGetCollectionData()).next_item_index;
+        const mintResult = await mintNftToAlice(nftCollection, alice);
+
+        // Check that the NFT was minted
+        const nftId = 0n;
+        const nftId0Address: Address = await nftCollection.getGetNftAddressByIndex(nftId);
+
+        let quotaShopAddress: Address = await nftCollection.getDebugGetQuotashopAddressByIndex(nftId);
+        quotaShop = blockchain.openContract(await QuotaShop.fromAddress(quotaShopAddress));
+
+        // Issue quota
+        const issueQuotaResult = await sendIssueQuota(author, quotaShopAddress);
+        const quotaPrice = await quotaShop.getDebugGetQuotaPrice();
+        const quotaAmount = await quotaShop.getDebugGetQuotaAmount();
+
+        // Buy quota
+
+        const buyQuotaResult = await sendBuyQuota(alice, quotaShopAddress);
+
+        //Check that the balance was increased
+        const quotaShopBalance = await quotaShop.getDebugGetBalance();
+        expect(quotaShopBalance).toEqual(toNano('100'));
+
+
+        const before_balance = await author.getBalance();
+
+        console.log("quotaShopAddress: ", quotaShopAddress);
+        // Withdraw
+        const withdrawResult = await quotaShop.send(
+            author.getSender(),
+            {
+                value: toNano('1'),
+            },
+            "Withdraw"
+        );
+        printTransactionFees(withdrawResult.transactions);
+        prettyLogTransactions(withdrawResult.transactions);
+
+        const after_balance = await author.getBalance();
+        const balance_diff = after_balance - before_balance;
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: author.address,
+            to: quotaShopAddress,
+            success: true,
+        });
+
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: quotaShopAddress,
+            to: author.address,
+            success: true,
+        });
+
+        // Check that the balance was increased
+        expect(balance_diff).toBeGreaterThan(toNano('10'));
+    });
+});
+
+tests/math/float.spec.ts
+import {
+    Blockchain,
+    SandboxContract,
+    TreasuryContract,
+    prettyLogTransactions,
+    printTransactionFees,
+} from '@ton-community/sandbox';
+import { Cell, beginCell, toNano } from 'ton-core';
+import { MathExample } from '../../wrappers/MathExample';
+import '@ton-community/test-utils';
+import { Decimal } from 'decimal.js';
+
+function toFloat(value: number, decimals: number = 64): bigint {
+    const d = new Decimal(value).mul(new Decimal(2).pow(decimals)).floor();
+    return BigInt(d.toString());
+}
+
+describe('MathExample', () => {
+    let blockchain: Blockchain;
+    let deployer: SandboxContract<TreasuryContract>;
+    let mathContract: SandboxContract<MathExample>;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        deployer = await blockchain.treasury('deployer');
+        const jetton_content: Cell = beginCell().endCell();
+        mathContract = blockchain.openContract(await MathExample.fromInit());
+        const deployResult = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
+
+        expect(deployResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: mathContract.address,
+            deploy: true,
+            success: true,
+        });
+    });
+
+    it('should deploy', async () => {
+        // the check is done inside beforeEach
+        // blockchain and nFTCollection are ready to use
+    });
+
+    it('2 + 7', async () => {
+        const addResult = await mathContract.getAdd();
+        const safeAddResult = await mathContract.getSafeAdd();
+        const actualFloatResult = await mathContract.getFloat(9n);
+        expect(actualFloatResult).toEqual(166020696663385964544n);
+        expect(addResult).toEqual(actualFloatResult);
+        expect(safeAddResult).toEqual(actualFloatResult);
+    });
+
+    it('2 - 7', async () => {
+        const subResult = await mathContract.getSub();
+        const safeSubResult = await mathContract.getSafeSub();
+        const actualFloatResult = await mathContract.getFloat(-5n);
+        expect(actualFloatResult).toEqual(-92233720368547758080n);
+        expect(subResult).toEqual(actualFloatResult);
+        expect(safeSubResult).toEqual(actualFloatResult);
+    });
+
+    it('2 * 7', async () => {
+        const mulResult = await mathContract.getMul();
+        const safeMulResult = await mathContract.getSafeMul();
+        const actualFloatResult = await mathContract.getFloat(14n);
+        expect(actualFloatResult).toEqual(258254417031933722624n);
+        expect(mulResult).toEqual(actualFloatResult);
+        expect(safeMulResult).toEqual(actualFloatResult);
+    });
+
+    it('2 / 7', async () => {
+        const divResult = await mathContract.getDiv();
+        const safeDivResult = await mathContract.getSafeDiv();
+        expect(divResult).toEqual(5270498306774157604n);
+        expect(safeDivResult).toEqual(5270498306774157604n);
+    });
+
+    it('Should throw errorCode 4 if div by 0', async () => {
+        await mathContract.getDivisionByZero().catch((e) => {
+            expect(e.exitCode).toEqual(4);
+        });
+    });
+
+    it('0.25 + 10', async () => {
+        const addTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(0.25),
+                floatB: toFloat(10),
+                op: 0n,
+            }
+        );
+        console.log('Add');
+        printTransactionFees(addTxs.transactions);
+        const addResult = await mathContract.getResult();
+        expect(Number(addResult)).toBeCloseTo(Number(toFloat(10.25)));
+    });
+
+    it('0.25 - 10', async () => {
+        const subTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(0.25),
+                floatB: toFloat(10),
+                op: 1n,
+            }
+        );
+        console.log('Sub');
+        printTransactionFees(subTxs.transactions);
+        const subResult = await mathContract.getResult();
+        expect(Number(subResult)).toBeCloseTo(Number(toFloat(-9.75)));
+    });
+
+    it('0.25 * 10', async () => {
+        const mulTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(0.25),
+                floatB: toFloat(10),
+                op: 2n,
+            }
+        );
+        console.log('Mul');
+        printTransactionFees(mulTxs.transactions);
+        const mulResult = await mathContract.getResult();
+        expect(Number(mulResult)).toBeCloseTo(Number(toFloat(2.5)));
+    });
+
+    it('0.25 / 10', async () => {
+        const divTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(0.25),
+                floatB: toFloat(10),
+                op: 3n,
+            }
+        );
+        console.log('Div');
+        printTransactionFees(divTxs.transactions);
+        const divResult = await mathContract.getResult();
+        expect(Number(divResult)).toBeCloseTo(Number(toFloat(0.025)));
+    });
+
+    it('Sqrt 0.05', async () => {
+        const sqrtTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(0.25),
+                floatB: 0n,
+                op: 4n,
+            }
+        );
+        console.log('Sqrt');
+        printTransactionFees(sqrtTxs.transactions);
+        const sqrtResult = await mathContract.getResult();
+        expect(Number(sqrtResult)).toBeCloseTo(Number(toFloat(0.5)));
+    });
+
+    it('Sqrt 25', async () => {
+        const sqrtTxs = await mathContract.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Arithmetic',
+                floatA: toFloat(25),
+                floatB: 0n,
+                op: 4n,
+            }
+        );
+        console.log('Sqrt');
+        printTransactionFees(sqrtTxs.transactions);
+        const sqrtResult = await mathContract.getResult();
+        expect(Number(sqrtResult)).toBeCloseTo(Number(toFloat(5)));
+    });
+});

@@ -1,0 +1,129 @@
+## Инструкция
+
+1. Инициализация проекта:
+Для начала нового проекта TON с использованием Tact, выполните следующую команду:
+
+```jsx
+npm create ton@latest
+//Введите имя проекта, выберите пустой шаблон Tact и название первого контракта
+cd NAME_DIR
+```
+
+1. Структура проекта:
+После инициализации, ваш проект будет иметь следующую структуру:
+
+```jsx
+my-ton-project/
+├── contracts/
+│   └── main.tact
+├── scripts/
+│   └── deployMain.ts
+├── tests/
+│   └── main.spec.ts
+├── wrappers/
+│   └── Main.ts
+├── package.json
+├── tsconfig.json
+└── tact.config.json
+```
+
+1. Контракт
+
+```jsx
+Базовый контракт-кликер TON на Tact
+
+import "@stdlib/deploy";
+
+contract Clicker with Deployable {
+    owner: Address;
+    clicks: Int as uint32;
+
+    init() {
+        self.owner = sender();
+        self.clicks = 0;
+    }
+
+    receive("Click") {
+        self.clicks = self.clicks + 1;
+    }
+
+    get fun clicks(): Int {
+        return self.clicks;
+    }
+
+    get fun owner(): Address {
+        return self.owner;
+    }
+}
+
+Объяснение кода:
+
+Мы импортируем @stdlib/deploy для базовой функциональности развертывания.
+Контракт Clicker наследует Deployable для стандартных функций развертывания.
+owner хранит адрес владельца контракта.
+
+clicks хранит количество кликов (используется uint32 для оптимизации хранения).
+
+Функция init() инициализирует контракт, устанавливая отправителя как владельца
+и обнуляя счетчик кликов.
+
+Функция receive("Click") увеличивает счетчик при получении сообщения "Click".
+
+Геттеры clicks() и owner() позволяют получить текущее значение кликов
+и адрес владельца.
+```
+
+1. Команды для компиляции и тестирования:
+
+```jsx
+npm run build
+npm run test
+```
+
+1. Создайте тестовый файл в директории `tests/`, например, `clicker.spec.ts`:
+
+```jsx
+import { Blockchain, SandboxContract } from '@ton-community/sandbox';
+import { toNano } from 'ton-core';
+import { Clicker } from '../wrappers/Clicker'; // Предполагается, что у вас есть wrapper для контракта
+
+describe('Clicker', () => {
+    let blockchain: Blockchain;
+    let clicker: SandboxContract<Clicker>;
+
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        clicker = blockchain.openContract(await Clicker.fromInit());
+        await clicker.send(
+            blockchain.sender,
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+            }
+        );
+    });
+
+    it('should deploy', async () => {
+        // Проверка успешного развертывания
+        expect(await clicker.getClicks()).toEqual(0n);
+    });
+
+    it('should increment clicks', async () => {
+        await clicker.send(
+            blockchain.sender,
+            {
+                value: toNano('0.05'),
+            },
+            "Click"
+        );
+        expect(await clicker.getClicks()).toEqual(1n);
+    });
+});
+```
+
+1. Развертывание в тестовой сети TON:
+
+Убедитесь, что у вас есть тестовые монеты. Их можно получить через @testgiver_ton_bot в Telegram.
+Настройте файл deployMain.ts в директории scripts/:

@@ -1,0 +1,62 @@
+FNFT.compile.ts
+import { CompilerConfig } from '@ton-community/blueprint';
+
+export const compile: CompilerConfig = {
+    lang: 'tact',
+    target: 'contracts/nft_fractionalize_example.tact',
+    options: {
+        debug: true,
+        external: true,
+        experimental: {
+            inline: true,
+        },
+    },
+};
+
+wrappers/FNFTEnforce.compile.ts
+import { CompilerConfig } from '@ton-community/blueprint';
+
+export const compile: CompilerConfig = {
+    lang: 'tact',
+    target: 'contracts/nft_enforce_royalty_example.tact',
+    options: {
+        debug: true,
+        external: true,
+        experimental: {
+            inline: true,
+        },
+    },
+};
+
+wrappers/FNFTEnforce_FNFTCollection.ts
+export * from '../build/FNFTEnforce/tact_FNFTCollection';
+
+wrappers/FNFTEnforce_FNFTItem.ts
+export * from '../build/FNFTEnforce/tact_FNFTItem';
+
+wrappers/FNFTEnforce_NFTFraction.ts
+export * from '../build/FNFTEnforce/tact_NFTFraction';
+
+wrappers/FNFTEnforce_NFTFractionWallet.ts
+export * from '../build/FNFTEnforce/tact_NFTFractionWallet';
+
+wrappers/FNFTEnforce_NFTItemAuction.ts
+export * from '../build/FNFTEnforce/tact_NFTItemAuction';
+
+wrappers/FNFTEnforce_QuotaShop.ts
+export * from '../build/FNFTEnforce/tact_QuotaShop';
+
+wrappers/JettonExample.compile.ts
+import { CompilerConfig } from '@ton-community/blueprint';
+
+export const compile: CompilerConfig = {
+    lang: 'tact',
+    target: 'contracts/jetton_example.tact',
+    options: {
+        debug: true,
+        external: true,
+        experimental: {
+            inline: true,
+        },
+    },
+};

@@ -1,0 +1,1103 @@
+build.ts
+
+import { Args, Runner } from './Runner';
+import { findCompiles, selectFile } from '../utils';
+import { UIProvider } from '../ui/UIProvider';
+import arg from 'arg';
+import { buildAll, buildOne } from '../build';
+import { helpArgs, helpMessages } from './constants';
+
+export async function selectCompile(ui: UIProvider, args: Args) {
+    return await selectFile(await findCompiles(), {
+        ui,
+        hint: args._.length > 1 && args._[1].length > 0 ? args._[1] : undefined,
+        import: false,
+    });
+}
+
+export const build: Runner = async (args: Args, ui: UIProvider) => {
+    const localArgs = arg({
+        '--all': Boolean,
+        ...helpArgs,
+    });
+    if (localArgs['--help']) {
+        ui.write(helpMessages['build']);
+        return;
+    }
+
+    if (localArgs['--all']) {
+        await buildAll();
+    } else {
+        const sel = await selectCompile(ui, localArgs);
+
+        await buildOne(sel.name, ui);
+    }
+};
+
+cli.ts
+#!/usr/bin/env node
+import * as dotenv from 'dotenv';
+dotenv.config();
+import arg from 'arg';
+import chalk from 'chalk';
+import { create } from './create';
+import { run } from './run';
+import { build } from './build';
+import { set } from './set';
+import { test } from './test';
+import { verify } from './verify';
+import { convert } from './convert';
+import { additionalHelpMessages, help } from './help';
+import { InquirerUIProvider } from '../ui/InquirerUIProvider';
+import { argSpec, Runner, RunnerContext } from './Runner';
+import { getConfig } from '../config/utils';
+
+const runners: Record<string, Runner> = {
+    create,
+    run,
+    build,
+    set,
+    test,
+    help,
+    verify,
+    convert,
+};
+
+async function main() {
+    require('ts-node/register');
+
+    const args = arg(argSpec, {
+        permissive: true,
+    });
+
+    if (args._.length === 0) {
+        showHelp();
+        process.exit(0);
+    }
+
+    let effectiveRunners: Record<string, Runner> = {};
+
+    const runnerContext: RunnerContext = {};
+
+    const config = await getConfig();
+
+    try {
+        runnerContext.config = config;
+
+        for (const plugin of config?.plugins ?? []) {
+            for (const runner of plugin.runners()) {
+                effectiveRunners[runner.name] = runner.runner;
+                additionalHelpMessages[runner.name] = runner.help;
+            }
+        }
+    } catch (e) {
+        // if plugin.runners() throws
+        console.error('Could not load one or more plugins');
+        console.error(e);
+    }
+
+    effectiveRunners = {
+        ...effectiveRunners,
+        ...runners,
+    };
+
+    const runner = effectiveRunners[args._[0]];
+    if (!runner) {
+        console.log(
+            chalk.redBright(` Error: command not found.`) + ` Run 'blueprint help' to see available commands\n`,
+        );
+        process.exit(1);
+    }
+
+    const ui = new InquirerUIProvider();
+
+    await runner(args, ui, runnerContext);
+
+    ui.close();
+}
+
+process.on('SIGINT', () => {
+    process.exit(130);
+});
+
+main()
+    .catch(console.error)
+    .then(() => process.exit(0));
+
+function showHelp() {
+    console.log(
+        chalk.blueBright(`
+     ____  _    _   _ _____ ____  ____  ___ _   _ _____
+    | __ )| |  | | | | ____|  _ \\|  _ \\|_ _| \\ | |_   _|
+    |  _ \\| |  | | | |  _| | |_) | |_) || ||  \\| | | |
+    | |_) | |__| |_| | |___|  __/|  _ < | || |\\  | | |
+    |____/|_____\\___/|_____|_|   |_| \\_\\___|_| \\_| |_|  `),
+    );
+    console.log(chalk.blue(`                     TON development for professionals`));
+    console.log(``);
+    console.log(` Usage: blueprint [OPTIONS] COMMAND [ARGS]`);
+    console.log(``);
+    console.log(
+        chalk.cyanBright(`  blueprint create`) +
+            `\t` +
+            chalk.whiteBright(`create a new contract with .fc source, .ts wrapper, .spec.ts test`),
+    );
+    console.log(`\t\t\t` + chalk.gray(`blueprint create ContractName`));
+
+    console.log(
+        chalk.cyanBright(`  blueprint build`) +
+            `\t` +
+            chalk.whiteBright(`builds a contract that has a .compile.ts file`),
+    );
+    console.log(`\t\t\t` + chalk.gray(`blueprint build ContractName`));
+
+    console.log(
+        chalk.cyanBright(`  blueprint test`) +
+            `\t` +
+            chalk.whiteBright(`run the full project test suite with all .spec.ts files`),
+    );
+    console.log(`\t\t\t` + chalk.gray(`blueprint test`));
+
+    console.log(
+        chalk.cyanBright(`  blueprint run `) +
+            `\t` +
+            chalk.whiteBright(`runs a script from 'scripts' directory (eg. a deploy script)`),
+    );
+    console.log(`\t\t\t` + chalk.gray(`blueprint run deployContractName`));
+
+    console.log(
+        chalk.cyanBright(`  blueprint help`) +
+            `\t` +
+            chalk.whiteBright(`shows more detailed help, also see https://github.com/ton-org/blueprint`),
+    );
+    console.log(`\t\t\t` + chalk.gray(`blueprint help`));
+
+    console.log(``);
+}
+
+constants.ts
+export const templateTypes: { name: string; value: string }[] = [
+    {
+        name: 'An empty contract (FunC)',
+        value: 'func-empty',
+    },
+    {
+        name: 'A simple counter contract (FunC)',
+        value: 'func-counter',
+    },
+    {
+        name: 'An empty contract (TACT)',
+        value: 'tact-empty',
+    },
+    {
+        name: 'A simple counter contract (TACT)',
+        value: 'tact-counter',
+    },
+];
+
+export const helpArgs = { '--help': Boolean };
+export const helpMessages = {
+    help: `Usage: blueprint help [command]
+
+Displays this message if no command is specified, or displays detailed help for the specified command.
+
+Blueprint is generally invoked as follows: blueprint [command] [command-args] [flags]
+
+List of available commands:
+- create
+- run
+- build
+- custom
+- help
+- test
+- verify
+- convert`,
+    create: `Usage: blueprint create [contract name] [flags]
+
+Creates a new contract together with supporting files according to a template.
+
+Contract name must be specified in PascalCase and may only include characters a-z, A-Z, 0-9. If not specified on the command line, it will be asked interactively.
+
+Flags:
+--type <type> - specifies the template type to use when creating the contract. If not specified on the command line, it will be asked interactively.
+List of available types:
+${templateTypes.map((t) => `${t.value} - ${t.name}`).join('\n')}`,
+    run: `Usage: blueprint run [script name] [flags]
+
+Runs a script from the scripts directory.
+
+Script name is matched (ignoring case) to a file in the scripts directory. If not specified on the command line, the available scripts will be presented interactively.
+
+Flags:
+--mainnet, --testnet - specifies the network to use when running the script. If not specified on the command line, it will be asked interactively.
+--custom [api-endpoint] - indicates that a custom API should be used when running the script, and the API URL optionally. (example: https://testnet.toncenter.com/api/v2/)
+--custom-version - specifies the API version to use with the custom API. Options: v2 (defualt), v4.
+--custom-key - specifies the API key to use with the custom API, can only be used with API v2.
+--custom-type - specifies the network type to be indicated to scripts. Options: custom (default), mainnet, testnet.
+--tonconnect, --tonhub, --deeplink, --mnemonic - specifies the deployer to use when running the script. If not specified on the command line, it will be asked interactively.
+--tonscan, --tonviewer, --toncx, --dton - specifies the network explorer to use when displaying links to the deployed contracts. Default: tonscan.`,
+    build: `Usage: blueprint build [contract name] [flags]
+
+Builds the specified contract according to the respective .compile.ts file. If the contract is written in TACT, all TACT-generated files (wrapper class, etc) will be placed in the build/<contract name> folder.
+
+If contract name is not specified on the command line, the buildable contracts (that have the respective .compile.ts files under wrappers directory) will be presented interactively, unless --all flag is specified.
+
+Flags:
+--all - builds all buildable contracts instead of just one.`,
+    set: `Usage: blueprint set <key> [value]
+Available keys:
+- func - overrides @ton-community/func-js-bin version, effectively setting the func version. The required version may be passed as the value, otherwise available versions will be displayed.`,
+    test: `Usage: blueprint test
+
+Just runs \`npm test\`, which by default runs \`jest\`.`,
+    verify: `Usage: blueprint verify [contract name] [flags]
+
+Builds a contract (similar to build command) and verifies it on https://verifier.ton.org. The contract must be already deployed on the network. If the contract's name is not specified on the command line, it will be asked interactively.
+
+Flags:
+--mainnet, --testnet - specifies the network to use when running the script. If not specified on the command line, it will be asked interactively.
+--custom [api-endpoint] - indicates that a custom API should be used when running the script, and the API URL optionally. (example: https://testnet.toncenter.com/api/v2/) Requires --custom-type to be specified.
+--custom-version - specifies the API version to use with the custom API. Options: v2 (defualt), v4.
+--custom-key - specifies the API key to use with the custom API, can only be used with API v2.
+--custom-type - specifies the network type to be indicated to scripts. Options: mainnet, testnet.`,
+    convert: `Usage: blueprint convert [path to build script]
+Atempts to convert legacy bash build script to a blueprint compile wrapper.`,
+} satisfies { [name: string]: string };
+
+convert.ts
+import { readFileSync, existsSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'fs';
+import path from 'path';
+import arg from 'arg';
+import { UIProvider } from '../ui/UIProvider';
+import { argSpec } from '../network/createNetworkProvider';
+import { executeTemplate, TEMPLATES_DIR } from '../template';
+import { WRAPPERS_DIR } from '../paths';
+import { Args, Runner } from './Runner';
+import { helpArgs, helpMessages } from './constants';
+
+function createWrapperName(old: string) {
+    return old
+        .split(/[-_]/)
+        .map((x) => x.replace(x[0], x[0].toUpperCase()))
+        .join('');
+}
+
+function quoteString(str: string) {
+    const quote = "'";
+    const quoted = str.startsWith(quote) && str.endsWith(quote);
+    return quoted ? str : quote + str + quote;
+}
+
+function findFile(dir: string, filename: string): string {
+    const contents = readdirSync(dir);
+    let hasFile = contents.includes(filename);
+    let foundPath = '';
+    if (hasFile) {
+        foundPath = path.join(dir, filename);
+        if (statSync(foundPath).isFile()) {
+            return foundPath;
+        }
+    }
+
+    for (let entry of contents) {
+        const entryPath = path.join(dir, entry);
+        const stat = statSync(entryPath);
+        if (stat.isDirectory()) {
+            foundPath = findFile(entryPath, filename);
+            if (foundPath !== '') {
+                break;
+            }
+        }
+    }
+
+    return foundPath;
+}
+
+function parseCompileString(str: string, src_dir: string, ui: UIProvider) {
+    // Naive but does the job
+    const tokens = str.split(/\\?\s+/).filter((t) => t != '\\');
+
+    const outputIdx = tokens.indexOf('-o');
+
+    if (outputIdx < 0) {
+        throw new Error('No output flag (-o) found in command:' + str);
+    }
+
+    const outFile = tokens[outputIdx + 1];
+    const outputName = outFile.match(/([A-Za-z0-9\-_\\\/]*)/);
+
+    if (outputName === null) {
+        throw new Error(`Something went wrong when parsing output from ${outFile}`);
+    }
+
+    const wrapperName = createWrapperName(path.basename(outputName[1]));
+    const sourceFiles = tokens.filter((x) => x.match(/\.func|\.fc['"]?$/) !== null).map((t) => t.replace(/['"`]/g, ''));
+    if (sourceFiles.length === 0) {
+        throw new Error(`No source files found in command:${str}`);
+    }
+
+    for (let i = 0; i < sourceFiles.length; i++) {
+        const testPath = path.join(src_dir, sourceFiles[i]);
+        if (existsSync(testPath)) {
+            sourceFiles[i] = quoteString(testPath);
+        } else {
+            const foundPath = findFile(src_dir, sourceFiles[i]);
+
+            if (foundPath === '') {
+                throw new Error(`${sourceFiles[i]} is not found anywhere`);
+            }
+
+            src_dir = path.dirname(foundPath);
+            sourceFiles[i] = quoteString(foundPath);
+        }
+    }
+    return {
+        name: wrapperName,
+        targets: sourceFiles.join(','),
+    };
+}
+
+export const convert: Runner = async (args: Args, ui: UIProvider) => {
+    const localArgs = arg({ ...argSpec, ...helpArgs });
+    if (localArgs['--help']) {
+        ui.write(helpMessages['convert']);
+        return;
+    }
+
+    let filePath: string;
+    if (localArgs._.length < 2) {
+        filePath = await ui.input('Please specify path to convert from:');
+    } else {
+        filePath = localArgs._[1];
+    }
+
+    const content = readFileSync(filePath, { encoding: 'utf-8' });
+
+    const srcDir = path.dirname(filePath);
+    const compileStrings = content.replace(/\\[\r?\n]+/g, '').matchAll(/\s?func\s+(.*)\n/g);
+
+    if (compileStrings === null) {
+        throw new Error(`No func related commands found in ${filePath}`);
+    }
+
+    const templatePath = path.join(TEMPLATES_DIR, 'func', 'legacy', 'wrappers', 'compile.ts.template');
+    const templateContent = readFileSync(templatePath, { encoding: 'utf-8' });
+
+    if (!existsSync(WRAPPERS_DIR)) {
+        ui.write('Creating wrappers directory...');
+        mkdirSync(WRAPPERS_DIR);
+    }
+
+    for (let compileStr of compileStrings) {
+        let parsed: { name: string; targets: string };
+
+        try {
+            parsed = parseCompileString(compileStr[1], srcDir, ui);
+        } catch (e: any) {
+            ui.write(e.toString());
+            continue;
+        }
+
+        const resTemplate = executeTemplate(templateContent, parsed);
+        let lineIdx = resTemplate.indexOf('\n');
+        const contentIdx = lineIdx + 1;
+        if (resTemplate[lineIdx - 1] === '\r') {
+            lineIdx--;
+        }
+
+        const wrapperName = resTemplate.substring(0, lineIdx);
+        const fileName = path.join(WRAPPERS_DIR, wrapperName);
+        const content = resTemplate.substring(contentIdx);
+
+        if (existsSync(fileName)) {
+            ui.write(`File ${wrapperName} already exists!`);
+            const overwrite = await ui.prompt('Do you want to overwrite it?');
+            if (!overwrite) {
+                ui.write(`Skipping ${wrapperName}`);
+                continue;
+            }
+        }
+
+        writeFileSync(fileName, content, { encoding: 'utf-8' });
+        ui.write(`${wrapperName} wrapper created!`);
+    }
+};
+
+create.ts
+import { Args, Runner } from './Runner';
+import { lstat, mkdir, open, readdir, readFile } from 'fs/promises';
+import path from 'path';
+import { executeTemplate, TEMPLATES_DIR } from '../template';
+import { selectOption } from '../utils';
+import arg from 'arg';
+import { UIProvider } from '../ui/UIProvider';
+import { buildOne } from '../build';
+import { getConfig } from '../config/utils';
+import { helpArgs, helpMessages } from './constants';
+
+function toSnakeCase(v: string): string {
+    const r = v.replace(/[A-Z]/g, (sub) => '_' + sub.toLowerCase());
+    return r[0] === '_' ? r.substring(1) : r;
+}
+
+async function createFile(templatePath: string, realPath: string, replaces: { [k: string]: string }) {
+    const template = (await readFile(templatePath)).toString('utf-8');
+    const lines = template.split('\n');
+    const fileName = executeTemplate(lines.shift()!, replaces);
+    const contents = executeTemplate(lines.join('\n'), replaces);
+
+    const p = path.join(realPath, fileName);
+    const file = await open(p, 'a+');
+    if ((await file.stat()).size > 0) {
+        console.warn(`${p} already exists, not changing.`);
+        await file.close();
+        return;
+    }
+
+    await file.writeFile(contents);
+    await file.close();
+}
+
+async function createFiles(templatePath: string, realPath: string, replaces: { [k: string]: string }) {
+    const contents = await readdir(templatePath);
+
+    for (const file of contents) {
+        const tp = path.join(templatePath, file);
+        const rp = path.join(realPath, file);
+        if ((await lstat(tp)).isDirectory()) {
+            await createFiles(tp, rp, replaces);
+        } else {
+            await mkdir(path.dirname(rp), {
+                recursive: true,
+            });
+            await createFile(tp, realPath, replaces);
+        }
+    }
+}
+
+export const templateTypes: { name: string; value: string }[] = [
+    {
+        name: 'An empty contract (FunC)',
+        value: 'func-empty',
+    },
+    {
+        name: 'A simple counter contract (FunC)',
+        value: 'func-counter',
+    },
+    {
+        name: 'An empty contract (TACT)',
+        value: 'tact-empty',
+    },
+    {
+        name: 'A simple counter contract (TACT)',
+        value: 'tact-counter',
+    },
+];
+
+export const create: Runner = async (args: Args, ui: UIProvider) => {
+    const localArgs = arg({
+        '--type': String,
+        ...helpArgs,
+    });
+    if (localArgs['--help']) {
+        ui.write(helpMessages['create']);
+        return;
+    }
+
+    const name =
+        localArgs._.length > 1 && localArgs._[1].trim().length > 0
+            ? localArgs._[1].trim()
+            : await ui.input('Contract name (PascalCase)');
+
+    if (name.length === 0) throw new Error(`Cannot create a contract with an empty name`);
+
+    if (name.toLowerCase() === 'contract' || !/^[A-Z][a-zA-Z0-9]*$/.test(name))
+        throw new Error(`Cannot create a contract with the name '${name}'`);
+
+    const which = (
+        await selectOption(templateTypes, {
+            ui,
+            msg: 'What type of contract do you want to create?',
+            hint: localArgs['--type'],
+        })
+    ).value;
+
+    const [lang, template] = which.split('-');
+
+    const snakeName = toSnakeCase(name);
+
+    const replaces = {
+        name,
+        loweredName: name.substring(0, 1).toLowerCase() + name.substring(1),
+        snakeName,
+        contractPath: 'contracts/' + snakeName + '.' + (lang === 'func' ? 'fc' : 'tact'),
+    };
+
+    const config = await getConfig();
+
+    const commonPath = config?.separateCompilables ? 'common' : 'not-separated-common';
+
+    await createFiles(path.join(TEMPLATES_DIR, lang, commonPath), process.cwd(), replaces);
+    await createFiles(path.join(TEMPLATES_DIR, lang, template), process.cwd(), replaces);
+
+    if (lang === 'tact') {
+        await buildOne(name, ui);
+    }
+};
+
+help.ts
+import { UIProvider } from '../ui/UIProvider';
+import { Args, Runner } from './Runner';
+import { helpMessages } from './constants';
+
+export let additionalHelpMessages: Record<string, string> = {};
+
+export const help: Runner = async (args: Args, ui: UIProvider) => {
+    const cmd = args._.length >= 2 ? args._[1].toLowerCase() : '';
+
+    const effectiveHelpMessages: Record<string, string> = {
+        ...additionalHelpMessages,
+        ...helpMessages,
+    };
+
+    for (const k in additionalHelpMessages) {
+        effectiveHelpMessages.help += '\n- ' + k;
+    }
+
+    const helpMessage = cmd in effectiveHelpMessages ? effectiveHelpMessages[cmd] : effectiveHelpMessages['help'];
+
+    ui.write(helpMessage);
+};
+
+run.ts
+import { Args, Runner, RunnerContext } from './Runner';
+import { createNetworkProvider, argSpec } from '../network/createNetworkProvider';
+import { findScripts, selectFile } from '../utils';
+import { UIProvider } from '../ui/UIProvider';
+import arg from 'arg';
+import { helpArgs, helpMessages } from './constants';
+
+export const run: Runner = async (args: Args, ui: UIProvider, context: RunnerContext) => {
+    const localArgs = arg({ ...argSpec, ...helpArgs });
+    if (localArgs['--help']) {
+        ui.write(helpMessages['run']);
+        return;
+    }
+
+    const { module: mod } = await selectFile(await findScripts(), {
+        ui,
+        hint: localArgs._.length > 1 && localArgs._[1].length > 0 ? localArgs._[1] : undefined,
+    });
+
+    if (typeof mod.run !== 'function') {
+        throw new Error('Function `run` is missing!');
+    }
+
+    const networkProvider = await createNetworkProvider(ui, localArgs, context.config);
+
+    await mod.run(networkProvider, localArgs._.slice(2));
+};
+
+runner.ts
+import arg from 'arg';
+import { UIProvider } from '../ui/UIProvider';
+import { Config } from '../config/Config';
+
+export const argSpec = {};
+
+export type Args = arg.Result<typeof argSpec>;
+
+export type RunnerContext = {
+    config?: Config;
+};
+
+export type Runner = (args: Args, ui: UIProvider, context: RunnerContext) => Promise<void>;
+
+set.ts
+import { Args, Runner } from './Runner';
+import { UIProvider } from '../ui/UIProvider';
+import { readFile, writeFile } from 'fs/promises';
+import { exec } from 'node:child_process';
+import path from 'path';
+import arg from 'arg';
+import { helpArgs, helpMessages } from './constants';
+
+const getVersions = (pkg: string, ui: UIProvider): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+        exec(`npm view ${pkg} versions --json`, (error, stdout, stderr) => {
+            if (stderr) {
+                ui.write(stderr);
+            }
+            if (stdout) {
+                if (error === null) {
+                    try {
+                        const resJson = JSON.parse(stdout);
+                        if (Array.isArray(resJson)) {
+                            resolve(resJson);
+                        } else {
+                            reject(new TypeError("Expect json array on stdout, but got:\n" + stdout));
+                        }
+                    } catch (e) {
+                        reject(e);
+                    }
+                    return;
+                } else {
+                    ui.write(stdout);
+                }
+            }
+            if (error) {
+                ui.write("Failed to get func-js-bin package versions!");
+                reject(error);
+            }
+        });
+    });
+};
+
+const install = (cmd: string, ui: UIProvider): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        exec(cmd, (error, stdout, stderr) => {
+                if (stderr) {
+                    ui.write(stderr);
+                }
+                if (stdout) {
+                    ui.write(stdout);
+                }
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve();
+        });
+    });
+}
+
+export const set: Runner = async (args: Args, ui: UIProvider) => {
+    const localArgs = arg(helpArgs);
+    if (localArgs['--help']) {
+        ui.write(helpMessages['set']);
+        return;
+    }
+
+    if (args._.length < 2) {
+        throw new Error('Please pass a key');
+    }
+
+    switch (args._[1]) {
+        case 'func': {
+            const pkg = '@ton-community/func-js-bin';
+
+            const funcVersions = await getVersions(pkg, ui);
+
+            let version = args._.length > 2 ? args._[2] : '';
+            if (!funcVersions.includes(version)) {
+                version = await ui.choose('Choose FunC version', funcVersions, (s) => s);
+            }
+
+            const packagePath = path.join(process.cwd(), 'package.json');
+            const packageContents = (await readFile(packagePath)).toString('utf-8');
+            const parsedPackage = JSON.parse(packageContents);
+
+            const packageManager: 'npm' | 'yarn' | 'pnpm' | 'other' = await ui.choose('Choose your package manager', ['npm', 'yarn', 'pnpm', 'other'], (s) => s);
+
+            if (packageManager === 'other') {
+                ui.write(`Please find out how to override @ton-community/func-js-bin version to ${version} using your package manager, do that, and then install the packages`);
+                return;
+            }
+
+            const overrideKey = packageManager === 'yarn' ? 'resolutions' : 'overrides';
+
+            parsedPackage[overrideKey] = {
+                ...parsedPackage[overrideKey],
+                [pkg]: version,
+            };
+
+            ui.write('Updating package.json...');
+
+            await writeFile(packagePath, JSON.stringify(parsedPackage, null, 4));
+
+            const installCmd = packageManager === 'yarn' ? 'yarn' : `${packageManager} i`;
+
+            try {
+                ui.write('Installing dependencies...');
+                await install(installCmd, ui);
+            } catch (e) {
+                ui.write('Failed to install dependencies, rolling back package.json');
+                await writeFile(packagePath, packageContents);
+                throw e;
+            }
+
+            break;
+        }
+        default: {
+            throw new Error('Unknown key: ' + args._[1]);
+        }
+    }
+};
+
+test.ts
+import { Runner } from './Runner';
+import { execSync } from 'child_process';
+import arg from 'arg';
+import { helpArgs, helpMessages } from './constants';
+
+export const test: Runner = async (args, ui) => {
+    const localArgs = arg(helpArgs);
+    if (localArgs['--help']) {
+        ui.write(helpMessages['test']);
+        return;
+    }
+
+    const testArgs = args._.slice(1); // first argument is `test`, need to get rid of it
+    execSync(`npm test ${testArgs.join(' ')}`, { stdio: 'inherit' });
+};
+ vetify.ts
+ import { Address, Cell, Contract, ContractProvider, Dictionary, toNano } from '@ton/core';
+ import { doCompile } from '../compile/compile';
+ import { UIProvider } from '../ui/UIProvider';
+ import { Args, Runner, RunnerContext } from './Runner';
+ import path from 'path';
+ import { argSpec, createNetworkProvider } from '../network/createNetworkProvider';
+ import { selectCompile } from './build';
+ import { sleep } from '../utils';
+ import arg from 'arg';
+ import { helpArgs, helpMessages } from './constants';
+
+ type FuncCompilerSettings = {
+     compiler: 'func';
+     compilerSettings: {
+         funcVersion: string;
+         commandLine: string;
+     };
+ };
+
+ type TactCompilerSettings = {
+     compiler: 'tact';
+     compilerSettings: {
+         tactVersion: string;
+     };
+ };
+
+ type CompilerSettings = FuncCompilerSettings | TactCompilerSettings;
+
+ type SourceObject = {
+     includeInCommand: boolean;
+     isEntrypoint: boolean;
+     isStdLib: boolean;
+     hasIncludeDirectives: boolean;
+     folder: string;
+ };
+
+ type SourcesObject = {
+     knownContractHash: string; // base64
+     knownContractAddress: string;
+     senderAddress: string;
+     sources: SourceObject[];
+ } & CompilerSettings;
+
+ const backends: Record<
+     'mainnet' | 'testnet',
+     {
+         sourceRegistry: Address;
+         backends: string[];
+         id: string;
+     }
+ > = {
+     mainnet: {
+         sourceRegistry: Address.parse('EQD-BJSVUJviud_Qv7Ymfd3qzXdrmV525e3YDzWQoHIAiInL'),
+         backends: [
+             'https://ton-source-prod-1.herokuapp.com',
+             'https://ton-source-prod-2.herokuapp.com',
+             'https://ton-source-prod-3.herokuapp.com',
+         ],
+         id: 'orbs.com',
+     },
+     testnet: {
+         sourceRegistry: Address.parse('EQCsdKYwUaXkgJkz2l0ol6qT_WxeRbE_wBCwnEybmR0u5TO8'),
+         backends: ['https://ton-source-prod-testnet-1.herokuapp.com'],
+         id: 'orbs-testnet',
+     },
+ };
+
+ function removeRandom<T>(els: T[]): T {
+     return els.splice(Math.floor(Math.random() * els.length), 1)[0];
+ }
+
+ class VerifierRegistry implements Contract {
+     constructor(readonly address: Address) {}
+
+     async getVerifiers(provider: ContractProvider) {
+         const res = await provider.get('get_verifiers', []);
+         const item = res.stack.readCell();
+         const c = item.beginParse();
+         const d = c.loadDict(Dictionary.Keys.BigUint(256), {
+             serialize: () => {
+                 throw undefined;
+             },
+             parse: (s) => s,
+         });
+
+         return Array.from(d.values()).map((v) => {
+             const admin = v.loadAddress();
+             const quorom = v.loadUint(8);
+             const pubKeyEndpoints = v.loadDict(Dictionary.Keys.BigUint(256), Dictionary.Values.Uint(32));
+
+             return {
+                 admin: admin,
+                 quorum: quorom,
+                 pubKeyEndpoints: new Map<bigint, number>(Array.from(pubKeyEndpoints).map(([k, v]) => [k, v])),
+                 name: v.loadRef().beginParse().loadStringTail(),
+                 url: v.loadRef().beginParse().loadStringTail(),
+             };
+         });
+     }
+ }
+ class SourceRegistry implements Contract {
+     constructor(readonly address: Address) {}
+     async getVerifierRegistry(provider: ContractProvider) {
+         const { stack } = await provider.get('get_verifier_registry_address', []);
+         return stack.readAddress();
+     }
+ }
+
+ async function lookupCodeHash(hash: Buffer, ui: UIProvider, retryCount: number = 5): Promise<string | undefined> {
+     type QueryResponse = {
+         data: {
+             account_states: Array<{
+                 address: string;
+                 workchain: number;
+             }>;
+         };
+     };
+
+     let queryResponse: QueryResponse;
+     let foundAddr: string | undefined;
+     let done = false;
+     const graphqlUrl = 'https://dton.io/graphql/';
+     const query = `{
+         account_states(page:0, page_size:1, account_state_state_init_code_hash: "${hash.toString('hex').toUpperCase()}")
+         {
+             address
+             workchain
+         }
+     }`;
+
+     do {
+         try {
+             ui.write('Checking if such a contract is already deployed...');
+             const resp = await fetch(graphqlUrl, {
+                 method: 'POST',
+                 body: JSON.stringify({ query }),
+                 headers: { 'Content-Type': 'application/json' },
+             });
+             if (resp.ok) {
+                 queryResponse = await resp.json();
+                 const states = queryResponse.data.account_states;
+                 if (states.length > 0) {
+                     const state = states[0];
+                     foundAddr = Address.parseRaw(`${state.workchain}:${state.address}`).toString();
+                 } else {
+                     ui.write('No such contract was found!');
+                 }
+                 done = true;
+             } else {
+                 retryCount--;
+             }
+             // Meh
+         } catch (e: any) {
+             retryCount--;
+             if (e.cause) {
+                 if (e.cause.code == 'ETIMEDOUT') {
+                     ui.write('API timed out, waiting...');
+                     await sleep(5000);
+                 }
+             } else {
+                 ui.write(e);
+             }
+         }
+     } while (!done && retryCount > 0);
+
+     return foundAddr;
+ }
+
+ export const verify: Runner = async (args: Args, ui: UIProvider, context: RunnerContext) => {
+     const localArgs = arg({ ...argSpec, ...helpArgs });
+     if (localArgs['--help']) {
+         ui.write(helpMessages['verify']);
+         return;
+     }
+
+     const sel = await selectCompile(ui, localArgs);
+
+     const networkProvider = await createNetworkProvider(ui, localArgs, context.config, false);
+
+     const sender = networkProvider.sender();
+
+     const senderAddress = sender.address;
+     if (senderAddress === undefined) {
+         throw new Error('Sender address needs to be known');
+     }
+
+     const network = networkProvider.network();
+     if (network === 'custom') {
+         throw new Error('Cannot use custom network');
+     }
+
+     const result = await doCompile(sel.name);
+     const resHash = result.code.hash();
+
+     ui.write(`Compiled code hash hex: ${resHash.toString('hex')}`);
+     ui.write('We can look up the address with such code hash in the blockchain automatically');
+
+     const passManually = await ui.prompt('Do you want to specify the address manually?');
+     let addr: string;
+
+     if (passManually) {
+         addr = (await ui.inputAddress('Deployed contract address')).toString();
+     } else {
+         const alreadyDeployed = await lookupCodeHash(resHash, ui);
+         if (alreadyDeployed) {
+             ui.write(`Contract is already deployed at: ${alreadyDeployed}\nUsing that address.`);
+             ui.write(`https://tonscan.org/address/${alreadyDeployed}`);
+             addr = alreadyDeployed;
+         } else {
+             ui.write("Please enter the contract's address manually");
+             addr = (await ui.inputAddress('Deployed contract address')).toString();
+         }
+     }
+
+     let src: SourcesObject;
+     const fd = new FormData();
+
+     if (result.lang === 'func') {
+         for (const f of result.snapshot) {
+             fd.append(f.filename, new Blob([f.content]), path.basename(f.filename));
+         }
+
+         src = {
+             compiler: 'func',
+             compilerSettings: {
+                 funcVersion: result.version,
+                 commandLine: '-SPA ' + result.targets.join(' '),
+             },
+             knownContractAddress: addr,
+             knownContractHash: result.code.hash().toString('base64'),
+             sources: result.snapshot.map((s) => ({
+                 includeInCommand: result.targets.includes(s.filename),
+                 isEntrypoint: result.targets.includes(s.filename),
+                 isStdLib: false,
+                 hasIncludeDirectives: true,
+                 folder: path.dirname(s.filename),
+             })),
+             senderAddress: senderAddress.toString(),
+         };
+     } else if (result.lang === 'tact') {
+         let pkg: { name: string; content: Buffer } | undefined = undefined;
+         for (const [k, v] of result.fs) {
+             if (k.endsWith('.pkg')) {
+                 pkg = {
+                     name: k,
+                     content: v,
+                 };
+                 break;
+             }
+         }
+         if (pkg === undefined) {
+             throw new Error('Could not find .pkg in compilation results');
+         }
+
+         fd.append(path.basename(pkg.name), new Blob([pkg.content]), path.basename(pkg.name));
+
+         src = {
+             compiler: 'tact',
+             compilerSettings: {
+                 tactVersion: '',
+             },
+             knownContractAddress: addr,
+             knownContractHash: result.code.hash().toString('base64'),
+             sources: [
+                 {
+                     includeInCommand: true,
+                     isEntrypoint: false,
+                     isStdLib: false,
+                     hasIncludeDirectives: false,
+                     folder: '',
+                 },
+             ],
+             senderAddress: senderAddress.toString(),
+         };
+     } else {
+         // future proofing
+
+         throw new Error('Unsupported language ' + (result as any).lang);
+     }
+
+     fd.append(
+         'json',
+         new Blob([JSON.stringify(src)], {
+             type: 'application/json',
+         }),
+         'blob',
+     );
+
+     const backend = backends[network];
+
+     const sourceRegistry   = networkProvider.open(new SourceRegistry(backend.sourceRegistry));
+     const verifierRegistry = networkProvider.open(new VerifierRegistry(await sourceRegistry.getVerifierRegistry()));
+
+     const verifier = (await verifierRegistry.getVerifiers()).find((v) => v.name === backend.id);
+     if (verifier === undefined) {
+         throw new Error('Could not find verifier');
+     }
+
+     const remainingBackends = [...backend.backends];
+
+     const sourceResponse = await fetch(removeRandom(remainingBackends) + '/source', {
+         method: 'POST',
+         body: fd,
+     });
+
+     if (sourceResponse.status !== 200) {
+         throw new Error('Could not compile on backend:\n' + (await sourceResponse.json()));
+     }
+
+     const sourceResult = await sourceResponse.json();
+
+     if (sourceResult.compileResult.result !== 'similar') {
+         throw new Error(sourceResult.compileResult.error);
+     }
+
+     let msgCell = sourceResult.msgCell;
+     let acquiredSigs = 1;
+
+     while (acquiredSigs < verifier.quorum) {
+         const curBackend = removeRandom(remainingBackends);
+         ui.write(`Using backend: ${curBackend}`);
+         const signResponse = await fetch(curBackend + '/sign', {
+             method: 'POST',
+             body: JSON.stringify({
+                 messageCell: msgCell,
+             }),
+             headers: { 'Content-Type': 'application/json' },
+         });
+
+         if (signResponse.status !== 200) {
+             throw new Error('Could not sign on backend:\n' + (await signResponse.text()));
+         }
+
+         const signResult = await signResponse.json();
+
+         msgCell = signResult.msgCell;
+         acquiredSigs++;
+     }
+
+     const c = Cell.fromBoc(Buffer.from(msgCell.data))[0];
+
+     await networkProvider.sender().send({
+         to: verifierRegistry.address,
+         value: toNano('0.5'),
+         body: c,
+     });
+
+     ui.write(`Contract successfully verified at https://verifier.ton.org/${addr}`);
+ };
+

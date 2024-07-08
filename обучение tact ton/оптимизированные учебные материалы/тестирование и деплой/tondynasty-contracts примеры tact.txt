@@ -1,0 +1,2864 @@
+contracts
+jetton_example.tact
+import "@stdlib/deploy";
+import "./packages/token/jetton/JettonMaster";
+import "./packages/token/jetton/JettonWallet";
+
+contract ExampleJettonWallet with JettonWallet {
+    balance: Int as coins = 0;
+    owner: Address;
+    jetton_master: Address;
+
+    init(owner: Address, jetton_master: Address) {
+        self.owner = owner;
+        self.jetton_master = jetton_master;
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit {
+        return initOf ExampleJettonWallet(owner_address, self.jetton_master);
+    }
+}
+
+contract ExampleJettonMaster with JettonMaster, Deployable {
+    total_supply: Int as coins = 0;
+    mintable: Bool = true;
+    owner: Address;
+    jetton_content: Cell;
+
+    init(owner: Address, jetton_content: Cell){
+        self.owner = owner;
+        self.jetton_content = jetton_content;
+    }
+
+    receive("Mint:1") {
+        let ctx: Context = context();
+        let msg: JettonMint = JettonMint{
+            origin: ctx.sender,
+            receiver: ctx.sender,
+            amount: ton("1"),
+            custom_payload: emptyCell(),
+            forward_ton_amount: 0,
+            forward_payload: emptySlice()
+        };
+        self._mint_validate(ctx, msg);
+        self._mint(ctx, msg);
+    }
+
+    override inline fun _mint_validate(ctx: Context, msg: JettonMint) {
+        require(self.mintable, "JettonMaster: Jetton is not mintable");
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit {
+        return initOf ExampleJettonWallet(owner_address, myAddress());
+    }
+}
+
+math_example.tact
+import "./packages/math/float.fc";
+import "@stdlib/deploy";
+
+@name(toFloat)
+extends native toFloat(self: Int): Int;
+
+@name(safeAdd)
+extends native safeAdd(self: Int, b: Int): Int;
+
+@name(safeSub)
+extends native safeSub(self: Int, b: Int): Int;
+
+@name(safeMul)
+extends native safeMul(self: Int, b: Int): Int;
+
+@name(safeDiv)
+extends native safeDiv(self: Int, b: Int): Int;
+
+@name(add)
+extends native add(self: Int, b: Int): Int;
+
+@name(sub)
+extends native sub(self: Int, b: Int): Int;
+
+@name(mul)
+extends native mul(self: Int, b: Int): Int;
+
+@name(div)
+extends native div(self: Int, b: Int): Int;
+
+@name(sqrtFloat)
+extends native sqrtFloat(self: Int): Int;
+
+message Arithmetic {
+    floatA: Int;
+    floatB: Int;
+    op: Int; // 0: add, 1: sub, 2: mul, 3: div
+}
+
+contract MathExample with Deployable {
+    x: Int = 2;
+    y: Int = 7;
+    result: Int = 0;
+    init(){}
+
+    receive(msg: Arithmetic){
+        if (msg.op == 0) {
+            self.result = msg.floatA.safeAdd(msg.floatB);
+            return ;
+        }
+        if (msg.op == 1) {
+            self.result = msg.floatA.safeSub(msg.floatB);
+            return ;
+        }
+        if (msg.op == 2) {
+            self.result = msg.floatA.safeMul(msg.floatB);
+            return ;
+        }
+        if (msg.op == 3) {
+            self.result = msg.floatA.safeDiv(msg.floatB);
+            return ;
+        }
+        if (msg.op == 4) {
+            self.result = msg.floatA.sqrtFloat();
+            return ;
+        }
+    }
+
+    get fun float(value: Int): Int {
+        return value.toFloat();
+    }
+
+    get fun safeAdd(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.safeAdd(b);
+    }
+
+    get fun safeSub(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.safeSub(b);
+    }
+
+    get fun safeMul(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.safeMul(b);
+    }
+
+    get fun safeDiv(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.safeDiv(b);
+    }
+
+    get fun Add(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.add(b);
+    }
+
+    get fun Sub(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.sub(b);
+    }
+
+    get fun Mul(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.mul(b);
+    }
+
+    get fun Div(): Int {
+        let a: Int = self.x.toFloat();
+        let b: Int = self.y.toFloat();
+        return a.div(b);
+    }
+
+    get fun DivisionByZero(): Int {
+        // expected to throw error code 4
+        let a: Int = self.x.toFloat();
+        let b: Int = 0;
+        return a.div(b);
+    }
+
+    get fun Result(): Int {
+        return self.result;
+    }
+}
+
+contracts/nft_auction_example.tact
+import "@stdlib/deploy";
+import "./packages/token/nft/NFTAuctionMarket";
+import "./packages/token/nft/NFTAuction";
+contract ExampleNFTAuctionMarket with Deployable, NFTAuctionMarketStandard {
+    owner: Address;
+    // Get auction info by seller address and nft address.
+    nftContractAuctions: map<Int, AuctionInfo>; // key => hash(sellerAddress and nftAddress), value => AuctionInfo
+    // Check whether nft is transfered to NFT Auction Market Contract
+    auctionTransferCheck: map<Int, Int>; // key => hash(sellerAddress and nftAddress), vlaue => 1: set, 0: not set
+    // Get auction info by nft collection address and nft id.
+    collectionNftIdToAuction: map<Int, Int>; // key => hash(nft collection address and nft id), value => hash(sellerAddress and nftAddress)
+    // Check whether nft auction is over or not
+    auctionOverCheck: map<Address, Address>;  // key => nft auction contract address, value => 1: not over, 0: over
+    init(owner: Address) {
+        self.owner = owner;
+    }
+
+    // @dev Retrieves the initial state for the NFT auction contract.
+    override get fun _nft_auction_init(nftAddress: Address, seller: Address): StateInit {
+        return initOf ExampleNFTAuction(myAddress(), nftAddress, seller);
+    }
+}
+
+contract ExampleNFTAuction with NFTAuctionStandard {
+    owner: Address;
+    nftAddress: Address;
+    seller: Address;
+    auctionInfo: AuctionInfo;
+    auctionBidPeriod: Int;
+    isInitialized: Int;
+    auctionEndTime: Int;
+
+    init(owner: Address, nftAddress: Address, seller: Address) {
+        self.owner = owner;
+        self.nftAddress = nftAddress;
+        self.seller = seller;
+        //self.auctionInfo = auctionInfo;
+        self.auctionBidPeriod = 0;
+        self.auctionEndTime = 0;
+        self.isInitialized = 0;
+        self.auctionInfo = AuctionInfo {
+            bidIncreasePercentage: 0,
+            auctionBidPeriod: 0,
+            auctionPeriod: 0,
+            reservePrice: 0,
+            buyNowPrice: 0,
+            nftHighestBid: 0,
+            nftHighestBidder: newAddress(0, 0),
+            nftSeller: seller,
+            whitelistedBuyer: seller,
+            nftRecipient: seller,
+            beneficiary: seller
+        };
+    }
+}
+
+contracts/nft_enforce_royalty_example.tact
+import "@stdlib/deploy";
+import "@stdlib/ownable";
+import "./packages/token/nft/NFTCollection";
+import "./packages/token/nft/extensions/NFTRoyalty";
+import "./packages/token/nft/NFTItem";
+import "./packages/token/jetton/JettonMaster";
+import "./packages/token/jetton/JettonWallet";
+import "./packages/utils/Estimatable";
+import "./packages/utils/Lockable";
+import "./packages/token/nft/NFTAuction";
+import "./packages/token/nft/NFTAuctionMarket";
+
+/*
+This code implements the POC (Proof of Concept) version of our proposed Hybrid NFT Enforced Royalty standard.
+This standard is compatible with the existing TEP-0062, TEP-0064, TEP-0066, and TEP-0074.
+These contracts has been validated through unit testing.
+
+We proposed a solution to the problem of NFT royalty enforcement, tackling the problem by
+introducing a new concept of fractionalization as royalty.
+
+Before delving into the code, we kindly invite you to acquaint yourself with our perspectives by reading our blog post:
+https://ton-dynasty.github.io/docs.contracts/blog/nft-enforced-royalty
+
+The code consists of 6 contracts:
+1. FNFTCollection: The collection contract of the NFT item
+2. FNFTItem: The NFT item contract
+3. NFTFraction: The contract that manages the fractionalization of NFT items
+4. NFTFractionWallet: The wallet contract of NFTFraction
+5. QuotaShop: The contract that manages the quota of NFTFraction
+6. NFTItemAuction: The contract that manages the auction of NFT items
+*/
+
+@name(udict_set_ref)
+native udict_set_ref(dict: Cell?, key_len: Int, index: Int, value: Cell): Cell?;
+
+const DEFAULT_RESERVE_PRICE: Int = ton("0.01");
+const DEFAULT_DEPLOY_FEE: Int = ton("0.2");
+
+message FractionParams {
+    author: Address;
+    reserve_price: Int as coins;
+    max_supply: Int as coins;
+    jetton_content: Cell;
+}
+
+message(0xbaa13f5f) Redeem {
+    sender: Address;
+    amount: Int as coins;
+}
+
+message(0xbac2f9a4) Compose {
+    new_owner: Address;
+}
+
+message(0x2e5cd8d7) IssueQuota {
+    amount: Int as uint32;
+    price: Int as coins;
+}
+
+message(0x56f76a58) BuyQuota {
+    amount: Int as uint32;
+}
+
+message(0x3b0da424) IncreaseQuota {
+    amount: Int as uint32;
+    sender: Address;
+}
+
+message(0x286cc02a) WithdrawQuotaShop{
+    amount: Int as coins;
+    custom_payload: Cell;
+}
+
+message(0x4056ceb8) TransferAuctionPayload {
+    seller: Address;
+}
+
+message Trade {
+    reserve_price: Int as coins;
+    buynow_price: Int as coins;
+    auction_period: Int as uint256;
+    beneficiary: Address?;
+}
+
+message BuyAllToken {
+    origin: Address;
+    reserve_price: Int as coins;
+}
+
+message FractionTrade {
+    buy_out: Int as coins;
+    bidder: Address;
+}
+
+message BuildQuotaShop {
+    sender: Address;
+}
+
+message BuyAll {
+    reserve_price: Int as coins;
+}
+
+contract NFTFractionWallet with JettonWallet {
+    balance: Int as coins = ton("0");
+    owner: Address;
+    jetton_master: Address;
+
+    init(owner: Address, jetton_master: Address) {
+        self.owner = owner;
+        self.jetton_master = jetton_master;
+    }
+
+    receive(msg: BuyAll) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "JettonWallet: Only owner can Set up auction");
+        send(SendParameters{
+            to: self.jetton_master,
+            value: 0,
+            bounce: true,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: BuyAllToken{
+                origin: ctx.sender,
+                reserve_price: msg.reserve_price //ton("0.1")
+            }.toCell()
+        });
+    }
+
+    // @dev  Withdraw all funds from NFTFraction (jettonMaster) and destroy the wallet
+    receive("Withdraw") {
+        let ctx: Context = context();
+        let old_balance: Int = self.balance;
+        require(ctx.sender == self.owner, "JettonWallet: Only Owner can burn tokens");
+        require(ctx.value > ctx.readForwardFee(), "JettonWallet: Not enough money to withdraw");
+        if (old_balance > 0) {
+            self.balance = 0;
+            send(SendParameters{
+                to: self.jetton_master,
+                value: 0,
+                mode: SendRemainingValue + SendIgnoreErrors,
+                bounce: false,
+                body: JettonBurnNotification{
+                    query_id: 0,
+                    amount: old_balance,
+                    sender: ctx.sender,
+                    response_destination: self.owner
+                }.toCell()
+            });
+        }
+    }
+
+    // @dev  Redeem NFT Item by burning all tokens (Bounceable)
+    receive("Redeem") {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "JettonWallet: Only owner can redeem NFT Item");
+        let old_balance: Int = self.balance;
+        self.balance = 0;
+        send(SendParameters{
+            to: self.jetton_master,
+            value: 0,
+            bounce: true,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: Redeem {
+                sender: ctx.sender,
+                amount: old_balance
+            }.toCell()
+        });
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_addr: Address): StateInit {
+        return initOf NFTFractionWallet(owner_addr, self.jetton_master);
+    }
+
+    get fun debug_get_balance(): Int {
+        return self.balance;
+    }
+}
+
+contract NFTFraction with JettonMaster, Estimatable, Deployable, Lockable {
+    mintable: Bool = true;          // This contract is always mintable
+    total_supply: Int as coins = 0; // Total supply of the NFT item
+    owner: Address;                 // NFT Item address
+    jetton_content: Cell;
+    reserve_price: Int as coins;    // Reserve price of the NFT item
+    max_supply: Int as coins;       // Max supply of the NFT item
+    is_locked: Bool = false;        // Whether the jetton contract is locked (triggered by EndFractionAuction)
+    ton_balance: Int as coins = 0;  // Ton balance of the contract
+
+    nullifier: Int as uint32;       // A nullifier to increase in NFTItem when the token is de-fractionalized
+
+    init(reserve_price: Int, max_supply: Int, owner: Address, jetton_content: Cell, nullifier: Int) {
+        self.reserve_price = reserve_price;
+        self.max_supply = max_supply;
+        self.owner = owner;
+        self.jetton_content = jetton_content;
+        self.nullifier = nullifier;
+    }
+
+    // @dev  When mint is bounced, the total supply should be decreased
+    bounced(src: bounced<JettonInternalTransfer>) {
+        self.total_supply = self.total_supply - src.amount;
+    }
+
+    receive(msg: BuyAllToken) {
+        let ctx: Context = context();
+        let nftFractionWalletInit: StateInit = self.calculate_jetton_wallet_init(msg.origin);
+        require(ctx.sender == contractAddress(nftFractionWalletInit), "NFTFraction: Only the NFT Fraction wallet contract trigger buy all tokens");
+        require(msg.reserve_price >= self.reserve_price, "NFTFraction: Reserve price is not enough");
+        let remain: Int = self.estimate_rest_value(ctx);
+        let total_price: Int = msg.reserve_price * self.max_supply / 1000000000;
+        require(remain > total_price, "NFTFraction: Not enough money");
+        send(SendParameters{
+            to: self.owner,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue,
+            body: FractionTrade {
+                buy_out: total_price,
+                bidder: msg.origin
+            }.toCell()
+        });
+    }
+
+    receive(msg: Redeem) {
+        self.ensureUnlocked();
+        let ctx: Context = context();
+        let nftFractionWalletInit: StateInit = self.calculate_jetton_wallet_init(msg.sender);
+        require(ctx.sender == contractAddress(nftFractionWalletInit), "NFTFraction: Only the NFT Fraction wallet contract trigger redeem");
+        require(msg.amount == self.total_supply, "NFTFraction: Amount is not equal to total supply");
+        send(SendParameters{
+            to: self.owner,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingBalance + SendDestroyIfZero,
+            body: Compose {
+                new_owner: msg.sender
+            }.toCell()
+        });
+    }
+
+    receive("EndFractionAuction") {
+        let ctx: Context = context();
+        self.ensureUnlocked();
+        require(ctx.sender == self.owner, "NFTFraction: Only the NFT Item can send end fraction auction");
+        self.lock();
+        self.ton_balance = ctx.value;
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit {
+        return initOf NFTFractionWallet(owner_address, myAddress());
+    }
+
+    override inline fun _burn_notification_validate(ctx: Context, msg: JettonBurnNotification) {
+        self.ensureLocked();
+        require(msg.amount > 0, "NFTFraction: Amount is 0");
+        let initCode: StateInit = self.calculate_jetton_wallet_init(msg.sender);
+        require(ctx.sender == contractAddress(initCode), "Sender is not a Jetton wallet");
+    }
+
+    // @dev  When receiving a burn notification, then transfer the rest value to the sender by the sender's share
+    override inline fun _burn_notification(ctx: Context, msg: JettonBurnNotification) {
+        let ton_amount: Int = self.ton_balance * msg.amount / self.total_supply;
+        if(msg.response_destination != newAddress(0, 0)){
+            send(SendParameters{
+                to: msg.response_destination,
+                value: ton_amount,
+                bounce: false,
+                mode: SendRemainingValue
+            });
+        }
+    }
+
+    override inline fun _mint_validate(ctx: Context, msg: JettonMint) {
+        self.ensureUnlocked();
+        require(ctx.sender == self.owner, "JettonMaster: Sender is not a NFT Item contract");
+        require(self.mintable, "JettonMaster: Jetton is not mintable");
+        require(self.total_supply + msg.amount <= self.max_supply, "JettonMaster: Exceeds max supply");
+    }
+
+    override inline fun _mint(ctx: Context, msg: JettonMint) {
+        // Parse royalty param from forward_payload slice in JettonMint
+        require(msg.custom_payload != null, "JettonMaster: Custom payload is null");
+        // Try to parse custom_payload as royalty_param(Slice)
+        let payload: Cell = msg.custom_payload!!;
+        let slice: Slice = payload.asSlice();
+        let numerator: Int = slice.loadUint(16);
+        let denominator: Int = slice.loadUint(16);
+        let destination: Address = slice.loadAddress();
+
+        let receiverInit: StateInit = self.calculate_jetton_wallet_init(msg.receiver);
+        let authorInit: StateInit = self.calculate_jetton_wallet_init(destination);
+        self.total_supply = self.total_supply + msg.amount;
+        let rest_value: Int = self.estimate_rest_value(ctx);
+        rest_value = rest_value - ctx.readForwardFee() - msg.forward_ton_amount * 2;
+        let royalty_fraction: Int = msg.amount * numerator / denominator;
+        let remain_fraction: Int = msg.amount - royalty_fraction;
+
+        // To author's jetton wallet
+        send(SendParameters{
+            to: contractAddress(authorInit),
+            value: msg.forward_ton_amount,
+            bounce: false,
+            mode: SendIgnoreErrors,
+            body: JettonInternalTransfer{
+                query_id: 0,
+                amount: royalty_fraction,
+                response_address: msg.origin,
+                from: myAddress(),
+                forward_ton_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell(),
+            code: authorInit.code,
+            data: authorInit.data
+        });
+        // To receiver's jetton wallet
+        send(SendParameters{
+            to: contractAddress(receiverInit),
+            value: msg.forward_ton_amount,
+            bounce: false,
+            mode: SendIgnoreErrors,
+            body: JettonInternalTransfer{
+                query_id: 0,
+                amount: remain_fraction,
+                response_address: msg.origin,
+                from: myAddress(),
+                forward_ton_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell(),
+            code: receiverInit.code,
+            data: receiverInit.data
+        });
+        // To return remaining value to msg.origin
+        send(SendParameters{
+            to: msg.origin,
+            value: rest_value,
+            bounce: false,
+            mode: SendIgnoreErrors
+        });
+
+    }
+
+}
+
+contract QuotaShop with Deployable, Estimatable {
+    override const minTonsForStorage: Int = ton("0.04");
+
+    quota_amount: Int as uint32 = 0;
+    quota_price: Int as coins = 0;
+    author: Address;
+    balance: Int as coins = 0;
+    nft_item: Address;
+    init (author: Address, nft_item: Address){
+        self.author = author;
+        self.nft_item = nft_item;
+    }
+
+    receive (msg: IssueQuota){
+        let ctx: Context = context();
+        require(ctx.sender == self.author, "QuotaShop: Only author can issue quota");
+        require(self.quota_amount == 0, "QuotaShop: Quota is already issued");
+        self.quota_amount = msg.amount;
+        self.quota_price = msg.price;
+    }
+
+    receive (msg: BuyQuota){
+        let ctx: Context = context();
+        require(self.quota_amount > 0, "QuotaShop: Quota is not issued");
+        require(self.quota_amount >= msg.amount, "QuotaShop: Not enough quota");
+        self.quota_amount = self.quota_amount - msg.amount;
+        self.balance = self.balance + self.quota_price * msg.amount;
+        let remain: Int = self.estimate_rest_value(ctx) - (self.quota_price * msg.amount);
+        send(SendParameters{
+            to: self.nft_item,
+            value: remain,
+            bounce: false,
+            mode: SendPayGasSeparately + SendIgnoreErrors,
+            body: IncreaseQuota{
+                amount: msg.amount,
+                sender: ctx.sender
+            }.toCell()
+        });
+    }
+
+    receive ("Withdraw"){
+        let ctx: Context = context();
+        require(ctx.sender == self.author, "QuotaShop: Only author can withdraw");
+        send(SendParameters{
+            to: self.author,
+            value: self.balance,
+            bounce: true,
+            mode: SendRemainingValue,
+            body: WithdrawQuotaShop{
+                amount: self.balance,
+                custom_payload: emptyCell()
+            }.toCell()
+        });
+        self.balance = 0;
+    }
+
+    receive(msg: BuildQuotaShop){
+        let ctx: Context = context();
+        if (ctx.value > 0) {
+            send(SendParameters{
+                to: msg.sender,
+                value: 0,
+                bounce: false,
+                mode: SendRemainingValue + SendIgnoreErrors
+            });
+        }
+    }
+
+    bounced (src: bounced<WithdrawQuotaShop>){
+        self.balance = self.balance + src.amount;
+    }
+
+    get fun debug_get_quota_price(): Int {
+        return self.quota_price;
+    }
+
+    get fun debug_get_quota_amount(): Int {
+        return self.quota_amount;
+    }
+
+    get fun debug_get_balance(): Int {
+        return self.balance;
+    }
+}
+
+contract FNFTCollection with NFTCollectionStandard, NFTRoyaltyStandard, Estimatable, Deployable {
+    next_item_index: Int as uint32 = 0; // if next_item_index is not -1, means sequential minting is enabled. We want a sequential minting in this example so we set it to uint32.
+    collection_content: Cell;           // collection_content may be the prefix of individual_content
+    owner_address: Address;             // owner_address is the address of the owner of the collection
+    royalty_params: RoyaltyParams;      // royalty_params is the params of royalty
+    author: Address;                    // author is the address of the author of the collection
+
+    init(owner_address: Address, collection_content: Cell, royalty_params: RoyaltyParams, author: Address) {
+        self.owner_address = owner_address;
+        self.collection_content = collection_content;
+        self.royalty_params = royalty_params;
+        self.author = author;
+    }
+
+    // @dev Mint is not the standard function of NFTCollection, so we need to define it by ourselves
+    receive("Mint") {
+        let ctx: Context = context();
+        let nftItemInit: StateInit = self._get_nft_item_state_init(self.next_item_index);
+        let remain: Int = self.estimate_rest_value(ctx) - DEFAULT_DEPLOY_FEE * 2;
+        let quotashopInit: StateInit = self.get_quotashop_init(self.next_item_index);
+        self.next_item_index = self.next_item_index + 1;
+        send(SendParameters{
+                to: contractAddress(nftItemInit),
+                value: DEFAULT_DEPLOY_FEE,
+                bounce: false,
+                mode: SendPayGasSeparately,
+                body: Transfer {
+                    query_id: 0,
+                    new_owner: ctx.sender,
+                    response_destination: ctx.sender,
+                    custom_payload: emptyCell(),
+                    forward_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell(),
+                code: nftItemInit.code,
+                data: nftItemInit.data
+            });
+        send(SendParameters{
+            to: contractAddress(quotashopInit),
+            value: remain,
+            bounce: false,
+            mode: SendIgnoreErrors,
+            body: BuildQuotaShop {
+                sender: ctx.sender
+            }.toCell(),
+            code: quotashopInit.code,
+            data: quotashopInit.data
+        });
+    }
+
+    inline fun get_quotashop_init(index: Int): StateInit {
+        return initOf QuotaShop(self.author, contractAddress(self._get_nft_item_state_init(index)));
+    }
+
+    inline fun get_fraction_param(index: Int): FractionParams {
+        let content_cell: Cell? = null;
+        let value1: Builder = beginCell();
+        let value1Str: StringBuilder = beginStringFromBuilder(value1);
+        value1Str.append("F-TonDynasty #");
+        value1Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("name"), value1Str.toCell());
+
+
+        let value2: Builder = beginCell();
+        let value2Str: StringBuilder = beginStringFromBuilder(value2);
+        value2Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("description"), value2Str.toCell());
+
+        let value3: Builder = beginCell();
+        let value3Str: StringBuilder = beginStringFromBuilder(value3);
+        value3Str.append("F-TDT #");
+        value3Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("symbol"), value3Str.toCell());
+
+        let jetton_content: Builder = beginCell().storeInt(0x00, 8).storeUint(1, 1).storeRef(content_cell!!);
+
+        return FractionParams {
+            author: self.author,
+            reserve_price: DEFAULT_RESERVE_PRICE,
+            max_supply: ton("100"),
+            jetton_content: jetton_content.endCell()
+        };
+    }
+
+    // @dev _get_nft_item_state_init returns the initCode of NFTItem
+    override inline fun _get_nft_item_state_init(index: Int): StateInit {
+        return initOf FNFTItem(myAddress(), index, self.owner_address, self.collection_content, self.royalty_params, self.get_fraction_param(index));
+    }
+
+    get fun debug_fraction_param(index: Int): FractionParams {
+        return self.get_fraction_param(index);
+    }
+
+    get fun debug_get_quotashop_address_by_index(index: Int): Address {
+        return contractAddress(self.get_quotashop_init(index));
+    }
+}
+
+contract FNFTItem with NFTItemStandard, Lockable, Ownable {
+    override const gasConsumption: Int = ton("0.03");
+    override const minTonsForStorage: Int = ton("0.04");
+    // @dev Default parameters for setting up an NFT auction
+    const defaultBidIncreasePercentage: Int = 100;
+    const defaultAuctionBidPeriod: Int = 86400; // 1 day
+    const minimumSettableIncreasePercentage: Int = 100;
+    const maximumMinPricePercentage: Int = 8000;
+    const auction_period: Int = 86400 * 14; // 14 day
+
+    collection_address: Address;
+    index: Int;
+    owner: Address;
+    individual_content: Cell;
+    is_initialized: Bool = false;
+    is_locked: Bool = false;
+    quota: Int as uint32 = 0;
+    fraction_params: FractionParams;
+    royalty_params: RoyaltyParams;
+
+    nullifier: Int as uint32 = 0;
+
+    init(collection_address: Address, index: Int, owner: Address, individual_content: Cell, royalty_params: RoyaltyParams, fraction_params: FractionParams) {
+        self.collection_address = collection_address;
+        self.index = index;
+        self.owner = owner;
+        self.individual_content = individual_content;
+        self.royalty_params = royalty_params;
+        self.fraction_params = fraction_params;
+    }
+
+    receive(msg: IncreaseQuota) {
+        let ctx: Context = context();
+        require(ctx.sender == contractAddress(self.get_quotashop_init()), "FNFTItem: Only the QuotaShop contract can increase the quota");
+        self.quota = self.quota + msg.amount;
+        send(SendParameters{
+            to: msg.sender,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors
+        });
+    }
+
+    receive(msg: Compose) {
+        self.ensureLocked();
+        let ctx: Context = context();
+        let nftFractionInit: StateInit = self.get_jetton_master_init();
+        require(ctx.sender == contractAddress(nftFractionInit), "FNFTItem: Only the NFT Fraction contract can compose the NFT item");
+        self.owner = msg.new_owner;
+        self.nullifier = self.nullifier + 1;
+        self.unlock();
+        send(SendParameters{
+            to: msg.new_owner,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: "Success".asComment()
+        });
+    }
+
+    receive(msg: Trade) {
+        let ctx: Context = context();
+        self.requireOwner();
+        self.ensureUnlocked();
+        self._buyNowPrice_validate(msg.buynow_price);
+        let nftAuctionAddress: Address = self.get_nft_auction_address();
+        let auctionInfo: AuctionInfo = self._fill_up_auction_info(self.owner, msg.reserve_price, msg.buynow_price, msg.auction_period, msg.beneficiary);
+        let nftAuctionInit: StateInit = self.get_nft_auction_init();
+        self._build_auction(nftAuctionAddress, auctionInfo, nftAuctionInit);
+    }
+
+    receive(msg: FractionTrade) {
+        let ctx: Context = context();
+        let jettonMasterInit: StateInit = self.get_jetton_master_init();
+        require(contractAddress(jettonMasterInit) == ctx.sender, "FNFTItem: Only the Jetton Master contract can trade the NFT item fraction");
+        self.ensureLocked();
+        let beneficiary: Address = myAddress(); // Jetton Master
+        let nftAuctionAddress: Address = self.get_nft_auction_address();
+        let auctionInfo: AuctionInfo = self._fill_up_auction_info(msg.bidder, msg.buy_out, 0, self.auction_period, beneficiary);
+        let nftAuctionInit: StateInit = self.get_nft_auction_init();
+        self._build_auction(nftAuctionAddress, auctionInfo, nftAuctionInit);
+    }
+
+    receive("EndFractionAuction") {
+        let cxt: Context = context();
+        let jettonMasterInit: StateInit = self.get_jetton_master_init();
+        require(cxt.sender == self.get_nft_auction_address(), "FNFTItem: Only the NFT Auction contract can end the fraction auction");
+        send(SendParameters{
+            to: contractAddress(jettonMasterInit),
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: "EndFractionAuction".asComment()
+        });
+
+    }
+
+    inline fun _fill_up_auction_info(sellerAddress: Address, reservePrice: Int, buyNowPrice: Int, auctionPeriod: Int, beneficiary: Address?): AuctionInfo {
+        if(beneficiary == null) {
+            beneficiary = sellerAddress;
+        }
+        return AuctionInfo {
+            bidIncreasePercentage: self.defaultBidIncreasePercentage,
+            auctionBidPeriod: self.defaultAuctionBidPeriod,
+            auctionPeriod: auctionPeriod,
+            reservePrice: reservePrice,
+            buyNowPrice: buyNowPrice,
+            nftHighestBid: 0,
+            nftHighestBidder: sellerAddress,
+            nftSeller: sellerAddress,
+            whitelistedBuyer: sellerAddress,
+            nftRecipient: sellerAddress,
+            beneficiary: beneficiary!!
+        };
+    }
+
+    inline fun _build_auction(nftAuctionAddress: Address, auctionInfo: AuctionInfo, nftAuctionInit: StateInit) {
+        send(SendParameters{
+            to: nftAuctionAddress,
+            value: 0,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            bounce: false,
+            body: BuildNftAuction {
+                auctionInfo: auctionInfo
+            }.toCell(),
+            code: nftAuctionInit.code,
+            data: nftAuctionInit.data
+        });
+    }
+
+    inline fun _buyNowPrice_validate(buyNowPrice: Int) {
+        require(buyNowPrice != 0, "NFTItemStandard: Buy now price cannot be 0");
+    }
+
+    inline fun get_quotashop_init(): StateInit {
+        return initOf QuotaShop(self.fraction_params.author, myAddress());
+    }
+
+    inline fun get_jetton_master_init(): StateInit {
+        return initOf NFTFraction(DEFAULT_RESERVE_PRICE, self.fraction_params.max_supply, myAddress(), self.fraction_params.jetton_content, self.nullifier);
+    }
+
+    inline fun get_nft_auction_init(): StateInit {
+        return initOf NFTItemAuction(myAddress(), self.owner);
+    }
+
+    inline fun get_nft_auction_address(): Address {
+        return contractAddress(self.get_nft_auction_init());
+    }
+
+    inline fun fractionalize_validate(ctx: Context, msg: Transfer) {
+        self.ensureUnlocked();
+    }
+
+    inline fun fractionalize(ctx: Context, msg: Transfer) {
+        self.lock();
+        self.owner = newAddress(0, 0);
+        let nftFractionInit: StateInit = self.get_jetton_master_init();
+        let custom_payload: Cell = beginCell().storeUint(self.royalty_params.numerator, 16).storeUint(self.royalty_params.denominator, 16).storeAddress(self.royalty_params.destination).endCell();
+        send(SendParameters{
+            to: contractAddress(nftFractionInit),
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: JettonMint {
+                origin: ctx.sender,
+                receiver: msg.new_owner,
+                amount: self.fraction_params.max_supply,
+                custom_payload: custom_payload,
+                forward_ton_amount: DEFAULT_DEPLOY_FEE,
+                forward_payload: emptySlice()
+            }.toCell(),
+            code: nftFractionInit.code,
+            data: nftFractionInit.data
+        });
+    }
+
+    override inline fun _transfer_validate(ctx: Context, msg: Transfer, remain: Int) {
+        if(ctx.sender != self.get_nft_auction_address())
+        {
+            self.ensureUnlocked();
+        }
+        require(ctx.sender == self.owner || ctx.sender == self.collection_address || ctx.sender == self.get_nft_auction_address(), "FNFTItem: Only the owner or collection can transfer the NFT item");
+    }
+
+    override inline fun mint(ctx: Context, msg: Transfer) {
+        require(ctx.sender == self.collection_address, "NFTItemStandard: Only the collection can initialize the NFT item");
+        self.is_initialized = true;
+        self.owner = msg.new_owner;
+        send(SendParameters{
+            to: msg.response_destination,
+            value: 0,
+            mode:  SendIgnoreErrors + SendRemainingValue,
+            body: Excesses { query_id: msg.query_id }.toCell()
+        });
+    }
+    inline fun isAuctionAddress(ctx: Context): Bool {
+        return ctx.sender == self.get_nft_auction_address();
+    }
+    inline fun isWhitelisted(ctx: Context): Bool {
+        return ctx.sender == self.fraction_params.author || ctx.sender == self.collection_address  || self.isAuctionAddress(ctx);
+    }
+    inline fun _end_auction_transfer(ctx: Context, msg: Transfer, remain: Int) {
+        let royalty_reward: Int = remain * self.royalty_params.numerator / self.royalty_params.denominator;
+        send(SendParameters{
+            to: self.royalty_params.destination,
+            value: royalty_reward,
+            mode: SendIgnoreErrors
+        });
+        self.unlock();
+        send(SendParameters{
+            to: msg.response_destination,
+            value: remain - royalty_reward - ctx.readForwardFee(),
+            mode: SendIgnoreErrors,
+            body: "EndFractionAuction".asComment()
+        });
+    }
+    // @dev  transfer transfer nft with royalty enforcement
+    // @note - If whitelisted or self.quota > 0 do not enforce royalty:
+    //          WhiteListed:
+    //              1. the sender is from author wallet address
+    //              2. the sender is NFT collection contract
+    //              3. the sender Fraction auction contract
+    //          Logic:
+    //              if not whitelisted:
+    //                  a. dwindles the quota by 1 (self.transfer)
+    //              send OwnershipAssigned to msg.new_owner  (if sender is Fraction auction contract, send OwnershipAssigned to auction winner)
+    //              send Excesses to msg.response_destination (if sender is Fraction auction contract, send Excesses to Jetton master)
+    //
+    //       - If un-whilitsted and self.quota == 0, the nft will be fractionalized (send JettonMint to NFTFraction contract):
+    //              a. a part of nft fraction (jetton) will be minted to the receiver
+    //              b. the remain part of nft fraction (jetton) will be minted to the author
+    override inline fun transfer(ctx: Context, msg: Transfer, remain: Int) {
+        let isWhitelisted: Bool = self.isWhitelisted(ctx);
+        let isAuctionAddress: Bool = self.isAuctionAddress(ctx);
+        if (isWhitelisted || self.quota > 0) { // Will not enforce royalty
+            if (!isWhitelisted) {
+                self.quota = self.quota - 1;
+            }
+            self.owner = msg.new_owner;
+            if (msg.forward_amount > 0) {
+                send(SendParameters{
+                    to: msg.new_owner,
+                    value: msg.forward_amount,
+                    mode: SendIgnoreErrors,
+                    bounce: false,
+                    body: OwnershipAssigned{
+                        query_id: msg.query_id,
+                        prev_owner: ctx.sender,
+                        forward_payload: msg.forward_payload
+                    }.toCell()
+                });
+            }
+            remain = remain - ctx.readForwardFee();
+            if (msg.response_destination != newAddress(0, 0) && remain > msg.forward_amount) {
+                if (isAuctionAddress) {
+                    self._end_auction_transfer(ctx, msg, remain);
+                }
+                else {
+                    send(SendParameters{
+                        to: msg.response_destination,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        body: Excesses { query_id: msg.query_id }.toCell()
+                    });
+                }
+            }
+        } else {
+            self.fractionalize_validate(ctx, msg);
+            self.fractionalize(ctx, msg);
+        }
+    }
+
+    get fun debug_nft_auction_address(): Address {
+        return self.get_nft_auction_address();
+    }
+
+    get fun debug_get_quota(): Int {
+        return self.quota;
+    }
+
+    get fun debug_get_jetton_master_address(): Address {
+        return contractAddress(self.get_jetton_master_init());
+    }
+
+    get fun debug_get_owner(): Address {
+        return self.owner;
+    }
+    get fun debug_get_nullifier(): Int {
+        return self.nullifier;
+    }
+
+    get fun debug_get_royalty_destination(): Address {
+        return self.royalty_params.destination;
+    }
+}
+
+contract NFTItemAuction {
+    const minTonsForStorage: Int = ton("0.03");
+    const gasConsumption: Int = ton("0.03");
+    nft_item: Address;
+    seller: Address;
+    auctionInfo: AuctionInfo;
+    auctionBidPeriod: Int;
+    isInitialized: Int;
+    auctionEndTime: Int;
+
+    init(nft_item: Address, seller: Address) {
+        self.nft_item = nft_item;
+        self.seller = seller;
+        self.isInitialized = 0;
+        self.auctionBidPeriod = 0;
+        self.auctionEndTime = 0;
+        self.auctionInfo = AuctionInfo {
+            bidIncreasePercentage: 0,
+            auctionBidPeriod: 0,
+            auctionPeriod: 0,
+            reservePrice: 0,
+            buyNowPrice: 0,
+            nftHighestBid: 0,
+            nftHighestBidder: newAddress(0, 0),
+            nftSeller: seller,
+            whitelistedBuyer: seller,
+            nftRecipient: seller,
+            beneficiary: seller
+        };
+    }
+
+    receive(msg: BuildNftAuction) {
+        let ctx: Context = context();
+        self._owner_validate(ctx);
+        self._initialized_validate();
+        if(msg.auctionInfo.buyNowPrice != 0) {
+            self._set_price_validate(msg.auctionInfo.buyNowPrice, msg.auctionInfo.reservePrice);
+        }
+        else {
+            msg.auctionInfo.nftHighestBid = msg.auctionInfo.reservePrice;
+        }
+        self.auctionInfo = msg.auctionInfo;
+        self.isInitialized = 1;
+        self.auctionBidPeriod = 0;
+        self.auctionEndTime = 0;
+    }
+
+    // @dev Accepts bids for the NFT as long as the auction is active
+    receive("Bid") {
+        // Check if auction is still active.
+        require(now() < self.auctionEndTime || self.auctionEndTime == 0, "Auction ended");
+        require(self.isInitialized == 1, "Contract is not initialized");
+        require(now() < self.auctionBidPeriod | self.auctionBidPeriod ==0, "Auction bid period ended");
+
+        let ctx: Context = context();
+        let buyer: Address = ctx.sender;
+        require(buyer != self.auctionInfo.nftSeller, "NFT Seller cannot bid");
+        let buyNowPrice: Int = self.auctionInfo.buyNowPrice;
+        if(buyNowPrice != 0) {
+            self._trade_bid(ctx, buyNowPrice);
+        }
+        else {
+            self._fraction_bid(ctx);
+        }
+    }
+
+    // @dev Settles the auction, transferring the NFT to the highest bidder and the funds to the seller
+    receive("settleAuction") {
+        require(now() >= self.auctionBidPeriod, "Auction not yet ended");
+        // Pay winning bid amount to seller.
+        self._send_winning_bid_amount();
+
+        // Transfer NFT to buyer
+        let buyer: Address = self.auctionInfo.nftHighestBidder;
+        self._transfer_nft(buyer);
+        self.isInitialized = 0;
+    }
+
+    // @dev Allows owner to adjust auction's reserve or buy-now prices.
+    receive(msg: ReviseAuction) {
+        let ctx: Context = context();
+        self._owner_validate(ctx);
+        require(self.auctionInfo.reservePrice == msg.reviseAuctionInfo.reservePrice || msg.reviseAuctionInfo.buyNowPrice == self.auctionInfo.buyNowPrice, "Cannot update reserve price and buy now price at the same time.");
+
+        // Update the reserve price of the auction.
+        // This can only be done if no bid has been made that already exceeds the original minimum price.
+        if(self.auctionEndTime == 0 && self.auctionInfo.reservePrice != msg.reviseAuctionInfo.reservePrice && msg.reviseAuctionInfo.reservePrice < self.auctionInfo.buyNowPrice) {
+
+            self.auctionInfo.reservePrice = msg.reviseAuctionInfo.reservePrice;
+            if(self.auctionInfo.nftHighestBid > self.auctionInfo.reservePrice) {
+                self._update_auction_bid_period();
+                self._update_auction_end_time();
+            }
+        }
+        // Update the buy now price of the auction.
+        // This can only be done if no bid has been made that already exceeds the original minimum price.
+        if(self.auctionEndTime == 0 && msg.reviseAuctionInfo.buyNowPrice != self.auctionInfo.buyNowPrice && msg.reviseAuctionInfo.buyNowPrice > self.auctionInfo.reservePrice) {
+            self.auctionInfo.buyNowPrice = msg.reviseAuctionInfo.buyNowPrice;
+        }
+    }
+
+    // @dev Ends the auction and transfers the NFT to the highest bidder or back to the seller(If autcion not started)
+    receive("EndAuction") {
+        // If this auction started, it will transfer NFT to highest bidder.
+        // Else, it will transfer NFT to seller.
+        if(self.auctionEndTime > 0) {
+            // Pay winning bid amount to seller.
+            self._send_winning_bid_amount();
+            // Transfer NFT to buyer
+            let buyer: Address = self.auctionInfo.nftHighestBidder;
+            self._transfer_nft(buyer);
+            self.isInitialized = 0;
+        }
+        else {
+            // Transfer NFT to seller
+            let seller: Address = self.auctionInfo.beneficiary;
+            self._transfer_nft(seller);
+            self.isInitialized = 0;
+        }
+    }
+
+    // @dev For complete NFT auction bid.
+    inline fun _trade_bid(ctx: Context, buyNowPrice: Int) {
+        let bidValue: Int = ctx.value;
+        let buyer: Address = ctx.sender;
+        if(bidValue >= buyNowPrice) {
+            self.auctionInfo.nftHighestBid = bidValue;
+            // Pay winning bid amount to seller.
+            self._send_winning_bid_amount();
+            // Transfer NFT to buyer
+            self._transfer_nft(buyer);
+            self.isInitialized = 0;
+            return;
+        }
+        let bidIncreaseAmount: Int = (self.auctionInfo.nftHighestBid * (10000 + self.auctionInfo.bidIncreasePercentage)) / 10000;
+        require(bidValue > bidIncreaseAmount, "Bid doesn't meet the minimum increase requirement");
+        if(self.auctionInfo.nftHighestBid != 0) {
+            self._send_prev_bid_back(ctx.sender, bidValue);
+        }
+        // Update highest bid and Transfer ton back to previous highest bidder.
+        self.auctionInfo.nftHighestBidder = buyer;
+        self.auctionInfo.nftHighestBid = bidValue;
+        // If bid value is greater than reserve price, then the auction is being started.
+        if(bidValue > self.auctionInfo.reservePrice) {
+            self._update_auction();
+        }
+    }
+
+    // @dev For fraction NFT auction bid. No buy now price, only have to compare with reserve price.
+    inline fun _fraction_bid(ctx: Context) {
+        let bidValue: Int = ctx.value;
+        let buyer: Address = ctx.sender;
+        let bidIncreaseAmount: Int = (self.auctionInfo.nftHighestBid * (10000 + self.auctionInfo.bidIncreasePercentage)) / 10000;
+        require(bidValue > bidIncreaseAmount, "FractionBid doesn't larger than the highest bid.");
+        self._send_prev_bid_back(ctx.sender, bidValue);
+        // Update highest bid and Transfer ton back to previous highest bidder.
+        self.auctionInfo.nftHighestBidder = buyer;
+        self.auctionInfo.nftHighestBid = bidValue;
+        // If bid value is greater than reserve price, then the auction is being started.
+        self._update_auction();
+    }
+
+    // @dev Transfer the NFT to the highest bidder
+    // @note If you want change msg value, you should make sure that is enough for NFT Auction market contract to transfer NFT.
+    inline fun _transfer_nft(buyer: Address) {
+        send(SendParameters{
+            to: self.nft_item,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingBalance + SendDestroyIfZero,
+            body: Transfer {
+                query_id: 0,
+                new_owner: buyer,
+                response_destination: buyer,
+                custom_payload: emptyCell(),
+                forward_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell()
+        });
+    }
+
+    // @dev Transfers the highest bid amount to the seller
+    inline fun _send_winning_bid_amount() {
+        let seller: Address = self.auctionInfo.beneficiary;
+        let winningBidAmount: Int = self.auctionInfo.nftHighestBid;
+        send(SendParameters{
+            to: seller,
+            value: winningBidAmount - ton("0.06"),
+            mode: SendPayGasSeparately,
+            body: "EndFractionAuction".asComment(),
+            bounce: false
+        });
+    }
+
+    // @dev Send back previous highest bid to previous highest bidder.
+    inline fun _send_prev_bid_back(bidder: Address, bidValue: Int) {
+        // Send back previous highest bid to previous highest bidder.
+        let prevNftHighestBidder: Address = self.auctionInfo.nftHighestBidder;
+        let prevNftHighestBid: Int = self.auctionInfo.nftHighestBid;
+        let paybackTon: Int = prevNftHighestBid - self.minTonsForStorage;
+        if (paybackTon > 0) {
+            send(SendParameters{
+                to: prevNftHighestBidder,
+                value: paybackTon,
+                mode: SendIgnoreErrors,
+                bounce: false,
+                body: "Pay bid money back to the prevNftHighestBidder".asComment()
+            });
+        }
+    }
+
+    // @dev Update auction bid period and auction end time.
+    inline fun _update_auction() {
+        self._update_auction_bid_period();
+        if(self.auctionEndTime == 0) {
+            // If the auction start, then set the auction end time.
+            self._update_auction_end_time();
+        }
+    }
+
+    inline fun _initialized_validate() {
+        require(self.isInitialized == 0, "Contract is already initialized");
+    }
+
+    inline fun _owner_validate(ctx: Context) {
+        require(ctx.sender == self.nft_item, "NFTItemAuction: Only the NFT Item contract can build the auction");
+    }
+
+    inline fun _set_price_validate(buyNowPrice: Int, reservePrice: Int) {
+        require(buyNowPrice > reservePrice, "BuyNowPrice must be greater than reservePrice.");
+    }
+
+     // @dev Updates the auction bid period time based on the latest bid and the defined auction bid period
+    inline fun _update_auction_bid_period() {
+        self.auctionBidPeriod = now() + self.auctionInfo.auctionBidPeriod;
+    }
+
+    // @dev Updates the auction end time
+    inline fun _update_auction_end_time() {
+        self.auctionEndTime = now() + self.auctionInfo.auctionPeriod;
+    }
+
+    // @dev Initializes the auction end time to 0, allowing the seller to auction the NFT again in the future
+    inline fun _init_auction_end() {
+        let ctx: Context = context();
+        require(ctx.sender == self.nft_item, "Only NFT Item can init auction end time.");
+        self.auctionBidPeriod = 0;
+    }
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    // @dev Returns the current auction information
+    get fun get_auction_info(): AuctionInfo {
+        return self.auctionInfo;
+    }
+
+    // @dev Checks if the auction is initialized and returns the state (1 for initialized, 0 otherwise)
+    get fun get_is_initialized(): Int {
+        return self.isInitialized;
+    }
+
+    // @dev Returns the end time of the auction
+    get fun get_auction_end(): Int {
+        return self.auctionEndTime;
+    }
+
+    // @dev Retruns the auction bid period
+    get fun get_auction_bid_period(): Int {
+        return self.auctionBidPeriod;
+    }
+}
+
+contracts/nft_example.tact
+import "@stdlib/deploy";
+import "./packages/token/nft/NFTCollection";
+import "./packages/token/nft/extensions/NFTRoyalty";
+import "./packages/token/nft/NFTItem";
+import "./packages/utils/Estimatable";
+
+contract ExampleNFTCollection with NFTCollectionStandard, NFTRoyaltyStandard, Estimatable, Deployable {
+    next_item_index: Int as uint32 = 0; // if next_item_index is not -1, means sequential minting is enabled. We want a sequential minting in this example so we set it to uint32.
+    collection_content: Cell;           // collection_content may be the prefix of individual_content
+    owner_address: Address;             // owner_address is the address of the owner of the collection
+    royalty_params: RoyaltyParams;      // royalty_params is the params of royalty
+
+    init(owner_address: Address, collection_content: Cell, royalty_params: RoyaltyParams) {
+        self.owner_address = owner_address;
+        self.collection_content = collection_content;
+        self.royalty_params = royalty_params;
+    }
+
+    // @dev Mint is not the standard function of NFTCollection, so we need to define it by ourselves
+    receive("Mint") {
+        let ctx: Context = context();
+        let nftItemInit: StateInit = self._get_nft_item_state_init(self.next_item_index);
+        send(SendParameters{
+                to: contractAddress(nftItemInit),
+                value: self.estimate_rest_value(ctx),
+                bounce: false,
+                mode: SendIgnoreErrors,
+                body: Transfer {
+                    query_id: 0,
+                    new_owner: ctx.sender,
+                    response_destination: ctx.sender,
+                    custom_payload: emptyCell(),
+                    forward_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell(),
+                code: nftItemInit.code,
+                data: nftItemInit.data
+            });
+        self.next_item_index = self.next_item_index + 1;
+    }
+
+    // @dev _get_nft_item_state_init returns the initCode of NFTItem
+    override inline fun _get_nft_item_state_init(index: Int): StateInit {
+        return initOf ExampleNFTItem(myAddress(), index, self.owner_address, self.collection_content);
+    }
+}
+
+contract ExampleNFTItem with NFTItemStandard {
+    override const gasConsumption: Int = ton("0.03");
+
+    collection_address: Address;
+    index: Int;
+    owner: Address;
+    individual_content: Cell;
+    is_initialized: Bool = false;
+
+    init(collection_address: Address, index: Int, owner: Address, individual_content: Cell) {
+        self.collection_address = collection_address;
+        self.index = index;
+        self.owner = owner;
+        self.individual_content = individual_content;
+    }
+}
+
+contracts/nft_fractionalize_example.tact
+import "@stdlib/deploy";
+import "@stdlib/ownable";
+import "./packages/token/nft/NFTCollection";
+import "./packages/token/nft/extensions/NFTRoyalty";
+import "./packages/token/nft/NFTItem";
+import "./packages/token/jetton/JettonMaster";
+import "./packages/token/jetton/JettonWallet";
+import "./packages/utils/Estimatable";
+import "./packages/utils/Lockable";
+
+@name(udict_set_ref)
+native udict_set_ref(dict: Cell?, key_len: Int, index: Int, value: Cell): Cell?;
+
+message FractionParams {
+    max_supply: Int as coins;
+    jetton_content: Cell;
+}
+
+message(0xbaa13f5f) TryRedeem {
+    sender: Address; // Request sender who sent "Redeem" message to NFT Item
+}
+
+message(0xbac2f9a4) Compose {
+    new_owner: Address;
+}
+
+contract NFTFractionWallet with JettonWallet {
+    balance: Int as coins = ton("0");
+    owner: Address;
+    jetton_master: Address;
+
+    init(owner: Address, jetton_master: Address) {
+        self.owner = owner;
+        self.jetton_master = jetton_master;
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_addr: Address): StateInit {
+        return initOf NFTFractionWallet(owner_addr, self.jetton_master);
+    }
+
+    override inline fun _burn_validate(ctx: Context, msg: JettonBurn) {
+        require(ctx.sender == self.jetton_master, "JettonWallet: Only JettonMaster can burn tokens");
+        require(msg.response_destination == self.owner, "JettonWallet: Only owner can burn tokens");
+    }
+}
+
+contract NFTFraction with JettonMaster, Estimatable, Deployable {
+    mintable: Bool = true;          // This contract is always mintable
+    total_supply: Int as coins = 0; // Total supply of the NFT item
+    owner: Address;                 // NFT Item address
+    jetton_content: Cell;
+
+    max_supply: Int as coins;
+
+    init(max_supply: Int, owner: Address, jetton_content: Cell) {
+        self.max_supply = max_supply;
+        self.owner = owner;
+        self.jetton_content = jetton_content;
+    }
+
+    receive(msg: TryRedeem) {
+        require(self.total_supply == self.max_supply, "NFTFraction: Total supply is not equal to max supply");
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "NFTFraction: Only NFT Item contract can try to redeem");
+        let walletInit: StateInit = self.calculate_jetton_wallet_init(msg.sender);
+        send(SendParameters{
+            to: contractAddress(walletInit),
+            value: self.estimate_rest_value(ctx),
+            bounce: false,
+            mode: SendIgnoreErrors,
+            body: JettonBurn {
+                query_id: 0,
+                amount: self.total_supply,
+                response_destination: msg.sender,
+                custom_payload: emptyCell()
+            }.toCell()
+        });
+    }
+
+    override inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit {
+        return initOf NFTFractionWallet(owner_address, myAddress());
+    }
+
+    override inline fun _burn_notification(ctx: Context, msg: JettonBurnNotification) {
+        self.total_supply = self.total_supply - msg.amount;
+        let remain: Int = self.estimate_rest_value(ctx) - ctx.readForwardFee();
+        send(SendParameters{
+            to: self.owner,
+            value: remain,
+            bounce: false,
+            mode: SendPayGasSeparately,
+            body: Compose{
+                new_owner: msg.sender
+            }.toCell()
+        });
+        if(msg.response_destination != newAddress(0, 0)){
+            send(SendParameters{
+                to: msg.response_destination,
+                value: 0,
+                bounce: false,
+                mode: SendRemainingValue + SendIgnoreErrors
+            });
+        }
+    }
+
+    override inline fun _mint_validate(ctx: Context, msg: JettonMint) {
+        require(ctx.sender == self.owner, "JettonMaster: Sender is not a NFT Item contract");
+        require(self.mintable, "JettonMaster: Jetton is not mintable");
+        require(self.total_supply + msg.amount <= self.max_supply, "JettonMaster: Exceeds max supply");
+    }
+}
+
+contract FNFTCollection with NFTCollectionStandard, NFTRoyaltyStandard, Estimatable, Deployable {
+    next_item_index: Int as uint32 = 0; // if next_item_index is not -1, means sequential minting is enabled. We want a sequential minting in this example so we set it to uint32.
+    collection_content: Cell;           // collection_content may be the prefix of individual_content
+    owner_address: Address;             // owner_address is the address of the owner of the collection
+    royalty_params: RoyaltyParams;      // royalty_params is the params of royalty
+    //content_cell: map<Int, Cell> ;
+    init(owner_address: Address, collection_content: Cell, royalty_params: RoyaltyParams) {
+        self.owner_address = owner_address;
+        self.collection_content = collection_content;
+        self.royalty_params = royalty_params;
+    }
+
+    // @dev Mint is not the standard function of NFTCollection, so we need to define it by ourselves
+    receive("Mint") {
+        let ctx: Context = context();
+        let nftItemInit: StateInit = self._get_nft_item_state_init(self.next_item_index);
+        send(SendParameters{
+                to: contractAddress(nftItemInit),
+                value: self.estimate_rest_value(ctx),
+                bounce: false,
+                mode: SendIgnoreErrors,
+                body: Transfer {
+                    query_id: 0,
+                    new_owner: ctx.sender,
+                    response_destination: ctx.sender,
+                    custom_payload: emptyCell(),
+                    forward_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell(),
+                code: nftItemInit.code,
+                data: nftItemInit.data
+            });
+        self.next_item_index = self.next_item_index + 1;
+    }
+
+    inline fun get_fraction_param(index: Int): FractionParams {
+        let content_cell: Cell? = null;
+        let value1: Builder = beginCell();
+        let value1Str: StringBuilder = beginStringFromBuilder(value1);
+        value1Str.append("F-TonDynasty #");
+        value1Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("name"), value1Str.toCell());
+
+
+        let value2: Builder = beginCell();
+        let value2Str: StringBuilder = beginStringFromBuilder(value2);
+        value2Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("description"), value2Str.toCell());
+
+        let value3: Builder = beginCell();
+        let value3Str: StringBuilder = beginStringFromBuilder(value3);
+        value3Str.append("F-TDT #");
+        value3Str.append(index.toString());
+        content_cell = udict_set_ref(content_cell, 256, sha256("symbol"), value3Str.toCell());
+
+        let jetton_content: Builder = beginCell().storeInt(0x00, 8).storeUint(1, 1).storeRef(content_cell!!);
+
+        return FractionParams {
+            max_supply: ton("100"),
+            jetton_content: jetton_content.endCell()
+        };
+    }
+
+    // @dev _get_nft_item_state_init returns the initCode of NFTItem
+    override inline fun _get_nft_item_state_init(index: Int): StateInit {
+        return initOf FNFTItem(myAddress(), index, self.owner_address, self.collection_content, self.get_fraction_param(index));
+    }
+
+    get fun debug_fraction_param(index: Int): FractionParams {
+        return self.get_fraction_param(index);
+    }
+}
+
+contract FNFTItem with NFTItemStandard, Lockable, Ownable {
+    override const gasConsumption: Int = ton("0.03");
+    override const minTonsForStorage: Int = ton("0.04");
+
+    collection_address: Address;
+    index: Int;
+    owner: Address;
+    individual_content: Cell;
+    is_initialized: Bool = false;
+    is_locked: Bool = false;
+
+    fraction_params: FractionParams;
+
+    init(collection_address: Address, index: Int, owner: Address, individual_content: Cell, fraction_params: FractionParams) {
+        self.collection_address = collection_address;
+        self.index = index;
+        self.owner = owner;
+        self.individual_content = individual_content;
+        self.fraction_params = fraction_params;
+    }
+
+    receive("Fractionalize:2") {
+        let ctx: Context = context();
+        self.fractionalize_validate(ctx);
+        self.fractionalize(ctx);
+    }
+
+    receive("Redeem:2") {
+        self.ensureLocked();
+        let ctx: Context = context();
+        let nftFractionInit: StateInit = self.get_jetton_master_init();
+        send(SendParameters{
+            to: contractAddress(nftFractionInit),
+            value: 0,
+            mode: SendRemainingValue,
+            body: TryRedeem { sender: ctx.sender }.toCell()
+        });
+    }
+
+    receive(msg: Compose) {
+        self.ensureLocked();
+        let ctx: Context = context();
+        let nftFractionInit: StateInit = self.get_jetton_master_init();
+        require(ctx.sender == contractAddress(nftFractionInit), "FNFTItem: Only the NFT Fraction contract can compose the NFT item");
+        self.owner = msg.new_owner;
+        self.unlock();
+        send(SendParameters{
+            to: msg.new_owner,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: "Success".asComment()
+        });
+    }
+
+    inline fun get_jetton_master_init(): StateInit {
+        return initOf NFTFraction(self.fraction_params.max_supply, myAddress(), self.fraction_params.jetton_content);
+    }
+
+    inline fun fractionalize_validate(ctx: Context) {
+        self.ensureUnlocked();
+        self.requireOwner();
+    }
+
+    inline fun fractionalize(ctx: Context) {
+        self.lock();
+        self.owner = newAddress(0, 0);
+        let nftFractionInit: StateInit = self.get_jetton_master_init();
+        self.forward(
+            contractAddress(nftFractionInit),
+            JettonMint {
+                origin: ctx.sender,
+                receiver: ctx.sender,
+                amount: self.fraction_params.max_supply,
+                custom_payload: emptyCell(),
+                forward_ton_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell(),
+            false,
+            nftFractionInit
+        );
+    }
+
+    override inline fun _transfer_validate(ctx: Context, msg: Transfer, remain: Int) {
+        self.ensureUnlocked();
+        require(ctx.sender == self.owner || ctx.sender == self.collection_address, "FNFTItem: Only the owner or collection can transfer the NFT item");
+    }
+}
+
+contracts/packages/token/jetton/JettonMaster.tact
+/*
+    This file provides traits for TEP-0074, TEP-0064 jetton standard
+
+    [TEP0074](https://github.com/ton-blockchain/TEPs/blob/master/text/0074-jettons-standard.md)
+    [Official FunC implementation](https://github.com/ton-blockchain/token-contract/blob/main/ft/jetton-wallet.fc)
+    [Ton Minter Contract](https://github.com/ton-blockchain/minter-contract)
+    [Tact Template](https://github.com/howardpen9/jetton-implementation-in-tact/blob/main/sources/contract.tact)
+*/
+import "./JettonWallet";
+
+struct JettonData {
+    total_supply: Int as coins; // the total number of issues jettons
+    mintable: Bool;             // flag which indicates whether number of jettons can increase admin_address
+    admin_address: Address;     // address of smart-contrac which control Jetton
+    jetton_content: Cell;       // data in accordance to Token Data Standard #64
+    jetton_wallet_code: Cell;   // code of wallet for that jetton
+}
+
+message JettonMint {
+    origin: Address;        // address of origin mint request (may be wallet v4)
+    receiver: Address;      // address of receiver
+    amount: Int;            // amount of jettons to mint
+    custom_payload: Cell?;  // optional custom data
+    forward_ton_amount: Int as coins;
+    forward_payload: Slice as remaining;
+}
+
+trait JettonMaster {
+    total_supply: Int;      // the total number of issued jettons
+    mintable: Bool;         // flag which indicates whether minting is allowed
+    owner: Address;         // owner of this jetton
+    jetton_content: Cell;   // data in accordance to Token Data Standard #64
+
+    //********************************************//
+    //                  Messages                  //
+    //********************************************//
+
+    // @dev  JettonBurnNotification is sent from Jetton wallet after burning jettons
+    receive(msg: JettonBurnNotification) {
+        let ctx: Context = context();
+        self._burn_notification_validate(ctx, msg);
+        self._burn_notification(ctx, msg);
+    }
+
+    // @dev  JettonMint is sent from user to mint jettons
+    receive(msg: JettonMint) {
+        let ctx: Context = context();
+        self._mint_validate(ctx, msg);
+        self._mint(ctx, msg);
+    }
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    // @dev  calculate_jetton_wallet_init retrieve init code of a jetton wallet
+    // @note one MUST override this function in inherited contract
+    abstract inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit;
+
+    // @dev  _mint_validate conduct some custom validating before mint
+    virtual inline fun _mint_validate(ctx: Context, msg: JettonMint) {
+        require(ctx.sender == self.owner, "JettonMaster: Sender is not a Jetton owner");
+        require(self.mintable, "JettonMaster: Jetton is not mintable");
+    }
+
+    // @dev  _mint mint jettons
+    virtual inline fun _mint(ctx: Context, msg: JettonMint) {
+        let initCode: StateInit = self.calculate_jetton_wallet_init(msg.receiver);
+        self.total_supply = self.total_supply + msg.amount;
+        send(SendParameters{
+            to: contractAddress(initCode),
+            value: 0,
+            bounce: true,
+            mode: SendRemainingValue,
+            body: JettonInternalTransfer{
+                query_id: 0,
+                amount: msg.amount,
+                response_address: msg.origin,
+                from: myAddress(),
+                forward_ton_amount: msg.forward_ton_amount,
+                forward_payload: msg.forward_payload
+            }.toCell(),
+            code: initCode.code,
+            data: initCode.data
+        });
+    }
+
+    // @dev  _burn_notification_validate perform some custom validation after receiving JettonBurnNotification sent from Jetton wallet
+    virtual inline fun _burn_notification_validate(ctx: Context, msg: JettonBurnNotification) {
+        let initCode: StateInit = self.calculate_jetton_wallet_init(msg.sender);
+        require(ctx.sender == contractAddress(initCode), "Sender is not a Jetton wallet");
+    }
+
+    // @dev  _burn_notification dwindles total_supply and send notification to wallet after receiving JettonBurnNotification
+    inline fun _burn_notification(ctx: Context, msg: JettonBurnNotification) {
+        self.total_supply = self.total_supply - msg.amount;
+        if(msg.response_destination != newAddress(0, 0)){
+            send(SendParameters{
+                to: msg.response_destination,
+                value: 0,
+                bounce: false,
+                mode: SendRemainingValue + SendIgnoreErrors
+            });
+        }
+    }
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    // @dev get_jetton_data retrieve information of this jetton
+    get fun get_jetton_data(): JettonData {
+        return JettonData{
+            total_supply: self.total_supply,
+            mintable: self.mintable,
+            admin_address: self.owner,
+            jetton_content: self.jetton_content,
+            jetton_wallet_code: self.calculate_jetton_wallet_init(myAddress()).code
+        };
+    }
+
+    // @dev get_wallet_address call calculate_jetton_wallet_init and return address of wallet
+    get fun get_wallet_address(owner_address: Address): Address {
+        let initCode: StateInit = self.calculate_jetton_wallet_init(owner_address);
+        return contractAddress(initCode);
+    }
+}
+
+contracts/packages/token/jetton/JettonWallet.tact
+/*
+    This file provides traits for TEP-0074 jetton standard
+
+    [TEP0074](https://github.com/ton-blockchain/TEPs/blob/master/text/0074-jettons-standard.md)
+    [Official FunC implementation](https://github.com/ton-blockchain/token-contract/blob/main/ft/jetton-wallet.fc)
+    [Ton Minter Contract](https://github.com/ton-blockchain/minter-contract)
+    [Tact Template](https://github.com/howardpen9/jetton-implementation-in-tact/blob/main/sources/contract.tact)
+*/
+
+message(0x0f8a7ea5) JettonTransfer {
+    query_id: Int as uint64;                // arbitrary request number
+    amount: Int as coins;                   // amount of jettons to transfer
+    destination: Address;                   // address of the new owner of the jettons
+    response_destination: Address;          // address where to send a response with confirmation of a successful transfer and the rest of the incoming message Toncoins.
+    custom_payload: Cell?;                  // optional custom payload
+    forward_ton_amount: Int as coins;       // the amount of nanotons to be sent to the destination address.
+    forward_payload: Slice as remaining;    // optional custom data that should be sent to the destination address.
+}
+
+message(0x7362d09c) JettonTransferNotification {
+    query_id: Int as uint64;                // arbitrary request number
+    amount: Int as coins;                   // amount of jettons to transfer
+    sender: Address;                        // address of the sender of the jettons
+    forward_payload: Slice as remaining;    // optional custom payload
+}
+
+message(0x595f07bc) JettonBurn {
+    query_id: Int as uint64;        // arbitrary request number
+    amount: Int as coins;           // amount of jettons to burn
+    response_destination: Address;  // address where to send a response with confirmation of a successful burn and the rest of the incoming message coins.
+    custom_payload: Cell?;          // optional custom payload
+}
+
+message(0xd53276db) JettonExcesses {
+    query_id: Int as uint64;        // arbitrary request number
+}
+
+message(0x178d4519) JettonInternalTransfer {
+    query_id: Int as uint64;                // arbitrary request number
+    amount: Int as coins;                   // amount of jettons to transfer
+    from: Address;                          // address of the sender of the jettons
+    response_address: Address;              // address where to send a response with confirmation of a successful transfer and the rest of the incoming message coins.
+    forward_ton_amount: Int as coins;       // the amount of nanotons to be sent to the destination address.
+    forward_payload: Slice as remaining;    // optional custom data that should be sent to the destination address.
+}
+
+message(0x7bdd97de) JettonBurnNotification {
+    query_id: Int as uint64;          // arbitrary request number
+    amount: Int as coins;             // amount of jettons to burn
+    sender: Address;                  // address of the sender of the jettons
+    response_destination: Address;    // address where to send a response with confirmation of a successful burn and the rest of the incoming message coins.
+}
+
+struct WalletData {
+    balance: Int as coins;      // amount of jettons on wallet
+    owner: Address;             // address of wallet owner;
+    jetton: Address;            // address of Jetton master-address
+    jetton_wallet_code: Cell;   // with code of this wallet
+}
+
+
+trait JettonWallet {
+    balance: Int;
+    owner: Address;
+    jetton_master: Address;
+    virtual const gasConsumption: Int = ton("0.01");
+    virtual const minTonsForStorage: Int = ton("0.01");
+
+    //********************************************//
+    //                  Messages                  //
+    //********************************************//
+
+    // @dev  JettonTransfer is send from the owner of the jetton wallet to the jetton wallet itself to transfer jettons to another user
+    receive(msg: JettonTransfer) {
+        let ctx: Context = context();
+        self.balance = self.balance - msg.amount;
+        require(self.balance >= 0, "JettonWallet: Not enough jettons to transfer");
+        self._transfer_validate(ctx, msg);
+        self._transfer_estimate_remain_value(ctx, msg);
+        self._transfer_jetton(ctx, msg);
+    }
+
+    // @dev  JettonBurn is send from the owner of the jetton wallet to the jetton wallet itself to burn jettons
+    receive(msg: JettonBurn) {
+        let ctx: Context = context();
+        self.balance = self.balance - msg.amount;
+        require(self.balance >= 0, "JettonWallet: Not enough balance to burn tokens");
+        self._burn_validate(ctx, msg);
+        self._burn_tokens(ctx, msg);
+    }
+
+    // @dev  JettonInternalTransfer is send from the jetton master or jetton wallet to the jetton wallet itself to transfer jettons to this jetton wallet
+    receive(msg: JettonInternalTransfer) {
+        let ctx: Context = context();
+        self.balance = self.balance + msg.amount;
+        require(self.balance >= 0, "JettonWallet: Not allow negative balance after internal transfer");
+        self._internal_transfer_validate(ctx, msg);
+        let remain: Int = self._internal_transfer_estimate_remain_value(ctx, msg);
+        if (msg.forward_ton_amount > 0){
+            self._internal_transfer_notification(ctx, msg);
+        }
+        self._internal_transfer_excesses(ctx, msg, remain);
+    }
+
+    bounced(src: bounced<JettonInternalTransfer>) {
+        self.balance = self.balance + src.amount;
+    }
+
+    bounced(src: bounced<JettonBurnNotification>) {
+        self.balance = self.balance + src.amount;
+    }
+
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    // @dev  calculate_jetton_wallet_init will get init code of a jetton wallet by provided it's owner address
+    // @note one MUST override this function and return state init of the inherited jetton wallet implementation
+    abstract inline fun calculate_jetton_wallet_init(owner_address: Address): StateInit;
+
+    // @dev  _internal_tranfer_validate will validate internal transfer message, usually it will check that sender is a jetton master or jetton wallet
+    // @note this function will triggered on receiving JettonTransfer message
+    virtual inline fun _internal_transfer_validate(ctx: Context, msg: JettonInternalTransfer) {
+        if(ctx.sender != self.jetton_master){
+            let init: StateInit = self.calculate_jetton_wallet_init(msg.from);
+            require(ctx.sender == contractAddress(init), "JettonWallet: Only Jetton master or Jetton wallet can call this function");
+        }
+    }
+
+    // @dev  _internal_transfer_estimate_remain_value will estimate remain value after deducting storage fee, forward fee and gas consumption
+    virtual inline fun _internal_transfer_estimate_remain_value(ctx: Context, msg: JettonInternalTransfer): Int {
+        let tonBalanceBeforeMsg: Int = myBalance() - ctx.value;
+        let storage_fee: Int =  self.minTonsForStorage - min(tonBalanceBeforeMsg, self.minTonsForStorage);
+        let remain: Int = ctx.value - (storage_fee + self.gasConsumption);
+        if (msg.forward_ton_amount > 0) {
+            remain = remain - (ctx.readForwardFee() + msg.forward_ton_amount);
+        }
+        return remain;
+    }
+
+    // @dev  _internal_transfer_notification will send notification to the owner of the jetton wallet
+    virtual inline fun _internal_transfer_notification(ctx: Context, msg: JettonInternalTransfer) {
+        if (msg.forward_ton_amount > 0) {
+            send(SendParameters{
+                to: self.owner,
+                value: msg.forward_ton_amount,
+                mode: SendPayGasSeparately,
+                bounce: false,
+                body: JettonTransferNotification{
+                    query_id: msg.query_id,
+                    amount: msg.amount,
+                    sender: msg.from,
+                    forward_payload: msg.forward_payload
+                }.toCell()
+            });
+        }
+    }
+
+    // @dev  _internal_transfer_excesses will send excesses message back after transfer action completed
+    virtual inline fun _internal_transfer_excesses(ctx: Context, msg: JettonInternalTransfer, remain: Int){
+        if((msg.response_address != newAddress(0, 0)) && remain > 0){
+            send(SendParameters{
+                to: msg.response_address,
+                value: remain,
+                bounce: false,
+                mode: SendIgnoreErrors,
+                body: JettonExcesses{
+                    query_id: msg.query_id
+                }.toCell()
+            });
+        }
+    }
+
+    // @dev  _burn_validate will conduct custom checking when receiving JettonBurn message
+    virtual inline fun _burn_validate(ctx: Context, msg: JettonBurn) {
+        require(ctx.sender == self.owner, "JettonWallet: Only owner can burn tokens");
+    }
+
+    // @dev  _burn_tokens will burn tokens and send JettonBurnNotification back to the jetton master
+    // @note this message is bounceable, if burn action failed, the message will be bounced back, you should increase the balance of the wallet
+    virtual inline fun _burn_tokens(ctx: Context, msg: JettonBurn) {
+        send(SendParameters{
+            to: self.jetton_master,
+            value: 0,
+            mode: SendRemainingValue,
+            bounce: true,
+            body: JettonBurnNotification{
+                query_id: msg.query_id,
+                amount: msg.amount,
+                sender: self.owner,
+                response_destination: msg.response_destination
+            }.toCell()
+        });
+    }
+
+    // @dev  _transfer_validate will conduct custom checking when receiving JettonTransfer message
+    virtual inline fun _transfer_validate(ctx: Context, msg: JettonTransfer) {
+        require(ctx.sender == self.owner, "Only owner can call this function");
+
+    }
+
+    // @dev  _transfer_estimate_remain_value will estimate remain value after deducting storage fee, forward fee and gas consumption
+    virtual inline fun _transfer_estimate_remain_value(ctx: Context, msg: JettonTransfer) {
+        let fwd_count: Int = 1;
+        if (msg.forward_ton_amount > 0) {
+            fwd_count = 2;
+        }
+        require(ctx.value > fwd_count * ctx.readForwardFee() + 2 * self.gasConsumption + self.minTonsForStorage, "Not enough funds to transfer");
+    }
+
+    // @dev  _transfer_jetton will transfer jettons to the jetton wallet of the destination address (owner of jetton wallet)
+    // @note  this message is bounceable, if transfer action failed, the message will be bounced back, you should increase the balance of the wallet
+    virtual inline fun _transfer_jetton(ctx: Context, msg: JettonTransfer) {
+        let init: StateInit = self.calculate_jetton_wallet_init(msg.destination);
+        let receiver: Address = contractAddress(init);
+        send(SendParameters{
+            to: receiver,
+            value: 0,
+            bounce: true,
+            mode: SendRemainingValue,
+            body: JettonInternalTransfer{
+                query_id: msg.query_id,
+                amount: msg.amount,
+                response_address: msg.response_destination,
+                from: self.owner,
+                forward_ton_amount: msg.forward_ton_amount,
+                forward_payload: msg.forward_payload
+            }.toCell(),
+            code: init.code,
+            data: init.data
+        });
+    }
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    // @dev  get_wallet_data will return wallet data, which follows TEP 0074 standard
+    get fun get_wallet_data(): WalletData{
+        return WalletData {
+            balance: self.balance,
+            owner: self.owner,
+            jetton: self.jetton_master,
+            jetton_wallet_code: self.calculate_jetton_wallet_init(self.owner).code
+        };
+    }
+}
+
+contracts/packages/token/nft/AuctionErrorCode.tact
+/*
+    NFT Auciton Market Error Code :
+    3724: Bid doesn't meet the minimum increase requirement
+    11017: Contract is already initialized
+    19941: Only owner can build nft auction contract
+    20805: Only owner can init auction end time.
+    20844: BuyNowPrice must be greater than reservePrice
+    24136: Auction was not set before.
+    37031: NFT Seller cannot bid
+    42237: Contract is not initialized
+    42345: Only owner can revise auction contract
+    45065: Auction not yet ended
+    46984: Auction ended
+    50905: Auction bid period ended
+    54143: This NFT didn't transfer to NFT Auction Market Contract yet.
+    55234: BuyNowPrice must be greater than reservePrice.
+    58706: Auction was already set for this NFT.
+    59374: Cannot update reserve price and buy now price at the same time.
+*/
+
+/*
+    NFT Auction Error Code :
+    3724: Bid doesn't meet the minimum increase requirement
+    11017: Contract is already initialized
+    19941: Only owner can build nft auction contract
+    20805: Only owner can init auction end time.
+    20844: BuyNowPrice must be greater than reservePrice
+    24136: Auction was not set before.
+    37031: NFT Seller cannot bid
+    42237: Contract is not initialized
+    42345: Only owner can revise auction contract
+    45065: Auction not yet ended
+    46984: Auction ended
+    50905: Auction bid period ended
+    54143: This NFT didn't transfer to NFT Auction Market Contract yet.
+    55234: BuyNowPrice must be greater than reservePrice.
+    58706: Auction was already set for this NFT.
+    59374: Cannot update reserve price and buy now price at the same time.
+*/
+
+/*
+    Error code Old Version :
+    1000: Auction not yet ended.
+    1001: Only owner can do this.
+    1002: Auction was not set before.
+    1003: This NFT didn't transfer to NFT Auction Market Contract yet.
+    1004: Contract is already initialized.
+    1005: Auction ended.
+    1006: NFT Seller cannot bid.
+    1007: Bid doesn't meet the minimum increase requirement.
+    1008: Auction was already set for this NFT.
+    1009: Auction did not set up before.
+    1010: BuyNowPrice must be greater than reservePrice.
+    1011: Cannot update reserve price and buy now price at the same time.
+*/
+
+NFTAuction.tact
+/*
+    This file provides traits for the NFT Auction contract, allowing users to bid on NFTs.
+    When the auction ends, the NFT goes to the highest bidder and the seller receives the bid amount.
+
+    Reference:
+    [Official Implementation](https://github.com/ton-blockchain/token-contract/blob/991bdb4925653c51b0b53ab212c53143f71f5476/nft/nft-marketplace.fc)
+    [Official Implementation](https://github.com/ton-blockchain/token-contract/blob/991bdb4925653c51b0b53ab212c53143f71f5476/nft/nft-sale.fc)
+    [NFT Auction Template](https://github.com/avolabs-io/nft-auction)
+*/
+
+trait NFTAuctionStandard {
+    virtual const minTonsForStorage: Int = ton("0.03");
+    virtual const gasConsumption: Int = ton("0.03");
+
+    owner: Address;
+    nftAddress: Address;
+    seller: Address;
+    auctionInfo: AuctionInfo;
+    auctionBidPeriod: Int;
+    isInitialized: Int;
+    auctionEndTime: Int;
+
+    //********************************************//
+    //                  Messages                  //
+    //********************************************//
+
+    // @dev Default receive function to receive funds
+    receive() {}
+
+    // @dev Initializes the auction when called by the owner
+    receive(msg: BuildNftAuction) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Only owner can build nft auction contract");
+        require(self.isInitialized == 0, "Contract is already initialized");
+        require(msg.auctionInfo.buyNowPrice > msg.auctionInfo.reservePrice, "BuyNowPrice must be greater than reservePrice");
+        self.auctionInfo = msg.auctionInfo;
+        self.isInitialized = 1;
+        self.auctionBidPeriod = 0;
+        self.auctionEndTime = 0;
+    }
+
+    // @dev Accepts bids for the NFT as long as the auction is active
+    receive("Bid") {
+        // Check if auction is still active.
+        require(now() < self.auctionEndTime || self.auctionEndTime == 0, "Auction ended");
+        require(self.isInitialized == 1, "Contract is not initialized");
+        require(now() < self.auctionBidPeriod | self.auctionBidPeriod ==0, "Auction bid period ended");
+
+        let ctx: Context = context();
+        let buyer: Address = ctx.sender;
+        require(buyer != self.auctionInfo.nftSeller, "NFT Seller cannot bid");
+        let bidValue: Int = ctx.value;
+        let buyNowPrice: Int = self.auctionInfo.buyNowPrice;
+        if(bidValue >= buyNowPrice) {
+            self.auctionInfo.nftHighestBid = bidValue;
+            // Pay winning bid amount to seller.
+            self._send_winning_bid_amount();
+            // Transfer NFT to buyer
+            self._transfer_nft(buyer);
+            self.isInitialized = 0;
+            return;
+        }
+
+        let bidIncreaseAmount: Int = (self.auctionInfo.nftHighestBid * (10000 + self.auctionInfo.bidIncreasePercentage)) / 10000;
+        require(bidValue > bidIncreaseAmount, "Bid doesn't meet the minimum increase requirement");
+        // Send back previous highest bid to previous highest bidder.
+        let prevNftHighestBidder: Address = self.auctionInfo.nftHighestBidder;
+        let prevNftHighestBid: Int = self.auctionInfo.nftHighestBid;
+        let paybackTon: Int = max(prevNftHighestBid - self.minTonsForStorage - self.gasConsumption,0);
+        send(SendParameters{
+            to: prevNftHighestBidder,
+            value: paybackTon,
+            mode: SendPayGasSeparately,
+            bounce: false,
+            body: "Pay bid money back to the prevNftHighestBidder".asComment()
+        });
+        // Update highest bid and Transfer ton back to previous highest bidder.
+        self.auctionInfo.nftHighestBidder = ctx.sender;
+        self.auctionInfo.nftHighestBid = bidValue;
+        // If bid value is greater than reserve price, then the auction is being started.
+        if(bidValue > self.auctionInfo.reservePrice) {
+            self._update_auction_bid_period();
+            if(self.auctionEndTime == 0) {
+                // If the auction start, then set the auction end time.
+                self._update_auction_end_time();
+            }
+        }
+    }
+
+    // @dev Settles the auction, transferring the NFT to the highest bidder and the funds to the seller
+    receive("settleAuction") {
+        require(now() >= self.auctionBidPeriod, "Auction not yet ended");
+        // Pay winning bid amount to seller.
+        self._send_winning_bid_amount();
+
+        // Transfer NFT to buyer
+        let buyer: Address = self.auctionInfo.nftHighestBidder;
+        self._transfer_nft(buyer);
+        self.isInitialized = 0;
+    }
+
+    // @dev Allows owner to adjust auction's reserve or buy-now prices.
+    receive(msg: ReviseAuction) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Only owner can revise auction contract");
+        require(self.auctionInfo.reservePrice == msg.reviseAuctionInfo.reservePrice || msg.reviseAuctionInfo.buyNowPrice == self.auctionInfo.buyNowPrice, "Cannot update reserve price and buy now price at the same time.");
+
+        // Update the reserve price of the auction.
+        // This can only be done if no bid has been made that already exceeds the original minimum price.
+        if(self.auctionEndTime == 0 && self.auctionInfo.reservePrice != msg.reviseAuctionInfo.reservePrice && msg.reviseAuctionInfo.reservePrice < self.auctionInfo.buyNowPrice) {
+
+            self.auctionInfo.reservePrice = msg.reviseAuctionInfo.reservePrice;
+            if(self.auctionInfo.nftHighestBid > self.auctionInfo.reservePrice) {
+                self._update_auction_bid_period();
+                self._update_auction_end_time();
+            }
+        }
+        // Update the buy now price of the auction.
+        // This can only be done if no bid has been made that already exceeds the original minimum price.
+        if(self.auctionEndTime == 0 && msg.reviseAuctionInfo.buyNowPrice != self.auctionInfo.buyNowPrice && msg.reviseAuctionInfo.buyNowPrice > self.auctionInfo.reservePrice) {
+            self.auctionInfo.buyNowPrice = msg.reviseAuctionInfo.buyNowPrice;
+        }
+    }
+
+    // @dev Ends the auction and transfers the NFT to the highest bidder or back to the seller(If autcion not started)
+    receive("EndAuction") {
+        // If this auction started, it will transfer NFT to highest bidder.
+        // Else, it will transfer NFT to seller.
+        if(self.auctionEndTime > 0) {
+            // Pay royalty to the creator of the NFT
+            // TODO: Implement royalty payment
+
+            // Pay winning bid amount to seller.
+            self._send_winning_bid_amount();
+            // Transfer NFT to buyer
+            let buyer: Address = self.auctionInfo.nftHighestBidder;
+            self._transfer_nft(buyer);
+            self.isInitialized = 0;
+        }
+        else {
+            // Transfer NFT to seller
+            let seller: Address = self.auctionInfo.nftSeller;
+            self._transfer_nft(seller);
+            self.isInitialized = 0;
+        }
+    }
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    // @dev Updates the auction bid period time based on the latest bid and the defined auction bid period
+    virtual inline fun _update_auction_bid_period() {
+        self.auctionBidPeriod = now() + self.auctionInfo.auctionBidPeriod;
+    }
+
+    // @dev Updates the auction end time
+    virtual inline fun _update_auction_end_time() {
+        self.auctionEndTime = now() + self.auctionInfo.auctionPeriod;
+    }
+
+    // @dev Transfer the NFT to the highest bidder
+    // @note If you want change msg value, you should make sure that is enough for NFT Auction market contract to transfer NFT.
+    virtual inline fun _transfer_nft(buyer: Address) {
+        send(SendParameters{
+            to: self.owner,
+            value: ton("0.06"),
+            bounce: true,
+            mode: SendPayGasSeparately,
+            body: TransferNFT {
+                nftAddress: self.nftAddress,
+                seller: self.auctionInfo.nftSeller,
+                query_id: 0,
+                new_owner: buyer,
+                response_destination: buyer,
+                custom_payload: emptyCell(),
+                forward_amount: 0,
+                forward_payload: emptySlice()
+            }.toCell()
+        });
+    }
+
+    // @dev Transfers the highest bid amount to the seller
+    virtual inline fun _send_winning_bid_amount() {
+        let seller: Address = self.auctionInfo.beneficiary;
+        let winningBidAmount: Int = self.auctionInfo.nftHighestBid;
+        send(SendParameters{
+            to: seller,
+            value: winningBidAmount - ton("0.06"),
+            mode: SendPayGasSeparately,
+            bounce: false,
+            body: "Pay winning bid amount".asComment()
+        });
+    }
+
+    // @dev Initializes the auction end time to 0, allowing the seller to auction the NFT again in the future
+    virtual inline fun _init_auction_end() {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Only owner can init auction end time.");
+        self.auctionBidPeriod = 0;
+    }
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    // @dev Returns the current auction information
+    get fun get_auctin_info(): AuctionInfo {
+        return self.auctionInfo;
+    }
+
+    // @dev Checks if the auction is initialized and returns the state (1 for initialized, 0 otherwise)
+    get fun get_is__initialized(): Int {
+        return self.isInitialized;
+    }
+
+    // @dev Returns the end time of the auction
+    get fun get_auction_end(): Int {
+        return self.auctionEndTime;
+    }
+
+    // @dev Retruns the auction bid period
+    get fun get_auction_bid_period(): Int {
+        return self.auctionBidPeriod;
+    }
+}
+
+contracts/packages/token/nft/NFTAuctionMarket.tact
+/*
+    This file provides traits for NFT auction market which can be easily used in a permissionless and flexible manner to auction (or simply buy/sell) NFTs.
+    Sellers and bidders are able to make customized auctions and bids that allow for a holistic NFT auction/sale mechanism.
+
+    Reference:
+    [Official Implementation](https://github.com/ton-blockchain/token-contract/blob/991bdb4925653c51b0b53ab212c53143f71f5476/nft/nft-marketplace.fc)
+    [Official Implementation](https://github.com/ton-blockchain/token-contract/blob/991bdb4925653c51b0b53ab212c53143f71f5476/nft/nft-sale.fc)
+    [NFT Auction Template](https://github.com/avolabs-io/nft-auction)
+*/
+import "./NFTItem";
+
+message SetUpAuction {
+    nftAddress: Address;            // NFT address to be auctioned
+    reservePrice: Int as coins;     // minimum bid price to start the auction timer
+    buyNowPrice: Int as coins;      // price at which the NFT can be directly bought
+    auctionPeriod: Int as uint256;  // time when the auction ends after it starts
+    beneficiary: Address?;           // the address of the beneficiary
+}
+
+message ReviseSetUpAuction {
+    nftAddress: Address;            // NFT address to be auctioned
+    reservePrice: Int as coins;     // minimum bid price to start the auction timer
+    buyNowPrice: Int as coins;      // price at which the NFT can be directly bought
+    auctionPeriod: Int as uint256;  // time when the auction ends after it starts
+    beneficiary: Address?;           // the address of the beneficiary
+    // TODO: beneficiary: Address?;           // the address of the beneficiary
+}
+
+message ReviseAuction {
+    reviseAuctionInfo: AuctionInfo;
+}
+
+message BuildNftAuction {
+    auctionInfo: AuctionInfo;
+}
+
+message EndAuction {
+    nftAddress: Address;
+}
+
+// @dev This message is used to ask NFT auction market contract to transfer NFT to the new owner
+message TransferNFT {
+    nftAddress: Address;
+    seller: Address;
+    query_id: Int as uint64;
+    new_owner: Address;
+    response_destination: Address;
+    custom_payload: Cell?;
+    forward_amount: Int as coins;
+    forward_payload: Slice as remaining;
+}
+
+// @dev This struct is used to store auction information
+// @note If you want to use custom auction parameters or logic, consider overriding this struct and setUpAuction function in a derived contract
+struct AuctionInfo {
+    bidIncreasePercentage: Int as uint256;  // the minimum percentage by which a new bid must exceed the current highest bid
+    auctionBidPeriod: Int as uint256;       // increments the length of time the auction is open in which a new bid can be made after each bid
+    auctionPeriod: Int as uint256;          // the time at which the auction will end
+    reservePrice: Int as coins;             // the minimum price that must be paid for the NFT
+    buyNowPrice: Int as coins;              // the price that must be paid for the NFT if the buyer chooses to buy it now
+    nftHighestBid: Int as coins;            // the highest bid that has been made so far
+    nftHighestBidder: Address;              // the address of the bidder who has made the highest bid so far
+    nftSeller: Address;                     // the address of the seller
+    whitelistedBuyer: Address;              // the seller can specify a whitelisted address for a sale (this is effectively a direct sale)
+    nftRecipient: Address;                  // the bidder can specify a recipient for the NFT if their bid is successful
+    beneficiary: Address;                  // the address of the beneficiary
+}
+
+trait NFTAuctionMarketStandard {
+    owner: Address;
+    // Check whether nft is transfered to NFT Auction Market Contract
+    auctionTransferCheck: map<Int, Int>; // key => hash(sellerAddress and nftAddress), vlaue => 1: set, 0: not set
+    // Check whether nft auction is over or not
+    auctionOverCheck: map<Address, Address>;  // key => nft auction contract address, value => 1: not over, 0: over
+
+    // @dev Default parameters for setting up an NFT auction
+    virtual const defaultBidIncreasePercentage: Int = 100;
+    virtual const defaultAuctionBidPeriod: Int = 86400; // 1 day
+    virtual const minimumSettableIncreasePercentage: Int = 100;
+    virtual const maximumMinPricePercentage: Int = 8000;
+
+    //********************************************//
+    //                  Messages                  //
+    //********************************************//
+
+    // Default receive function to receive funds
+    receive() {}
+
+    // @dev Processes the OwnershipAssigned message and updates auction mappings,
+    //      and confirms NFT transfer to the Auction Market.
+    receive(msg: OwnershipAssigned) {
+        let ctx: Context = context();
+        let prev_owner: Address = msg.prev_owner; // Seller Address
+        let nftAddress: Address = ctx.sender;
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(prev_owner, nftAddress);
+        // Set nft transfer checking to 1
+        self.auctionTransferCheck.set(hashSellerNftAddress, 1);
+        let payload: Slice = msg.forward_payload;
+
+        if(payload.empty() == false) {
+            self._parse_forward_payload(prev_owner, nftAddress, payload);
+        }
+    }
+
+    // @dev Handles the receipt of a SetUpAuction message.
+    //      First, it verifies if the NFT has been transferred to the NFT Auction Market Contract.
+    //      Upon successful validation, it sets up the auction for the specified NFT and deploys
+    //      a new NFT Auction Contract instance for it.
+    receive(msg: SetUpAuction) {
+        let ctx: Context = context();
+        let sellerAddress: Address = ctx.sender;
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(sellerAddress, msg.nftAddress);
+        self._auction_transfer_validate(hashSellerNftAddress);
+        if(msg.beneficiary == null) {
+            msg.beneficiary = sellerAddress;
+        }
+        // Set up auction info
+        let auctionInfo: AuctionInfo = self._set_up_auction(sellerAddress, msg.nftAddress, msg.reservePrice, msg.buyNowPrice, msg.auctionPeriod, msg.beneficiary!!); // set up auction
+        self._set_price_validate(msg.buyNowPrice, msg.reservePrice);
+        let nftAuctionInit: StateInit = self._nft_auction_init(msg.nftAddress, sellerAddress);
+        let nftAuctionAddress: Address = self.get_nft_auction_address(msg.nftAddress, sellerAddress);
+        self._auction_set_validate(nftAuctionAddress);
+        self.auctionOverCheck.set(nftAuctionAddress, msg.nftAddress);
+
+        // Deploy a new NFT Auction Contract
+        self._build_auction(nftAuctionAddress, auctionInfo, nftAuctionInit);
+    }
+
+    // @dev Handles the TransferNFT message and facilitates NFT transfer to the auction's winning bidder.
+    receive(msg: TransferNFT) {
+        let ctx: Context = context();
+        let nftAuctionAddress: Address = ctx.sender;
+        self._auction_not_set_validate(nftAuctionAddress);
+        send(SendParameters{
+            to: msg.nftAddress,
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue,
+            body: Transfer {
+                query_id: msg.query_id,
+                new_owner: msg.new_owner,
+                response_destination: msg.response_destination,
+                custom_payload: msg.custom_payload,
+                forward_amount: msg.forward_amount,
+                forward_payload: msg.forward_payload
+            }.toCell()
+        });
+        self.auctionOverCheck.set(ctx.sender, null);
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(msg.seller, msg.nftAddress);
+        self.auctionTransferCheck.set(hashSellerNftAddress, null);
+    }
+
+    // @dev Updates auction details after verifying NFT transfer and previous auction setup, then communicates the update to the nftAuctionAddress.
+    receive(msg: ReviseSetUpAuction) {
+        let ctx: Context = context();
+        let sellerAddress: Address = ctx.sender;
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(sellerAddress, msg.nftAddress);
+        self._auction_transfer_validate(hashSellerNftAddress);
+        // Get nft auction address
+        let nftAuctionAddress: Address = self.get_nft_auction_address(msg.nftAddress, sellerAddress);
+        self._auction_not_set_validate(nftAuctionAddress);
+        if(msg.beneficiary == null) {
+            msg.beneficiary = sellerAddress;
+        }
+        // Set up auction info
+        let auctionInfo: AuctionInfo = self._set_up_auction(sellerAddress, msg.nftAddress, msg.reservePrice, msg.buyNowPrice, msg.auctionPeriod, msg.beneficiary!!); // set up auction
+        self.auctionOverCheck.set(nftAuctionAddress, msg.nftAddress);
+        let newAuctionInfo: AuctionInfo = self._set_up_auction(sellerAddress, msg.nftAddress, msg.reservePrice, msg.buyNowPrice, msg.auctionPeriod, msg.beneficiary!!); // set up auction
+        send(SendParameters{
+                to: nftAuctionAddress,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: false,
+                body: ReviseAuction {
+                    reviseAuctionInfo: newAuctionInfo
+                }.toCell()
+            }
+        );
+    }
+
+    // @dev Allows the seller to terminate an auction.
+    //      It verifies if the auction was previously set and then sends a message to the nftAuctionAddress to conclude the auction.
+    //      It will transfer the NFT to the highest bidder or back to the seller(If autcion not started).
+    receive(msg: EndAuction) {
+        // Seller can end auction.
+        let ctx: Context = context();
+        let sellerAddress: Address = ctx.sender;
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(sellerAddress, msg.nftAddress);
+        let nftAuctionAddress: Address = self.get_nft_auction_address(msg.nftAddress, sellerAddress);
+        self._auction_not_set_validate(nftAuctionAddress);
+        send(SendParameters{
+                to: nftAuctionAddress,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: false,
+                body: "EndAuction".asComment()
+            }
+        );
+    }
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    virtual inline fun _parse_forward_payload(seller: Address, nftAddress: Address, payload: Slice) {
+        // Parse payload
+        let beneficiary: Address = payload.loadAddress();
+        let reservePrice: Int = payload.loadCoins();
+        let buyNowPrice: Int = payload.loadCoins();
+        let auctionPeriod: Int = payload.loadUint(256);
+
+        // Set up auction info
+        let auctionInfo: AuctionInfo = self._set_up_auction(seller, nftAddress, reservePrice, buyNowPrice, auctionPeriod, beneficiary); // set up auction
+        self._set_price_validate(buyNowPrice, reservePrice);
+        let nftAuctionInit: StateInit = self._nft_auction_init(nftAddress, seller);
+        let nftAuctionAddress: Address = self.get_nft_auction_address(nftAddress, seller);
+        self._auction_set_validate(nftAuctionAddress);
+        self.auctionOverCheck.set(nftAuctionAddress, nftAddress);
+
+        // Deploy a new NFT Auction Contract
+        self._build_auction(nftAuctionAddress, auctionInfo, nftAuctionInit);
+    }
+
+    virtual inline fun _build_auction(nftAuctionAddress: Address, auctionInfo: AuctionInfo, nftAuctionInit: StateInit) {
+        send(SendParameters{
+                to: nftAuctionAddress,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: false,
+                body: BuildNftAuction {
+                    auctionInfo: auctionInfo
+                }.toCell(),
+                code: nftAuctionInit.code,
+                data: nftAuctionInit.data
+            }
+        );
+    }
+
+    virtual inline fun _set_price_validate(buyNowPrice: Int, reservePrice: Int) {
+        require(buyNowPrice > reservePrice, "BuyNowPrice must be greater than reservePrice.");
+    }
+
+    virtual inline fun _auction_set_validate(nftAuctionAddress: Address) {
+        require(self.auctionOverCheck.get(nftAuctionAddress) == null, "Auction was already set for this NFT.");
+    }
+
+    virtual inline fun _auction_not_set_validate(nftAuctionAddress: Address) {
+        require(self.auctionOverCheck.get(nftAuctionAddress) != null, "Auction was not set before.");
+    }
+
+    virtual inline fun _auction_transfer_validate(hashSellerNftAddress: Int) {
+        require(self.get_is_auction_transfer_check(hashSellerNftAddress) == 1, "This NFT didn't transfer to NFT Auction Market Contract yet.");
+    }
+
+    // @dev Initializes an auction for a specified NFT with given parameters such as reserve price, buy now price, and auction duration.
+    // @note If you want to use custom auction parameters or logic, consider overriding this function and AuctionInfo struct in a derived contract.
+    virtual inline fun _set_up_auction(sellerAddress: Address, nftAddress: Address, reservePrice: Int, buyNowPrice: Int, auctionPeriod: Int, beneficiary: Address): AuctionInfo {
+        let hashSellerNftAddress: Int = self.get_hash_seller_nft_address(sellerAddress, nftAddress);
+        return AuctionInfo {
+            bidIncreasePercentage: self.defaultBidIncreasePercentage,
+            auctionBidPeriod: self.defaultAuctionBidPeriod,
+            auctionPeriod: auctionPeriod,
+            reservePrice: reservePrice,
+            buyNowPrice: buyNowPrice,
+            nftHighestBid: 0,
+            nftHighestBidder: sellerAddress,
+            nftSeller: sellerAddress,
+            whitelistedBuyer: sellerAddress,
+            nftRecipient: sellerAddress,
+            beneficiary: beneficiary
+        };
+    }
+
+    // @dev Retrieves the initial state for the NFT auction contract.
+    // @note one MUST override this function to provide NFT Auction initCode
+    abstract fun _nft_auction_init(nftAddress: Address, seller: Address): StateInit;
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    // @dev Determines the NFT auction contract address.
+    get fun get_nft_auction_address(nftAddress: Address, seller: Address): Address {
+        let nftAuctionInit: StateInit = self._nft_auction_init(nftAddress, seller);
+        return contractAddress(nftAuctionInit);
+    }
+
+    // @dev Generates a hash value based on the seller and NFT address.
+    get fun get_hash_seller_nft_address(seller: Address, nftAddress: Address): Int {
+        return beginCell().storeAddress(seller).storeAddress(nftAddress).endCell().asSlice().hash();
+    }
+
+    // @dev Checks if the auction transfer for a given hash is valid.
+    get fun get_is_auction_transfer_check(hashSellerNftAddress: Int): Int {
+        if(self.auctionTransferCheck.get(hashSellerNftAddress) == null) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    }
+}
+
+contracts/packages/token/nft/NFTCollection.tact
+/*
+    This file provides traits for NFT collections which follows the TEP-0062 standard.
+    https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md
+*/
+
+
+struct CollectionData {
+    next_item_index: Int;     // collection should issue NFT with sequential indexes starting from 1. -1 value implies non-sequential collections.
+    collection_content: Cell; // collection content format should comply with TEP64
+    owner_address: Address;   // collection owner address, zero address if no owner
+}
+
+trait NFTCollectionStandard {
+    virtual const NFT_COLLECTION_STANDARD_METADATA: String = "meta.json";
+
+    next_item_index: Int;
+    collection_content: Cell;
+    owner_address: Address;
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    // @dev _get_nft_item_state_init calculates init code for NFT item contract by item index
+    // @note one MUST override this function to provide custom NFT item initCode
+    abstract inline fun _get_nft_item_state_init(index: Int): StateInit;
+
+    // @dev _get_nft_content gets the serial number of the NFT item of this collection and the individual content of this NFT item.
+    //      returns the full content of the NFT item in format that complies with standard TEP-64.
+    // @note one MUST override this function to provide full NFT item content
+    virtual inline fun _get_nft_content(index: Int, individual_content: Cell): Cell {
+        let builder: StringBuilder = beginString();
+        let idvStr: String = individual_content.asSlice().asString();
+        builder.append(idvStr);
+        return builder.toCell();
+    }
+
+    // @dev get_collection_data returns nft collection data
+    virtual inline fun _get_collection_data(): CollectionData {
+        let builder: StringBuilder = beginString();
+        let urlPrefix: String = self.collection_content.asSlice().asString();
+        builder.append(urlPrefix);
+        builder.append(self.NFT_COLLECTION_STANDARD_METADATA);
+        return CollectionData {
+            next_item_index: self.next_item_index,
+            collection_content: builder.toCell(),
+            owner_address: self.owner_address
+        };
+    }
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    get fun get_collection_data(): CollectionData {
+        return self._get_collection_data();
+    }
+
+    // @dev get_nft_address_by_index gets the serial number of NFT item of this collection and returns its address
+    get fun get_nft_address_by_index(index: Int): Address {
+        let initCode: StateInit = self._get_nft_item_state_init(index);
+        return contractAddress(initCode);
+    }
+
+    // @dev get_nft_content calls _get_nft_content and returns the full content of the NFT item in format that complies with standard TEP-64.
+    get fun get_nft_content(index: Int, individual_content: Cell): Cell {
+        return self._get_nft_content(index, individual_content);
+    }
+}
+
+trait NFTEditable {
+
+}
+
+/*
+    This file provides traits for NFT royalty standard is TEP-0066
+    https://github.com/ton-blockchain/TEPs/blob/master/text/0066-nft-royalty-standard.md
+*/
+
+struct RoyaltyParams {
+    numerator: Int as uint16; // numerator to calculate royalty percentage
+    denominator: Int as uint16; // denominator to calculate royalty percentage
+    destination: Address; // Address to receive royalty
+}
+
+message(0x693d3950) GetRoyaltyParams {
+    query_id: Int as uint64; // arbitrary request number for sending ReportRoyaltyParams back with send mode 64
+}
+
+message(0xa8cb00ad) ReportRoyaltyParams {
+    query_id: Int as uint64; // corresponding request number
+    numerator:  Int as uint16; // numerator to calculate royalty percentage, maximum 65535
+    denominator: Int as uint16; // denominator to calculate royalty percentage, maximum 65535
+    destination: Address; // Address to receive royalty
+}
+
+trait NFTRoyaltyStandard {
+    royalty_params: RoyaltyParams;
+    owner_address: Address;
+
+    //********************************************//
+    //                  Messages                  //
+    //********************************************//
+
+    receive(msg: GetRoyaltyParams) {
+        self.report_royalty_params(msg);
+    }
+
+    //********************************************//
+    //             Internal functions             //
+    //********************************************//
+
+    virtual inline fun report_royalty_params(msg: GetRoyaltyParams) {
+        let ctx: Context = context();
+        send(SendParameters{
+            to: ctx.sender,
+            value: 0,
+            mode: SendRemainingValue,
+            bounce: false,
+            body: ReportRoyaltyParams {
+                query_id: msg.query_id,
+                numerator:  self.royalty_params.numerator,
+                denominator: self.royalty_params.denominator,
+                destination: self.owner_address
+            }.toCell()
+        });
+    }
+
+
+    //*********************************//
+    //             Getters             //
+    //*********************************//
+
+    get fun royalty_params(): RoyaltyParams {
+        return self.royalty_params;
+    }
+}
+
+utils/ton-tep64.ts
+import { sha256_sync } from 'ton-crypto';
+import { Cell, Dictionary, beginCell } from 'ton-core';
+
+export const ONCHAIN_CONTENT_PREFIX = 0x00;
+export const OFFCHAIN_TAG = 0x01;
+export const SNAKE_PREFIX = 0x00;
+export const CELL_MAX_SIZE_BYTES = Math.floor((1023 - 8) / 8);
+export const NFT_BASE_URL = 'https://s.getgems.io/nft-staging/c/628f6ab8077060a7a8d52d63/';
+
+export interface JettonContent {
+    uri?: string;
+    name: string;
+    description: string;
+    symbol: string;
+    image?: string;
+    decimals?: string;
+    amount_style?: string;
+    render_type?: string;
+}
+
+function bufferToChunks(buff: Buffer, chunkSize: number) {
+    let chunks: Buffer[] = [];
+    while (buff.byteLength > 0) {
+        chunks.push(buff.subarray(0, chunkSize));
+        buff = buff.subarray(chunkSize);
+    }
+    return chunks;
+}
+
+function makeSnakeCell(data: Buffer) {
+    let chunks = bufferToChunks(data, CELL_MAX_SIZE_BYTES);
+    const b = chunks.reduceRight((curCell, chunk, index) => {
+        if (index === 0) {
+            curCell.storeInt(SNAKE_PREFIX, 8);
+        }
+        curCell.storeBuffer(chunk);
+        if (index > 0) {
+            const cell = curCell.endCell();
+            return beginCell().storeRef(cell);
+        } else {
+            return curCell;
+        }
+    }, beginCell());
+    return b.endCell();
+}
+
+const toKey = (key: string) => {
+    return BigInt(`0x${sha256_sync(key).toString('hex')}`);
+};
+
+// data can be either jetton content dict or NFT item index
+export function buildJettonContent(data: JettonContent | bigint): Cell {
+    let dict = Dictionary.empty(Dictionary.Keys.BigUint(256), Dictionary.Values.Cell());
+    if (typeof data === 'bigint') {
+        const name = `F-TonDynasty #${data}`;
+        const description = `${data}`;
+        const symbol = `F-TDT #${data}`;
+        dict.set(toKey('name'), makeSnakeCell(Buffer.from(name, 'utf8')));
+        dict.set(toKey('description'), makeSnakeCell(Buffer.from(description, 'utf8')));
+        dict.set(toKey('symbol'), makeSnakeCell(Buffer.from(symbol, 'utf8')));
+    } else {
+        Object.entries(data).forEach(([key, value]) => {
+            if (!!value) {
+                dict.set(toKey(key), makeSnakeCell(Buffer.from(value, 'utf8')));
+            }
+        });
+    }
+    return beginCell().storeInt(ONCHAIN_CONTENT_PREFIX, 8).storeDict(dict).endCell();
+}
+
+export function buildNFTCollectionContent(base_url: string = NFT_BASE_URL): Cell {
+    return beginCell().storeInt(OFFCHAIN_TAG, 8).storeStringRefTail(base_url).endCell();
+}
+
