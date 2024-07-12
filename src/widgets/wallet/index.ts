@@ -1,0 +1,1 @@
+export { default as WalletWidgets } from './WalletWidgets.vue'

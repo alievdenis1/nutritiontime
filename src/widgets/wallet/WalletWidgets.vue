@@ -1,0 +1,49 @@
+<template>
+	<TabsMain :default-value="store.defaultValueTabs">
+		<div class="flex justify-between items-center mb-[16px]">
+			<button
+				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
+				@click="$router.go(-1)"
+			>
+				<IconArrowRight icon-color="#1C1C1C" />
+			</button>
+			<h2 class="text-center text-lg text-darkGray">
+				Мой кошелёк
+			</h2>
+			<div />
+		</div>
+		<TabsList>
+			<TabsTrigger value="balance">
+				Баланс
+			</TabsTrigger>
+			<TabsTrigger value="history">
+				История
+			</TabsTrigger>
+		</TabsList>
+		<TabsContent value="balance">
+			<WalletBalance />
+		</TabsContent>
+		<TabsContent value="history">
+			<WalletHistory />
+		</TabsContent>
+	</TabsMain>
+</template>
+
+<script setup lang="ts">
+import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { useWalletStore } from '@/entities/Wallet/model/wallet.store'
+import { IconArrowRight } from 'shared/components/Icon'
+import { WalletBalance } from 'entities/Wallet/wallet-balance'
+import { WalletHistory } from 'entities/Wallet/wallet-history'
+// import { useTranslation } from '@/shared/lib/i18n'
+// import localizations from './CreateRecipeTabs.localization.json'
+const store = useWalletStore()
+// const { t } = useTranslation(localizations)
+
+// import { useRouter } from 'vue-router'
+
+// const router = useRouter()
+
+</script>
+
+<style scoped></style>

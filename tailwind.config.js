@@ -22,7 +22,8 @@ export default {
         xs: ['12px', '16px'],
         lg: ['18px', '22px'],
         xl: ['20px', '24px'],
-        xxl: ['28px', '32px']
+        xxl: ['28px', '32px'],
+        xxxl: ['40px', '48px']
       },
       borderColor: {
         'custom-gray': '#1C1C1C0D',
@@ -38,7 +39,9 @@ export default {
         sans: ['Roboto', 'sans-serif']
       },
       colors: {
+        neonBlue: '#0098EA',
         disabled: '#319A6E1A',
+        transparentGreen: '#319A6E1A',
         mainBg: '#FCFCFC',
         forestGreen: '#319A6E',
         lightGray: '#F3F3F3',

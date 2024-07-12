@@ -4,7 +4,7 @@ import { getTonConnectUIInstance } from './tonConnectUIInstance'
 
 export function useAuthButton() {
     const tonConnectUI = getTonConnectUIInstance()
-
+    console.log(tonConnectUI.connectionRestored)
     const unsubscribe = tonConnectUI.onStatusChange((walletInfo: ConnectedWallet | null) => {
         const friendlyWalletAddress = walletInfo?.account.address ? toUserFriendlyAddress(walletInfo.account.address) : ''
         const sessionStore = useSessionStore()
