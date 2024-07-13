@@ -59,7 +59,7 @@
 				</div>
 			</div>
 			<img
-				src="public/image/start-screen-image.webp"
+				src="/public/image/start-screen-image.webp"
 				alt=""
 				class="cursor-pointer"
 				@click="addCard"
