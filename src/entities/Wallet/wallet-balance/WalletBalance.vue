@@ -15,7 +15,7 @@
 			<VModal :show="show">
 				<div class="flex justify-between mb-[12px] items-center">
 					<h2 class="text-xl font-bold">
-						Заголовок справки
+						{{ t('helpTitle') }}
 					</h2>
 					<button
 						class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
@@ -24,33 +24,45 @@
 						<IconClose />
 					</button>
 				</div>
-				<div>
+				<div class="flex flex-col gap-[20px] text-sm mb-[20px]">
 					<span>
-						Текст-информация о том, как происходит зачисление и что будет потом. Пока текст-рыба.
+						{{ t('creditInfo') }}
 					</span>
 					<span>
-						Противоположная точка зрения подразумевает, что базовые сценарии поведения пользователей
-						формируют глобальную экономическую сеть и при этом — объективно рассмотрены соответствующими
-						инстанциями! Следует отметить, что высокое качество позиционных исследований предопределяет
-						высокую востребованность поставленных обществом задач. Вот вам яркий пример современных
-						тенденций — начало повседневной работы по формированию позиции представляет собой интересный
-						эксперимент проверки системы обучения кадров, соответствующей насущным потребностям.
+						{{ t('globalNetworkInfo') }}
 					</span>
 				</div>
 				<VButton
 					:color="ButtonColors.Green"
 					@click="closeModal"
 				>
-					Понятно
+					{{ t('buttonConfirm') }}
 				</VButton>
 			</VModal>
 		</div>
 		<div
-			class="flex items-center justify-center rounded-[50%] bg-transparentGreen mt-[35px] h-[365px] max-w-max m-auto mb-[16px]"
+			class="flex items-center justify-center rounded-[50%] bg-transparentGreen mt-[35px] h-[365px] max-w-max m-auto mb-[16px] relative"
 		>
+			<div
+				id="card-container"
+				class="absolute bottom-0 left-[50%]"
+			>
+				<div
+					v-for="(card, index) in cards"
+					:key="card.id"
+					class="card"
+					:style="{ animationDelay: `${index * 0.1}s` }"
+					@animationend="removeCard(card.id)"
+				>
+					+1
+					<IconGold class="w-[24px] h-[24px]" />
+				</div>
+			</div>
 			<img
 				src="public/image/start-screen-image.webp"
 				alt=""
+				class="cursor-pointer"
+				@click="addCard"
 			>
 		</div>
 		<div class="flex justify-between relative">
@@ -66,7 +78,7 @@
 					class="flex items-center gap-[8px] bg-forestGreen rounded-[16px] max-w-max py-[10px] px-[24px] cursor-pointer h-[44px]"
 				>
 					<div class="text-white">
-						Подключить TON кошелёк
+						{{ t('connectWalletPrompt') }}
 					</div>
 					<IconArrowRight />
 				</div>
@@ -95,12 +107,18 @@ import WebApp from '@twa-dev/sdk'
 import { useTWA } from 'entities/Session/api/useTWA'
 import { useAuthButton } from 'entities/Session/api/useAuthButton'
 import { getTonConnectUIInstance } from 'entities/Session/api/tonConnectUIInstance'
-import { Locales, useLocaleStore } from 'shared/lib/i18n'
+import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
+import Localization from './WalletBalance.localization.json'
+import { Card } from './types'
 
-const props = withDefaults(defineProps<{ currency: number, energyCurrency: number }>(), {
-	currency: 0,
-	energyCurrency: 100
+const props = withDefaults(defineProps<{
+	initialCurrency: number,
+	initialEnergyCurrency: number
+}>(), {
+	initialCurrency: 0,
+	initialEnergyCurrency: 10
 })
+const { t } = useTranslation(Localization)
 
 const show = ref(false)
 const tonConnectActive = ref(false)
@@ -128,41 +146,66 @@ onMounted(async () => {
 	loading.value = false
 })
 
+const cards = ref<Card[]>([])
+let clickCount = 0
+const canClick = ref(true)
+
+const currency = ref(props.initialCurrency)
+const energyCurrency = ref(props.initialEnergyCurrency)
+
 const formattedCurrency = computed(() => {
-	return props.currency.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 })
+
+const addCard = () => {
+	if (!canClick.value || energyCurrency.value <= 0) return
+	canClick.value = false
+	cards.value.push({ id: clickCount++ })
+	energyCurrency.value = Math.max(energyCurrency.value - 1, 0)
+	currency.value++
+	setTimeout(() => {
+		canClick.value = true
+	}, 800)
+}
+
+const removeCard = (id: number) => {
+	cards.value = cards.value.filter(card => card.id !== id)
+}
 </script>
 
-<style scoped>
-.loading-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba(255, 255, 255, 0.8);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 9999;
+<style scoped lang="scss">
+#card-container {
+	@apply relative w-full h-full;
 }
 
-.loader {
-	border: 16px solid #f3f3f3;
-	border-top: 16px solid #3498db;
-	border-radius: 50%;
-	width: 120px;
-	height: 120px;
-	animation: spin 2s linear infinite;
+.card {
+	@apply absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
+	animation: moveUp 2s ease-in-out forwards;
 }
 
-@keyframes spin {
+@keyframes moveUp {
 	0% {
-		transform: rotate(0deg);
+		bottom: 0;
+		opacity: 1;
+		transform: translateX(-50%) rotate(0deg);
+	}
+
+	25% {
+		transform: translateX(-50%) rotate(10deg);
+	}
+
+	50% {
+		transform: translateX(-50%) rotate(-10deg);
+	}
+
+	75% {
+		transform: translateX(-50%) rotate(10deg);
+		opacity: 0.5;
 	}
 
 	100% {
-		transform: rotate(360deg);
+		bottom: 100%;
+		opacity: 0;
 	}
 }
 </style>

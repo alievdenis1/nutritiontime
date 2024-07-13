@@ -39,6 +39,8 @@ export default {
         sans: ['Roboto', 'sans-serif']
       },
       colors: {
+        coralRed:'#F04F4F',
+        tealGreen:'#24825B',
         neonBlue: '#0098EA',
         disabled: '#319A6E1A',
         transparentGreen: '#319A6E1A',

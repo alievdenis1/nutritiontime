@@ -8,16 +8,16 @@
 				<IconArrowRight icon-color="#1C1C1C" />
 			</button>
 			<h2 class="text-center text-lg text-darkGray">
-				Мой кошелёк
+				{{ t('wallet') }}
 			</h2>
 			<div />
 		</div>
 		<TabsList>
 			<TabsTrigger value="balance">
-				Баланс
+				{{ t('balance') }}
 			</TabsTrigger>
 			<TabsTrigger value="history">
-				История
+				{{ t('history') }}
 			</TabsTrigger>
 		</TabsList>
 		<TabsContent value="balance">
@@ -35,10 +35,10 @@ import { useWalletStore } from '@/entities/Wallet/model/wallet.store'
 import { IconArrowRight } from 'shared/components/Icon'
 import { WalletBalance } from 'entities/Wallet/wallet-balance'
 import { WalletHistory } from 'entities/Wallet/wallet-history'
-// import { useTranslation } from '@/shared/lib/i18n'
-// import localizations from './CreateRecipeTabs.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+import localizations from './WalletWidgets.localization.json'
 const store = useWalletStore()
-// const { t } = useTranslation(localizations)
+const { t } = useTranslation(localizations)
 
 // import { useRouter } from 'vue-router'
 
