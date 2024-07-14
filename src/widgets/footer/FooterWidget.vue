@@ -38,11 +38,11 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
-const { t } = useTranslation(Localization)
 import { ModalCreateRecipe } from '@/entities/CreateRecipe/modal-create/ui'
 import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()
+const { t } = useTranslation(Localization)
 
 const isCurrentRoute = (route: string) => {
 	return router.currentRoute.value.path === route

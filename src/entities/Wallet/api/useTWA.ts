@@ -1,5 +1,5 @@
 import WebApp from '@twa-dev/sdk'
-import { useSessionStore } from 'entities/Session'
+import { useSessionStore } from 'entities/Wallet'
 
 export function useTWA() {
     const sessionStore = useSessionStore()

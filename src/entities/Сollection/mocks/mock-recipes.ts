@@ -1,11 +1,11 @@
-import { CollectionList } from '../ui/type'
+import { RecipesList } from '../../Recipe/ui/type'
 
 export const addPrefix = (url: string) => {
     const prefix = '/nutritiolntime'
     return `${prefix}${url}`
 }
 
-export const mockRecipes: CollectionList = [
+export const mockRecipes: RecipesList = [
     {
         'id': 1,
         'image': addPrefix('/image/recipes1.png'),

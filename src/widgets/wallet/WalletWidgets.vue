@@ -39,11 +39,6 @@ import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './WalletWidgets.localization.json'
 const store = useWalletStore()
 const { t } = useTranslation(localizations)
-
-// import { useRouter } from 'vue-router'
-
-// const router = useRouter()
-
 </script>
 
 <style scoped></style>

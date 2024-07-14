@@ -177,4 +177,4 @@ watch(showModal, (newVal) => {
 .filledInput {
     border: 2px solid #319A6E33;
 }
-</style>
+</style>../IngredientsRecipe/enum

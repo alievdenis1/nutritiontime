@@ -104,9 +104,9 @@ import { VModal } from 'shared/components/Modal'
 import { VButton } from 'shared/components/Button'
 import { ButtonColors } from 'shared/components/Button'
 import WebApp from '@twa-dev/sdk'
-import { useTWA } from 'entities/Session/api/useTWA'
-import { useAuthButton } from 'entities/Session/api/useAuthButton'
-import { getTonConnectUIInstance } from 'entities/Session/api/tonConnectUIInstance'
+import { useTWA } from 'entities/Wallet/api/useTWA'
+import { useAuthButton } from 'entities/Wallet/api/useAuthButton'
+import { getTonConnectUIInstance } from 'entities/Wallet/api/tonConnectUIInstance'
 import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
 import { Card } from './types'
@@ -118,6 +118,7 @@ const props = withDefaults(defineProps<{
 	initialCurrency: 0,
 	initialEnergyCurrency: 10
 })
+
 const { t } = useTranslation(Localization)
 
 const show = ref(false)
@@ -209,3 +210,4 @@ const removeCard = (id: number) => {
 	}
 }
 </style>
+@/entities/Wallet/api/useTWA@/entities/Wallet/api/useAuthButton@/entities/Wallet/api/tonConnectUIInstance

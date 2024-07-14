@@ -3,7 +3,7 @@ interface Author {
 	profile_image: string;
 }
 
-export interface CollectionItem {
+export interface RecipesItem {
 	id: number;
 	image: string;
 	title: string;
@@ -16,4 +16,4 @@ export interface CollectionItem {
 	liked: boolean;
 }
 
-export type CollectionList = CollectionItem[]
+export type RecipesList = RecipesItem[]
