@@ -1,0 +1,20 @@
+{
+    "ru": {
+        "inviteFriends": "Пригласить друзей",
+        "shareTitle": "Приглашение",
+        "shareText": "Приглашаю тебя присоединиться и получить 500 $RECIPETON!",
+        "getBonus": "Получите 500 $RECIPETON за рекомендацию!",
+        "eachFriend": "За каждого друга начислим 500 $RECIPETON",
+        "history": "История",
+        "transactionHistory": "Здесь будет храниться история зачислений"
+    },
+    "en": {
+        "inviteFriends": "Invite friends",
+        "shareTitle": "Invitation",
+        "shareText": "I invite you to join and get 500 $RECIPETON!",
+        "getBonus": "Get 500 $RECIPETON for a recommendation!",
+        "eachFriend": "Earn 500 $RECIPETON for each friend",
+        "history": "History",
+        "transactionHistory": "The transaction history will be stored here"
+    }
+}

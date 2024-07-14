@@ -26,7 +26,6 @@
 					<div>
 						<h2 class="truncated-text text-lg font-regular text-sm">
 							{{ recipe.title }}
-							<!-- Lorem ipsum dolor sit amet consectetur, adipisicing elit. Adipisci sit officia nihil rem perferendis pariatur animi recusandae, sunt quidem nisi optio sed repellat, ut consectetur odit eaque ratione, placeat ipsa! Perferendis temporibus, nesciunt debitis blanditiis quis asperiores, aperiam ipsum distinctio iste non porro sapiente iusto, suscipit corporis cum nobis! Numquam ullam dolor quibusdam eveniet quo voluptas minima. Blanditiis molestiae iure eos explicabo iusto aspernatur dolores cum incidunt odit atque debitis, ad provident porro in pariatur, voluptate minus! Cum unde voluptatibus illum sit eos qui ex. Est dicta nobis delectus expedita ut voluptatem optio aspernatur nemo dolorum, tempora quia architecto ad. -->
 						</h2>
 					</div>
 					<div class="flex justify-between items-center mt-2 flex-wrap gap-[6px]">
@@ -73,10 +72,10 @@
 
 <script setup lang="ts">
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-import { CollectionItem } from 'entities/Сollection/ui/type'
+import { RecipesItem } from './type'
 
 withDefaults(defineProps<{
-	recipesData: Array<CollectionItem>
+	recipesData: Array<RecipesItem>
 }>(), {
 	recipesData: () => []
 })

@@ -1,0 +1,16 @@
+{
+    "ru": {
+        "helpTitle": "Заголовок справки",
+        "creditInfo": "Текст-информация о том, как происходит зачисление и что будет потом. Пока текст-рыба.",
+        "globalNetworkInfo": "Противоположная точка зрения подразумевает, что базовые сценарии поведения пользователей формируют глобальную экономическую сеть и при этом — объективно рассмотрены соответствующими инстанциями! Следует отметить, что высокое качество позиционных исследований предопределяет высокую востребованность поставленных обществом задач. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции представляет собой интересный эксперимент проверки системы обучения кадров, соответствующей насущным потребностям.",
+        "buttonConfirm": "Понятно",
+        "connectWalletPrompt": "Подключить TON кошелёк"
+    },
+    "en": {
+        "helpTitle": "Help Title",
+        "creditInfo": "Text-information about how the crediting happens and what will happen next. Placeholder text for now.",
+        "globalNetworkInfo": "The opposite point of view implies that the basic scenarios of user behavior form a global economic network and at the same time are objectively considered by the relevant instances! It should be noted that the high quality of positional research predetermines the high demand for the tasks set by society. Here is a vivid example of modern trends - the beginning of daily work on forming a position is an interesting experiment in testing the training system for personnel corresponding to urgent needs.",
+        "buttonConfirm": "Understood",
+        "connectWalletPrompt": "Connect TON Wallet"
+    }
+}

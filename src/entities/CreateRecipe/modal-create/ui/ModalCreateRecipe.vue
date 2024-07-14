@@ -9,7 +9,7 @@
 					{{ t('createRecipe') }}
 				</h2>
 				<button
-					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px]"
+					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
 					@click="store.closeModal"
 				>
 					<IconClose />

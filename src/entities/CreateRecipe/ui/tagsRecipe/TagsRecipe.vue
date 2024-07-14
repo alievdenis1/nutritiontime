@@ -64,7 +64,7 @@
 							<button
 								v-for="tag in category.tags"
 								:key="tag"
-								:class="['px-2 py-1 border rounded-full cursor-pointer', { 'bg-forestGreen': hasTag(tag), 'bg-lightGray': !hasTag(tag) }]"
+								:class="['px-2 py-1 border rounded-full cursor-pointer', { 'bg-forestGreen text-white': hasTag(tag), 'bg-lightGray': !hasTag(tag) }]"
 								@click="toggleTag(tag)"
 							>
 								{{ tag }}

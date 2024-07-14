@@ -1,0 +1,12 @@
+{
+    "ru": {
+        "wallet": "Мой кошелёк",
+        "balance": "Баланс",
+        "history": "История"
+    },
+    "en": {
+        "wallet": "My Wallet",
+        "balance": "Balance",
+        "history": "History"
+    }
+}

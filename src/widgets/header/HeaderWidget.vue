@@ -13,13 +13,11 @@
 			>
 
 			<div class="flex items-center gap-[8px]">
-				<button class="settings-button py-[10px] px-[16px] relative">
+				<button
+					class="settings-button py-[10px] px-[16px] relative"
+					@click="navigateToWallet"
+				>
 					<IconWallet />
-
-					<div
-						id="ton-connect-button-root"
-						class="absolute opacity-0 left-0"
-					/>
 				</button>
 
 				<button
@@ -57,15 +55,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
+import { ref } from 'vue'
+import { useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'
-import WebApp from '@twa-dev/sdk'
-import { useTWA } from 'entities/Session/api/useTWA'
-import { useAuthButton } from 'entities/Session/api/useAuthButton'
-
+import { useRouter } from 'vue-router'
 import { IconWallet, IconArrow } from '@/shared/components/Icon'
+
+const router = useRouter()
 
 const localeStore = useLocaleStore()
 const { t } = useTranslation(Localization)
@@ -75,14 +72,9 @@ const languageDropDownOpen = ref(false)
 
 onClickOutside(target, () => languageDropDownOpen.value = false)
 
-onMounted(() => {
-	useAuthButton()
-	useTWA()
-	let user = WebApp.initDataUnsafe.user
-	if (user && user.language_code) {
-		localeStore.setLocale(user.language_code as Locales)
-	}
-})
+const navigateToWallet = () => {
+	router.push('/wallet')
+}
 </script>
 
 <style lang="scss" scoped>
