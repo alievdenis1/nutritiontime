@@ -1,5 +1,5 @@
 import { toUserFriendlyAddress, ConnectedWallet } from '@tonconnect/ui'
-import { useWalletStore } from 'entities/Wallet'
+import { useWalletStore } from '../../Wallet'
 import { getTonConnectUIInstance } from './tonConnectUIInstance'
 
 export function useAuthButton() {

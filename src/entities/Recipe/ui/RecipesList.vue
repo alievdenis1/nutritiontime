@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from '@/shared/components/Icon'
-import { RecipesItem } from 'entities/Recipe/ui/type'
+import { RecipesItem } from './type'
 
 withDefaults(defineProps<{
 	recipesData: Array<RecipesItem>
