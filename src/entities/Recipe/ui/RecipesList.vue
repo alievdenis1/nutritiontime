@@ -103,4 +103,4 @@ withDefaults(defineProps<{
 	min-width: 140px;
 	max-width: 140px;
 }
-</style>@/entities/Сollection/ui/type
+</style>

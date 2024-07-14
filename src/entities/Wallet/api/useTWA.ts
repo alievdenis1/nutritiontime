@@ -1,8 +1,8 @@
 import WebApp from '@twa-dev/sdk'
-import { useSessionStore } from 'entities/Wallet'
+import { useWalletStore } from 'entities/Wallet'
 
 export function useTWA() {
-    const sessionStore = useSessionStore()
+    const sessionStore = useWalletStore()
     sessionStore.setUserInfo(WebApp.initDataUnsafe)
     console.log('WebApp.initDataUnsafe', WebApp.initDataUnsafe)
 }

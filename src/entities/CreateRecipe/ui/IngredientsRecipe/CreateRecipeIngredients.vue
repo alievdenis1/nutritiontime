@@ -204,4 +204,4 @@ watch(showModal, (newVal) => {
 	display: none;
 	/* Safari and Chrome */
 }
-</style>../types/enum
+</style>

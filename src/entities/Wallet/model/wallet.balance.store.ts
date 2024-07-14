@@ -16,8 +16,8 @@ export const USER_INFO_KEY = 'user-info-key'
 export const WALLET_INFO_KEY = 'wallet-info-key'
 export const WALLET_ADDRESS = 'wallet-address'
 
-export const useSessionStore = defineStore({
-    id: 'session-store',
+export const useWalletStore = defineStore({
+    id: 'wallet-store',
     state: (): State => ({
         userInfo: null,
         walletInfo: null,
