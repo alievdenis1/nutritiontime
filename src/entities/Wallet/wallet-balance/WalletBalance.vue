@@ -75,12 +75,12 @@
 			<div :class="{ 'opacity-0': loading }">
 				<div
 					v-if="!tonConnectActive"
-					class="flex items-center gap-[8px] bg-forestGreen rounded-[16px] max-w-max py-[10px] px-[24px] cursor-pointer h-[44px]"
+					class="flex items-center gap-[8px] bg-forestGreen rounded-[16px] max-w-max py-[10px] px-[20px] cursor-pointer h-[44px]"
 				>
-					<div class="text-white">
+					<div class="text-white text-sm">
 						{{ t('connectWalletPrompt') }}
 					</div>
-					<IconArrowRight />
+					<IconArrowRight v-if="!isSmallScreen" />
 				</div>
 				<div
 					v-else
@@ -133,6 +133,8 @@ const openModal = () => {
 const closeModal = () => {
 	show.value = false
 }
+
+const isSmallScreen = ref(window.innerWidth <= 380)
 
 onMounted(async () => {
 	const connect = getTonConnectUIInstance()
