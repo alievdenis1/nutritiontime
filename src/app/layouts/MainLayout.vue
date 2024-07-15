@@ -1,5 +1,5 @@
 <template>
-	<main :class="`layout p-[25px] pb-[50px] bg-mainBg`">
+	<main :class="`layout p-[16px] pb-[50px] bg-mainBg`">
 		<slot />
 	</main>
 	<footer-widget class="fixed bottom-0" />

@@ -41,7 +41,7 @@
 			</VModal>
 		</div>
 		<div
-			class="flex items-center justify-center rounded-[50%] bg-transparentGreen mt-[35px] h-[365px] max-w-max m-auto mb-[16px] relative"
+			class="flex items-center justify-center rounded-[50%] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px] no-padding"
 		>
 			<div
 				id="card-container"
@@ -61,7 +61,7 @@
 			<img
 				src="/public/image/start-screen-image.webp"
 				alt=""
-				class="cursor-pointer"
+				class="cursor-pointer w-full h-full object-cover rounded-[50%] prevent-shrink"
 				@click="addCard"
 			>
 		</div>
