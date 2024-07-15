@@ -41,7 +41,7 @@
 			</VModal>
 		</div>
 		<div
-			class="flex items-center justify-center rounded-[50%] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px] no-padding"
+			class="flex items-center justify-center rounded-[50%] h-[280px] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
 		>
 			<div
 				id="card-container"
