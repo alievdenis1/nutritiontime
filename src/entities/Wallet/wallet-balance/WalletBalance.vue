@@ -41,29 +41,34 @@
 			</VModal>
 		</div>
 		<div
-			class="flex items-center justify-center rounded-[50%] h-[280px] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
+			class="img flex items-center justify-center rounded-[50%] h-[280px] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
+			:class="{ 'clicked': isClicked }"
+			@click="addCardAndAnimate"
 		>
+			<img
+				src="/public/image/start-screen-image.webp"
+				alt=""
+				class="w-full h-full object-cover rounded-[50%] prevent-shrink"
+			>
 			<div
 				id="card-container"
-				class="absolute bottom-0 left-[50%]"
+				class="absolute inset-0 overflow-hidden pointer-events-none"
 			>
 				<div
-					v-for="(card, index) in cards"
+					v-for="card in cards"
 					:key="card.id"
 					class="card"
-					:style="{ animationDelay: `${index * 0.1}s` }"
+					:style="{
+						left: `${card.x}px`,
+						top: `${card.y}px`,
+						animationDuration: `${card.duration}s`
+					}"
 					@animationend="removeCard(card.id)"
 				>
 					+1
 					<IconGold class="w-[24px] h-[24px]" />
 				</div>
 			</div>
-			<img
-				src="/public/image/start-screen-image.webp"
-				alt=""
-				class="cursor-pointer w-full h-full object-cover rounded-[50%] prevent-shrink"
-				@click="addCard"
-			>
 		</div>
 		<div class="flex justify-between relative">
 			<div
@@ -116,7 +121,7 @@ const props = withDefaults(defineProps<{
 	initialEnergyCurrency: number
 }>(), {
 	initialCurrency: 0,
-	initialEnergyCurrency: 10
+	initialEnergyCurrency: 100
 })
 
 const { t } = useTranslation(Localization)
@@ -151,7 +156,6 @@ onMounted(async () => {
 
 const cards = ref<Card[]>([])
 let clickCount = 0
-const canClick = ref(true)
 
 const currency = ref(props.initialCurrency)
 const energyCurrency = ref(props.initialEnergyCurrency)
@@ -160,15 +164,25 @@ const formattedCurrency = computed(() => {
 	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 })
 
-const addCard = () => {
-	if (!canClick.value || energyCurrency.value <= 0) return
-	canClick.value = false
-	cards.value.push({ id: clickCount++ })
+const isClicked = ref(false)
+
+const addCardAndAnimate = (event: MouseEvent) => {
+	if (energyCurrency.value <= 0 || !event.currentTarget) return
+	const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+	const x = event.clientX - rect.left
+	const y = event.clientY - rect.top
+	const duration = 2 - (y / rect.height) * 1.5
+	cards.value.push({ id: clickCount++, x, y, duration })
 	energyCurrency.value = Math.max(energyCurrency.value - 1, 0)
 	currency.value++
+	animateClick()
+}
+
+const animateClick = () => {
+	isClicked.value = true
 	setTimeout(() => {
-		canClick.value = true
-	}, 800)
+		isClicked.value = false
+	}, 300)
 }
 
 const removeCard = (id: number) => {
@@ -178,38 +192,61 @@ const removeCard = (id: number) => {
 
 <style scoped lang="scss">
 #card-container {
-	@apply relative w-full h-full;
+	@apply absolute inset-0 overflow-hidden pointer-events-none;
+	z-index: 10;
 }
 
 .card {
-	@apply absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
-	animation: moveUp 2s ease-in-out forwards;
+	@apply absolute w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
+	animation: moveUp ease-out forwards;
+}
+
+.img {
+	position: relative;
+	cursor: pointer;
+	transition: transform 0.3s ease-in-out;
+}
+
+.img.clicked {
+	animation: click-animation 0.3s ease-in-out;
 }
 
 @keyframes moveUp {
 	0% {
-		bottom: 0;
+		transform: translate(-50%, 0) rotate(0deg);
 		opacity: 1;
-		transform: translateX(-50%) rotate(0deg);
 	}
 
 	25% {
-		transform: translateX(-50%) rotate(10deg);
+		transform: translate(-50%, -75px) rotate(10deg);
 	}
 
 	50% {
-		transform: translateX(-50%) rotate(-10deg);
+		transform: translate(-50%, -100px) rotate(-10deg);
 	}
 
 	75% {
-		transform: translateX(-50%) rotate(10deg);
+		transform: translate(-50%, -125px) rotate(10deg);
 		opacity: 0.5;
 	}
 
 	100% {
-		bottom: 100%;
+		transform: translate(-50%, -150px) rotate(0deg);
 		opacity: 0;
 	}
 }
+
+@keyframes click-animation {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.1);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
 </style>
-@/entities/Wallet/api/useTWA@/entities/Wallet/api/useAuthButton@/entities/Wallet/api/tonConnectUIInstance
