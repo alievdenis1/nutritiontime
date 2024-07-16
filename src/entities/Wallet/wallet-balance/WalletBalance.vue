@@ -48,7 +48,6 @@
 			<img
 				src="/public/image/start-screen-image.webp"
 				alt=""
-				class="w-full h-full object-cover rounded-[50%] prevent-shrink"
 			>
 			<div
 				id="card-container"
@@ -209,6 +208,13 @@ const removeCard = (id: number) => {
 
 .img.clicked {
 	animation: click-animation 0.3s ease-in-out;
+}
+
+.cat-image {
+	width: 120%;
+	height: 120%;
+	object-fit: cover;
+	object-position: center;
 }
 
 @keyframes moveUp {
