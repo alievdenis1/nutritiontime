@@ -7,7 +7,6 @@
 				</div>
 				<IconGold />
 			</div>
-
 			<IconEnquiry
 				class="cursor-pointer"
 				@click="openModal"
@@ -25,12 +24,8 @@
 					</button>
 				</div>
 				<div class="flex flex-col gap-[20px] text-sm mb-[20px]">
-					<span>
-						{{ t('creditInfo') }}
-					</span>
-					<span>
-						{{ t('globalNetworkInfo') }}
-					</span>
+					<span>{{ t('creditInfo') }}</span>
+					<span>{{ t('globalNetworkInfo') }}</span>
 				</div>
 				<VButton
 					:color="ButtonColors.Green"
@@ -40,35 +35,12 @@
 				</VButton>
 			</VModal>
 		</div>
-		<div
-			class="img flex items-center justify-center rounded-[50%] h-[280px] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
-			:class="{ 'clicked': isClicked }"
-			@click="addCardAndAnimate"
-		>
-			<img
-				src="/public/image/start-screen-image.webp"
-				alt=""
-			>
-			<div
-				id="card-container"
-				class="absolute inset-0 overflow-hidden pointer-events-none"
-			>
-				<div
-					v-for="card in cards"
-					:key="card.id"
-					class="card"
-					:style="{
-						left: `${card.x}px`,
-						top: `${card.y}px`,
-						animationDuration: `${card.duration}s`
-					}"
-					@animationend="removeCard(card.id)"
-				>
-					+1
-					<IconGold class="w-[24px] h-[24px]" />
-				</div>
-			</div>
-		</div>
+		<CatClicker
+			:energy-current="energyCurrency"
+			:currency="currency"
+			@update:currency="updateCurrency"
+			@update:energy-current="updateEnergyCurrency"
+		/>
 		<div class="flex justify-between relative">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px]"
@@ -102,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, nextTick } from 'vue'
+import { onMounted, ref, computed, nextTick, toRefs } from 'vue'
 import { IconGold, IconEnquiry, IconEnergy, IconArrowRight, IconClose, IconDiamond } from 'shared/components/Icon'
 import { VModal } from 'shared/components/Modal'
 import { VButton } from 'shared/components/Button'
@@ -113,7 +85,7 @@ import { useAuthButton } from 'entities/Wallet/api/useAuthButton'
 import { getTonConnectUIInstance } from 'entities/Wallet/api/tonConnectUIInstance'
 import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
-import { Card } from './types'
+import { CatClicker } from 'entities/Wallet/wallet-balance'
 
 const props = withDefaults(defineProps<{
 	initialCurrency: number,
@@ -123,6 +95,7 @@ const props = withDefaults(defineProps<{
 	initialEnergyCurrency: 100
 })
 
+const { initialEnergyCurrency, initialCurrency } = toRefs(props)
 const { t } = useTranslation(Localization)
 
 const show = ref(false)
@@ -153,106 +126,20 @@ onMounted(async () => {
 	loading.value = false
 })
 
-const cards = ref<Card[]>([])
-let clickCount = 0
+const currency = ref(initialCurrency.value)
+const energyCurrency = ref(initialEnergyCurrency.value)
 
-const currency = ref(props.initialCurrency)
-const energyCurrency = ref(props.initialEnergyCurrency)
+const updateCurrency = (newValue: number) => {
+	currency.value = newValue
+}
+
+const updateEnergyCurrency = (newValue: number) => {
+	energyCurrency.value = newValue
+}
 
 const formattedCurrency = computed(() => {
 	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 })
-
-const isClicked = ref(false)
-
-const addCardAndAnimate = (event: MouseEvent) => {
-	if (energyCurrency.value <= 0 || !event.currentTarget) return
-	const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-	const x = event.clientX - rect.left
-	const y = event.clientY - rect.top
-	const duration = 2 - (y / rect.height) * 1.5
-	cards.value.push({ id: clickCount++, x, y, duration })
-	energyCurrency.value = Math.max(energyCurrency.value - 1, 0)
-	currency.value++
-	animateClick()
-}
-
-const animateClick = () => {
-	isClicked.value = true
-	setTimeout(() => {
-		isClicked.value = false
-	}, 300)
-}
-
-const removeCard = (id: number) => {
-	cards.value = cards.value.filter(card => card.id !== id)
-}
 </script>
 
-<style scoped lang="scss">
-#card-container {
-	@apply absolute inset-0 overflow-hidden pointer-events-none;
-	z-index: 10;
-}
-
-.card {
-	@apply absolute w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
-	animation: moveUp ease-out forwards;
-}
-
-.img {
-	position: relative;
-	cursor: pointer;
-	transition: transform 0.3s ease-in-out;
-}
-
-.img.clicked {
-	animation: click-animation 0.3s ease-in-out;
-}
-
-.cat-image {
-	width: 120%;
-	height: 120%;
-	object-fit: cover;
-	object-position: center;
-}
-
-@keyframes moveUp {
-	0% {
-		transform: translate(-50%, 0) rotate(0deg);
-		opacity: 1;
-	}
-
-	25% {
-		transform: translate(-50%, -75px) rotate(10deg);
-	}
-
-	50% {
-		transform: translate(-50%, -100px) rotate(-10deg);
-	}
-
-	75% {
-		transform: translate(-50%, -125px) rotate(10deg);
-		opacity: 0.5;
-	}
-
-	100% {
-		transform: translate(-50%, -150px) rotate(0deg);
-		opacity: 0;
-	}
-}
-
-@keyframes click-animation {
-	0% {
-		transform: scale(1);
-	}
-
-	50% {
-		transform: scale(1.1);
-	}
-
-	100% {
-		transform: scale(1);
-	}
-}
-</style>
+<style scoped lang="scss"></style>
