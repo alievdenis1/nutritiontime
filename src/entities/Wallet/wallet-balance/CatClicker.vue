@@ -1,4 +1,5 @@
 <template>
+	{{ accelerationq }} {{ CLICKER_CONFIG.shake.threshold }}
 	{{ isShaking }}
 	{{ isShouting }}
 	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
@@ -142,7 +143,7 @@ const CLICKER_CONFIG = reactive({
     rapidClickDuration: 85     // Длительность вибрации при быстром клике
   },
   sound: {
-    threshold: 0.2,            // Порог громкости для определения крика (0-1)
+    threshold: 0.07,            // Порог громкости для определения крика (0-1)
     timeout: 500,             // Время, в течение которого действует эффект крика (мс)
   }
 })
@@ -286,6 +287,7 @@ const removeCard = (id: number) => {
   }
 }
 
+const accelerationq = ref(0)
 const handleDeviceMotion = (event: DeviceMotionEvent) => {
   const { accelerationIncludingGravity } = event
   if (accelerationIncludingGravity) {
@@ -294,6 +296,8 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
         Math.pow(accelerationIncludingGravity.y || 0, 2) +
         Math.pow(accelerationIncludingGravity.z || 0, 2)
     )
+
+    accelerationq.value = acceleration
 
     if (acceleration > CLICKER_CONFIG.shake.threshold) {
       isShaking.value = true
