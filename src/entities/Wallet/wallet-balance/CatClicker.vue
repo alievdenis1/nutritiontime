@@ -46,7 +46,7 @@ const CLICKER_CONFIG = {
   animation: {
     click: {
       duration: 300,           // Длительность анимации клика (мс)
-      scaleFactor: 1.01,        // Фактор увеличения при клике
+      scaleFactor: 1.01,       // Фактор увеличения при клике
       rotateFactor: 20,        // Фактор вращения при клике (градусы)
       shadowFactor: 10         // Фактор тени при клике (пиксели)
     },
@@ -60,7 +60,12 @@ const CLICKER_CONFIG = {
   },
   rapidClick: {
     threshold: 8,              // Порог для определения быстрого клика
-    timeout: 150               // Время сброса счетчика быстрых кликов (мс)
+    timeout: 150,              // Время сброса счетчика быстрых кликов (мс)
+    shakeThreshold: 2.67,      // Порог для определения быстрого клика при тряске (1/3 от обычного)
+  },
+  shake: {
+    threshold: 15,             // Порог ускорения для определения тряски
+    timeout: 1000,             // Время, в течение которого действует эффект тряски (мс)
   },
   style: {
     containerSize: 280,        // Размер контейнера кликера (пиксели)
@@ -71,7 +76,7 @@ const CLICKER_CONFIG = {
     }
   },
   catEffect: {
-    scaleFactor: 1.05,          // Фактор увеличения изображения кота при клике
+    scaleFactor: 1.05,         // Фактор увеличения изображения кота при клике
     brightnessFactor: {
       min: 0.8,                // Минимальная яркость изображения при быстром клике
       max: 1.5                 // Максимальная яркость изображения при быстром клике
@@ -79,9 +84,9 @@ const CLICKER_CONFIG = {
     hueRotateAngle: 40         // Угол поворота цвета при быстром клике (градусы)
   },
   vibration: {
-    enabled: true,           // Включить вибрацию
-    duration: 25,            // Длительность вибрации в миллисекундах
-    rapidClickDuration: 85   // Длительность вибрации при быстром клике
+    enabled: true,             // Включить вибрацию
+    duration: 25,              // Длительность вибрации в миллисекундах
+    rapidClickDuration: 85     // Длительность вибрации при быстром клике
   }
 }
 
@@ -103,8 +108,10 @@ const cards = ref<Array<{ id: number, x: number, y: number, duration: number }>>
 const imgContainer = ref<HTMLElement | null>(null)
 
 const isRapidClicking = ref(false)
+const isShaking = ref(false)
 let clickSpeed = 0
 let clickTimer: number | null = null
+let shakeTimeout: number | null = null
 
 const visibleCards = computed(() => cards.value.slice(-20))
 
@@ -122,7 +129,8 @@ const addCardAndAnimate = (event: MouseEvent) => {
   animateClick(x, y)
 
   clickSpeed++
-  isRapidClicking.value = clickSpeed > CLICKER_CONFIG.rapidClick.threshold
+  const currentThreshold = isShaking.value ? CLICKER_CONFIG.rapidClick.shakeThreshold : CLICKER_CONFIG.rapidClick.threshold
+  isRapidClicking.value = clickSpeed > currentThreshold
 
   vibrate(isRapidClicking.value ? CLICKER_CONFIG.vibration.rapidClickDuration : CLICKER_CONFIG.vibration.duration)
 
@@ -176,23 +184,47 @@ const removeCard = (id: number) => {
   }
 }
 
-onMounted(() => {
-  window.addEventListener('visibilitychange', handleVisibilityChange)
-})
+const handleDeviceMotion = (event: DeviceMotionEvent) => {
+  const { accelerationIncludingGravity } = event
+  if (accelerationIncludingGravity) {
+    const acceleration = Math.sqrt(
+        Math.pow(accelerationIncludingGravity.x || 0, 2) +
+        Math.pow(accelerationIncludingGravity.y || 0, 2) +
+        Math.pow(accelerationIncludingGravity.z || 0, 2)
+    )
 
-onUnmounted(() => {
-  window.removeEventListener('visibilitychange', handleVisibilityChange)
-  if (clickTimer) clearTimeout(clickTimer)
-})
+    if (acceleration > CLICKER_CONFIG.shake.threshold) {
+      isShaking.value = true
+      if (shakeTimeout) clearTimeout(shakeTimeout)
+      shakeTimeout = window.setTimeout(() => {
+        isShaking.value = false
+      }, CLICKER_CONFIG.shake.timeout)
+    }
+  }
+}
 
 const handleVisibilityChange = () => {
   if (document.hidden) {
     cards.value = []
     clickSpeed = 0
     isRapidClicking.value = false
+    isShaking.value = false
     if (clickTimer) clearTimeout(clickTimer)
+    if (shakeTimeout) clearTimeout(shakeTimeout)
   }
 }
+
+onMounted(() => {
+  window.addEventListener('visibilitychange', handleVisibilityChange)
+  window.addEventListener('devicemotion', handleDeviceMotion)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('visibilitychange', handleVisibilityChange)
+  window.removeEventListener('devicemotion', handleDeviceMotion)
+  if (clickTimer) clearTimeout(clickTimer)
+  if (shakeTimeout) clearTimeout(shakeTimeout)
+})
 </script>
 
 <style scoped lang="scss">
