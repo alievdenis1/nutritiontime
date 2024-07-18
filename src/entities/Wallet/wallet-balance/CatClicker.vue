@@ -147,14 +147,14 @@ const handleVisibilityChange = () => {
 </script>
 
 <style scoped lang="scss">
-
 .img-container {
   position: relative;
   cursor: pointer;
   transition: background-color 0.3s ease;
   perspective: 1000px;
   will-change: transform;
-  overflow: hidden;
+  border-radius: 50%;
+  overflow: visible; // Изменено с hidden на visible
 }
 
 .img-wrapper {
@@ -165,6 +165,7 @@ const handleVisibilityChange = () => {
   left: -10%;
   transition: transform 0.3s ease;
   will-change: transform;
+  overflow: visible; // Добавлено для обеспечения видимости содержимого
 }
 
 .cat-image {
@@ -182,13 +183,14 @@ const handleVisibilityChange = () => {
 #card-container {
   @apply absolute inset-0 pointer-events-none;
   z-index: 10;
-  overflow: visible;
+  overflow: visible; // Изменено с hidden на visible
 }
 
 .card {
   @apply absolute w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
   animation: moveUp ease-out forwards;
   will-change: transform, opacity;
+  pointer-events: none; // Добавлено, чтобы карточки не мешали кликам
 }
 
 .card-enter-active,
