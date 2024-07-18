@@ -62,6 +62,7 @@ const CLICKER_CONFIG = {
     threshold: 9,              // Порог для определения быстрого клика
     timeout: 150,              // Время сброса счетчика быстрых кликов (мс)
     shakeThreshold: 2,      // Порог для определения быстрого клика при тряске (1/3 от обычного)
+    shoutThreshold: 1,         //  порог при крике
   },
   shake: {
     threshold: 8,             // Порог ускорения для определения тряски
@@ -87,6 +88,10 @@ const CLICKER_CONFIG = {
     enabled: true,             // Включить вибрацию
     duration: 25,              // Длительность вибрации в миллисекундах
     rapidClickDuration: 85     // Длительность вибрации при быстром клике
+  },
+  sound: {
+    threshold: 0.2,            // Порог громкости для определения крика (0-1)
+    timeout: 1000,             // Время, в течение которого действует эффект крика (мс)
   }
 }
 
@@ -100,6 +105,45 @@ const emit = defineEmits(['update:currency', 'update:energyCurrent'])
 const vibrate = (duration: number) => {
   if (CLICKER_CONFIG.vibration.enabled && 'vibrate' in navigator) {
     navigator.vibrate(duration)
+  }
+}
+
+const isShouting = ref(false)
+let shoutTimeout: number | null = null
+let audioContext: AudioContext | null = null
+let analyser: AnalyserNode | null = null
+let microphone: MediaStreamAudioSourceNode | null = null
+
+const startAudioAnalysis = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    analyser = audioContext.createAnalyser()
+    microphone = audioContext.createMediaStreamSource(stream)
+    microphone.connect(analyser)
+    analyser.fftSize = 256
+    const bufferLength = analyser.frequencyBinCount
+    const dataArray = new Uint8Array(bufferLength)
+
+    const checkAudioLevel = () => {
+      analyser!.getByteFrequencyData(dataArray)
+      const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength
+      const normalizedAverage = average / 255  // Normalize to 0-1 range
+
+      if (normalizedAverage > CLICKER_CONFIG.sound.threshold) {
+        isShouting.value = true
+        if (shoutTimeout) clearTimeout(shoutTimeout)
+        shoutTimeout = window.setTimeout(() => {
+          isShouting.value = false
+        }, CLICKER_CONFIG.sound.timeout)
+      }
+
+      requestAnimationFrame(checkAudioLevel)
+    }
+
+    checkAudioLevel()
+  } catch (error) {
+    console.error('Error accessing microphone:', error)
   }
 }
 
@@ -129,7 +173,15 @@ const addCardAndAnimate = (event: MouseEvent) => {
   animateClick(x, y)
 
   clickSpeed++
-  const currentThreshold = isShaking.value ? CLICKER_CONFIG.rapidClick.shakeThreshold : CLICKER_CONFIG.rapidClick.threshold
+  clickSpeed++
+  let currentThreshold = CLICKER_CONFIG.rapidClick.threshold
+  if (isShaking.value) {
+    currentThreshold = CLICKER_CONFIG.rapidClick.shakeThreshold
+  }
+  if (isShouting.value) {
+    currentThreshold = CLICKER_CONFIG.rapidClick.shoutThreshold
+  }
+  isRapidClicking.value = clickSpeed > currentThreshold
   isRapidClicking.value = clickSpeed > currentThreshold
 
   vibrate(isRapidClicking.value ? CLICKER_CONFIG.vibration.rapidClickDuration : CLICKER_CONFIG.vibration.duration)
@@ -217,6 +269,7 @@ const handleVisibilityChange = () => {
 onMounted(() => {
   window.addEventListener('visibilitychange', handleVisibilityChange)
   window.addEventListener('devicemotion', handleDeviceMotion)
+  startAudioAnalysis()
 })
 
 onUnmounted(() => {
@@ -224,6 +277,10 @@ onUnmounted(() => {
   window.removeEventListener('devicemotion', handleDeviceMotion)
   if (clickTimer) clearTimeout(clickTimer)
   if (shakeTimeout) clearTimeout(shakeTimeout)
+  if (shoutTimeout) clearTimeout(shoutTimeout)
+  if (audioContext) {
+    audioContext.close()
+  }
 })
 </script>
 
