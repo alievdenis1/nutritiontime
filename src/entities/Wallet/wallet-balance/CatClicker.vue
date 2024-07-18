@@ -1,4 +1,6 @@
 <template>
+	{{ isShaking }}
+	{{ isShouting }}
 	<div
 		ref="imgContainer"
 		class="img-container flex items-center justify-center rounded-[50%] h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
@@ -90,7 +92,7 @@ const CLICKER_CONFIG = {
     rapidClickDuration: 85     // Длительность вибрации при быстром клике
   },
   sound: {
-    threshold: 0.7,            // Порог громкости для определения крика (0-1)
+    threshold: 0.3,            // Порог громкости для определения крика (0-1)
     timeout: 500,             // Время, в течение которого действует эффект крика (мс)
   }
 }
