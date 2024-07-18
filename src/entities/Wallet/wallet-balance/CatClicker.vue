@@ -80,8 +80,8 @@ const CLICKER_CONFIG = {
   },
   vibration: {
     enabled: true,           // Включить вибрацию
-    duration: 50,            // Длительность вибрации в миллисекундах
-    rapidClickDuration: 25   // Длительность вибрации при быстром клике
+    duration: 25,            // Длительность вибрации в миллисекундах
+    rapidClickDuration: 85   // Длительность вибрации при быстром клике
   }
 }
 
