@@ -173,7 +173,6 @@ const addCardAndAnimate = (event: MouseEvent) => {
   animateClick(x, y)
 
   clickSpeed++
-  clickSpeed++
   let currentThreshold = CLICKER_CONFIG.rapidClick.threshold
   if (isShaking.value) {
     currentThreshold = CLICKER_CONFIG.rapidClick.shakeThreshold
