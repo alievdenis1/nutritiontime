@@ -7,7 +7,6 @@
 				</div>
 				<IconGold />
 			</div>
-
 			<IconEnquiry
 				class="cursor-pointer"
 				@click="openModal"
@@ -25,12 +24,8 @@
 					</button>
 				</div>
 				<div class="flex flex-col gap-[20px] text-sm mb-[20px]">
-					<span>
-						{{ t('creditInfo') }}
-					</span>
-					<span>
-						{{ t('globalNetworkInfo') }}
-					</span>
+					<span>{{ t('creditInfo') }}</span>
+					<span>{{ t('globalNetworkInfo') }}</span>
 				</div>
 				<VButton
 					:color="ButtonColors.Green"
@@ -40,31 +35,12 @@
 				</VButton>
 			</VModal>
 		</div>
-		<div
-			class="flex items-center justify-center rounded-[50%] h-[280px] bg-transparentGreen mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
-		>
-			<div
-				id="card-container"
-				class="absolute bottom-0 left-[50%]"
-			>
-				<div
-					v-for="(card, index) in cards"
-					:key="card.id"
-					class="card"
-					:style="{ animationDelay: `${index * 0.1}s` }"
-					@animationend="removeCard(card.id)"
-				>
-					+1
-					<IconGold class="w-[24px] h-[24px]" />
-				</div>
-			</div>
-			<img
-				src="/public/image/start-screen-image.webp"
-				alt=""
-				class="cursor-pointer w-full h-full object-cover rounded-[50%] prevent-shrink"
-				@click="addCard"
-			>
-		</div>
+		<CatClicker
+			:energy-current="energyCurrency"
+			:currency="currency"
+			@update:currency="updateCurrency"
+			@update:energy-current="updateEnergyCurrency"
+		/>
 		<div class="flex justify-between relative">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px]"
@@ -98,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, nextTick } from 'vue'
+import { onMounted, ref, computed, nextTick, toRefs } from 'vue'
 import { IconGold, IconEnquiry, IconEnergy, IconArrowRight, IconClose, IconDiamond } from 'shared/components/Icon'
 import { VModal } from 'shared/components/Modal'
 import { VButton } from 'shared/components/Button'
@@ -109,16 +85,17 @@ import { useAuthButton } from 'entities/Wallet/api/useAuthButton'
 import { getTonConnectUIInstance } from 'entities/Wallet/api/tonConnectUIInstance'
 import { Locales, useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
-import { Card } from './types'
+import { CatClicker } from 'entities/Wallet/wallet-balance'
 
 const props = withDefaults(defineProps<{
 	initialCurrency: number,
 	initialEnergyCurrency: number
 }>(), {
 	initialCurrency: 0,
-	initialEnergyCurrency: 10
+	initialEnergyCurrency: 100
 })
 
+const { initialEnergyCurrency, initialCurrency } = toRefs(props)
 const { t } = useTranslation(Localization)
 
 const show = ref(false)
@@ -149,67 +126,20 @@ onMounted(async () => {
 	loading.value = false
 })
 
-const cards = ref<Card[]>([])
-let clickCount = 0
-const canClick = ref(true)
+const currency = ref(initialCurrency.value)
+const energyCurrency = ref(initialEnergyCurrency.value)
 
-const currency = ref(props.initialCurrency)
-const energyCurrency = ref(props.initialEnergyCurrency)
+const updateCurrency = (newValue: number) => {
+	currency.value = newValue
+}
+
+const updateEnergyCurrency = (newValue: number) => {
+	energyCurrency.value = newValue
+}
 
 const formattedCurrency = computed(() => {
 	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 })
-
-const addCard = () => {
-	if (!canClick.value || energyCurrency.value <= 0) return
-	canClick.value = false
-	cards.value.push({ id: clickCount++ })
-	energyCurrency.value = Math.max(energyCurrency.value - 1, 0)
-	currency.value++
-	setTimeout(() => {
-		canClick.value = true
-	}, 800)
-}
-
-const removeCard = (id: number) => {
-	cards.value = cards.value.filter(card => card.id !== id)
-}
 </script>
 
-<style scoped lang="scss">
-#card-container {
-	@apply relative w-full h-full;
-}
-
-.card {
-	@apply absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[75px] h-10 bg-white flex justify-center items-center text-[#1C1C1C] text-[24px] rounded-[16px] opacity-100;
-	animation: moveUp 2s ease-in-out forwards;
-}
-
-@keyframes moveUp {
-	0% {
-		bottom: 0;
-		opacity: 1;
-		transform: translateX(-50%) rotate(0deg);
-	}
-
-	25% {
-		transform: translateX(-50%) rotate(10deg);
-	}
-
-	50% {
-		transform: translateX(-50%) rotate(-10deg);
-	}
-
-	75% {
-		transform: translateX(-50%) rotate(10deg);
-		opacity: 0.5;
-	}
-
-	100% {
-		bottom: 100%;
-		opacity: 0;
-	}
-}
-</style>
-@/entities/Wallet/api/useTWA@/entities/Wallet/api/useAuthButton@/entities/Wallet/api/tonConnectUIInstance
+<style scoped lang="scss"></style>
