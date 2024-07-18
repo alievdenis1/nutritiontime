@@ -77,6 +77,11 @@ const CLICKER_CONFIG = {
       max: 1.5                 // Максимальная яркость изображения при быстром клике
     },
     hueRotateAngle: 40         // Угол поворота цвета при быстром клике (градусы)
+  },
+  vibration: {
+    enabled: true,           // Включить вибрацию
+    duration: 50,            // Длительность вибрации в миллисекундах
+    rapidClickDuration: 25   // Длительность вибрации при быстром клике
   }
 }
 
@@ -86,6 +91,12 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:currency', 'update:energyCurrent'])
+
+const vibrate = (duration: number) => {
+  if (CLICKER_CONFIG.vibration.enabled && 'vibrate' in navigator) {
+    navigator.vibrate(duration)
+  }
+}
 
 let clickCount = 0
 const cards = ref<Array<{ id: number, x: number, y: number, duration: number }>>([])
@@ -112,6 +123,8 @@ const addCardAndAnimate = (event: MouseEvent) => {
 
   clickSpeed++
   isRapidClicking.value = clickSpeed > CLICKER_CONFIG.rapidClick.threshold
+
+  vibrate(isRapidClicking.value ? CLICKER_CONFIG.vibration.rapidClickDuration : CLICKER_CONFIG.vibration.duration)
 
   if (clickTimer) clearTimeout(clickTimer)
   clickTimer = window.setTimeout(() => {
