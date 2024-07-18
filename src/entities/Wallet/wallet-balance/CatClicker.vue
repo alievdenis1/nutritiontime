@@ -1,6 +1,56 @@
 <template>
 	{{ isShaking }}
 	{{ isShouting }}
+	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
+		<h2 class="text-lg font-bold mb-2">
+			Конфигурация кликера
+		</h2>
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог быстрого клика</label>
+				<input
+					v-model.number="CLICKER_CONFIG.rapidClick.threshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог при тряске</label>
+				<input
+					v-model.number="CLICKER_CONFIG.rapidClick.shakeThreshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог при крике</label>
+				<input
+					v-model.number="CLICKER_CONFIG.rapidClick.shoutThreshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
+				<input
+					v-model.number="CLICKER_CONFIG.shake.threshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог определения крика</label>
+				<input
+					v-model.number="CLICKER_CONFIG.sound.threshold"
+					type="number"
+					step="0.1"
+					min="0"
+					max="1"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+		</div>
+	</div>
 	<div
 		ref="imgContainer"
 		class="img-container flex items-center justify-center rounded-[50%] h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
@@ -40,11 +90,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { IconGold } from 'shared/components/Icon'
 
 // Конфигурация кликера
-const CLICKER_CONFIG = {
+const CLICKER_CONFIG = reactive({
   animation: {
     click: {
       duration: 300,           // Длительность анимации клика (мс)
@@ -95,7 +145,7 @@ const CLICKER_CONFIG = {
     threshold: 0.2,            // Порог громкости для определения крика (0-1)
     timeout: 500,             // Время, в течение которого действует эффект крика (мс)
   }
-}
+})
 
 const props = defineProps<{
   currency: number,
