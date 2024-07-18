@@ -177,9 +177,9 @@ const addCardAndAnimate = (event: MouseEvent) => {
   if (isShaking.value) {
     currentThreshold = CLICKER_CONFIG.rapidClick.shakeThreshold
   }
-  // if (isShouting.value) {
-  //   currentThreshold = CLICKER_CONFIG.rapidClick.shoutThreshold
-  // }
+  if (isShouting.value) {
+    currentThreshold = CLICKER_CONFIG.rapidClick.shoutThreshold
+  }
   isRapidClicking.value = clickSpeed > currentThreshold
 
   vibrate(isRapidClicking.value ? CLICKER_CONFIG.vibration.rapidClickDuration : CLICKER_CONFIG.vibration.duration)
