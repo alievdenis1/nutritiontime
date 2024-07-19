@@ -1,0 +1,22 @@
+{
+    "ru": {
+        "generateRecipeTitle": "Сгенерируйте рецепт по вашей идее",
+        "describeIdeaPlaceholder": "Опишите свою идею",
+        "exampleIdea": "Например, яблочный пирог с корицей и сахаром",
+        "readyIdeasTitle": "Готовые идеи",
+        "readyIdeasDescription": "Сгенерируйте рецепт из списка наших готовых идей",
+        "generateByIngredientsTitle": "Генерация по ингридиентам",
+        "generateByIngredientsDescription": "Сгенерируйте рецепт по доступным ингридиентам",
+        "generateButtonText": "Сгенерировать рецепт"
+    },
+    "en": {
+        "generateRecipeTitle": "Generate a recipe based on your idea",
+        "describeIdeaPlaceholder": "Describe your idea",
+        "exampleIdea": "For example, apple pie with cinnamon and sugar",
+        "readyIdeasTitle": "Ready ideas",
+        "readyIdeasDescription": "Generate a recipe from our list of ready ideas",
+        "generateByIngredientsTitle": "Generate by ingredients",
+        "generateByIngredientsDescription": "Generate a recipe based on available ingredients",
+        "generateButtonText": "Generate recipe"
+    }
+}

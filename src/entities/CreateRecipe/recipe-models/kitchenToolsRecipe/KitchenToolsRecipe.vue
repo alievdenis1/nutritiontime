@@ -117,36 +117,36 @@ const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]
 const ingredientNameInput = ref<HTMLInputElement | null>(null)
 
 const openModal = () => {
-    showModal.value = true
+	showModal.value = true
 }
 
 const addIngredient = () => {
-    tryToSave.value = true
-    if (ingredientName.value && ingredientQuantity.value) {
-        ingredients.value.push({
-            name: ingredientName.value,
-            quantity: ingredientQuantity.value,
+	tryToSave.value = true
+	if (ingredientName.value && ingredientQuantity.value) {
+		ingredients.value.push({
+			name: ingredientName.value,
+			quantity: ingredientQuantity.value,
 			type: activeTab.value
-        })
-        closeModal()
-    }
+		})
+		closeModal()
+	}
 }
 
 const removeIngredient = (index: number) => {
-    ingredients.value.splice(index, 1)
+	ingredients.value.splice(index, 1)
 }
 
 const closeModal = () => {
-    showModal.value = false
-    ingredientName.value = ''
-    ingredientQuantity.value = ''
-    tryToSave.value = false
+	showModal.value = false
+	ingredientName.value = ''
+	ingredientQuantity.value = ''
+	tryToSave.value = false
 }
 
 const filterNumericInput = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    target.value = target.value.replace(/\D/g, '')
-    ingredientQuantity.value = target.value
+	const target = event.target as HTMLInputElement
+	target.value = target.value.replace(/\D/g, '')
+	ingredientQuantity.value = target.value
 }
 
 const activeInputName = computed(() => tryToSave.value && !ingredientName.value)
@@ -155,26 +155,26 @@ const activeInputQuantity = computed(() => tryToSave.value && !ingredientQuantit
 const notEmptyIngredientQuantity = computed(() => ingredientQuantity.value.length !== 0)
 
 watch(showModal, (newVal) => {
-    if (newVal) {
-        nextTick(() => {
-            if (ingredientNameInput.value) {
-                ingredientNameInput.value.focus()
-            }
-        })
-    }
+	if (newVal) {
+		nextTick(() => {
+			if (ingredientNameInput.value) {
+				ingredientNameInput.value.focus()
+			}
+		})
+	}
 })
 </script>
 
 <style scoped>
 .border {
-    border: 1px solid #E1E1E1;
+	border: 1px solid #E1E1E1;
 }
 
 .activeInput {
-    border: 1px solid #F04F4F;
+	border: 1px solid #F04F4F;
 }
 
 .filledInput {
-    border: 2px solid #319A6E33;
+	border: 2px solid #319A6E33;
 }
 </style>

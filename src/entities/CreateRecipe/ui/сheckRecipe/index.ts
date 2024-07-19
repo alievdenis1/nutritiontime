@@ -1,1 +1,0 @@
-export { default as CheckRecipe } from './CheckRecipe.vue'

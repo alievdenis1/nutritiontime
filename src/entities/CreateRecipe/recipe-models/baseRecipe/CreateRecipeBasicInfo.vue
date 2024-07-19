@@ -188,7 +188,6 @@ const selectCategory = (category: string) => {
 
 <style scoped>
 textarea {
-	resize: none;
 	border: 1px solid #d1d5db;
 }
 .border {

@@ -51,27 +51,11 @@
 						/>
 					</div>
 				</div>
-				<div class="flex-grow overflow-y-auto custom-scrollbar">
-					<div
-						v-for="(category, index) in categories"
-						:key="index"
-						class="mb-5"
-					>
-						<h3 class="mb-3.5 text-lg">
-							{{ category.name }}
-						</h3>
-						<div class="flex flex-wrap gap-2">
-							<button
-								v-for="tag in category.tags"
-								:key="tag"
-								:class="['px-2 py-1 border rounded-full cursor-pointer', { 'bg-forestGreen text-white': hasTag(tag), 'bg-lightGray': !hasTag(tag) }]"
-								@click="toggleTag(tag)"
-							>
-								{{ tag }}
-							</button>
-						</div>
-					</div>
-				</div>
+				<TagsCollectionsItem
+					class="flex-grow overflow-y-auto custom-scrollbar"
+					:categories-tags="categories"
+					:modal-selected-tags="modalSelectedTags"
+				/>
 				<button
 					:class="['block w-full mt-4 py-2 rounded-xl text-white text-center cursor-pointer', buttonClass]"
 					:disabled="isButtonDisabled"
@@ -91,7 +75,7 @@ import { VModal } from '@/shared/components/Modal'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './TagsRecipe.localization.json'
 import { IconArrowRight, IconClose } from '@/shared/components/Icon'
-
+import TagsCollectionsItem from './TagsCollectionsItem.vue'
 const { t } = useTranslation(localizations)
 
 const showModal = ref(false)
@@ -115,14 +99,6 @@ const closeModal = () => {
 	showModal.value = false
 }
 
-const toggleTag = (tag: string) => {
-	if (modalSelectedTags.value.includes(tag)) {
-		modalSelectedTags.value = modalSelectedTags.value.filter(t => t !== tag)
-	} else {
-		modalSelectedTags.value.push(tag)
-	}
-}
-
 const removeTag = (tag: string) => {
 	selectedTags.value = selectedTags.value.filter(t => t !== tag)
 }
@@ -131,8 +107,6 @@ const saveTags = () => {
 	selectedTags.value = [...modalSelectedTags.value]
 	closeModal()
 }
-
-const hasTag = (tag: string) => modalSelectedTags.value.includes(tag)
 
 const isButtonDisabled = computed(() => modalSelectedTags.value.length === 0)
 
