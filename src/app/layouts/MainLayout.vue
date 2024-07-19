@@ -6,5 +6,5 @@
 </template>
 
 <script setup lang="ts">
-import { FooterWidget } from 'widgets/footer'
+// import { FooterWidget } from 'widgets/footer'
 </script>

@@ -150,47 +150,54 @@ const vibrate = (duration: number) => {
 }
 
 const isShouting = ref(false)
+const isShaking = ref(false)
+const isRapidClicking = ref(false)
+const isCalibrating = ref(true)
+const isAudioInitialized = ref(false)
+const errorMessage = ref('')
+
+const normalizedAverageq = ref(0)
+const relativeIncreaseq = ref(0)
+const currentLevelq = ref(0)
+const baselineNoiseLevel = ref(0)
+
 let shoutTimeout: number | null = null
 let audioContext: AudioContext | null = null
 let analyser: AnalyserNode | null = null
 let microphone: MediaStreamAudioSourceNode | null = null
 
-const normalizedAverageq = ref(0)
-
-const isCalibrating = ref(true)
 const CALIBRATION_DURATION = 5000 // 5 seconds for calibration
 const NOISE_SAMPLES = 800 // Increased number of samples for better accuracy
 const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
 
-let noiseLevels: number[] = []
-let baselineNoiseLevel = 0
-let relativeIncreaseq = ref(0)
-let currentLevelq = ref(0)
+const noiseLevels = ref<number[]>([])
+
 const startAudioAnalysis = async () => {
+  if (isAudioInitialized.value) return
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     analyser = audioContext.createAnalyser()
     microphone = audioContext.createMediaStreamSource(stream)
     microphone.connect(analyser)
-    analyser.fftSize = 1024 // Increased for better frequency resolution
+    analyser.fftSize = 1024
     const bufferLength = analyser.frequencyBinCount
     const dataArray = new Uint8Array(bufferLength)
 
-    let calibrationStartTime = Date.now()
+    const calibrationStartTime = Date.now()
 
     const getAudioLevel = (): number => {
       analyser!.getByteFrequencyData(dataArray)
-      const sum = dataArray.reduce((acc, value) => acc + value, 0)
-      return sum / bufferLength / 255 // Normalize to 0-1
+      return dataArray.reduce((acc, value) => acc + value, 0) / bufferLength / 255
     }
 
     const updateNoiseLevel = (level: number) => {
-      noiseLevels.push(level)
-      if (noiseLevels.length > NOISE_SAMPLES) {
-        noiseLevels.shift()
+      noiseLevels.value.push(level)
+      if (noiseLevels.value.length > NOISE_SAMPLES) {
+        noiseLevels.value.shift()
       }
-      baselineNoiseLevel = noiseLevels.reduce((sum, level) => sum + level, 0) / noiseLevels.length
+      baselineNoiseLevel.value = noiseLevels.value.reduce((sum, level) => sum + level, 0) / noiseLevels.value.length
     }
 
     const checkAudioLevel = () => {
@@ -202,17 +209,16 @@ const startAudioAnalysis = async () => {
       } else {
         if (isCalibrating.value) {
           isCalibrating.value = false
-          console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel)
+          console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel.value)
         }
 
         updateNoiseLevel(currentLevel)
 
-        // Only check for shouting at intervals to reduce false positives
-        if (Date.now() % SHOUT_DETECTION_INTERVAL < 20) { // 20ms window to catch the interval
-          const relativeIncrease = currentLevel / baselineNoiseLevel
-          console.log('Relative increase:', relativeIncrease, 'Current level:', currentLevel, 'Baseline:', baselineNoiseLevel)
+        if (Date.now() % SHOUT_DETECTION_INTERVAL < 20) {
+          const relativeIncrease = currentLevel / baselineNoiseLevel.value
+          relativeIncreaseq.value = relativeIncrease
+          currentLevelq.value = currentLevel
 
-           currentLevelq.value = currentLevel
           if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
             if (!isShouting.value) {
               console.log('Shouting detected!')
@@ -220,8 +226,6 @@ const startAudioAnalysis = async () => {
             }
             if (shoutTimeout) clearTimeout(shoutTimeout)
             shoutTimeout = window.setTimeout(() => {
-              relativeIncreaseq.value = relativeIncrease
-
               isShouting.value = false
             }, CLICKER_CONFIG.sound.timeout)
           }
@@ -232,11 +236,12 @@ const startAudioAnalysis = async () => {
     }
 
     checkAudioLevel()
+    isAudioInitialized.value = true
   } catch (error) {
     console.error('Error accessing microphone:', error)
+    errorMessage.value = 'Не удалось получить доступ к микрофону'
   }
 }
-
 const stopAudioAnalysis = () => {
   if (audioContext) {
     audioContext.close()
@@ -263,8 +268,6 @@ interface Card {
 const cards = ref<Card[]>([])
 const imgContainer = ref<HTMLElement | null>(null)
 
-const isRapidClicking = ref(false)
-const isShaking = ref(false)
 let clickSpeed = 0
 let clickTimer: number | null = null
 let shakeTimeout: number | null = null
@@ -390,18 +393,12 @@ const handleVisibilityChange = () => {
 onMounted(() => {
   window.addEventListener('visibilitychange', handleVisibilityChange)
   window.addEventListener('devicemotion', handleDeviceMotion)
-  startAudioAnalysis()
+  document.addEventListener('click', startAudioAnalysis, { once: true })
 })
 
 onUnmounted(() => {
   window.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('devicemotion', handleDeviceMotion)
-  if (clickTimer) clearTimeout(clickTimer)
-  if (shakeTimeout) clearTimeout(shakeTimeout)
-  if (shoutTimeout) clearTimeout(shoutTimeout)
-  if (audioContext) {
-    audioContext.close()
-  }
   stopAudioAnalysis()
 })
 </script>
