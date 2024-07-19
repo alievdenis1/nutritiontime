@@ -1,7 +1,7 @@
 <template>
 	тряска {{ accelerationq }} <br> крик {{ normalizedAverageq }} <br><br>
 	тряска привышена {{ isShaking }} <br>
-	крик привышен {{ isShouting }}
+	крик привышен {{ isShouting }} <br>
 	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
 		<div class="grid grid-cols-2 gap-4">
 			<div>
