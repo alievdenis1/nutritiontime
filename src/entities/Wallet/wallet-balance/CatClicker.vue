@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { IconGold } from 'shared/components/Icon'
 
 // Конфигурация кликера
@@ -148,12 +148,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:currency', 'update:energyCurrent'])
 
-const vibrate = (duration: number) => {
-  if (CLICKER_CONFIG.vibration.enabled && 'vibrate' in navigator) {
-    navigator.vibrate(duration)
-  }
-}
-
+const imgContainer = ref<HTMLElement | null>(null)
 const isShouting = ref(false)
 const isShaking = ref(false)
 const isRapidClicking = ref(false)
@@ -165,22 +160,39 @@ const normalizedAverageq = ref(0)
 const relativeIncreaseq = ref(0)
 const currentLevelq = ref(0)
 const baselineNoiseLevel = ref(0)
-
-let shoutTimeout: number | null = null
-let audioContext: AudioContext | null = null
-let analyser: AnalyserNode | null = null
-let microphone: MediaStreamAudioSourceNode | null = null
-
-const CALIBRATION_DURATION = 5000 // 5 seconds for calibration
-const NOISE_SAMPLES = 800 // Increased number of samples for better accuracy
-const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
-
 const noiseLevels = ref<number[]>([])
 
 const testCounter = ref(0)
 const testCounter2 = ref(0)
 const testCounter3 = ref(0)
 const testCounter4 = ref(0)
+
+const forceUpdate = ref(0)
+
+let shoutTimeout: number | null = null
+let audioContext: AudioContext | null = null
+let analyser: AnalyserNode | null = null
+let microphone: MediaStreamAudioSourceNode | null = null
+let clickSpeed = 0
+let clickTimer: number | null = null
+let shakeTimeout: number | null = null
+let clickCount = 0
+
+const CALIBRATION_DURATION = 5000 // 5 seconds for calibration
+const NOISE_SAMPLES = 800 // Increased number of samples for better accuracy
+const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
+
+interface Card {
+  id: number;
+  x: number;
+  y: number;
+  duration: number;
+  multiplier: number;
+}
+
+const cards = ref<Card[]>([])
+const visibleCards = computed(() => cards.value.slice(-20))
+
 const startAudioAnalysis = async () => {
   if (isAudioInitialized.value) return
 
@@ -230,22 +242,23 @@ const startAudioAnalysis = async () => {
 
           testCounter.value++
 
-          if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
-            testCounter2.value++
+          nextTick(() => {
+            if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
+              testCounter2.value++
 
-            if (!isShouting.value) {
-              testCounter3.value++
-
-              console.log('Shouting detected!')
-              isShouting.value = true
+              if (!isShouting.value) {
+                testCounter3.value++
+                console.log('Shouting detected!')
+                isShouting.value = true
+              }
+              if (shoutTimeout) clearTimeout(shoutTimeout)
+              shoutTimeout = window.setTimeout(() => {
+                testCounter4.value++
+                isShouting.value = false
+              }, CLICKER_CONFIG.sound.timeout)
             }
-            if (shoutTimeout) clearTimeout(shoutTimeout)
-            shoutTimeout = window.setTimeout(() => {
-              testCounter4.value++
-
-              isShouting.value = false
-            }, CLICKER_CONFIG.sound.timeout)
-          }
+            forceUpdate.value++
+          })
         }
       }
 
@@ -259,6 +272,7 @@ const startAudioAnalysis = async () => {
     errorMessage.value = 'Не удалось получить доступ к микрофону'
   }
 }
+
 const stopAudioAnalysis = () => {
   if (audioContext) {
     audioContext.close()
@@ -274,22 +288,6 @@ const stopAudioAnalysis = () => {
     shoutTimeout = null
   }
 }
-let clickCount = 0
-interface Card {
-  id: number;
-  x: number;
-  y: number;
-  duration: number;
-  multiplier: number;
-}
-const cards = ref<Card[]>([])
-const imgContainer = ref<HTMLElement | null>(null)
-
-let clickSpeed = 0
-let clickTimer: number | null = null
-let shakeTimeout: number | null = null
-
-const visibleCards = computed(() => cards.value.slice(-20))
 
 const addCardAndAnimate = (event: MouseEvent) => {
   if (props.energyCurrent <= 0 || !event.currentTarget) return
@@ -374,7 +372,6 @@ const removeCard = (id: number) => {
   }
 }
 
-const accelerationq = ref(0)
 const handleDeviceMotion = (event: DeviceMotionEvent) => {
   const { accelerationIncludingGravity } = event
   if (accelerationIncludingGravity) {
@@ -383,8 +380,6 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
         Math.pow(accelerationIncludingGravity.y || 0, 2) +
         Math.pow(accelerationIncludingGravity.z || 0, 2)
     )
-
-    accelerationq.value = acceleration
 
     if (acceleration > CLICKER_CONFIG.shake.threshold) {
       isShaking.value = true
@@ -407,6 +402,16 @@ const handleVisibilityChange = () => {
   }
 }
 
+const vibrate = (duration: number) => {
+  if (CLICKER_CONFIG.vibration.enabled && 'vibrate' in navigator) {
+    navigator.vibrate(duration)
+  }
+}
+
+watch([testCounter2, testCounter3, testCounter4], (newValues, oldValues) => {
+  console.log('Counters changed:', newValues, oldValues)
+})
+
 onMounted(() => {
   window.addEventListener('visibilitychange', handleVisibilityChange)
   window.addEventListener('devicemotion', handleDeviceMotion)
@@ -416,6 +421,9 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('devicemotion', handleDeviceMotion)
+  if (clickTimer) clearTimeout(clickTimer)
+  if (shakeTimeout) clearTimeout(shakeTimeout)
+  if (shoutTimeout) clearTimeout(shoutTimeout)
   stopAudioAnalysis()
 })
 </script>
