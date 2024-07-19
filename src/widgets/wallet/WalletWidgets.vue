@@ -24,7 +24,10 @@
 			<WalletBalance />
 		</TabsContent>
 		<TabsContent value="history">
-			<WalletHistory />
+			<div class="mt-5">
+				Готовится к выпуску
+			</div>
+			<!--			<WalletHistory />-->
 		</TabsContent>
 	</TabsMain>
 </template>
