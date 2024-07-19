@@ -1,9 +1,16 @@
 <template>
-	тряска  {{ isShaking ? 'есть' : 'никакой' }} <br>
-	мяуканье {{ isShouting ? 'есть' : 'нет' }} <br>
 	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
 		<div class="grid grid-cols-2 gap-4">
 			<div>
+				Какие-то циферки: <br>
+				{{ relativeIncreaseq }} <br>
+				{{ CLICKER_CONFIG.sound.threshold }} <br>
+				{{ currentLevelq }} <br>
+				<br>
+				тряска  {{ isShaking ? 'есть' : 'никакой' }} <br>
+				мяуканье {{ isShouting ? 'есть' : 'нет' }} <br>
+
+				<br>
 				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
 				<input
 					v-model.number="CLICKER_CONFIG.shake.threshold"
@@ -149,7 +156,8 @@ const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
 
 let noiseLevels: number[] = []
 let baselineNoiseLevel = 0
-
+let relativeIncreaseq = ref(0)
+let currentLevelq = ref(0)
 const startAudioAnalysis = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -196,6 +204,7 @@ const startAudioAnalysis = async () => {
           const relativeIncrease = currentLevel / baselineNoiseLevel
           console.log('Relative increase:', relativeIncrease, 'Current level:', currentLevel, 'Baseline:', baselineNoiseLevel)
 
+           currentLevelq.value = currentLevel
           if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
             if (!isShouting.value) {
               console.log('Shouting detected!')
@@ -203,6 +212,8 @@ const startAudioAnalysis = async () => {
             }
             if (shoutTimeout) clearTimeout(shoutTimeout)
             shoutTimeout = window.setTimeout(() => {
+              relativeIncreaseq.value = relativeIncrease
+
               isShouting.value = false
             }, CLICKER_CONFIG.sound.timeout)
           }
