@@ -93,7 +93,7 @@ const CLICKER_CONFIG = reactive({
   },
   shake: {
     threshold: 14,             // Порог ускорения для определения тряски
-    timeout: 1300,             // Время, в течение которого действует эффект тряски (мс)
+    timeout: 3300,             // Время, в течение которого действует эффект тряски (мс)
   },
   style: {
     containerSize: 280,        // Размер контейнера кликера (пиксели)
@@ -117,8 +117,8 @@ const CLICKER_CONFIG = reactive({
     rapidClickDuration: 85     // Длительность вибрации при быстром клике
   },
   sound: {
-    threshold: 0.07,            // Порог громкости для определения крика (0-1)
-    timeout: 500,             // Время, в течение которого действует эффект крика (мс)
+    threshold: 0.052,            // Порог громкости для определения крика (0-1)
+    timeout: 1700,             // Время, в течение которого действует эффект крика (мс)
   }
 })
 
@@ -143,6 +143,14 @@ let microphone: MediaStreamAudioSourceNode | null = null
 
 const normalizedAverageq = ref(0)
 
+const isCalibrating = ref(true)
+const CALIBRATION_DURATION = 5000 // 5 seconds for calibration
+const NOISE_SAMPLES = 800 // Increased number of samples for better accuracy
+const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
+
+let noiseLevels: number[] = []
+let baselineNoiseLevel = 0
+
 const startAudioAnalysis = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -150,22 +158,56 @@ const startAudioAnalysis = async () => {
     analyser = audioContext.createAnalyser()
     microphone = audioContext.createMediaStreamSource(stream)
     microphone.connect(analyser)
-    analyser.fftSize = 256
+    analyser.fftSize = 1024 // Increased for better frequency resolution
     const bufferLength = analyser.frequencyBinCount
     const dataArray = new Uint8Array(bufferLength)
 
-    const checkAudioLevel = () => {
-      analyser!.getByteFrequencyData(dataArray)
-      const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength
-      const normalizedAverage = average / 255  // Normalize to 0-1 range
+    let calibrationStartTime = Date.now()
 
-      normalizedAverageq.value = normalizedAverage
-      if (normalizedAverage > CLICKER_CONFIG.sound.threshold) {
-        isShouting.value = true
-        if (shoutTimeout) clearTimeout(shoutTimeout)
-        shoutTimeout = window.setTimeout(() => {
-          isShouting.value = false
-        }, CLICKER_CONFIG.sound.timeout)
+    const getAudioLevel = (): number => {
+      analyser!.getByteFrequencyData(dataArray)
+      const sum = dataArray.reduce((acc, value) => acc + value, 0)
+      return sum / bufferLength / 255 // Normalize to 0-1
+    }
+
+    const updateNoiseLevel = (level: number) => {
+      noiseLevels.push(level)
+      if (noiseLevels.length > NOISE_SAMPLES) {
+        noiseLevels.shift()
+      }
+      baselineNoiseLevel = noiseLevels.reduce((sum, level) => sum + level, 0) / noiseLevels.length
+    }
+
+    const checkAudioLevel = () => {
+      const currentLevel = getAudioLevel()
+      normalizedAverageq.value = currentLevel
+
+      if (Date.now() - calibrationStartTime < CALIBRATION_DURATION) {
+        updateNoiseLevel(currentLevel)
+      } else {
+        if (isCalibrating.value) {
+          isCalibrating.value = false
+          console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel)
+        }
+
+        updateNoiseLevel(currentLevel)
+
+        // Only check for shouting at intervals to reduce false positives
+        if (Date.now() % SHOUT_DETECTION_INTERVAL < 20) { // 20ms window to catch the interval
+          const relativeIncrease = currentLevel / baselineNoiseLevel
+          console.log('Relative increase:', relativeIncrease, 'Current level:', currentLevel, 'Baseline:', baselineNoiseLevel)
+
+          if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
+            if (!isShouting.value) {
+              console.log('Shouting detected!')
+              isShouting.value = true
+            }
+            if (shoutTimeout) clearTimeout(shoutTimeout)
+            shoutTimeout = window.setTimeout(() => {
+              isShouting.value = false
+            }, CLICKER_CONFIG.sound.timeout)
+          }
+        }
       }
 
       requestAnimationFrame(checkAudioLevel)
@@ -177,6 +219,21 @@ const startAudioAnalysis = async () => {
   }
 }
 
+const stopAudioAnalysis = () => {
+  if (audioContext) {
+    audioContext.close()
+    audioContext = null
+  }
+  if (microphone) {
+    microphone.disconnect()
+    microphone = null
+  }
+  analyser = null
+  if (shoutTimeout) {
+    clearTimeout(shoutTimeout)
+    shoutTimeout = null
+  }
+}
 let clickCount = 0
 const cards = ref<Array<{ id: number, x: number, y: number, duration: number }>>([])
 const imgContainer = ref<HTMLElement | null>(null)
@@ -312,6 +369,7 @@ onUnmounted(() => {
   if (audioContext) {
     audioContext.close()
   }
+  stopAudioAnalysis()
 })
 </script>
 
