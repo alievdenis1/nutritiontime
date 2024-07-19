@@ -477,11 +477,11 @@ onUnmounted(() => {
   pointer-events: none;
 
   &.double-reward {
-    @apply w-[85px] h-12 text-[28px];
+    @apply w-[100px] h-14 text-[28px];
   }
 
   &.quadruple-reward {
-    @apply w-[95px] h-14 text-[32px] text-[#ecae81];
+    @apply w-[125px] h-16 text-[32px] text-[#ecae81];
   }
 }
 
