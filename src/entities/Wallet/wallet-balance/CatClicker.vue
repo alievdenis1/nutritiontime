@@ -28,7 +28,7 @@
 	</div>
 	<div
 		ref="imgContainer"
-		class="img-container flex items-center justify-center rounded-[50%] h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
+		class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
 		:class="{ 'bg-transparentGreen': !isRapidClicking, 'bg-rapidClickColor': isRapidClicking }"
 		@click="addCardAndAnimate"
 	>
@@ -345,7 +345,6 @@ onUnmounted(() => {
   object-fit: cover;
   transition: transform 0.3s ease;
   will-change: transform, filter;
-  border-radius: 50%;
 }
 
 .cat-image.rapid-clicking {
