@@ -92,7 +92,7 @@ const props = withDefaults(defineProps<{
 	initialEnergyCurrency: number
 }>(), {
 	initialCurrency: 0,
-	initialEnergyCurrency: 100
+	initialEnergyCurrency: 1000
 })
 
 const { initialEnergyCurrency, initialCurrency } = toRefs(props)
