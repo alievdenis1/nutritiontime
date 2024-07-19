@@ -36,12 +36,13 @@
 			</VModal>
 		</div>
 		<CatClicker
+			class="mb-5"
 			:energy-current="energyCurrency"
 			:currency="currency"
 			@update:currency="updateCurrency"
 			@update:energy-current="updateEnergyCurrency"
 		/>
-		<div class="flex justify-between relative">
+		<div class="flex justify-between relative mt-20">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px]"
 			>

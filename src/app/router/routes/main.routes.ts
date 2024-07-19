@@ -4,10 +4,11 @@ import { MainLayout } from 'app/layouts'
 export default [
 	{
 		name: 'main',
-		component: () => import('pages/main/MainPage.vue'), // Важно: динасический импорт, чтобы код работал в production при build
+		// component: () => import('pages/main/MainPage.vue')
+		component: () => import('pages/wallet/UserWallet.vue'), // Важно: динасический импорт, чтобы код работал в production при build
 		path: '/',
 		meta: {
-			title: 'Nutrition Time',
+			title: 'NutritionTime',
 			layout: MainLayout
 		}
 	}
