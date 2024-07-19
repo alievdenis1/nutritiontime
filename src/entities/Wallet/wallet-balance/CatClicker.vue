@@ -1,37 +1,4 @@
 <template>
-	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				Какие-то циферки: <br>
-				{{ relativeIncreaseq }} <br>
-				{{ CLICKER_CONFIG.sound.threshold }} <br>
-				{{ currentLevelq }} <br>
-				<br>
-				тряска  {{ isShaking ? 'есть' : 'никакой' }} <br>
-				мяуканье {{ isShouting ? 'есть' : 'нет' }} <br>
-
-				<br>
-				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
-				<input
-					v-model.number="CLICKER_CONFIG.shake.threshold"
-					type="number"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
-			<br>
-			<div>
-				<label class="block text-sm font-medium text-gray-700">Порог определения крика</label>
-				<input
-					v-model.number="CLICKER_CONFIG.sound.threshold"
-					type="number"
-					step="0.1"
-					min="0"
-					max="1"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
-		</div>
-	</div>
 	<div
 		ref="imgContainer"
 		class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
@@ -55,6 +22,10 @@
 					v-for="card in visibleCards"
 					:key="card.id"
 					class="card"
+					:class="{
+						'double-reward': card.multiplier === 2,
+						'quadruple-reward': card.multiplier === 4
+					}"
 					:style="{
 						left: `${card.x}px`,
 						top: `${card.y}px`,
@@ -62,10 +33,42 @@
 					}"
 					@animationend="removeCard(card.id)"
 				>
-					+1
+					+{{ card.multiplier }}
 					<IconGold class="w-[24px] h-[24px]" />
 				</div>
 			</TransitionGroup>
+		</div>
+	</div>
+	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
+		<div class="grid grid-cols-2 gap-4">
+			<div
+				class="flex flex-col gap-4"
+			>
+				<br>
+				<span class="text-amber-900">тряска: <span class="text-gray">
+					{{ isShaking ? 'есть' : 'никакой' }}</span></span>
+				<span class="text-amber-900">мяуканье: <span class="text-gray">{{ isShouting ? 'есть' : 'нет' }}</span></span>
+
+				<br>
+				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
+				<input
+					v-model.number="CLICKER_CONFIG.shake.threshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<br>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог определения мяу</label>
+				<input
+					v-model.number="CLICKER_CONFIG.sound.threshold"
+					type="number"
+					step="0.1"
+					min="0"
+					max="1"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
 		</div>
 	</div>
 </template>
@@ -245,7 +248,14 @@ const stopAudioAnalysis = () => {
   }
 }
 let clickCount = 0
-const cards = ref<Array<{ id: number, x: number, y: number, duration: number }>>([])
+interface Card {
+  id: number;
+  x: number;
+  y: number;
+  duration: number;
+  multiplier: number;
+}
+const cards = ref<Card[]>([])
 const imgContainer = ref<HTMLElement | null>(null)
 
 const isRapidClicking = ref(false)
@@ -262,10 +272,18 @@ const addCardAndAnimate = (event: MouseEvent) => {
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
   const duration = CLICKER_CONFIG.animation.card.duration / 1000 // Convert to seconds for CSS
-  cards.value.push({ id: clickCount++, x, y, duration })
+
+  let multiplier = 1
+  if (isShouting.value) {
+    multiplier = 4
+  } else if (isShaking.value) {
+    multiplier = 2
+  }
+
+  cards.value.push({ id: clickCount++, x, y, duration, multiplier })
 
   emit('update:energyCurrent', props.energyCurrent - 1)
-  emit('update:currency', props.currency + 1)
+  emit('update:currency', props.currency + multiplier)
 
   animateClick(x, y)
 
@@ -430,6 +448,14 @@ onUnmounted(() => {
   animation: moveUp ease-out forwards;
   will-change: transform, opacity;
   pointer-events: none;
+
+  &.double-reward {
+    @apply w-[85px] h-12 text-[28px];
+  }
+
+  &.quadruple-reward {
+    @apply w-[95px] h-14 text-[32px] text-[#ecae81];
+  }
 }
 
 .card-enter-active,
