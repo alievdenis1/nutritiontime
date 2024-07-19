@@ -1,36 +1,9 @@
 <template>
-	{{ accelerationq }} {{ CLICKER_CONFIG.shake.threshold }}
-	{{ isShaking }}
-	{{ isShouting }}
+	тряска {{ accelerationq }} <br> крик {{ normalizedAverageq }} <br><br>
+	тряска привышена {{ isShaking }} <br>
+	крик привышен {{ isShouting }}
 	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
-		<h2 class="text-lg font-bold mb-2">
-			Конфигурация кликера
-		</h2>
 		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<label class="block text-sm font-medium text-gray-700">Порог быстрого клика</label>
-				<input
-					v-model.number="CLICKER_CONFIG.rapidClick.threshold"
-					type="number"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
-			<div>
-				<label class="block text-sm font-medium text-gray-700">Порог при тряске</label>
-				<input
-					v-model.number="CLICKER_CONFIG.rapidClick.shakeThreshold"
-					type="number"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
-			<div>
-				<label class="block text-sm font-medium text-gray-700">Порог при крике</label>
-				<input
-					v-model.number="CLICKER_CONFIG.rapidClick.shoutThreshold"
-					type="number"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
 			<div>
 				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
 				<input
@@ -39,6 +12,7 @@
 					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 				>
 			</div>
+			<br>
 			<div>
 				<label class="block text-sm font-medium text-gray-700">Порог определения крика</label>
 				<input
@@ -112,14 +86,14 @@ const CLICKER_CONFIG = reactive({
     }
   },
   rapidClick: {
-    threshold: 9,              // Порог для определения быстрого клика
+    threshold: 8,              // Порог для определения быстрого клика
     timeout: 150,              // Время сброса счетчика быстрых кликов (мс)
-    shakeThreshold: 3,      // Порог для определения быстрого клика при тряске (1/3 от обычного)
+    shakeThreshold: 2,      // Порог для определения быстрого клика при тряске
     shoutThreshold: 1,         //  порог при крике
   },
   shake: {
-    threshold: 2,             // Порог ускорения для определения тряски
-    timeout: 1000,             // Время, в течение которого действует эффект тряски (мс)
+    threshold: 14,             // Порог ускорения для определения тряски
+    timeout: 1300,             // Время, в течение которого действует эффект тряски (мс)
   },
   style: {
     containerSize: 280,        // Размер контейнера кликера (пиксели)
@@ -167,6 +141,8 @@ let audioContext: AudioContext | null = null
 let analyser: AnalyserNode | null = null
 let microphone: MediaStreamAudioSourceNode | null = null
 
+const normalizedAverageq = ref(0)
+
 const startAudioAnalysis = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -183,6 +159,7 @@ const startAudioAnalysis = async () => {
       const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength
       const normalizedAverage = average / 255  // Normalize to 0-1 range
 
+      normalizedAverageq.value = normalizedAverage
       if (normalizedAverage > CLICKER_CONFIG.sound.threshold) {
         isShouting.value = true
         if (shoutTimeout) clearTimeout(shoutTimeout)
