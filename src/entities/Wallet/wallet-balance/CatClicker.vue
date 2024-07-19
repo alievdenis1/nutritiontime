@@ -71,6 +71,11 @@
 			</div>
 
 			Какие-то циферки: <br>
+			{{ testCounter }} <br>
+			{{ testCounter2 }} <br>
+			{{ testCounter3 }} <br>
+			{{ testCounter4 }} <br>
+
 			{{ relativeIncreaseq }} <br>
 			{{ CLICKER_CONFIG.sound.threshold }} <br>
 			{{ currentLevelq }} <br>
@@ -172,6 +177,10 @@ const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
 
 const noiseLevels = ref<number[]>([])
 
+const testCounter = ref(0)
+const testCounter2 = ref(0)
+const testCounter3 = ref(0)
+const testCounter4 = ref(0)
 const startAudioAnalysis = async () => {
   if (isAudioInitialized.value) return
 
@@ -219,13 +228,21 @@ const startAudioAnalysis = async () => {
           relativeIncreaseq.value = relativeIncrease
           currentLevelq.value = currentLevel
 
+          testCounter.value++
+
           if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
+            testCounter2.value++
+
             if (!isShouting.value) {
+              testCounter3.value++
+
               console.log('Shouting detected!')
               isShouting.value = true
             }
             if (shoutTimeout) clearTimeout(shoutTimeout)
             shoutTimeout = window.setTimeout(() => {
+              testCounter4.value++
+
               isShouting.value = false
             }, CLICKER_CONFIG.sound.timeout)
           }
