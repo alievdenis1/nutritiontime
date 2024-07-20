@@ -2,10 +2,14 @@
 	<div class="mt-[16px] mb-[60px]">
 		<div class="flex justify-between items-center px-[24px] py-[16px] shadow-custom rounded-[16px]">
 			<div class="flex gap-[10px] items-center">
+				<IconGold />
+
 				<div class="text-xxxl">
 					{{ formattedCurrency }}
 				</div>
-				<IconGold />
+				<div class="text-xl">
+					$RECIPETON
+				</div>
 			</div>
 			<IconEnquiry
 				class="cursor-pointer"
