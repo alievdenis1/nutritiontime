@@ -1,18 +1,15 @@
 <template>
-	<div class="p-4">
-		<div class="flex items-center justify-between  mb-[22px] ">
+	<div>
+		<div class="flex justify-between items-center mb-[16px]">
 			<button
 				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
 				@click="$router.go(-1)"
 			>
-				<IconArrowRight
-					icon-color="#000000"
-					class="w-6 h-6"
-				/>
+				<IconArrowRight icon-color="#1C1C1C" />
 			</button>
-			<h1 class="font-semibold text-lg">
+			<h2 class="text-center text-lg text-darkGray">
 				{{ t('recipeReviewTitle') }}
-			</h1>
+			</h2>
 			<div />
 		</div>
 		<div class="mb-4">

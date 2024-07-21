@@ -104,8 +104,7 @@ import { ButtonColors, VButton } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
 import Localization from './AuthTypeSelection.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
-import { IconApple, IconEmail, IconFacebook, IconGoogle } from '@/shared/components/Icon'
-import { IconTelegram } from '@/shared/components/Icon'
+import { IconApple, IconEmail, IconFacebook, IconGoogle, IconTelegram } from 'shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 const router = useRouter()

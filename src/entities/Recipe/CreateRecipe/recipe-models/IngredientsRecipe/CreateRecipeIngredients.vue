@@ -1,11 +1,11 @@
 <template>
-	<VAccordion :title="t('ingredientsTitle')">
+	<VAccordion :title="title">
 		<div class="mt-[20px]">
 			<p
 				v-if="ingredients.length === 0"
 				class="text-gray text-xs mb-4"
 			>
-				{{ t('ingredientsDescription') }}
+				{{ desc }}
 			</p>
 			<div
 				v-for="(ingredient, index) in ingredients"
@@ -16,10 +16,8 @@
 				<div>
 					<span class="text-[#535353] text-xs">
 						{{ ingredient.quantity }}
-						{{ ingredient.type ===
-							QuantityType.WEIGHT ?
-								t('unitPieces') : t('unitGrams') }}
-					</span>
+						{{ ingredient.type === 'weight' ?
+							t('unitGrams') : t('unitPieces') }}</span>
 					<button
 						class="text-forestGreen ml-[14px] cursor-pointer"
 						@click="removeIngredient(index)"
@@ -61,12 +59,9 @@
 							v-model="ingredientName"
 							type="text"
 							:placeholder="t('ingredientPlaceholderName')"
-							class="border rounded px-[12px] py-4 text-base w-full h-[54px]"
+							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
 							:class="{ activeInput: activeInputName, filledInput: notEmptyIngredientName, 'pt-[26px]': notEmptyIngredientName }"
 						>
-					</div>
-					<div class="text-gray mb-4">
-						{{ t('forExampleBlender') }}
 					</div>
 					<div class="relative">
 						<span
@@ -84,7 +79,20 @@
 							@input="filterNumericInput"
 						>
 					</div>
-
+					<TabsMain
+						v-model="activeTab"
+						default-value="weight"
+						class="mb-[20px] mt-[10px]"
+					>
+						<TabsList>
+							<TabsTrigger :value="QuantityType.WEIGHT">
+								{{ t('InGrams') }}
+							</TabsTrigger>
+							<TabsTrigger :value="QuantityType.QUANTITY">
+								{{ t('InPieces') }}
+							</TabsTrigger>
+						</TabsList>
+					</TabsMain>
 					<button
 						class="bg-forestGreen text-white rounded-[16px] py-2 px-4 w-[100%] text-center"
 						@click="addIngredient"
@@ -94,6 +102,7 @@
 				</div>
 			</VModal>
 		</div>
+		<slot />
 	</VAccordion>
 </template>
 
@@ -102,18 +111,26 @@ import { ref, watch, nextTick, computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VModal } from '@/shared/components/Modal'
-import { IconClose, IconPlus } from '@/shared/components/Icon'
-import localization from './KitchenToolsRecipe.localization.json'
+import { IconClose, IconPlus } from 'shared/components/Icon'
+import localization from './CreateRecipeIngredients.localization.json'
+import { TabsMain, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { QuantityType } from '../types/enum'
+
+interface Props {
+	title: string;
+	desc: string
+}
+
+defineProps<Props>()
 
 const { t } = useTranslation(localization)
 
 const showModal = ref(false)
 const ingredientName = ref<string>('')
 const ingredientQuantity = ref<string>('')
+const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]>([])
 const tryToSave = ref(false)
 const activeTab = ref<QuantityType>(QuantityType.WEIGHT)
-const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]>([])
 const ingredientNameInput = ref<HTMLInputElement | null>(null)
 
 const openModal = () => {
@@ -145,8 +162,8 @@ const closeModal = () => {
 
 const filterNumericInput = (event: Event) => {
 	const target = event.target as HTMLInputElement
-	target.value = target.value.replace(/\D/g, '')
-	ingredientQuantity.value = target.value
+	const numericValue = target.value.replace(/\D/g, '')
+	ingredientQuantity.value = numericValue
 }
 
 const activeInputName = computed(() => tryToSave.value && !ingredientName.value)
@@ -176,5 +193,23 @@ watch(showModal, (newVal) => {
 
 .filledInput {
 	border: 2px solid #319A6E33;
+}
+
+.overflow-x-auto {
+	overflow-x: auto;
+	display: flex;
+	white-space: nowrap;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+	/* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+	/* Safari and Chrome */
 }
 </style>

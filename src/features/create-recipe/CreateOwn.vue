@@ -3,7 +3,10 @@
 		<CreateRecipeBasicInfo />
 		<CreateRecipeGradation />
 		<CreateRecipeTime />
-		<CreateRecipeIngredients />
+		<CreateRecipeIngredients
+			:title="t('ingredients')"
+			desc="То, что нужно для приготовления блюда. Например, 250 грамм картошки "
+		/>
 		<CreateRecipeNutritional />
 		<StepByStepRecipe />
 		<KitchenToolsRecipe />
@@ -21,19 +24,18 @@
 </template>
 
 <script setup lang="ts">
-import
-{
-	CreateRecipeBasicInfo,
-	CreateRecipeGradation,
-	CreateRecipeIngredients,
-	KitchenToolsRecipe,
-	CreateRecipeNutritional,
-	StepByStepRecipe,
-	TagsRecipe,
-	CreateRecipeTime
+import {
+CreateRecipeBasicInfo,
+CreateRecipeGradation,
+CreateRecipeIngredients,
+KitchenToolsRecipe,
+CreateRecipeNutritional,
+StepByStepRecipe,
+TagsRecipe,
+CreateRecipeTime
 }
 	from
-	'entities/CreateRecipe/recipe-models'
+	'entities/Recipe/CreateRecipe/recipe-models'
 import { ButtonColors, VButton } from '@/shared/components/Button'
 import { useRouter } from 'vue-router'
 import { useTranslation } from '@/shared/lib/i18n'
@@ -46,6 +48,4 @@ const CheckRecipe = () => {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

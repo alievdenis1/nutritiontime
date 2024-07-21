@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUpdated } from 'vue'
-import { IconArrow } from '@/shared/components/Icon'
+import { IconArrow } from 'shared/components/Icon'
 
 defineProps<{
 	title: string;

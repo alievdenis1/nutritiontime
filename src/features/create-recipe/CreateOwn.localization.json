@@ -1,8 +1,10 @@
 {
     "ru": {
-        "further": "Далее"
+        "further": "Далее",
+        "ingredients": "Ингредиенты"
     },
     "en": {
-        "further": "Further"
+        "further": "Further",
+        "ingredients": "Ingredients"
     }
 }

@@ -7,7 +7,8 @@
         "readyIdeasDescription": "Сгенерируйте рецепт из списка наших готовых идей",
         "generateByIngredientsTitle": "Генерация по ингридиентам",
         "generateByIngredientsDescription": "Сгенерируйте рецепт по доступным ингридиентам",
-        "generateButtonText": "Сгенерировать рецепт"
+        "generateButtonText": "Сгенерировать рецепт",
+        "generateWithSelected": "Сгенерировать с учётом отмеченного"
     },
     "en": {
         "generateRecipeTitle": "Generate a recipe based on your idea",
@@ -17,6 +18,7 @@
         "readyIdeasDescription": "Generate a recipe from our list of ready ideas",
         "generateByIngredientsTitle": "Generate by ingredients",
         "generateByIngredientsDescription": "Generate a recipe based on available ingredients",
-        "generateButtonText": "Generate recipe"
+        "generateButtonText": "Generate recipe",
+        "generateWithSelected": "Generate with selected"
     }
 }

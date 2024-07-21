@@ -36,6 +36,9 @@
 					:height-image="44"
 					:height-main="54"
 					:title="t('uploadPhoto')"
+					icon-color="#1C1C1C"
+					backgrounds="#F3F3F3"
+					:icon="IconPhoto"
 				/>
 			</div>
 			<button
@@ -53,7 +56,7 @@
 import { ref } from 'vue'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VAddPhoto } from '@/shared/components/AddPhoto'
-import { IconClose, IconPlus } from '@/shared/components/Icon'
+import { IconClose, IconPlus, IconPhoto } from 'shared/components/Icon'
 import localization from './StepByStepRecipe.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 

@@ -39,12 +39,12 @@
 <script setup lang="ts">
 import { CreateOwn, CreateAi } from 'features/create-recipe'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
+import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateRecipeTabs.localization.json'
-import { IconAi, IconArrowRight } from '@/shared/components/Icon'
+import { IconAi, IconArrowRight } from 'shared/components/Icon'
 const store = useModalCreateStore()
 const { t } = useTranslation(localizations)
 </script>
 
-<style scoped></style>
+<style scoped></style>@/entities/Recipe/ui/CreateRecipe/modal-create/model/model-store

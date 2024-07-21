@@ -1,0 +1,18 @@
+{
+    "ru": {
+        "backButton": "Назад",
+        "clarificationTitle": "Внесём уточнения?",
+        "clarificationSubtitle": "Рецепт можно сделать точнее",
+        "clarificationDescription": "Отметьте теги, которые как вам кажется должны соответствовать этому блюду",
+        "generateWithSelected": "Сгенерировать с учётом отмеченного",
+        "noThanks": "Спасибо не надо"
+    },
+    "en": {
+        "backButton": "Back",
+        "clarificationTitle": "Shall we make clarifications?",
+        "clarificationSubtitle": "The recipe can be made more precise",
+        "clarificationDescription": "Mark the tags that you think should correspond to this dish",
+        "generateWithSelected": "Generate with selected",
+        "noThanks": "No thanks"
+    }
+}

@@ -24,7 +24,10 @@
 			<WalletBalance />
 		</TabsContent>
 		<TabsContent value="history">
-			<WalletHistory />
+			<div class="mt-5">
+				Готовится к выпуску
+			</div>
+			<!--			<WalletHistory />-->
 		</TabsContent>
 	</TabsMain>
 </template>
@@ -34,7 +37,7 @@ import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/component
 import { useWalletStore } from '@/entities/Wallet/model/wallet.store'
 import { IconArrowRight } from 'shared/components/Icon'
 import { WalletBalance } from 'entities/Wallet/wallet-balance'
-import { WalletHistory } from 'entities/Wallet/wallet-history'
+// import { WalletHistory } from 'entities/Wallet/wallet-history'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './WalletWidgets.localization.json'
 const store = useWalletStore()

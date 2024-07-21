@@ -6,6 +6,8 @@
 				:height-image="54"
 				:title="t('uploadMainPhoto')"
 				:height-main="66"
+				backgrounds="#F3F3F3"
+				:icon="IconPhoto"
 			/>
 			<p class="text-xs text-gray max-w-xs mb-[24px]">
 				{{ t('additionalPhotosInfo') }}
@@ -111,7 +113,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
-import { IconArrowRight, IconSearch, IconClose, IconRadio } from '@/shared/components/Icon'
+import { IconArrowRight, IconSearch, IconClose, IconRadio, IconPhoto } from 'shared/components/Icon'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VAddPhoto } from '@/shared/components/AddPhoto'
 import { VModal } from '@/shared/components/Modal'

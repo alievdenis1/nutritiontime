@@ -55,6 +55,7 @@
 					class="flex-grow overflow-y-auto custom-scrollbar"
 					:categories-tags="categories"
 					:modal-selected-tags="modalSelectedTags"
+					@tag-changed="handleTagChanged"
 				/>
 				<button
 					:class="['block w-full mt-4 py-2 rounded-xl text-white text-center cursor-pointer', buttonClass]"
@@ -74,7 +75,7 @@ import { VAccordion } from '@/shared/components/Accordion'
 import { VModal } from '@/shared/components/Modal'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './TagsRecipe.localization.json'
-import { IconArrowRight, IconClose } from '@/shared/components/Icon'
+import { IconArrowRight, IconClose } from 'shared/components/Icon'
 import TagsCollectionsItem from './TagsCollectionsItem.vue'
 const { t } = useTranslation(localizations)
 
@@ -89,6 +90,10 @@ const categories = ref([
 	{ name: 'Категория 4', tags: ['#тег36', '#тег37', '#тег38', '#тег39', '#тег40', '#тег41', '#тег42', '#тег43', '#тег44', '#тег45', '#тег46', '#тег47'] },
 	{ name: 'Категория 5', tags: ['#тег48', '#тег49', '#тег50', '#тег51', '#тег52', '#тег53', '#тег54', '#тег55', '#тег56', '#тег57', '#тег58', '#тег59'] },
 ])
+
+const handleTagChanged = (updatedTags: string[]) => {
+	modalSelectedTags.value = updatedTags
+}
 
 const openModal = () => {
 	showModal.value = true

@@ -1,0 +1,1 @@
+export { default as TagsSelected } from './TagsSelected.vue'

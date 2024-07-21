@@ -28,6 +28,7 @@ export default {
       borderColor: {
         'custom-gray': '#1C1C1C0D',
       },
+
       borderWidth: {
         '1': '1px',
       },
