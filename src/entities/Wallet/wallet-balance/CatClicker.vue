@@ -475,7 +475,7 @@ watch([testCounter2, testCounter3, testCounter4], (newValues, oldValues) => {
 onMounted(() => {
   window.addEventListener('visibilitychange', handleVisibilityChange)
   window.addEventListener('devicemotion', handleDeviceMotion)
-  document.addEventListener('click', startAudioAnalysis, { once: true })
+  // document.addEventListener('click', startAudioAnalysis, { once: true })
   // initTWA()
   // setupScrollPrevention()
   startAudioAnalysis()
