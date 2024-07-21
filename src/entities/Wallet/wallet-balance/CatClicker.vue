@@ -1,158 +1,151 @@
 <template>
+	<!--	<div-->
+	<!--		id="appContainer"-->
+	<!--		ref="appContainerRef"-->
+	<!--		class="app-container"-->
+	<!--	>-->
 	<div
-		id="appContainer"
-		ref="appContainerRef"
-		class="app-container"
+		ref="imgContainer"
+		class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
+		:class="{ 'bg-transparentGreen': !isRapidClicking, 'bg-rapidClickColor': isRapidClicking }"
+		@click="addCardAndAnimate"
 	>
-		<div
-			ref="imgContainer"
-			class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
-			:class="{ 'bg-transparentGreen': !isRapidClicking, 'bg-rapidClickColor': isRapidClicking }"
-			@click="addCardAndAnimate"
-		>
-			<div class="img-wrapper">
-				<img
-					src="/public/image/start-screen-image.webp"
-					alt="Кот-повар"
-					class="cat-image"
-					:class="{ 'rapid-clicking': isRapidClicking }"
-				>
-			</div>
-			<div id="card-container">
-				<TransitionGroup
-					name="card"
-					tag="div"
-				>
-					<div
-						v-for="card in visibleCards"
-						:key="card.id"
-						class="card"
-						:class="{
-							'double-reward': card.multiplier === 2,
-							'quadruple-reward': card.multiplier === 4
-						}"
-						:style="{
-							left: `${card.x}px`,
-							top: `${card.y}px`,
-							animationDuration: `${CLICKER_CONFIG.animation.card.duration}ms`
-						}"
-						@animationend="removeCard(card.id)"
-					>
-						+{{ card.multiplier }}
-						<IconGold class="w-[24px] h-[24px]" />
-					</div>
-				</TransitionGroup>
-			</div>
+		<div class="img-wrapper">
+			<img
+				src="/public/image/start-screen-image.webp"
+				alt="Кот-повар"
+				class="cat-image"
+				:class="{ 'rapid-clicking': isRapidClicking }"
+			>
 		</div>
-		<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
-			<div class="grid grid-cols-2 gap-4">
+		<div id="card-container">
+			<TransitionGroup
+				name="card"
+				tag="div"
+			>
 				<div
-					class="flex flex-col gap-4"
+					v-for="card in visibleCards"
+					:key="card.id"
+					class="card"
+					:class="{
+						'double-reward': card.multiplier === 2,
+						'quadruple-reward': card.multiplier === 4
+					}"
+					:style="{
+						left: `${card.x}px`,
+						top: `${card.y}px`,
+						animationDuration: `${CLICKER_CONFIG.animation.card.duration}ms`
+					}"
+					@animationend="removeCard(card.id)"
 				>
-					<br>
-					<span class="text-amber-900">тряска: <span class="text-gray">
-						{{ isShaking ? 'есть' : 'никакой' }}</span></span>
-					<span class="text-amber-900">мяуканье: <span class="text-gray">{{ isShouting ? 'есть' : 'нет' }}</span></span>
-
-					<br>
-					<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
-					<input
-						v-model.number="CLICKER_CONFIG.shake.threshold"
-						type="number"
-						class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					>
+					+{{ card.multiplier }}
+					<IconGold class="w-[24px] h-[24px]" />
 				</div>
-				<br>
-				<div>
-					<label class="block text-sm font-medium text-gray-700">Порог определения мяу</label>
-					<input
-						v-model.number="CLICKER_CONFIG.sound.threshold"
-						type="number"
-						step="0.1"
-						min="0"
-						max="1"
-						class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					>
-				</div>
-
-				Какие-то циферки: <br>
-				{{ testCounter }} <br>
-				{{ testCounter2 }} <br>
-				{{ testCounter3 }} <br>
-				{{ testCounter4 }} <br>
-
-				{{ relativeIncreaseq }} <br>
-				{{ CLICKER_CONFIG.sound.threshold }} <br>
-				{{ currentLevelq }} <br>
-			</div>
+			</TransitionGroup>
 		</div>
 	</div>
+	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
+		<div class="grid grid-cols-2 gap-4">
+			<div
+				class="flex flex-col gap-4"
+			>
+				<br>
+				<span class="text-amber-900">тряска: <span class="text-gray">
+					{{ isShaking ? 'есть' : 'никакой' }}</span></span>
+				<span class="text-amber-900">мяуканье: <span class="text-gray">{{ isShouting ? 'есть' : 'нет' }}</span></span>
+
+				<br>
+				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
+				<input
+					v-model.number="CLICKER_CONFIG.shake.threshold"
+					type="number"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+			<br>
+			<div>
+				<label class="block text-sm font-medium text-gray-700">Порог определения мяу</label>
+				<input
+					v-model.number="CLICKER_CONFIG.sound.threshold"
+					type="number"
+					step="0.1"
+					min="0"
+					max="1"
+					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				>
+			</div>
+
+			Какие-то циферки: <br>
+			{{ testCounter }} <br>
+			{{ testCounter2 }} <br>
+			{{ testCounter3 }} <br>
+			{{ testCounter4 }} <br>
+
+			{{ relativeIncreaseq }} <br>
+			{{ CLICKER_CONFIG.sound.threshold }} <br>
+			{{ currentLevelq }} <br>
+		</div>
+	</div>
+<!--	</div>-->
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { IconGold } from 'shared/components/Icon'
 
-const appContainerRef = ref<HTMLElement | null>(null)
-let touchStartY = 0
-
-// Function to prevent default touch behavior
-const preventDefaultTouch = (e: TouchEvent) => {
-  if (e.target === document.body || e.target === document.documentElement) {
-    e.preventDefault()
-  }
-}
-
-// Function to handle touch start
-const handleTouchStart = (e: TouchEvent) => {
-  touchStartY = e.touches[0].clientY
-}
-
-// Function to handle touch move
-const handleTouchMove = (e: TouchEvent) => {
-  const touchEndY = e.changedTouches[0].clientY
-  const scrollTop = appContainerRef.value?.scrollTop || 0
-
-  if (scrollTop <= 0 && touchEndY > touchStartY) {
-    e.preventDefault() // Prevent scrolling down when already at the top
-  } else if ((appContainerRef.value?.scrollHeight || 0) - scrollTop <= (appContainerRef.value?.clientHeight || 0) && touchEndY < touchStartY) {
-    e.preventDefault() // Prevent scrolling up when already at the bottom
-  }
-}
-
-// Function to initialize TWA
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        expand: () => void;
-        ready: () => void;
-      }
-    }
-  }
-}
-
-const initTWA = () => {
-  const twa = window.Telegram?.WebApp
-  if (twa) {
-    twa.expand()
-    twa.ready()
-  }
-}
-
-// Function to setup scroll prevention
-const setupScrollPrevention = () => {
-  const overflow = 11
-  document.body.style.overflowY = 'hidden'
-  document.body.style.marginTop = `${overflow}px`
-  document.body.style.height = `${window.innerHeight + overflow}px`
-  document.body.style.paddingBottom = `${overflow}px`
-  window.scrollTo(0, overflow)
-
-  window.addEventListener('touchmove', preventDefaultTouch, { passive: false })
-  document.addEventListener('touchstart', handleTouchStart, { passive: false })
-  document.addEventListener('touchmove', handleTouchMove, { passive: false })
-}
+// const appContainerRef = ref<HTMLElement | null>(null)
+// let touchStartY = 0
+// // Function to prevent default touch behavior
+// const preventDefaultTouch = (e: TouchEvent) => {
+//   if (e.target === document.body || e.target === document.documentElement) {
+//     e.preventDefault()
+//   }
+// }
+// const handleTouchStart = (e: TouchEvent) => {
+//   touchStartY = e.touches[0].clientY
+// }
+// const handleTouchMove = (e: TouchEvent) => {
+//   const touchEndY = e.changedTouches[0].clientY
+//   const scrollTop = appContainerRef.value?.scrollTop || 0
+//
+//   if (scrollTop <= 0 && touchEndY > touchStartY) {
+//     e.preventDefault() // Prevent scrolling down when already at the top
+//   } else if ((appContainerRef.value?.scrollHeight || 0) - scrollTop <= (appContainerRef.value?.clientHeight || 0) && touchEndY < touchStartY) {
+//     e.preventDefault() // Prevent scrolling up when already at the bottom
+//   }
+// }
+// // Function to initialize TWA
+// declare global {
+//   interface Window {
+//     Telegram?: {
+//       WebApp?: {
+//         expand: () => void;
+//         ready: () => void;
+//       }
+//     }
+//   }
+// }
+//
+// const initTWA = () => {
+//   const twa = window.Telegram?.WebApp
+//   if (twa) {
+//     twa.expand()
+//     twa.ready()
+//   }
+// }
+// // Function to setup scroll prevention
+// const setupScrollPrevention = () => {
+//   const overflow = 11
+//   document.body.style.overflowY = 'hidden'
+//   document.body.style.marginTop = `${overflow}px`
+//   document.body.style.height = `${window.innerHeight + overflow}px`
+//   document.body.style.paddingBottom = `${overflow}px`
+//   window.scrollTo(0, overflow)
+//
+//   window.addEventListener('touchmove', preventDefaultTouch, { passive: false })
+//   document.addEventListener('touchstart', handleTouchStart, { passive: false })
+//   document.addEventListener('touchmove', handleTouchMove, { passive: false })
+// }
 
 // Конфигурация кликера
 const CLICKER_CONFIG = reactive({
@@ -483,8 +476,8 @@ onMounted(() => {
   window.addEventListener('visibilitychange', handleVisibilityChange)
   window.addEventListener('devicemotion', handleDeviceMotion)
   document.addEventListener('click', startAudioAnalysis, { once: true })
-  initTWA()
-  setupScrollPrevention()
+  // initTWA()
+  // setupScrollPrevention()
   startAudioAnalysis()
 })
 
@@ -495,19 +488,19 @@ onUnmounted(() => {
   if (shakeTimeout) clearTimeout(shakeTimeout)
   if (shoutTimeout) clearTimeout(shoutTimeout)
   stopAudioAnalysis()
-  window.removeEventListener('touchmove', preventDefaultTouch)
-  document.removeEventListener('touchstart', handleTouchStart)
-  document.removeEventListener('touchmove', handleTouchMove)
+  // window.removeEventListener('touchmove', preventDefaultTouch)
+  // document.removeEventListener('touchstart', handleTouchStart)
+  // document.removeEventListener('touchmove', handleTouchMove)
 })
 </script>
 
 <style scoped lang="scss">
-.app-container {
-  overflow-y: auto;
-  height: 100vh;
-  padding-bottom: 100px;
-  -webkit-overflow-scrolling: touch; /* для улучшения прокрутки на iOS */
-}
+//.app-container {
+//  overflow-y: auto;
+//  height: 100vh;
+//  padding-bottom: 100px;
+//  -webkit-overflow-scrolling: touch; /* для улучшения прокрутки на iOS */
+//}
 
 .img-container {
   position: relative;
