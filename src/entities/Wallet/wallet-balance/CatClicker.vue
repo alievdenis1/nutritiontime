@@ -121,10 +121,22 @@ const handleTouchMove = (e: TouchEvent) => {
 }
 
 // Function to initialize TWA
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        expand: () => void;
+        ready: () => void;
+      }
+    }
+  }
+}
+
 const initTWA = () => {
-  if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.expand()
-    window.Telegram.WebApp.ready()
+  const twa = window.Telegram?.WebApp
+  if (twa) {
+    twa.expand()
+    twa.ready()
   }
 }
 
@@ -187,8 +199,8 @@ const CLICKER_CONFIG = reactive({
   },
   vibration: {
     enabled: true,             // Включить вибрацию
-    duration: 35,              // Длительность вибрации в миллисекундах
-    rapidClickDuration: 97     // Длительность вибрации при быстром клике
+    duration: 30,              // Длительность вибрации в миллисекундах
+    rapidClickDuration: 85     // Длительность вибрации при быстром клике
   },
   sound: {
     threshold: 0.0007,            // Порог громкости для определения крика (0-1)
@@ -233,9 +245,9 @@ let clickTimer: number | null = null
 let shakeTimeout: number | null = null
 let clickCount = 0
 
-const CALIBRATION_DURATION = 5000 // 5 seconds for calibration
+const CALIBRATION_DURATION = 3200 // 3 seconds for calibration
 const NOISE_SAMPLES = 800 // Increased number of samples for better accuracy
-const SHOUT_DETECTION_INTERVAL = 500 // Check for shouting every 500ms
+const SHOUT_DETECTION_INTERVAL = 400 // Check for shouting every 500ms
 
 interface Card {
   id: number;
