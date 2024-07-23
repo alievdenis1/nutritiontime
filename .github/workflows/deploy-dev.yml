@@ -45,7 +45,6 @@ jobs:
           else
             echo "Unable to determine package manager"
             exit 1
-          fi
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -72,14 +71,14 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Static HTML export with Nuxt
         run: ${{ steps.detect-package-manager.outputs.manager }} run build
-      - name: Prepare deployment directory
+      - name: Move output to /dev directory
         run: |
           mkdir -p ./output/dev
           mv ./dist/* ./output/dev/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./output
+          path: ./output/dev
 
   # Deployment job
   deploy:
@@ -91,12 +90,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Download artifact
-        uses: actions/download-pages-artifact@v3
-        with:
-          path: ./output
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: ./output/dev
+          publish_dir: ./output/dev
+          publish_branch: gh-pages
+          keep_files: true
