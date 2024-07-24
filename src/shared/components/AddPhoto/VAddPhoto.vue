@@ -1,7 +1,7 @@
 <template>
 	<div
-		class="photo-upload bg-lightGray mb-[8px] flex justify-center items-center"
-		:style="{ height: `${heightMain}px` }"
+		class="photo-upload mb-[8px] flex justify-center items-center"
+		:style="{ height: `${heightMain}px`, background: backgrounds }"
 	>
 		<div
 			v-if="uploadedImage"
@@ -17,7 +17,7 @@
 				class="p-2 cursor-pointer"
 				@click.stop.prevent="removeImage"
 			>
-				<IconClose icon-color="#9F9FA0" />
+				<IconClose :icon-color="iconColor" />
 			</button>
 		</div>
 		<label
@@ -30,8 +30,15 @@
 				@change="handleFileUpload"
 			>
 			<div class="photo-upload-content flex items-center gap-2">
-				<IconPhoto />
-				<span class="text-xs">{{ title }}</span>
+				<component
+					:is="icon"
+					v-if="icon"
+					:icon-color="iconColor"
+				/>
+				<span
+					class="text-xs"
+					:style="{ color: textColor }"
+				>{{ title }}</span>
 			</div>
 		</label>
 	</div>
@@ -39,37 +46,37 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IconClose, IconPhoto } from '@/shared/components/Icon'
+import { IconClose, IconPhoto } from 'shared/components/Icon'
+import { AddPhoto } from './type.ts'
 
-defineProps<{
-	title: string;
-	widthImage: number;
-	heightImage: number;
-	heightMain: number;
-}>()
+withDefaults(defineProps<AddPhoto>(), {
+	icon: IconPhoto,
+	iconColor: '#9F9FA0',
+	textColor: '#1C1C1C'
+})
 
 const uploadedImage = ref<string | null>(null)
 
 const handleFileUpload = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const files = target.files
-    if (files && files[0]) {
-        const reader = new FileReader()
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            uploadedImage.value = e.target?.result as string
-        }
-        reader.readAsDataURL(files[0])
-    }
+	const target = event.target as HTMLInputElement
+	const files = target.files
+	if (files && files[0]) {
+		const reader = new FileReader()
+		reader.onload = (e: ProgressEvent<FileReader>) => {
+			uploadedImage.value = e.target?.result as string
+		}
+		reader.readAsDataURL(files[0])
+	}
 }
 
 const removeImage = () => {
-    uploadedImage.value = null
+	uploadedImage.value = null
 }
 </script>
 
 <style scoped>
 .photo-upload {
-	@apply bg-lightGray rounded-[16px] text-center cursor-pointer;
+	@apply rounded-[16px] text-center cursor-pointer;
 }
 
 .photo-upload-label {
@@ -79,5 +86,4 @@ const removeImage = () => {
 .photo-upload-input {
 	@apply hidden;
 }
-
 </style>

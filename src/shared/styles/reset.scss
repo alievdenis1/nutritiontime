@@ -20,17 +20,20 @@
 }
 
 /* Reapply the pointer cursor for anchor tags */
-a, button {
+a,
+button {
   cursor: revert;
 }
 
 /* Remove list styles (bullets/numbers) */
-ol, ul, menu {
+ol,
+ul,
+menu {
   list-style: none;
 }
 
 img {
-	height: unset;
+  height: unset;
 }
 
 /* For images to not be able to exceed their container */
@@ -45,14 +48,16 @@ table {
 }
 
 /* Safari - solving issue when using user-select:none on the <body> text input doesn't working */
-input, textarea {
+input,
+textarea {
   -webkit-user-select: auto;
 }
 
 /* revert the 'white-space' property for textarea elements on Safari */
 textarea {
   white-space: revert;
-  overflow-wrap: break-word
+  overflow-wrap: break-word;
+  resize: none;
 }
 
 /* minimum style to allow to style meter element */

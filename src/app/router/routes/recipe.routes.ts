@@ -4,7 +4,7 @@ import { MainLayout } from 'app/layouts'
 export default [
 	{
 		name: 'recipe',
-		component: () => import('pages/recipe/RecipePage.vue'), // Важно: динасический импорт, чтобы код работал в production при build
+		component: () => import('pages/recipe/RecipePage.vue'),
 		path: '/:recipeId',
 		meta: {
 			title: 'Recipe',

@@ -1,1 +1,0 @@
-export { default as KitchenToolsRecipe } from './KitchenToolsRecipe.vue'

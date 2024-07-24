@@ -1,0 +1,12 @@
+{
+    "ru": {
+        "chooseRecipe": "Выберите рецепт",
+        "time": "35 мин",
+        "calories": "300 ккал"
+    },
+    "en": {
+        "chooseRecipe": "Choose a Recipe",
+        "time": "35 min",
+        "calories": "300 kcal"
+    }
+}
