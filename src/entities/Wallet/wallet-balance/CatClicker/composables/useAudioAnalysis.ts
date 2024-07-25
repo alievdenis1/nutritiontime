@@ -80,7 +80,6 @@ export const useAudioAnalysis = () => {
 
                 requestAnimationFrame(checkAudioLevel)
             }
-
             checkAudioLevel()
             isAudioInitialized.value = true
         } catch (error) {
