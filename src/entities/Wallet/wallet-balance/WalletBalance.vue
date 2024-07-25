@@ -7,8 +7,8 @@
 				<div class="text-xxxl">
 					{{ formattedCurrency }}
 				</div>
-				<div class="text-xl">
-					$RECIPETON
+				<div class="text-lg font-bold">
+					$RCPT
 				</div>
 			</div>
 			<IconEnquiry
