@@ -33,13 +33,13 @@
 </template>
 
 <script setup lang="ts">
-import { IconHome, IconPlus, IconSearch } from '@/shared/components/Icon'
+import { IconHome, IconPlus, IconSearch } from 'shared/components/Icon'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
-import { ModalCreateRecipe } from '@/entities/CreateRecipe/modal-create/ui'
-import { useModalCreateStore } from '@/entities/CreateRecipe/modal-create/model/model-store'
+import { ModalCreateRecipe } from 'entities/Recipe/CreateRecipe/modal-create/ui'
+import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()
 const { t } = useTranslation(Localization)
@@ -96,3 +96,4 @@ const searchIconColor = computed(() => {
 	opacity: 0.5;
 }
 </style>
+@/entities/Recipe/ui/CreateRecipe/modal-create/ui@/entities/Recipe/ui/CreateRecipe/modal-create/model/model-store

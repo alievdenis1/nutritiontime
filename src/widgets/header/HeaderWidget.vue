@@ -60,7 +60,7 @@ import { useLocaleStore, useTranslation } from 'shared/lib/i18n'
 import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import { IconWallet, IconArrow } from '@/shared/components/Icon'
+import { IconWallet, IconArrow } from 'shared/components/Icon'
 
 const router = useRouter()
 

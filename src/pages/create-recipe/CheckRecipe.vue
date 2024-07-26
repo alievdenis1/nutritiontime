@@ -5,9 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { CheckRecipe } from '@/entities/CreateRecipe/ui/сheckRecipe'
+import { CheckRecipe } from 'entities/Recipe/CreateRecipe/recipe-models'
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

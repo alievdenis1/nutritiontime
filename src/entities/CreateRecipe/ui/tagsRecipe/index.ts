@@ -1,1 +1,0 @@
-export { default as TagsRecipe } from './TagsRecipe.vue'

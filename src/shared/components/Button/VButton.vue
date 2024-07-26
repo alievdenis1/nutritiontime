@@ -50,14 +50,14 @@ const onButtonClicked = () => {
 <style lang="scss" scoped>
 .v-button {
     @apply flex items-center justify-center text-base w-full h-[50px]
-         border-solid py-0 px-[25px] gap-[8px];
+         border-solid py-0 px-[25px] gap-[8px] border-transparent;
 
     &--green {
-        @apply bg-forestGreen border-green text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
+        @apply bg-forestGreen text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
 
     &--white {
-        @apply bg-white border-[#3636364D] text-[#363636] shadow-[0_3px_2px_rgba(237,216,194,0.35)];
+        @apply bg-white border-[#3636364D] text-forestGreen shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
     &--red {
         @apply bg-red  text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];

@@ -46,7 +46,7 @@ import Localization from './Collection.localization.json'
 import { VDragAndDrop } from 'shared/components/DragAndDrop'
 import { DragTypes } from 'shared/components/DragAndDrop/types'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { IconArrowRight, IconPlus } from '@/shared/components/Icon'
+import { IconArrowRight, IconPlus } from 'shared/components/Icon'
 
 const { t } = useTranslation(Localization)
 

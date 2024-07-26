@@ -1,0 +1,10 @@
+{
+    "ru": {
+        "addRecipe": "Готовые идеи",
+        "generateWithSelected": "Сгенерировать с учётом отмеченного"
+    },
+    "en": {
+        "addRecipe": "Ready Ideas",
+        "generateWithSelected": "Generate with Selected"
+    }
+}
