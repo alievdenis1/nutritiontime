@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import eslint from 'vite-plugin-eslint'
 import { fileURLToPath, URL } from 'node:url'
-
+import fs from 'fs'
 import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
@@ -10,7 +10,10 @@ import autoprefixer from 'autoprefixer'
 export default defineConfig({
 	base: '/nutritiolntime/',
 	server: {
-		port: 9090
+		https: {
+			key: fs.readFileSync('localhost-key.pem'),
+			cert: fs.readFileSync('localhost.pem'),
+		},
 	},
 	plugins: [
 		vue(),

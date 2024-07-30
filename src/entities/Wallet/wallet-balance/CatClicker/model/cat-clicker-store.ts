@@ -1,4 +1,3 @@
-// cat-clicker-store.ts
 import { defineStore } from 'pinia'
 
 export const useCatClickerStore = defineStore('catClicker', {
@@ -7,7 +6,9 @@ export const useCatClickerStore = defineStore('catClicker', {
         energyCurrent: 100,
         isRapidClicking: false,
         isShouting: false,
+        shoutLevel: '',
         isShaking: false,
+        shakeLevel: 'medium',
     }),
     actions: {
         addCurrency(amount: number) {
@@ -21,11 +22,18 @@ export const useCatClickerStore = defineStore('catClicker', {
         setRapidClicking(value: boolean) {
             this.isRapidClicking = value
         },
-        setShouting(value: boolean) {
+        setShouting(value: boolean, level = '') {
             this.isShouting = value
+            this.shoutLevel = value ? level : ''
         },
         setShaking(value: boolean) {
             this.isShaking = value
+        },
+        setShakeLevel(level: string) {
+            this.shakeLevel = level
+        },
+        setShoutLevel(level: string) {
+            this.shoutLevel = level
         },
         setCurrency(value: number) {
             this.currency = value

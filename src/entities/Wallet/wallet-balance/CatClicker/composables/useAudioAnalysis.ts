@@ -1,4 +1,4 @@
-import { ref,  onUnmounted } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useCatClickerStore, CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
 
 export const useAudioAnalysis = () => {
@@ -65,15 +65,25 @@ export const useAudioAnalysis = () => {
                     if (Date.now() % SHOUT_DETECTION_INTERVAL < 20) {
                         const relativeIncrease = currentLevel / baselineNoiseLevel.value
 
-                        if (relativeIncrease > CLICKER_CONFIG.sound.threshold && currentLevel > 0.1) {
-                            if (!store.isShouting) {
-                                console.log('Shouting detected!')
-                                store.setShouting(true)
-                            }
+                        let shoutLevel = ''
+                        if (relativeIncrease > CLICKER_CONFIG.sound.thresholdHigh) {
+                            shoutLevel = 'high'
+                        } else if (relativeIncrease > CLICKER_CONFIG.sound.thresholdMedium) {
+                            shoutLevel = 'medium'
+                        } else if (relativeIncrease > CLICKER_CONFIG.sound.thresholdLow) {
+                            shoutLevel = 'low'
+                        }
+
+                        if (shoutLevel && currentLevel > 0.1) {
+                            console.log(`Shouting detected! Level: ${shoutLevel}`)
+                            store.setShouting(true, shoutLevel)
                             if (shoutTimeout) clearTimeout(shoutTimeout)
                             shoutTimeout = window.setTimeout(() => {
-                                store.setShouting(false)
+                                store.setShouting(false, '')
                             }, CLICKER_CONFIG.sound.timeout)
+                        } else {
+                            // Если нет мяуканья, сразу сбрасываем состояние
+                            store.setShouting(false, '')
                         }
                     }
                 }
