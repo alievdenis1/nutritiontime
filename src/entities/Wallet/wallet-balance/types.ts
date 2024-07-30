@@ -29,9 +29,11 @@ export interface ClickerConfig {
         shoutThreshold: number;
     };
     shake: {
-        threshold: number;
-        timeout: number;
-    };
+        thresholdLow: number,
+        thresholdMedium: number,
+        thresholdHigh: number,
+        timeout: number,
+    },
     style: {
         containerSize: number;
         catImageOverflow: number;
@@ -54,9 +56,11 @@ export interface ClickerConfig {
         rapidClickDuration: number;
     };
     sound: {
-        threshold: number;
-        timeout: number;
-    };
+        thresholdLow: number,
+        thresholdMedium: number,
+        thresholdHigh: number,
+        timeout: number,
+    },
     debugMode: boolean;
 }
 export interface AudioData {
