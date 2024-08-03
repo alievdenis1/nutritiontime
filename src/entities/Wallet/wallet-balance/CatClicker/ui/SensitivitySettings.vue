@@ -35,9 +35,6 @@
 						@click="setVoiceLevel(level.value)"
 					/>
 				</div>
-				<div class="mt-4">
-					<p>Текущий порог звука: {{ CLICKER_CONFIG.sound.thresholdLow }}</p>
-				</div>
 			</TabsContent>
 		</TabsMain>
 	</div>

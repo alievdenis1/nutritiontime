@@ -70,7 +70,13 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:currency', 'update:energyCurrent'])
 
-const { startAudioAnalysis, stopAudioAnalysis, isAudioInitialized } = useAudioAnalysis()
+const {
+  startAudioAnalysis,
+  isAudioInitialized,
+  errorMessage,
+  stopAudioAnalysis,
+} = useAudioAnalysis()
+
 const { addCardAndAnimate, cards, removeCard, animateClick } = useCards()
 
 const imgContainer = ref<HTMLElement | null>(null)
@@ -91,7 +97,7 @@ const handleClick = (event: MouseEvent) => {
     animateClick(event.clientX - imgContainer.value.offsetLeft, event.clientY - imgContainer.value.offsetTop, imgContainer.value)
   }
 
-  if (!isAudioInitialized.value) {
+  if (!isAudioInitialized.value && !errorMessage.value) {
     startAudioAnalysis()
   }
 
@@ -123,7 +129,7 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
         Math.pow(accelerationIncludingGravity.x || 0, 2) +
         Math.pow(accelerationIncludingGravity.y || 0, 2) +
         Math.pow(accelerationIncludingGravity.z || 0, 2)
-      ) - 9.81 // Вычитаем ускорение свободного падения
+      ) - 9.81
 
       debugAcceleration.value = acceleration
       console.log('Calculated acceleration:', acceleration)
