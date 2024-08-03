@@ -56,13 +56,28 @@ export interface ClickerConfig {
         rapidClickDuration: number;
     };
     sound: {
-        thresholdLow: number,
-        thresholdMedium: number,
-        thresholdHigh: number,
+        thresholds: {
+            low: {
+                low: number,
+                medium: number,
+                high: number
+            },
+            medium: {
+                low: number,
+                medium: number,
+                high: number
+            },
+            high: {
+                low: number,
+                medium: number,
+                high: number
+            }
+        },
         timeout: number,
     },
     debugMode: boolean;
 }
+
 export interface AudioData {
     normalizedAverage: number;
     relativeIncrease: number;
