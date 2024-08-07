@@ -51,8 +51,8 @@ export const CLICKER_CONFIG = reactive({
     },
     sound: {
         thresholdLow: 0.001,    // 10% выше базового уровня шума
-        thresholdMedium: 0.1, // 30% выше базового уровня шума
-        thresholdHigh: 0.9,   // 60% выше базового уровня шума
+        thresholdMedium: 1, // 30% выше базового уровня шума
+        thresholdHigh: 3,   // 60% выше базового уровня шума
         timeout: 1000,
     },
 })
