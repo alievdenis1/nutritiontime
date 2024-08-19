@@ -48,8 +48,13 @@ import { useCatClickerStore, CLICKER_CONFIG } from 'entities/Wallet/wallet-balan
 
 const store = useCatClickerStore()
 
+defineProps<{
+	shakeLevel: string,
+}>()
+
+const emit = defineEmits(['update:level'])
+
 const activeTab = ref('shake')
-const shakeLevel = ref(store.shakeLevel || 'medium')
 const voiceLevel = ref(store.shoutLevel || 'medium')
 
 const shakeLevels = [
@@ -65,7 +70,7 @@ const voiceLevels = [
 ]
 
 const setShakeLevel = (level: string) => {
-    shakeLevel.value = level
+    emit('update:level', level)
     store.setShakeLevel(level)
     const selectedLevel = shakeLevels.find(l => l.value === level)
     if (selectedLevel) {
@@ -85,7 +90,7 @@ const setVoiceLevel = (level: string) => {
 const initializeLevels = () => {
     const currentShakeLevel = shakeLevels.find(l => l.threshold === CLICKER_CONFIG.shake.thresholdLow)
     if (currentShakeLevel) {
-        shakeLevel.value = currentShakeLevel.value
+		emit('update:level', currentShakeLevel.value)
     }
 
     const currentVoiceLevel = voiceLevels.find(l => l.threshold === CLICKER_CONFIG.sound.thresholdLow)

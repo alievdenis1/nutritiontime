@@ -47,7 +47,10 @@
 		>
 			{{ t('enableShakeDetection') }}
 		</button>
-		<SensitivitySettings />
+		<SensitivitySettings
+			:shakeLevel="shakeLevel"
+			@update:level="setShakeLevel"
+		/>
 		<ConfigPanel />
 	</div>
 </template>
@@ -89,7 +92,11 @@ const permissionGranted = ref(false)
 const eventCount = ref(0)
 const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
-const shakeLevel = ref('medium')
+const shakeLevel = ref(store.shakeLevel || 'medium')
+
+const setShakeLevel = (level: string) => {
+  shakeLevel.value = level
+}
 
 const handleClick = (event: MouseEvent) => {
   addCardAndAnimate(event)
@@ -124,6 +131,7 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
     console.log('Device motion event received', event)
 
     const { accelerationIncludingGravity } = event
+
     if (accelerationIncludingGravity) {
       const acceleration = Math.sqrt(
         Math.pow(accelerationIncludingGravity.x || 0, 2) +
