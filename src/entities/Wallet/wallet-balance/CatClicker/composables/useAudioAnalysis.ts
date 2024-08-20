@@ -6,7 +6,7 @@ export const useAudioAnalysis = () => {
 
     const CALIBRATION_DURATION = 3000
     const NOISE_SAMPLES = 50
-    const SMOOTHING_FACTOR = 0.2
+    const SMOOTHING_FACTOR = 3.2
 
     const isCalibrating = ref(true)
     const isAudioInitialized = ref(false)
@@ -53,6 +53,7 @@ export const useAudioAnalysis = () => {
                 if (noiseLevels.value.length > NOISE_SAMPLES) {
                     noiseLevels.value.shift()
                 }
+
                 baselineNoiseLevel.value = noiseLevels.value.reduce((sum, level) => sum + level, 0) / noiseLevels.value.length
             }
             const checkAudioLevel = () => {
@@ -67,24 +68,20 @@ export const useAudioAnalysis = () => {
                         console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel.value)
                     }
 
-                    smoothedAudioLevel.value = smoothedAudioLevel.value * (1 - SMOOTHING_FACTOR) + rawLevel * SMOOTHING_FACTOR
+                    smoothedAudioLevel.value = smoothedAudioLevel.value * (4 - SMOOTHING_FACTOR) + rawLevel * SMOOTHING_FACTOR
 
-                    const normalizedLevel = Math.max(0, Math.min(1, (smoothedAudioLevel.value - baselineNoiseLevel.value) / (1 - baselineNoiseLevel.value)))
+                    const normalizedLevel = Math.max(0, Math.min(5, (smoothedAudioLevel.value - baselineNoiseLevel.value) / (4 - baselineNoiseLevel.value)))
 
                     let shoutLevel = ''
-                    if (normalizedLevel > CLICKER_CONFIG.sound.thresholdHigh) {
-                        shoutLevel = 'high'
-                    } else if (normalizedLevel > CLICKER_CONFIG.sound.thresholdMedium) {
-                        shoutLevel = 'medium'
-                    } else if (normalizedLevel > CLICKER_CONFIG.sound.thresholdLow) {
-                        shoutLevel = 'low'
+                    if (normalizedLevel > CLICKER_CONFIG.sound.thresholdLow) {
+                        shoutLevel = store.shoutLevel
                     }
 
                     if (shoutLevel) {
                         console.log(`Shouting detected! Level: ${shoutLevel}, Normalized level: ${normalizedLevel.toFixed(2)}`)
-                        store.setShouting(true, shoutLevel)
+                        store.setShouting(true)
                     } else {
-                        store.setShouting(false, '')
+                        store.setShouting(false)
                     }
                 }
 
@@ -110,15 +107,15 @@ export const useAudioAnalysis = () => {
             if (currentTime - lastClickTime < 300) { // Если клики происходят быстро
                 clickCount++
                 if (clickCount > 5) { // Пороговое значение для "громкого" звука
-                    store.setShouting(true, 'high')
+                    store.setShouting(true)
                 } else if (clickCount > 3) { // Пороговое значение для "среднего" звука
-                    store.setShouting(true, 'medium')
+                    store.setShouting(true)
                 } else {
-                    store.setShouting(true, 'low')
+                    store.setShouting(true)
                 }
             } else {
                 clickCount = 1
-                store.setShouting(false, '')
+                store.setShouting(false)
             }
             lastClickTime = currentTime
         }
