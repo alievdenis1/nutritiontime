@@ -6,7 +6,7 @@ export const useCatClickerStore = defineStore('catClicker', {
         energyCurrent: 100,
         isRapidClicking: false,
         isShouting: false,
-        shoutLevel: '',
+        shoutLevel: 'low',
         isShaking: false,
         shakeLevel: 'medium',
     }),
@@ -22,9 +22,8 @@ export const useCatClickerStore = defineStore('catClicker', {
         setRapidClicking(value: boolean) {
             this.isRapidClicking = value
         },
-        setShouting(value: boolean, level = '') {
+        setShouting(value: boolean) {
             this.isShouting = value
-            this.shoutLevel = value ? level : ''
         },
         setShaking(value: boolean) {
             this.isShaking = value

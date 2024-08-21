@@ -40,15 +40,8 @@
 				</TransitionGroup>
 			</div>
 		</div>
-		<button
-			v-if="showPermissionButton"
-			class="permission-button bg-forestGreen text-white py-2 px-4 rounded-full mb-4"
-			@click="requestMotionPermission"
-		>
-			{{ t('enableShakeDetection') }}
-		</button>
 		<SensitivitySettings
-			:shakeLevel="shakeLevel"
+			:shake-level="shakeLevel"
 			@update:level="setShakeLevel"
 		/>
 		<ConfigPanel />
@@ -61,11 +54,8 @@ import { IconGold } from '@/shared/components/Icon'
 import SensitivitySettings from './SensitivitySettings.vue'
 import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 import ConfigPanel from './ConfigPanel.vue'
-import { useTranslation } from '@/shared/lib/i18n'
 const store = useCatClickerStore()
-import Localization from './CatClicker.localization.json'
 
-const { t } = useTranslation(Localization)
 const props = defineProps<{
   initialEnergyCurrency: number,
   initialCurrency: number
@@ -93,12 +83,18 @@ const eventCount = ref(0)
 const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
 const shakeLevel = ref(store.shakeLevel || 'medium')
+const isPermissionRequested = ref(false)
 
 const setShakeLevel = (level: string) => {
   shakeLevel.value = level
 }
 
-const handleClick = (event: MouseEvent) => {
+const handleClick = async (event: MouseEvent) => {
+  if (!isPermissionRequested.value) {
+    await requestMotionPermission()
+    isPermissionRequested.value = true
+  }
+
   addCardAndAnimate(event)
   if (imgContainer.value) {
     animateClick(event.clientX - imgContainer.value.offsetLeft, event.clientY - imgContainer.value.offsetTop, imgContainer.value)

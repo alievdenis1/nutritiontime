@@ -64,9 +64,9 @@ const shakeLevels = [
 ]
 
 const voiceLevels = [
-    { label: 'Низкая', value: 'low', threshold: 0.00001 },
-    { label: 'Средняя', value: 'medium', threshold: 5 },
-    { label: 'Высокая', value: 'high', threshold: 10 },
+    { label: 'Низкая', value: 'low', threshold: 2.5 },
+    { label: 'Средняя', value: 'medium', threshold: 3.5 },
+    { label: 'Высокая', value: 'high', threshold: 4 },
 ]
 
 const setShakeLevel = (level: string) => {

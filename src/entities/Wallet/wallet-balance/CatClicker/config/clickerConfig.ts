@@ -50,9 +50,9 @@ export const CLICKER_CONFIG = reactive({
         rapidClickDuration: 85     // Длительность вибрации при быстром клике
     },
     sound: {
-        thresholdLow: 0.001,    // 10% выше базового уровня шума
-        thresholdMedium: 1, // 30% выше базового уровня шума
-        thresholdHigh: 3,   // 60% выше базового уровня шума
+        thresholdLow: 1.5,    // 10% выше базового уровня шума
+        thresholdMedium: 2.5, // 30% выше базового уровня шума
+        thresholdHigh: 4.5,   // 60% выше базового уровня шума
         timeout: 1000,
     },
 })
