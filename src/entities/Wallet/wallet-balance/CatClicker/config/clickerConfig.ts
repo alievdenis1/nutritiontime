@@ -23,9 +23,9 @@ export const CLICKER_CONFIG = reactive({
         shoutThreshold: 1,         //  порог при крике
     },
     shake: {
-        thresholdLow: 33,
-        thresholdMedium: 40,
-        thresholdHigh: 47,
+        thresholdLow: 23,
+        thresholdMedium: 30,
+        thresholdHigh: 37,
         timeout: 1000,
     },
     style: {
@@ -50,9 +50,9 @@ export const CLICKER_CONFIG = reactive({
         rapidClickDuration: 85     // Длительность вибрации при быстром клике
     },
     sound: {
-        thresholdLow: 3.4,
-        thresholdMedium: 3.65,
-        thresholdHigh: 3.9,
+        thresholdLow: 3.3,
+        thresholdMedium: 3.75,
+        thresholdHigh: 3.95,
         timeout: 1000,
     },
 })
