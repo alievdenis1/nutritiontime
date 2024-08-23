@@ -6,7 +6,7 @@
 					Настройки тряски
 				</TabsTrigger>
 				<TabsTrigger value="voice">
-					Настройки голоса
+					Настройки мяу
 				</TabsTrigger>
 			</TabsList>
 			<TabsContent value="shake">
@@ -19,9 +19,6 @@
 						:active="shakeLevel === level.value"
 						@click="setShakeLevel(level.value)"
 					/>
-				</div>
-				<div class="mt-4">
-					<p>Текущий порог тряски: {{ CLICKER_CONFIG.shake.thresholdLow }}</p>
 				</div>
 			</TabsContent>
 			<TabsContent value="voice">
@@ -58,15 +55,15 @@ const activeTab = ref('shake')
 const voiceLevel = ref(store.shoutLevel || 'medium')
 
 const shakeLevels = [
-    { label: 'Низкая', value: 'low', threshold: 20 },
+    { label: 'Низкая', value: 'low', threshold: 33 },
     { label: 'Средняя', value: 'medium', threshold: 40 },
-    { label: 'Высокая', value: 'high', threshold: 60 },
+    { label: 'Высокая', value: 'high', threshold: 47 },
 ]
 
 const voiceLevels = [
-    { label: 'Низкая', value: 'low', threshold: 2.5 },
-    { label: 'Средняя', value: 'medium', threshold: 3.5 },
-    { label: 'Высокая', value: 'high', threshold: 4 },
+    { label: 'Низкая', value: 'low', threshold: 3.4 },
+    { label: 'Средняя', value: 'medium', threshold: 3.65 },
+    { label: 'Высокая', value: 'high', threshold: 3.9 },
 ]
 
 const setShakeLevel = (level: string) => {

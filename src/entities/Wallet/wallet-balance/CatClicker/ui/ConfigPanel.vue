@@ -9,29 +9,25 @@
 					{{ isShouting ? 'есть' : 'нет' }}</span></span>
 
 				<br>
-				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>
-				<input
-					v-model.number="CLICKER_CONFIG.shake.thresholdLow"
-					type="number"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
+				<!--				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>-->
+				<!--				<input-->
+				<!--					v-model.number="CLICKER_CONFIG.shake.thresholdLow"-->
+				<!--					type="number"-->
+				<!--					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"-->
+				<!--				>-->
 			</div>
 			<br>
-			<div>
-				<label class="block text-sm font-medium text-gray-700">Порог определения мяу</label>
-				<input
-					v-model.number="CLICKER_CONFIG.sound.thresholdLow"
-					type="number"
-					step="0.1"
-					min="0"
-					max="5"
-					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				>
-			</div>
-
-			Какие-то циферки: <br>
-			{{ store.currency }} <br>
-			{{ store.energyCurrent }} <br>
+			<!--			<div>-->
+			<!--				<label class="block text-sm font-medium text-gray-700">Порог определения мяу</label>-->
+			<!--				<input-->
+			<!--					v-model.number="CLICKER_CONFIG.sound.thresholdLow"-->
+			<!--					type="number"-->
+			<!--					step="0.1"-->
+			<!--					min="0"-->
+			<!--					max="5"-->
+			<!--					class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"-->
+			<!--				>-->
+			<!--			</div>-->
 		</div>
 	</div>
 </template>
