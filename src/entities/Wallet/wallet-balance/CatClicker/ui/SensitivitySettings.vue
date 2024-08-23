@@ -55,9 +55,9 @@ const activeTab = ref('shake')
 const voiceLevel = ref(store.shoutLevel || 'medium')
 
 const shakeLevels = [
-    { label: 'Низкая', value: 'low', threshold: 23 },
-    { label: 'Средняя', value: 'medium', threshold: 30 },
-    { label: 'Высокая', value: 'high', threshold: 37 },
+    { label: 'Низкая', value: 'low', threshold: 18 },
+    { label: 'Средняя', value: 'medium', threshold: 23 },
+    { label: 'Высокая', value: 'high', threshold: 31 },
 ]
 
 const voiceLevels = [
