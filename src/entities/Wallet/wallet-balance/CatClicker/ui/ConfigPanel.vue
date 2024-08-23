@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
+// import { CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
 import { useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 import { storeToRefs } from 'pinia'
 
