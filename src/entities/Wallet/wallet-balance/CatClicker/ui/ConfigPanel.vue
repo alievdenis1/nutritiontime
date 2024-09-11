@@ -2,13 +2,13 @@
 	<div class="config-panel mb-4 p-4 bg-gray-100 rounded-lg">
 		<div class="grid grid-cols-2 gap-4">
 			<div class="flex flex-col gap-4">
-				<br>
-				<span class="text-amber-900">тряска: <span class="text-gray">
-					{{ isShaking ? 'есть' : 'никакой' }}</span></span>
-				<span class="text-amber-900">мяуканье: <span class="text-gray">
-					{{ isShouting ? 'есть' : 'нет' }}</span></span>
+				<!--				<br>-->
+				<!--				<span class="text-amber-900">тряска: <span class="text-gray">-->
+				<!--					{{ isShaking ? 'есть' : 'никакой' }}</span></span>-->
+				<!--				<span class="text-amber-900">мяуканье: <span class="text-gray">-->
+				<!--					{{ isShouting ? 'есть' : 'нет' }}</span></span>-->
 
-				<br>
+				<!--				<br>-->
 				<!--				<label class="block text-sm font-medium text-gray-700">Порог определения тряски</label>-->
 				<!--				<input-->
 				<!--					v-model.number="CLICKER_CONFIG.shake.thresholdLow"-->

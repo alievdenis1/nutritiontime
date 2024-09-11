@@ -40,10 +40,10 @@
 				</TransitionGroup>
 			</div>
 		</div>
-		<SensitivitySettings
-			:shake-level="shakeLevel"
-			@update:level="setShakeLevel"
-		/>
+		<!--		<SensitivitySettings-->
+		<!--			:shake-level="shakeLevel"-->
+		<!--			@update:level="setShakeLevel"-->
+		<!--		/>-->
 		<ConfigPanel />
 	</div>
 </template>
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { IconGold } from '@/shared/components/Icon'
-import SensitivitySettings from './SensitivitySettings.vue'
+// import SensitivitySettings from './SensitivitySettings.vue'
 import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 import ConfigPanel from './ConfigPanel.vue'
 const store = useCatClickerStore()
