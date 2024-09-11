@@ -2,7 +2,7 @@
 #
 # To get started with Nuxt see: https://nuxtjs.org/docs/get-started/installation
 #
-name: Deploy Nutritiolntime to Pages
+name: Deploy Nutritiontime to Pages
 
 on:
   # Runs on pushes targeting the default branch
