@@ -65,7 +65,7 @@
 			@update:energy-current="updateEnergyCurrency"
 		/>
 
-		<div class="flex justify-between relative mt-20">
+		<div class="flex justify-between relative">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px]"
 			>
@@ -122,7 +122,7 @@ const props = withDefaults(defineProps<{
 const { initialEnergyCurrency, initialCurrency } = toRefs(props)
 const { t } = useTranslation(Localization)
 
-const show = ref(true)
+const show = ref(false)
 const tonConnectActive = ref(false)
 const loading = ref(true)
 const localeStore = useLocaleStore()
