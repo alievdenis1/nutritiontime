@@ -4,13 +4,13 @@
         "creditInfo": "Это ваш индивидуальный счет. В скором времени вы сможете его пополнять и выводить на свой TON-кошелек.",
         "globalNetworkInfo": "Чтобы не пропустить раздачи и быть в числе первых подписывайтесь на канал",
         "buttonConfirm": "Понятно",
-        "connectWalletPrompt": "Подключить TON-кошелёк"
+        "connectWalletPrompt": "Подключить кошелёк"
     },
     "en": {
-        "helpTitle": "Help Title",
-        "creditInfo": "Text-information about how the crediting happens and what will happen next. Placeholder text for now.",
-        "globalNetworkInfo": "The opposite point of view implies that the basic scenarios of user behavior form a global economic network and at the same time are objectively considered by the relevant instances! It should be noted that the high quality of positional research predetermines the high demand for the tasks set by society. Here is a vivid example of modern trends - the beginning of daily work on forming a position is an interesting experiment in testing the training system for personnel corresponding to urgent needs.",
+        "helpTitle": "What is this?",
+        "creditInfo": "This is your individual account. Soon you will be able to replenish it and withdraw it to your TON wallet",
+        "globalNetworkInfo": "So as not to miss giveaways and be among the first, subscribe to the channel",
         "buttonConfirm": "Understood",
-        "connectWalletPrompt": "Connect TON Wallet"
+        "connectWalletPrompt": "Connect Wallet"
     }
 }

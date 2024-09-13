@@ -85,10 +85,6 @@ const isDeviceMotionSupported = ref(false)
 const shakeLevel = ref(store.shakeLevel || 'medium')
 const isPermissionRequested = ref(false)
 
-const setShakeLevel = (level: string) => {
-  shakeLevel.value = level
-}
-
 const handleClick = async (event: MouseEvent) => {
   if (!isPermissionRequested.value) {
     await requestMotionPermission()

@@ -34,11 +34,11 @@
 
 <script setup lang="ts">
 // import { CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
-import { useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
-import { storeToRefs } from 'pinia'
-
-const store = useCatClickerStore()
-const { isShouting, isShaking } = storeToRefs(store)
+// import { useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
+// import { storeToRefs } from 'pinia'
+//
+// const store = useCatClickerStore()
+// const { isShouting, isShaking } = storeToRefs(store)
 </script>
 
 <style scoped></style>
