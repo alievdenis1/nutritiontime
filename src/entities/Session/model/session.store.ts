@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import type { User } from '../types'
+import type { Locales } from '@/shared/lib/i18n/types.ts'
 
 type State = {
 	userInfo: User | null,
 	error: string | null,
 	token: string | null,
 	isAuthenticated: boolean,
+	lang: Locales,
 };
 
 export const useSessionStore = defineStore({
@@ -15,6 +17,7 @@ export const useSessionStore = defineStore({
 		error: null,
 		token: null,
 		isAuthenticated: false,
+		lang: 'en',
 	}),
 	getters: {
 		isAuthenticated(): boolean {
@@ -35,6 +38,9 @@ export const useSessionStore = defineStore({
 		},
 		setUserInfo(userInfo: User | null) {
 			this.userInfo = userInfo
-		}
+		},
+		setLang(lang: Locales) {
+			this.lang = lang
+		},
 	}
 })

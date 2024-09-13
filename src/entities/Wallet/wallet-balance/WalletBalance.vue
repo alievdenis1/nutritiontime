@@ -154,10 +154,17 @@ const closeModal = () => {
 const isSmallScreen = ref(window.innerWidth <= 380)
 
 onMounted(async () => {
-	const connect = getTonConnectUIInstance()
-	tonConnectActive.value = await connect.connectionRestored
-	await nextTick()
-	useAuthButton()
+  const isLocal = import.meta.env.VITE_USE_TWA_MOCK
+
+  if (isLocal) {
+    console.warn('TWA is not available. Some features may not work correctly.')
+  } else {
+    const connect = getTonConnectUIInstance()
+    tonConnectActive.value = await connect.connectionRestored
+    await nextTick()
+    useAuthButton()
+  }
+
 	loading.value = false
 })
 

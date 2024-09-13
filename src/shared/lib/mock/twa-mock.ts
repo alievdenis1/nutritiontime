@@ -38,7 +38,7 @@ const mockUser = {
     first_name: 'John',
     last_name: 'Doe',
     username: 'johndoe2',
-    language_code: 'en',
+    language_code: 'ru',
     is_premium: false
 }
 const initDataUnsafe = {

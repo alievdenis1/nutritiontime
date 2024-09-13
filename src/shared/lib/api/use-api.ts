@@ -16,7 +16,7 @@ const api: AxiosInstance = axios.create({
   }
 })
 
-const isLocal = import.meta.env.VITE_USE_TWA_MOCK === 'true'
+const isLocal = import.meta.env.VITE_USE_TWA_MOCK
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('auth_token')

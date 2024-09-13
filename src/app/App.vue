@@ -27,11 +27,12 @@ const layout = shallowRef<Component>(DefaultLayout)
 const { isLoading, authorize } = useAuthorization()
 const sessionStore = useSessionStore()
 const localeStore = useLocaleStore()
-localeStore.initializeLocale('ru')
+localeStore.initializeLocale(sessionStore.lang)
 watch(() => route?.meta?.layout, (newLayoutComponent) => {
 	layout.value = newLayoutComponent || DefaultLayout
   if (!sessionStore.isAuthenticated) {
     authorize()
+    localeStore.initializeLocale(sessionStore.lang)
   }
 })
 

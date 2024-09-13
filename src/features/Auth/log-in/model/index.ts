@@ -2,6 +2,7 @@ import { useSessionStore } from '@/entities/Session/model'
 import { login } from '../api'
 import { ref } from 'vue'
 import { twa } from '@/shared/lib/api/twa'
+import type { Locales } from '@/shared/lib/i18n/types.ts'
 
 export const useAuthorization = () => {
     const sessionStore = useSessionStore()
@@ -20,6 +21,11 @@ export const useAuthorization = () => {
 
             if (!twaUser) {
                 throw new Error('User data is not available from TWA')
+            }
+
+            console.log('TWA', twaUser)
+            if (twaUser.language_code != undefined) {
+                sessionStore.setLang(twaUser.language_code as Locales)
             }
 
             const { data, error: loginError, execute } = login({
@@ -46,7 +52,6 @@ export const useAuthorization = () => {
 
             sessionStore.updateToken(newToken)
             sessionStore.setUserInfo(userData)
-
         } catch (e) {
             console.error('Error during session initialization:', e)
             sessionStore.setError(e instanceof Error ? e.message : String(e))
