@@ -2,11 +2,13 @@
     "ru": {
         "wallet": "Мой кошелёк",
         "balance": "Баланс",
-        "history": "История"
+        "history": "История",
+        "preparingRelease": "Готовится к выпуску"
     },
     "en": {
         "wallet": "My Wallet",
         "balance": "Balance",
-        "history": "History"
+        "history": "History",
+        "preparingRelease": "Preparing for release"
     }
 }

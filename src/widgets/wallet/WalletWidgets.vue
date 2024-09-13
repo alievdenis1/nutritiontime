@@ -25,7 +25,7 @@
 		</TabsContent>
 		<TabsContent value="history">
 			<div class="mt-5">
-				Готовится к выпуску
+				{{ t('preparingRelease') }}
 			</div>
 			<!--			<WalletHistory />-->
 		</TabsContent>
