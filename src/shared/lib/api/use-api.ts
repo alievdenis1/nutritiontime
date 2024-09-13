@@ -39,7 +39,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       console.error('Authentication error')
-      // Здесь можно добавить логику для выхода пользователя или перенаправления на страницу входа
+      // Здесь можно добавить логику для обработки ошибки аутентификации
     }
     return Promise.reject(error)
   }
@@ -90,6 +90,6 @@ export function useApi<T>(method: ApiMethod, url: string, payload?: any) {
   return { data, error, loading, execute, cancel }
 }
 
-export const apiInstance = api
+// export const apiInstance = api
 
 export default useApi

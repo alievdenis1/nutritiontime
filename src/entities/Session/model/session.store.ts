@@ -17,6 +17,9 @@ export const useSessionStore = defineStore({
 		isAuthenticated: false,
 	}),
 	getters: {
+		isAuthenticated(): boolean {
+			return this.token !== null
+		},
 	},
 	actions: {
 		updateToken(newToken: string | null) {

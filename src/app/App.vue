@@ -1,5 +1,15 @@
 <template>
 	<component :is="layout">
+		{{ sessionStore.userInfo }}
+		<div
+			v-if="isLoading"
+			class="loading"
+		>
+			..
+			<div class="loading__spinner">
+				Loading...
+			</div>
+		</div>
 		<router-view />
 	</component>
 </template>
@@ -9,17 +19,22 @@ import { shallowRef, watch, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { DefaultLayout } from './layouts'
 import { useLocaleStore } from '@/shared/lib/i18n'
-
-const localeStore = useLocaleStore()
-localeStore.initializeLocale('ru')
+import { useAuthorization } from '@/features/Auth/log-in'
+import { useSessionStore } from '@/entities/Session'
 
 const route = useRoute()
 
 const layout = shallowRef<Component>(DefaultLayout)
 
+const { isLoading, authorize } = useAuthorization()
+const sessionStore = useSessionStore()
+const localeStore = useLocaleStore()
+localeStore.initializeLocale('ru')
 watch(() => route?.meta?.layout, (newLayoutComponent) => {
 	layout.value = newLayoutComponent || DefaultLayout
+  authorize()
 })
+
 </script>
 
 <style lang="scss" src="shared/styles/index.scss" />

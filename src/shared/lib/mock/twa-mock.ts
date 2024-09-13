@@ -1,5 +1,10 @@
 import WebApp from '@twa-dev/sdk'
-import { BiometricManager, BiometricRequestAccessParams, BiometricAuthenticateParams, ShareStoryParams } from '@twa-dev/types'
+import {
+    BiometricManager,
+    BiometricRequestAccessParams,
+    BiometricAuthenticateParams,
+    ShareStoryParams
+} from '@twa-dev/types'
 
 type TWA = typeof WebApp
 type PopupParams = Parameters<TWA['showPopup']>[0]
