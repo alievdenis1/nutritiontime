@@ -1,5 +1,5 @@
 <template>
-	<TabsMain :default-value="store.defaultValueTabs">
+	<TabsMain :default-value="'balance'">
 		<div class="flex justify-between items-center mb-[16px]">
 			<button
 				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
@@ -34,13 +34,11 @@
 
 <script setup lang="ts">
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { useWalletStore } from '@/entities/Wallet/model/wallet.store'
 import { IconArrowRight } from 'shared/components/Icon'
 import { WalletBalance } from 'entities/Wallet/wallet-balance'
 // import { WalletHistory } from 'entities/Wallet/wallet-history'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './WalletWidgets.localization.json'
-const store = useWalletStore()
 const { t } = useTranslation(localizations)
 </script>
 
