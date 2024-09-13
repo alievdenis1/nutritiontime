@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
-import { WebAppInitData } from '@twa-dev/types'
 import { ConnectedWallet } from '@tonconnect/ui'
 
 type State = {
-    userInfo: WebAppInitData | null,
     walletAddress: string | null,
     walletInfo: ConnectedWallet | null,
     isAuthorized: boolean,
@@ -19,7 +17,6 @@ export const WALLET_ADDRESS = 'wallet-address'
 export const useWalletStore = defineStore({
     id: 'wallet-store',
     state: (): State => ({
-        userInfo: null,
         walletInfo: null,
         walletAddress: localStorage.getItem(WALLET_ADDRESS),
         isAuthorized: false,
@@ -43,16 +40,12 @@ export const useWalletStore = defineStore({
             }
 
         },
-        setUserInfo(userInfo: WebAppInitData | null) {
-            this.userInfo = userInfo
-        },
         setWalletInfo(walletInfo: ConnectedWallet | null) {
             this.walletInfo = walletInfo
         },
 
         setAuthorized(isAuthorized: boolean) {
             if (!isAuthorized) {
-                this.userInfo = null
                 this.walletAddress = null
                 localStorage.removeItem(USER_INFO_KEY)
                 localStorage.removeItem(WALLET_INFO_KEY)
@@ -63,7 +56,6 @@ export const useWalletStore = defineStore({
         logout() {
             this.setAuthorized(false)
             this.setWalletAddress(null)
-            this.setUserInfo(null)
             this.setWalletInfo(null)
         }
     }
