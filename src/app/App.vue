@@ -1,11 +1,9 @@
 <template>
 	<component :is="layout">
-		{{ sessionStore.userInfo }}
 		<div
 			v-if="isLoading"
 			class="loading"
 		>
-			..
 			<div class="loading__spinner">
 				Loading...
 			</div>
@@ -32,7 +30,9 @@ const localeStore = useLocaleStore()
 localeStore.initializeLocale('ru')
 watch(() => route?.meta?.layout, (newLayoutComponent) => {
 	layout.value = newLayoutComponent || DefaultLayout
-  authorize()
+  if (!sessionStore.isAuthenticated) {
+    authorize()
+  }
 })
 
 </script>
