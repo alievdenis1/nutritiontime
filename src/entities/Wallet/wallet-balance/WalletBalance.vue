@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, nextTick, toRefs } from 'vue'
+import { onMounted, ref, computed, toRefs } from 'vue'
 import {
   IconGold,
   IconEnquiry,
@@ -122,8 +122,7 @@ import {
 import { VModal } from 'shared/components/Modal'
 import { VButton } from 'shared/components/Button'
 import { ButtonColors } from 'shared/components/Button'
-import { useAuthButton } from 'entities/Wallet/api/useAuthButton'
-import { getTonConnectUIInstance } from 'entities/Wallet/api/tonConnectUIInstance'
+import { useAuthWalletButton } from 'entities/Wallet/api/useAuthButton'
 import { useTranslation } from 'shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
 import { CatClicker } from 'entities/Wallet/wallet-balance/CatClicker'
@@ -140,7 +139,6 @@ const { initialEnergyCurrency, initialCurrency } = toRefs(props)
 const { t } = useTranslation(Localization)
 
 const show = ref(false)
-const tonConnectActive = ref(false)
 const loading = ref(true)
 
 const openModal = () => {
@@ -159,10 +157,7 @@ onMounted(async () => {
   if (isLocal) {
     console.warn('TWA is not available. Some features may not work correctly.')
   } else {
-    const connect = getTonConnectUIInstance()
-    tonConnectActive.value = await connect.connectionRestored
-    await nextTick()
-    useAuthButton()
+    useAuthWalletButton()
   }
 
 	loading.value = false

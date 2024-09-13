@@ -2,7 +2,7 @@ import { toUserFriendlyAddress, ConnectedWallet } from '@tonconnect/ui'
 import { useWalletStore } from '../../Wallet'
 import { getTonConnectUIInstance } from './tonConnectUIInstance'
 
-export function useAuthButton() {
+export function useAuthWalletButton() {
     const isLocal = import.meta.env.VITE_USE_TWA_MOCK
 
     if (isLocal) {
