@@ -135,7 +135,8 @@ const currency = computed(() => store.currency)
 const energyCurrency = computed(() => store.energyCurrent)
 
 const formattedCurrency = computed(() => {
-	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  const value = currency.value ?? 0
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 })
 </script>
 
