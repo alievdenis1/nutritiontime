@@ -1,6 +1,7 @@
+// src/entities/Wallet/wallet-balance/CatClicker/useCards.ts
 import { ref } from 'vue'
-import { useCatClickerStore, CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
-import { Card } from 'entities/Wallet/wallet-balance'
+import { useCatClickerStore, CLICKER_CONFIG } from '@/entities/Wallet/wallet-balance/CatClicker'
+import { Card } from '@/entities/Wallet/wallet-balance'
 
 export const useCards = () => {
     const store = useCatClickerStore()
@@ -10,24 +11,14 @@ export const useCards = () => {
     let clickTimer: number | null = null
     const cards = ref<Card[]>([])
 
-    const addCardAndAnimate = (event: MouseEvent) => {
-        if (store.energyCurrent <= 0 || !event.currentTarget) return
-        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
+    const addCardAndAnimate = (x: number, y: number, multiplier: number) => {
         const duration = CLICKER_CONFIG.animation.card.duration / 1000
-
-        let multiplier = 1
-        if (store.isShouting) {
-            multiplier = 4
-        } else if (store.isShaking) {
-            multiplier = 2
-        }
 
         cards.value.push({ id: clickCount++, x, y, duration, multiplier })
 
-        store.useEnergy()
-        store.addCurrency(multiplier)
+        // Удаляем прямое изменение энергии и валюты
+        // store.useEnergy()
+        // store.addCurrency(multiplier)
 
         clickSpeed.value++
         let currentThreshold = CLICKER_CONFIG.rapidClick.threshold
@@ -39,7 +30,11 @@ export const useCards = () => {
         }
         store.setRapidClicking(clickSpeed.value > currentThreshold)
 
-        vibrate(store.isRapidClicking ? CLICKER_CONFIG.vibration.rapidClickDuration : CLICKER_CONFIG.vibration.duration)
+        vibrate(
+            store.isRapidClicking
+                ? CLICKER_CONFIG.vibration.rapidClickDuration
+                : CLICKER_CONFIG.vibration.duration
+        )
 
         if (clickTimer) clearTimeout(clickTimer)
         clickTimer = window.setTimeout(() => {
@@ -49,7 +44,7 @@ export const useCards = () => {
     }
 
     const removeCard = (id: number) => {
-        const index = cards.value.findIndex(card => card.id === id)
+        const index = cards.value.findIndex((card) => card.id === id)
         if (index !== -1) {
             cards.value.splice(index, 1)
         }
@@ -68,30 +63,42 @@ export const useCards = () => {
         const distanceX = (x - centerX) / centerX
         const distanceY = (y - centerY) / centerY
 
-        container.animate([
-            { transform: 'scale(1)' },
+        container.animate(
+            [
+                { transform: 'scale(1)' },
+                {
+                    transform: `scale(${scaleFactor}) rotateX(${
+                        distanceY * rotateFactor
+                    }deg) rotateY(${-distanceX * rotateFactor}deg)`,
+                    boxShadow: `${distanceX * shadowFactor}px ${distanceY * shadowFactor}px ${
+                        shadowFactor * 2
+                    }px rgba(0,0,0,0.3)`,
+                },
+                { transform: 'scale(1)' },
+            ],
             {
-                transform: `scale(${scaleFactor}) rotateX(${distanceY * rotateFactor}deg) rotateY(${-distanceX * rotateFactor}deg)`,
-                boxShadow: `${distanceX * shadowFactor}px ${distanceY * shadowFactor}px ${shadowFactor * 2}px rgba(0,0,0,0.3)`
-            },
-            { transform: 'scale(1)' }
-        ], {
-            duration,
-            easing: 'ease-in-out'
-        })
+                duration,
+                easing: 'ease-in-out',
+            }
+        )
 
         const imgWrapper = container.querySelector('.img-wrapper') as HTMLElement
         if (imgWrapper) {
-            imgWrapper.animate([
-                { transform: 'scale(1) translate(0, 0)' },
+            imgWrapper.animate(
+                [
+                    { transform: 'scale(1) translate(0, 0)' },
+                    {
+                        transform: `scale(${CLICKER_CONFIG.catEffect.scaleFactor}) translate(${
+                            distanceX * 5
+                        }%, ${distanceY * 5}%)`,
+                    },
+                    { transform: 'scale(1) translate(0, 0)' },
+                ],
                 {
-                    transform: `scale(${CLICKER_CONFIG.catEffect.scaleFactor}) translate(${distanceX * 5}%, ${distanceY * 5}%)`,
-                },
-                { transform: 'scale(1) translate(0, 0)' }
-            ], {
-                duration,
-                easing: 'ease-in-out'
-            })
+                    duration,
+                    easing: 'ease-in-out',
+                }
+            )
         }
     }
 

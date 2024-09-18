@@ -1,3 +1,4 @@
+<!-- src/entities/Wallet/wallet-balance/WalletBalance.vue -->
 <template>
 	<div class="mt-[16px] mb-[60px]">
 		<div class="flex justify-between items-center px-[24px] py-[16px] shadow-custom rounded-[16px]">
@@ -58,12 +59,7 @@
 				</VButton>
 			</VModal>
 		</div>
-		<CatClicker
-			:initial-energy-currency="initialEnergyCurrency"
-			:initial-currency="initialCurrency"
-			@update:currency="updateCurrency"
-			@update:energy-current="updateEnergyCurrency"
-		/>
+		<CatClicker />
 
 		<div class="flex justify-between relative">
 			<div
@@ -83,34 +79,12 @@
 
 				<IconArrowRight v-if="!isSmallScreen" />
 			</div>
-
-			<!--			<div :class="{ 'opacity-0': loading }">-->
-			<!--				<div-->
-			<!--					v-if="!tonConnectActive"-->
-			<!--					class="flex items-center gap-[8px] bg-forestGreen rounded-[16px] max-w-max py-[10px] px-[20px] cursor-pointer h-[44px]"-->
-			<!--				>-->
-			<!--					<div class="text-white text-sm">-->
-			<!--						{{ t('connectWalletPrompt') }}-->
-			<!--					</div>-->
-			<!--					<IconArrowRight v-if="!isSmallScreen" />-->
-			<!--				</div>-->
-			<!--				<div-->
-			<!--					v-else-->
-			<!--					class="flex items-center justify-center w-[48px] bg-neonBlue rounded-[16px] relative cursor-pointer h-[44px]"-->
-			<!--				>-->
-			<!--					<IconDiamond />-->
-			<!--				</div>-->
-			<!--				<div-->
-			<!--					id="ton-connect-button-root"-->
-			<!--					class="absolute opacity-0 right-0 top-0"-->
-			<!--				/>-->
-			<!--			</div>-->
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, toRefs } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import {
   IconGold,
   IconEnquiry,
@@ -118,24 +92,16 @@ import {
   IconArrowRight,
   IconClose,
   // IconDiamond
-} from 'shared/components/Icon'
-import { VModal } from 'shared/components/Modal'
-import { VButton } from 'shared/components/Button'
-import { ButtonColors } from 'shared/components/Button'
-import { useAuthWalletButton } from 'entities/Wallet/api/useAuthButton'
-import { useTranslation } from 'shared/lib/i18n'
+} from '@/shared/components/Icon'
+import { VModal } from '@/shared/components/Modal'
+import { VButton } from '@/shared/components/Button'
+import { ButtonColors } from '@/shared/components/Button'
+import { useAuthWalletButton } from '@/entities/Wallet/api/useAuthButton'
+import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
-import { CatClicker } from 'entities/Wallet/wallet-balance/CatClicker'
+import CatClicker from './CatClicker/ui/CatClicker.vue'
+import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
 
-const props = withDefaults(defineProps<{
-	initialCurrency: number,
-	initialEnergyCurrency: number
-}>(), {
-	initialCurrency: 0,
-	initialEnergyCurrency: 1000
-})
-
-const { initialEnergyCurrency, initialCurrency } = toRefs(props)
 const { t } = useTranslation(Localization)
 
 const show = ref(false)
@@ -163,16 +129,10 @@ onMounted(async () => {
 	loading.value = false
 })
 
-const currency = ref(initialCurrency.value)
-const energyCurrency = ref(initialEnergyCurrency.value)
+const store = useCatClickerStore()
 
-const updateCurrency = (newValue: number) => {
-	currency.value = newValue
-}
-
-const updateEnergyCurrency = (newValue: number) => {
-	energyCurrency.value = newValue
-}
+const currency = computed(() => store.currency)
+const energyCurrency = computed(() => store.energyCurrent)
 
 const formattedCurrency = computed(() => {
 	return currency.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
