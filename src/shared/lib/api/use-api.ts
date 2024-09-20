@@ -1,3 +1,4 @@
+// src/shared/lib/api/use-api.ts
 import { ref, Ref } from 'vue'
 import axios, {
   AxiosResponse,
@@ -63,18 +64,20 @@ export function useApi<T>(method: ApiMethod, url: string, payload?: any) {
     cancelTokenSource = axios.CancelToken.source()
 
     try {
-      const response: AxiosResponse<T> = await api[method](
+      const response: AxiosResponse<T> = await api.request<T>({
+        method,
         url,
-        method === 'get' ? { params: payload, cancelToken: cancelTokenSource.token } : payload,
-        method !== 'get' ? { cancelToken: cancelTokenSource.token } : undefined
-      )
+        data: method !== 'get' ? payload : undefined,
+        params: method === 'get' ? payload : undefined,
+        cancelToken: cancelTokenSource.token,
+      })
       data.value = response.data
     } catch (e) {
       if (axios.isCancel(e)) {
         console.log('Request canceled:', e.message)
       } else {
         error.value = e instanceof Error ? e.message : String(e)
-        console.error(`API Error (${method} ${url}):`, e)
+        console.error(`API Error (${method.toUpperCase()} ${url}):`, e)
       }
     } finally {
       loading.value = false
@@ -89,7 +92,5 @@ export function useApi<T>(method: ApiMethod, url: string, payload?: any) {
 
   return { data, error, loading, execute, cancel }
 }
-
-// export const apiInstance = api
 
 export default useApi
