@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { IconGold } from '@/shared/components/Icon'
 import { CLICKER_CONFIG, useCards } from '@/entities/Wallet/wallet-balance/CatClicker'
 import { useCatClickerStore } from '../model/cat-clicker-store'
@@ -68,8 +68,8 @@ const handleClick = async (event: MouseEvent) => {
     multiplier = 2
   }
 
-  // Отправляем клик на сервер с учётом мультипликатора
-  await store.processClick(1, multiplier) // Передаем clickCount = 1 и multiplier
+  // Вызываем метод click из store
+  await store.click(1) // Передаем clickCount = 1
 
   // Получаем координаты клика
   if (!imgContainer.value) return
@@ -82,9 +82,26 @@ const handleClick = async (event: MouseEvent) => {
   addCardAndAnimate(x, y, multiplier)
 }
 
+// Функция для периодической синхронизации
+const syncInterval = ref<number | null>(null)
+
+const startPeriodicSync = () => {
+  syncInterval.value = window.setInterval(() => {
+    store.syncWithServer()
+  }, 10000) // Синхронизация каждые 10 секунд
+}
+
 onMounted(() => {
   store.fetchClickerStats()
   store.fetchEnergyStatus()
+  startPeriodicSync()
+})
+
+onUnmounted(() => {
+  if (syncInterval.value) {
+    clearInterval(syncInterval.value)
+  }
+  store.syncWithServer() // Синхронизация при размонтировании компонента
 })
 </script>
 

@@ -1,4 +1,3 @@
-// src/entities/Wallet/wallet-balance/CatClicker/model/cat-clicker-store.ts
 import { defineStore } from 'pinia'
 import { getClickerStats, getEnergyStatus, processClick } from '@/features/WalletBalanceUpdate/api/walletBalanceApi'
 
@@ -19,6 +18,9 @@ export const useCatClickerStore = defineStore('catClicker', {
         shoutLevel: 'low',
         isShaking: false,
         shakeLevel: 'medium',
+        clickBuffer: 0,
+        lastSyncTime: Date.now(),
+        isSyncing: false,
     }),
     actions: {
         async fetchClickerStats() {
@@ -48,21 +50,52 @@ export const useCatClickerStore = defineStore('catClicker', {
                 this.energyCurrent = energy.current_energy
                 this.maxEnergy = energy.max_energy
                 this.energyRegenerationRate = energy.regeneration_rate
-                // Здесь можно обработать last_update при необходимости
             } else if (error.value) {
                 console.error('Failed to fetch energy status:', error.value)
             }
         },
-        async processClick(clickCount: number, multiplier: number) {
-            const { data, error, execute } = processClick(clickCount, multiplier)
-            await execute()
-            if (data.value) {
-                this.currency = data.value.new_balance
-                this.energyCurrent = data.value.energy
-                this.totalClicks += clickCount
-                this.totalEarned += data.value.earned
-            } else if (error.value) {
-                console.error('Failed to process click:', error.value)
+        async click(clickCount = 1) {
+            if (this.energyCurrent < clickCount) {
+                console.log('Not enough energy')
+                return
+            }
+
+            // Обновляем локальное состояние
+            this.clickBuffer += clickCount
+            this.energyCurrent -= clickCount
+            this.currency += this.clickReward * clickCount
+            this.totalClicks += clickCount
+            this.totalEarned += this.clickReward * clickCount
+
+            // Проверяем, нужно ли синхронизироваться с сервером
+            if (this.clickBuffer >= 10 || Date.now() - this.lastSyncTime > 3000) {
+                await this.syncWithServer()
+            }
+        },
+        async syncWithServer() {
+            if (this.isSyncing || this.clickBuffer === 0) return
+
+            this.isSyncing = true
+            const clicksToSync = this.clickBuffer
+            this.clickBuffer = 0
+
+            try {
+                const { data, error, execute } = processClick(clicksToSync, 1) // предполагаем, что multiplier всегда 1
+                await execute()
+
+                if (data.value) {
+                    // Обновляем состояние данными с сервера
+                    this.currency = data.value.new_balance
+                    this.energyCurrent = data.value.energy
+                    // Возможно, нужно обновить и другие поля
+                } else if (error.value) {
+                    console.error('Failed to sync clicks:', error.value)
+                    // Возвращаем клики в буфер в случае ошибки
+                    this.clickBuffer += clicksToSync
+                }
+            } finally {
+                this.isSyncing = false
+                this.lastSyncTime = Date.now()
             }
         },
         // Остальные методы
