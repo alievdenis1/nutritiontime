@@ -8,7 +8,7 @@ import axios, {
 } from 'axios'
 import { twa } from './twa'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://nutritiontime.xyz/'
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://nutritiontime.xyz/api'
 
 const api: AxiosInstance = axios.create({
   baseURL,
