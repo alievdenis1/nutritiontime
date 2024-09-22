@@ -3,7 +3,11 @@
 		<div
 			ref="imgContainer"
 			class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
-			:class="{ 'bg-transparentGreen': !store.isRapidClicking, 'bg-rapidClickColor': store.isRapidClicking }"
+			:class="{
+				'bg-transparentGreen': !store.isRapidClicking,
+				'bg-rapidClickColor': store.isRapidClicking,
+				'cursor-not-allowed': !canClick
+			}"
 			@click="handleClick"
 		>
 			<div class="img-wrapper">
@@ -20,7 +24,7 @@
 					tag="div"
 				>
 					<div
-						v-for="card in cards"
+						v-for="card in visibleCards"
 						:key="card.id"
 						class="card"
 						:class="{
@@ -44,23 +48,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { IconGold } from '@/shared/components/Icon'
-import { CLICKER_CONFIG, useCards } from '@/entities/Wallet/wallet-balance/CatClicker'
-import { useCatClickerStore } from '../model/cat-clicker-store'
+import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 
 const store = useCatClickerStore()
+
+const {
+  startAudioAnalysis,
+  isAudioInitialized,
+  errorMessage,
+  stopAudioAnalysis,
+} = useAudioAnalysis()
+
 const { addCardAndAnimate, cards, removeCard, animateClick } = useCards()
 
 const imgContainer = ref<HTMLElement | null>(null)
+let shakeTimeout: number | null = null
+const visibleCards = computed(() => cards.value.slice(-20))
+
+const showPermissionButton = ref(true)
+const debugAcceleration = ref(0)
+const permissionGranted = ref(false)
+const eventCount = ref(0)
+const lastError = ref('')
+const isDeviceMotionSupported = ref(false)
+const shakeLevel = ref(store.shakeLevel || 'medium')
+const isPermissionRequested = ref(false)
+
+const canClick = computed(() => store.energyCurrent > 0)
 
 const handleClick = async (event: MouseEvent) => {
-  if (store.energyCurrent <= 0) {
-    // Нет энергии
-    return
+  if (!canClick.value) return
+
+  if (!isPermissionRequested.value) {
+    await requestMotionPermission()
+    isPermissionRequested.value = true
   }
 
-  // Определяем мультипликатор
   let multiplier = 1
   if (store.isShouting) {
     multiplier = 4
@@ -68,40 +93,156 @@ const handleClick = async (event: MouseEvent) => {
     multiplier = 2
   }
 
-  // Вызываем метод click из store
-  await store.click(1) // Передаем clickCount = 1
+  try {
+    await store.click(1)
 
-  // Получаем координаты клика
-  if (!imgContainer.value) return
-  const rect = imgContainer.value.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
+    if (imgContainer.value) {
+      const rect = imgContainer.value.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      animateClick(x, y, imgContainer.value)
+      addCardAndAnimate(x, y, multiplier)
+    }
 
-  // Анимации
-  animateClick(x, y, imgContainer.value)
-  addCardAndAnimate(x, y, multiplier)
+    if (!isAudioInitialized.value && !errorMessage.value) {
+      startAudioAnalysis()
+    }
+
+    if (!isDeviceMotionSupported.value) {
+      simulateShake()
+    }
+  } catch (error) {
+    console.error('Error processing click:', error)
+  }
 }
 
-// Функция для периодической синхронизации
-const syncInterval = ref<number | null>(null)
-
-const startPeriodicSync = () => {
-  syncInterval.value = window.setInterval(() => {
-    store.syncWithServer()
-  }, 10000) // Синхронизация каждые 10 секунд
+const simulateShake = () => {
+  const randomChance = Math.random()
+  if (randomChance < 0.1) {
+    console.log('Simulated shake detected!')
+    store.setShaking(true)
+    setTimeout(() => {
+      store.setShaking(false)
+    }, CLICKER_CONFIG.shake.timeout)
+  }
 }
 
-onMounted(() => {
-  store.fetchClickerStats()
-  store.fetchEnergyStatus()
-  startPeriodicSync()
+const handleDeviceMotion = (event: DeviceMotionEvent) => {
+  try {
+    eventCount.value++
+    console.log('Device motion event received', event)
+
+    const { accelerationIncludingGravity } = event
+
+    if (accelerationIncludingGravity) {
+      const acceleration = Math.sqrt(
+          Math.pow(accelerationIncludingGravity.x || 0, 2) +
+          Math.pow(accelerationIncludingGravity.y || 0, 2) +
+          Math.pow(accelerationIncludingGravity.z || 0, 2)
+      ) - 9.81
+
+      debugAcceleration.value = acceleration
+      console.log('Calculated acceleration:', acceleration)
+
+      let threshold
+      switch (shakeLevel.value) {
+        case 'low':
+          threshold = CLICKER_CONFIG.shake.thresholdLow
+          break
+        case 'high':
+          threshold = CLICKER_CONFIG.shake.thresholdHigh
+          break
+        default:
+          threshold = CLICKER_CONFIG.shake.thresholdMedium
+      }
+
+      if (acceleration > threshold) {
+        console.log('Shake detected!')
+        store.setShaking(true)
+        store.setShakeLevel(shakeLevel.value)
+
+        if (shakeTimeout) clearTimeout(shakeTimeout)
+        shakeTimeout = window.setTimeout(() => {
+          store.setShaking(false)
+        }, CLICKER_CONFIG.shake.timeout)
+      }
+    }
+  } catch (error) {
+    console.error('Error in handleDeviceMotion:', error)
+    lastError.value = error instanceof Error ? error.message : 'Unknown error in handleDeviceMotion'
+  }
+}
+
+const requestMotionPermission = async () => {
+  try {
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      const permissionState = await (DeviceMotionEvent as any).requestPermission()
+      if (permissionState === 'granted') {
+        permissionGranted.value = true
+        window.addEventListener('devicemotion', handleDeviceMotion)
+        console.log('Motion permission granted')
+      } else {
+        console.error('Motion permission denied')
+        lastError.value = 'Motion permission denied. Please enable it in your device settings.'
+      }
+    } else {
+      permissionGranted.value = true
+      window.addEventListener('devicemotion', handleDeviceMotion)
+      console.log('Motion listener added without permission request')
+    }
+  } catch (error: any) {
+    console.error('Error requesting motion permission:', error)
+    lastError.value = error.message
+  }
+  showPermissionButton.value = false
+}
+
+const checkDeviceMotionSupport = () => {
+  isDeviceMotionSupported.value = 'DeviceMotionEvent' in window
+  console.log('Device motion supported:', isDeviceMotionSupported.value)
+  if (!isDeviceMotionSupported.value) {
+    lastError.value = 'Device motion is not supported on this device. Using alternative shake detection.'
+  }
+}
+
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    store.setRapidClicking(false)
+    store.setShaking(false)
+    if (shakeTimeout) clearTimeout(shakeTimeout)
+  }
+}
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+
+onMounted(async () => {
+  console.log('Component mounted')
+  window.addEventListener('visibilitychange', handleVisibilityChange)
+  checkDeviceMotionSupport()
+  if (isDeviceMotionSupported.value) {
+    if (isIOS && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      showPermissionButton.value = true
+      console.log('Permission button shown for iOS device')
+    } else {
+      await requestMotionPermission()
+    }
+  } else {
+    console.log('Using alternative shake detection method')
+  }
+
+  await Promise.all([
+    store.fetchClickerStats(),
+    store.fetchEnergyStatus()
+  ])
 })
 
 onUnmounted(() => {
-  if (syncInterval.value) {
-    clearInterval(syncInterval.value)
-  }
-  store.syncWithServer() // Синхронизация при размонтировании компонента
+  console.log('Component unmounted')
+  window.removeEventListener('visibilitychange', handleVisibilityChange)
+  window.removeEventListener('devicemotion', handleDeviceMotion)
+  if (shakeTimeout) clearTimeout(shakeTimeout)
+  stopAudioAnalysis()
+  store.syncWithServer()
 })
 </script>
 
