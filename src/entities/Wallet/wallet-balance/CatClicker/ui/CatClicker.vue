@@ -44,6 +44,7 @@
 				</TransitionGroup>
 			</div>
 		</div>
+		{{ counter }}
 	</div>
 </template>
 
@@ -238,8 +239,10 @@ onMounted(async () => {
 
 const syncInterval = ref<number | null>(null)
 
+let counter = ref(0)
 const startPeriodicSync = () => {
   syncInterval.value = window.setInterval(() => {
+    counter.value++
     store.syncWithServer()
   }, 3000)
 }
