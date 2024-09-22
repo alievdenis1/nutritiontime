@@ -241,7 +241,7 @@ const syncInterval = ref<number | null>(null)
 const startPeriodicSync = () => {
   syncInterval.value = window.setInterval(() => {
     store.syncWithServer()
-  }, 10000) // Синхронизация каждые 10 секунд
+  }, 3000) // Синхронизация каждые 10 секунд
 }
 
 onUnmounted(() => {
