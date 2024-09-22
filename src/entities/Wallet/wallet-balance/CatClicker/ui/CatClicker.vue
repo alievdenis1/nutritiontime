@@ -241,7 +241,7 @@ const syncInterval = ref<number | null>(null)
 const startPeriodicSync = () => {
   syncInterval.value = window.setInterval(() => {
     store.syncWithServer()
-  }, 3000) // Синхронизация каждые 10 секунд
+  }, 3000)
 }
 
 onUnmounted(() => {
@@ -251,6 +251,12 @@ onUnmounted(() => {
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
   store.syncWithServer()
+  startPeriodicSync()
+})
+
+onMounted(() => {
+  store.fetchClickerStats()
+  store.fetchEnergyStatus()
   startPeriodicSync()
 })
 </script>
