@@ -22,7 +22,6 @@ import { useLocaleStore } from '@/shared/lib/i18n'
 import { VLoading } from '@/shared/components/Loading'
 import { useAuthorization } from '@/features/Auth/log-in'
 import { useSessionStore } from '@/entities/Session'
-import { VButton } from 'shared/components/Button'
 
 const route = useRoute()
 

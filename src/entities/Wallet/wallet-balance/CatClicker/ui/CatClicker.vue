@@ -236,6 +236,14 @@ onMounted(async () => {
   ])
 })
 
+const syncInterval = ref<number | null>(null)
+
+const startPeriodicSync = () => {
+  syncInterval.value = window.setInterval(() => {
+    store.syncWithServer()
+  }, 3000) // Синхронизация каждые 10 секунд
+}
+
 onUnmounted(() => {
   console.log('Component unmounted')
   window.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -243,6 +251,7 @@ onUnmounted(() => {
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
   store.syncWithServer()
+  startPeriodicSync()
 })
 </script>
 
