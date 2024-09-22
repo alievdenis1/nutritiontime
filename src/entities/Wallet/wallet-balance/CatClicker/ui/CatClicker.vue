@@ -48,18 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { IconGold } from '@/shared/components/Icon'
 import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 
 const store = useCatClickerStore()
-
-const props = defineProps<{
-  initialEnergyCurrency: number,
-  initialCurrency: number
-}>()
-
-const emit = defineEmits(['update:currency', 'update:energyCurrent'])
 
 const {
   startAudioAnalysis,
@@ -240,8 +233,7 @@ onMounted(async () => {
   } else {
     console.log('Using alternative shake detection method')
   }
-  store.setCurrency(props.initialCurrency)
-  store.setEnergyCurrent(props.initialEnergyCurrency)
+
   await Promise.all([
     store.fetchClickerStats(),
     store.fetchEnergyStatus()
@@ -255,14 +247,6 @@ onUnmounted(() => {
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
   store.syncWithServer()
-})
-
-watch(() => store.currency, (newValue) => {
-  emit('update:currency', newValue)
-})
-
-watch(() => store.energyCurrent, (newValue) => {
-  emit('update:energyCurrent', newValue)
 })
 </script>
 
