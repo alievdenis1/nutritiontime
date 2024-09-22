@@ -5,10 +5,12 @@
 			class="loading"
 		>
 			<div class="loading__spinner">
-				Loading...
+				<v-loading />
 			</div>
 		</div>
-		<router-view />
+		<div v-else>
+			<router-view />
+		</div>
 	</component>
 </template>
 
@@ -17,8 +19,10 @@ import { shallowRef, watch, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { DefaultLayout } from './layouts'
 import { useLocaleStore } from '@/shared/lib/i18n'
+import { VLoading } from '@/shared/components/Loading'
 import { useAuthorization } from '@/features/Auth/log-in'
 import { useSessionStore } from '@/entities/Session'
+import { VButton } from 'shared/components/Button'
 
 const route = useRoute()
 
