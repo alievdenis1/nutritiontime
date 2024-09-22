@@ -79,11 +79,7 @@ const isPermissionRequested = ref(false)
 const canClick = computed(() => store.energyCurrent > 0)
 
 const handleClick = async (event: MouseEvent) => {
-  console.log('permissionRequested', isPermissionRequested)
-
   if (!canClick.value) return
-
-  console.log('permissionRequested', isPermissionRequested)
 
   if (!isPermissionRequested.value) {
     await requestMotionPermission()
