@@ -18,9 +18,7 @@ export const useCatClickerStore = defineStore('catClicker', {
         shoutLevel: 'low',
         isShaking: false,
         shakeLevel: 'medium',
-        clickBuffer: 0,
-        lastSyncTime: Date.now(),
-        isSyncing: false,
+        userId: 0,
     }),
     actions: {
         async fetchClickerStats() {
@@ -54,48 +52,41 @@ export const useCatClickerStore = defineStore('catClicker', {
                 console.error('Failed to fetch energy status:', error.value)
             }
         },
+        connectSocket() {
+            const userId = this.userId
+            if (!userId) return
+
+            window.Echo.private(`user.${userId}`)
+                .listen('UserStatsUpdated', (data: any) => {
+                    this.currency = data.balance
+                    this.energyCurrent = data.energy
+                    this.maxEnergy = data.max_energy
+                    this.totalClicks = data.total_clicks
+                    this.totalEarned = data.total_earned
+                    // Обновите другие поля по необходимости
+                })
+        },
         async click(clickCount = 1) {
             if (this.energyCurrent < clickCount) {
                 console.log('Not enough energy')
                 return
             }
 
-            // Обновляем локальное состояние
-            this.clickBuffer += clickCount
             this.energyCurrent -= clickCount
-            this.currency += this.clickReward * clickCount
-            this.totalClicks += clickCount
-            this.totalEarned += this.clickReward * clickCount
 
-            // Проверяем, нужно ли синхронизироваться с сервером
-            if (this.clickBuffer >= 10 || Date.now() - this.lastSyncTime > 3000) {
-                await this.syncWithServer()
-            }
-        },
-        async syncWithServer() {
-            if (this.isSyncing || this.clickBuffer === 0) return
-
-            this.isSyncing = true
-            const clicksToSync = this.clickBuffer
-            this.clickBuffer = 0
-
+            const multiplier = 1
             try {
-                const { data, error, execute } = processClick(clicksToSync, 1) // предполагаем, что multiplier всегда 1
+                const { data, error, execute } =
+                    processClick(clickCount, multiplier)
                 await execute()
 
                 if (data.value) {
-                    // Обновляем состояние данными с сервера
-                    this.currency = data.value.new_balance
-                    this.energyCurrent = data.value.energy
-                    // Возможно, нужно обновить и другие поля
+                    // Остальные данные обновятся через WebSocket
                 } else if (error.value) {
-                    console.error('Failed to sync clicks:', error.value)
-                    // Возвращаем клики в буфер в случае ошибки
-                    this.clickBuffer += clicksToSync
+                    console.error('Failed to process click:', error.value)
                 }
-            } finally {
-                this.isSyncing = false
-                this.lastSyncTime = Date.now()
+            } catch (e) {
+                console.error('Error processing click:', e)
             }
         },
         // Остальные методы

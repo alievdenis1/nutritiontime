@@ -44,7 +44,6 @@
 				</TransitionGroup>
 			</div>
 		</div>
-		{{ counter }}
 	</div>
 </template>
 
@@ -52,7 +51,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { IconGold } from '@/shared/components/Icon'
 import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
+import { useSessionStore } from '@/entities/Session'
 
+const sessionStore = useSessionStore()
 const store = useCatClickerStore()
 
 const {
@@ -237,30 +238,23 @@ onMounted(async () => {
   ])
 })
 
-const syncInterval = ref<number | null>(null)
-
-let counter = ref(0)
-const startPeriodicSync = () => {
-  syncInterval.value = window.setInterval(() => {
-    counter.value++
-    store.syncWithServer()
-  }, 3000)
-}
-
 onUnmounted(() => {
-  console.log('Component unmounted')
+  if (store.userId) {
+    window.Echo.leave(`user.${store.userId}`)
+  }
   window.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('devicemotion', handleDeviceMotion)
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
-  store.syncWithServer()
-  startPeriodicSync()
 })
 
-onMounted(() => {
-  store.fetchClickerStats()
-  store.fetchEnergyStatus()
-  startPeriodicSync()
+onMounted(async () => {
+  store.userId = sessionStore.userInfo?.id ?? 0
+  store.connectSocket()
+  await Promise.all([
+    store.fetchClickerStats(),
+    store.fetchEnergyStatus()
+  ])
 })
 </script>
 
