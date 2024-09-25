@@ -64,7 +64,7 @@ export const useAudioAnalysis = () => {
                 } else {
                     if (isCalibrating.value) {
                         isCalibrating.value = false
-                        console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel.value)
+                        // console.log('Calibration complete. Baseline noise level:', baselineNoiseLevel.value)
                     }
 
                     smoothedAudioLevel.value = smoothedAudioLevel.value * (4 - SMOOTHING_FACTOR) + rawLevel * SMOOTHING_FACTOR
@@ -77,7 +77,7 @@ export const useAudioAnalysis = () => {
                     }
 
                     if (shoutLevel) {
-                        console.log(`Shouting detected! Level: ${shoutLevel}, Normalized level: ${normalizedLevel.toFixed(2)}`)
+                        // console.log(`Shouting detected! Level: ${shoutLevel}, Normalized level: ${normalizedLevel.toFixed(2)}`)
                         store.setShouting(true)
                     } else {
                         store.setShouting(false)
@@ -93,37 +93,6 @@ export const useAudioAnalysis = () => {
             errorMessage.value = 'Не удалось получить доступ к микрофону'
         }
     }
-
-    // const startAlternativeAudioAnalysis = () => {
-    //     console.log('Starting alternative audio analysis')
-    //     isAudioInitialized.value = true
-    //     let clickCount = 0
-    //     let lastClickTime = Date.now()
-    //
-    //     const handleClick = () => {
-    //         const currentTime = Date.now()
-    //         if (currentTime - lastClickTime < 300) { // Если клики происходят быстро
-    //             clickCount++
-    //             if (clickCount > 5) { // Пороговое значение для "громкого" звука
-    //                 store.setShouting(true)
-    //             } else if (clickCount > 3) { // Пороговое значение для "среднего" звука
-    //                 store.setShouting(true)
-    //             } else {
-    //                 store.setShouting(true)
-    //             }
-    //         } else {
-    //             clickCount = 1
-    //             store.setShouting(false)
-    //         }
-    //         lastClickTime = currentTime
-    //     }
-    //     const container = document.querySelector('.img-container')
-    //     if (container) {
-    //         container.addEventListener('click', handleClick)
-    //     }
-    //
-    //     isAudioInitialized.value = true
-    // }
 
     const stopAudioAnalysis = () => {
         if (audioContext) {

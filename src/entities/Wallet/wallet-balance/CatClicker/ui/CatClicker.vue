@@ -96,7 +96,7 @@ const handleClick = async (event: MouseEvent) => {
   }
 
   try {
-    await store.click(1)
+    await store.click(1, multiplier)
 
     if (imgContainer.value) {
       const rect = imgContainer.value.getBoundingClientRect()

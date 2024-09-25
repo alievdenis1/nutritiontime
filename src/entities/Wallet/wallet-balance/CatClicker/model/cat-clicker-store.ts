@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getClickerStats, getEnergyStatus, processClick } from '@/features/WalletBalanceUpdate/api/walletBalanceApi'
+import { getClickerStats, getEnergyStatus } from '@/features/WalletBalanceUpdate/api/walletBalanceApi'
 
 export const useCatClickerStore = defineStore('catClicker', {
     state: () => ({
@@ -66,7 +66,7 @@ export const useCatClickerStore = defineStore('catClicker', {
                     // Обновите другие поля по необходимости
                 })
         },
-        async click(clickCount = 1) {
+        async click(clickCount = 1, multiplier = 1) {
             if (this.energyCurrent < clickCount) {
                 console.log('Not enough energy')
                 return
@@ -74,19 +74,15 @@ export const useCatClickerStore = defineStore('catClicker', {
 
             this.energyCurrent -= clickCount
 
-            const multiplier = 1
             try {
-                const { data, error, execute } =
-                    processClick(clickCount, multiplier)
-                await execute()
-
-                if (data.value) {
-                    // Остальные данные обновятся через WebSocket
-                } else if (error.value) {
-                    console.error('Failed to process click:', error.value)
-                }
+                // Отправляем событие через сокет
+                window.Echo.private(`user.${this.userId}`)
+                    .whisper('client-click', {
+                        click_count: clickCount,
+                        multiplier: multiplier,
+                    })
             } catch (e) {
-                console.error('Error processing click:', e)
+                console.error('Error sending click via socket:', e)
             }
         },
         // Остальные методы
