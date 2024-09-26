@@ -75,7 +75,7 @@ const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
 const isPermissionRequested = ref(false)
 
-const canClick = computed(() => store.energyCurrent > 0)
+const canClick = computed(() => Number(store.energyCurrent) > 0)
 
 const handleClick = (event: MouseEvent) => {
   if (!store.canClick) return

@@ -73,7 +73,7 @@ export const useAudioAnalysis = () => {
 
                     let shoutLevel = ''
                     if (normalizedLevel > CLICKER_CONFIG.sound.thresholdLow) {
-                        shoutLevel = store.shoutLevel
+                        shoutLevel = 'medium'
                     }
 
                     if (shoutLevel) {
