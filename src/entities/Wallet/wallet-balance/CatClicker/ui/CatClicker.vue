@@ -78,11 +78,19 @@ const isPermissionRequested = ref(false)
 const canClick = computed(() => store.energyCurrent > 0)
 
 const handleClick = (event: MouseEvent) => {
-  if (!canClick.value) return
+  if (!store.canClick) return
 
   if (!isPermissionRequested.value) {
     requestMotionPermission()
     isPermissionRequested.value = true
+  }
+
+  let energySpent = 1
+  let shakeClicks = 0
+  let shoutClicks = 0
+
+  if (store.stats?.multi_tap_enabled) {
+    energySpent = Math.min(store.energyCurrent, store.stats.multi_tap_limit)
   }
 
   let multiplier = 1
@@ -91,8 +99,8 @@ const handleClick = (event: MouseEvent) => {
   } else if (store.isShaking) {
     multiplier = 2
   }
+  const clickResult = store.click(energySpent, shakeClicks, shoutClicks)
 
-  const clickResult = store.click(1)
   if (clickResult) {
     if (imgContainer.value) {
       const rect = imgContainer.value.getBoundingClientRect()
@@ -203,6 +211,7 @@ onMounted(async () => {
   console.log('Component mounted')
   window.addEventListener('visibilitychange', handleVisibilityChange)
   checkDeviceMotionSupport()
+  store.syncWithBackend()
   if (isDeviceMotionSupported.value) {
     if (isIOS && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
       showPermissionButton.value = true
@@ -213,26 +222,13 @@ onMounted(async () => {
   } else {
     console.log('Using alternative shake detection method')
   }
-
-  await Promise.all([
-    store.fetchClickerStats(),
-    store.fetchEnergyStatus()
-  ])
 })
 
 onUnmounted(() => {
-  console.log('Component unmounted')
   window.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('devicemotion', handleDeviceMotion)
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
-})
-
-onMounted(() => {
-  store.fetchClickerStats()
-  store.fetchEnergyStatus()
-  store.startPeriodicSync()
-
 })
 </script>
 

@@ -17,16 +17,16 @@ export interface ClickerStats {
 export interface ClickResponse {
     success: boolean;
     earned: number;
-    new_balance: number | string;
-    energy: number;
-    total_earned: number;  // Добавляем это поле
+    new_balance: string;
+    current_energy: string;
+    total_earned: string;
 }
 
 export interface EnergyStatus {
     current_energy: number;
     max_energy: number;
     regeneration_rate: number;
-    last_update: string;
+    last_update: string | null;
 }
 
 export interface ClickRequest {
