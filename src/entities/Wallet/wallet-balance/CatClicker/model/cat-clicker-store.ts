@@ -5,7 +5,7 @@ import { getClickerStats, getEnergyStatus, processClick, ClickerStats, EnergySta
 export const useCatClickerStore = defineStore('catClicker', () => {
     const stats = ref<ClickerStats | null>(null)
     const energyStatus = ref<EnergyStatus | null>(null)
-    const pendingClicks = ref<{ energy_spent: number, shake_clicks: number, shout_clicks: number }[]>([])
+    const pendingClicks = ref<{ energy_spent: number, is_multi_click: boolean, shake_clicks: number, shout_clicks: number }[]>([])
     const lastSyncTime = ref(Date.now())
     const syncInterval = 1700 // 5 seconds
     const localVersion = ref(0)
@@ -72,6 +72,42 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         localVersion.value = serverVersion.value
     }
 
+    function updateStatsFromClickResponse(response: ClickResponse) {
+        if (stats.value) {
+            stats.value.balance = Number(response.new_balance)
+            stats.value.total_earned = Number(response.total_earned)
+        }
+
+        if (energyStatus.value) {
+            energyStatus.value.current_energy = Number(response.current_energy)
+        }
+
+        localVersion.value++
+    }
+
+    function click(energySpent = 1, isMultiClick = false, shakeClicks = 0, shoutClicks = 0) {
+        if (!canClick.value) return false
+
+        pendingClicks.value.push({ energy_spent: energySpent, is_multi_click: isMultiClick, shake_clicks: shakeClicks, shout_clicks: shoutClicks })
+
+        // Оптимистичное обновление
+        if (energyStatus.value) {
+            energyStatus.value.current_energy = Math.max(0, Number(energyStatus.value.current_energy) - energySpent)
+        }
+        if (stats.value) {
+            const baseReward = Number(stats.value.click_reward) * energySpent
+            const shakeMultiplier = 1 + (shakeClicks * 0.01) // Пример: 1% бонус за каждую тряску
+            const shoutMultiplier = 1 + (shoutClicks * 0.02) // Пример: 2% бонус за каждый крик
+            const totalReward = baseReward * shakeMultiplier * shoutMultiplier
+
+            stats.value.balance = Number(stats.value.balance) + totalReward
+            stats.value.total_clicks++
+            stats.value.total_earned = Number(stats.value.total_earned) + totalReward
+        }
+        localVersion.value++
+
+        return true
+    }
     async function syncWithBackend() {
         const now = Date.now()
         if (now - lastSyncTime.value < syncInterval) return
@@ -80,10 +116,11 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             const totalEnergySpent = pendingClicks.value.reduce((sum, click) => sum + click.energy_spent, 0)
             const totalShakeClicks = pendingClicks.value.reduce((sum, click) => sum + click.shake_clicks, 0)
             const totalShoutClicks = pendingClicks.value.reduce((sum, click) => sum + click.shout_clicks, 0)
+            const isMultiClick = pendingClicks.value[0].is_multi_click // Берем значение из первого клика
 
             const clickRequest: ClickRequest = {
                 energy_spent: totalEnergySpent,
-                is_multi_click: false,
+                is_multi_click: isMultiClick,
                 shake_clicks: totalShakeClicks,
                 shout_clicks: totalShoutClicks
             }
@@ -102,39 +139,6 @@ export const useCatClickerStore = defineStore('catClicker', () => {
 
         await Promise.all([fetchStats(), fetchEnergyStatus()])
         lastSyncTime.value = now
-    }
-
-    function updateStatsFromClickResponse(response: ClickResponse) {
-        if (stats.value) {
-            stats.value.balance = Number(response.new_balance)
-            stats.value.total_earned = Number(response.total_earned)
-        }
-
-        if (energyStatus.value) {
-            energyStatus.value.current_energy = Number(response.current_energy)
-        }
-
-        localVersion.value++
-    }
-
-    function click(energySpent = 1, shakeClicks = 0, shoutClicks = 0) {
-        if (!canClick.value) return false
-
-        pendingClicks.value.push({ energy_spent: energySpent, shake_clicks: shakeClicks, shout_clicks: shoutClicks })
-
-        // Оптимистичное обновление
-        if (energyStatus.value) {
-            energyStatus.value.current_energy = Math.max(0, Number(energyStatus.value.current_energy) - energySpent)
-        }
-        if (stats.value) {
-            const reward = Number(stats.value.click_reward) * energySpent
-            stats.value.balance = Number(stats.value.balance) + reward
-            stats.value.total_clicks++
-            stats.value.total_earned = Number(stats.value.total_earned) + reward
-        }
-        localVersion.value++
-
-        return true
     }
 
     // Инициализация и периодическая синхронизация

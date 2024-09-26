@@ -86,12 +86,11 @@ const handleClick = (event: MouseEvent) => {
   }
 
   let energySpent = 1
-  let shakeClicks = 0
-  let shoutClicks = 0
+  let shakeClicks = store.isShaking ? 1 : 0
+  let shoutClicks = store.isShouting ? 1 : 0
 
-  if (store.stats?.multi_tap_enabled) {
-    energySpent = Math.min(store.energyCurrent, store.stats.multi_tap_limit)
-  }
+  // Мультитап не вычисляется здесь, а просто передается текущее состояние
+  const isMultiClick = !!store.stats?.multi_tap_enabled
 
   let multiplier = 1
   if (store.isShouting) {
@@ -99,7 +98,8 @@ const handleClick = (event: MouseEvent) => {
   } else if (store.isShaking) {
     multiplier = 2
   }
-  const clickResult = store.click(energySpent, shakeClicks, shoutClicks)
+
+  const clickResult = store.click(energySpent, isMultiClick, shakeClicks, shoutClicks)
 
   if (clickResult) {
     if (imgContainer.value) {
@@ -113,20 +113,6 @@ const handleClick = (event: MouseEvent) => {
     if (!isAudioInitialized.value && !errorMessage.value) {
       startAudioAnalysis()
     }
-
-    if (!isDeviceMotionSupported.value) {
-      simulateShake()
-    }
-  }
-}
-const simulateShake = () => {
-  const randomChance = Math.random()
-  if (randomChance < 0.1) {
-    console.log('Simulated shake detected!')
-    store.setShaking(true)
-    setTimeout(() => {
-      store.setShaking(false)
-    }, CLICKER_CONFIG.shake.timeout)
   }
 }
 
@@ -211,7 +197,6 @@ onMounted(async () => {
   console.log('Component mounted')
   window.addEventListener('visibilitychange', handleVisibilityChange)
   checkDeviceMotionSupport()
-  store.syncWithBackend()
   if (isDeviceMotionSupported.value) {
     if (isIOS && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
       showPermissionButton.value = true
@@ -222,6 +207,7 @@ onMounted(async () => {
   } else {
     console.log('Using alternative shake detection method')
   }
+  await store.syncWithBackend()
 })
 
 onUnmounted(() => {
