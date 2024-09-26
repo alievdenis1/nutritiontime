@@ -31,6 +31,8 @@ interface CatClickerState {
     lastMultiClickTime: number;
     pendingRewards: number;
     syncInterval: number;
+    shoutLevel: 'low' | 'medium' | 'high';
+    shakeLevel: 'low' | 'medium' | 'high';
 }
 export const useCatClickerStore = defineStore('catClicker', {
     state: (): CatClickerState => ({
@@ -57,7 +59,9 @@ export const useCatClickerStore = defineStore('catClicker', {
         shoutClickBuffer: 0,
         lastMultiClickTime: 0,
         pendingRewards: 0,
-        syncInterval: 1000, // Интерв
+        syncInterval: 500, // Интерв
+        shoutLevel: 'low',
+        shakeLevel: 'medium',
     }),
     actions: {
         async fetchClickerStats() {
