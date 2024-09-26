@@ -44,7 +44,6 @@
 				</TransitionGroup>
 			</div>
 		</div>
-		{{ counter }}
 	</div>
 </template>
 
@@ -74,16 +73,15 @@ const permissionGranted = ref(false)
 const eventCount = ref(0)
 const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
-const shakeLevel = ref(store.shakeLevel || 'medium')
 const isPermissionRequested = ref(false)
 
 const canClick = computed(() => store.energyCurrent > 0)
 
-const handleClick = async (event: MouseEvent) => {
+const handleClick = (event: MouseEvent) => {
   if (!canClick.value) return
 
   if (!isPermissionRequested.value) {
-    await requestMotionPermission()
+    requestMotionPermission()
     isPermissionRequested.value = true
   }
 
@@ -94,9 +92,8 @@ const handleClick = async (event: MouseEvent) => {
     multiplier = 2
   }
 
-  try {
-    await store.click(1)
-
+  const clickResult = store.click(1)
+  if (clickResult) {
     if (imgContainer.value) {
       const rect = imgContainer.value.getBoundingClientRect()
       const x = event.clientX - rect.left
@@ -112,11 +109,8 @@ const handleClick = async (event: MouseEvent) => {
     if (!isDeviceMotionSupported.value) {
       simulateShake()
     }
-  } catch (error) {
-    console.error('Error processing click:', error)
   }
 }
-
 const simulateShake = () => {
   const randomChance = Math.random()
   if (randomChance < 0.1) {
@@ -145,22 +139,11 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
       debugAcceleration.value = acceleration
       console.log('Calculated acceleration:', acceleration)
 
-      let threshold
-      switch (shakeLevel.value) {
-        case 'low':
-          threshold = CLICKER_CONFIG.shake.thresholdLow
-          break
-        case 'high':
-          threshold = CLICKER_CONFIG.shake.thresholdHigh
-          break
-        default:
-          threshold = CLICKER_CONFIG.shake.thresholdMedium
-      }
+      let threshold = CLICKER_CONFIG.shake.thresholdMedium
 
       if (acceleration > threshold) {
         console.log('Shake detected!')
         store.setShaking(true)
-        store.setShakeLevel(shakeLevel.value)
 
         if (shakeTimeout) clearTimeout(shakeTimeout)
         shakeTimeout = window.setTimeout(() => {
@@ -237,30 +220,19 @@ onMounted(async () => {
   ])
 })
 
-const syncInterval = ref<number | null>(null)
-
-let counter = ref(0)
-const startPeriodicSync = () => {
-  syncInterval.value = window.setInterval(() => {
-    counter.value++
-    store.syncWithServer()
-  }, 3000)
-}
-
 onUnmounted(() => {
   console.log('Component unmounted')
   window.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('devicemotion', handleDeviceMotion)
   if (shakeTimeout) clearTimeout(shakeTimeout)
   stopAudioAnalysis()
-  store.syncWithServer()
-  startPeriodicSync()
 })
 
 onMounted(() => {
   store.fetchClickerStats()
   store.fetchEnergyStatus()
-  startPeriodicSync()
+  store.startPeriodicSync()
+
 })
 </script>
 
