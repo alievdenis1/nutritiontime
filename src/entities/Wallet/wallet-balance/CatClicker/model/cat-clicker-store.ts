@@ -56,7 +56,9 @@ export const useCatClickerStore = defineStore('catClicker', {
             const userId = this.userId
             if (!userId) return
 
-            window.Echo.private(`user.${userId}`)
+            const channel = `user.${this.userId}`
+
+            window.Echo.private(channel)
                 .listen('UserStatsUpdated', (data: any) => {
                     this.currency = data.balance
                     this.energyCurrent = data.energy
@@ -74,16 +76,30 @@ export const useCatClickerStore = defineStore('catClicker', {
 
             this.energyCurrent -= clickCount
 
-            try {
-                // Отправляем событие через сокет
-                window.Echo.private(`user.${this.userId}`)
-                    .whisper('client-click', {
-                        click_count: clickCount,
-                        multiplier: multiplier,
-                    })
-            } catch (e) {
-                console.error('Error sending click via socket:', e)
+            const pusher = window.Echo.connector.pusher
+            const channel = `user.${this.userId}`
+            const socketId = pusher.connection.socket_id
+
+            const eventName = 'client-client-click'
+            const event = {
+                event: eventName,
+                data: {
+                    click_count: clickCount,
+                    multiplier: multiplier,
+                },
+                channel: channel,
+                socket_id: socketId,
             }
+
+            // Отправляем событие через сокет
+            pusher.send_event(eventName, event.data, channel)
+                .then(() => {
+                    console.log('Клиентское событие отправлено успешно')
+                })
+                .catch((error: any) => {
+                    console.error('Ошибка при отправке клиентского события:', error)
+                })
+
         },
         // Остальные методы
         setRapidClicking(value: boolean) {
