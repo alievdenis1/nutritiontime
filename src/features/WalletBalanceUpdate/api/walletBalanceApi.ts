@@ -17,15 +17,23 @@ export interface ClickerStats {
 export interface ClickResponse {
     success: boolean;
     earned: number;
-    new_balance: number;
-    energy: number;
+    new_balance: string;
+    current_energy: string;
+    total_earned: string;
 }
 
 export interface EnergyStatus {
     current_energy: number;
     max_energy: number;
     regeneration_rate: number;
-    last_update: string;
+    last_update: string | null;
+}
+
+export interface ClickRequest {
+    energy_spent: number;
+    is_multi_click: boolean;
+    shake_clicks: number;
+    shout_clicks: number;
 }
 
 export function getClickerStats() {
@@ -36,6 +44,6 @@ export function getEnergyStatus() {
     return useApi<EnergyStatus>('get', '/clicker/energy')
 }
 
-export function processClick(clickCount: number, multiplier: number) {
-    return useApi<ClickResponse>('post', '/click', { click_count: clickCount, multiplier })
+export function processClick(params: ClickRequest) {
+    return useApi<ClickResponse>('post', '/click', params)
 }
