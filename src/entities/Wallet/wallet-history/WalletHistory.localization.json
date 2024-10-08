@@ -2,19 +2,23 @@
     "ru": {
         "inviteFriends": "Пригласить друзей",
         "shareTitle": "Приглашение",
-        "shareText": "Приглашаю тебя присоединиться и получить 500 $RECIPETON!",
-        "getBonus": "Получите 500 $RECIPETON за рекомендацию!",
-        "eachFriend": "За каждого друга начислим 500 $RECIPETON",
+        "shareText": "Приглашаю тебя присоединиться и получить 500 $RCPT!",
+        "getBonus": "Получите 500 $RCPT за рекомендацию!",
+        "eachFriend": "За каждого друга начислим 500 $RCPT",
         "history": "История",
-        "transactionHistory": "Здесь будет храниться история зачислений"
+        "transactionHistory": "Здесь будет храниться история зачислений",
+        "invitation": "Приглашение",
+        "invitationDescription": "Приглашаю тебя присоединиться к Nutrition Time!"
     },
     "en": {
         "inviteFriends": "Invite friends",
         "shareTitle": "Invitation",
-        "shareText": "I invite you to join and get 500 $RECIPETON!",
-        "getBonus": "Get 500 $RECIPETON for a recommendation!",
-        "eachFriend": "Earn 500 $RECIPETON for each friend",
+        "shareText": "I invite you to join and get 500 $RCPT!",
+        "getBonus": "Get 500 $RCPT for a recommendation!",
+        "eachFriend": "Earn 500 $RCPT for each friend",
         "history": "History",
-        "transactionHistory": "The transaction history will be stored here"
+        "transactionHistory": "The transaction history will be stored here",
+        "invitation": "Invitation",
+        "invitationDescription": "I invite you to join Nutrition Time!"
     }
 }

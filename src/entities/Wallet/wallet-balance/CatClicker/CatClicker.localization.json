@@ -1,0 +1,18 @@
+{
+    "ru": {
+        "microphoneErrorTitle": "Ошибка доступа к микрофону",
+        "microphoneTitle": "Доступ к микрофону",
+        "microphoneUnknownErrorDescription": "Произошла ошибка доступа к микрофону. Попробуйте перезагрузить Telegram или измените настройки доступа к микрофону.",
+        "microphoneNotAllowedErrorDescription": "Чтобы заново получить доступ к микрофону - перезагрузите Telegram или измените настройки доступа к микрофону.",
+        "microphoneNotFoundErrorDescription": "Микрофон не найден.",
+        "microphoneModalSubmit": "Понятно"
+    },
+    "en": {
+        "microphoneErrorTitle": "Microphone accessing error",
+        "microphoneTitle": "Access to microphone",
+        "microphoneUnknownErrorDescription": "There was an error accessing the microphone. Restart Telegram or change microphone access settings.",
+        "microphoneNotAllowedErrorDescription": "To regain access to the microphone, restart Telegram or change the microphone access settings.",
+        "microphoneNotFoundErrorDescription": "Microphone not found.",
+        "microphoneModalSubmit": "Ok"
+    }
+}

@@ -16,14 +16,15 @@
 
 <script setup lang="ts">
 import { shallowRef, watch, type Component } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { DefaultLayout } from './layouts'
+import { twa } from '@/shared/lib/api/twa'
 import { useLocaleStore } from '@/shared/lib/i18n'
-import { VLoading } from '@/shared/components/Loading'
 import { useAuthorization } from '@/features/Auth/log-in'
 import { useSessionStore } from '@/entities/Session'
 
 const route = useRoute()
+const router = useRouter()
 
 const layout = shallowRef<Component>(DefaultLayout)
 
@@ -35,16 +36,47 @@ const authUser = async () => {
   if (!sessionStore.isAuthenticated) {
     await authorize()
     localeStore.initializeLocale(sessionStore.lang)
-    console.log('lang', sessionStore.lang)
   }
 }
+
+if (twa) {
+  twa.ready()
+  twa.enableClosingConfirmation()
+  twa.disableVerticalSwipes()
+  twa.expand()
+  twa.onEvent('viewportChanged', ({ isStateStable }) => {
+	if (isStateStable) {
+		twa && twa.expand()
+	}
+  })
+
+// TODO
+//   const startParams = twa.initDataUnsafe.start_param
+}
+
 authUser()
+
+watch(() => route?.path, () => {
+	authUser()
+})
 
 watch(() => route?.meta?.layout, (newLayoutComponent) => {
 	layout.value = newLayoutComponent || DefaultLayout
-    authUser()
 })
 
+watch(() => route?.path, () => {
+	const hasBackButton = route?.meta?.backButton
+
+	if (twa && hasBackButton) {
+		const BackButton = twa.BackButton
+		BackButton.show()
+
+		BackButton.onClick(() => {
+			router.go(-1)
+			BackButton.hide()
+		})
+	}
+})
 </script>
 
 <style lang="scss" src="shared/styles/index.scss" />

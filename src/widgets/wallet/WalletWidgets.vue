@@ -1,16 +1,9 @@
 <template>
 	<TabsMain :default-value="'balance'">
-		<div class="flex justify-between items-center mb-[16px]">
-			<button
-				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
-				@click="$router.go(-1)"
-			>
-				<IconArrowRight icon-color="#1C1C1C" />
-			</button>
+		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
 			<h2 class="text-center text-lg text-darkGray">
 				{{ t('wallet') }}
 			</h2>
-			<div />
 		</div>
 		<TabsList>
 			<TabsTrigger value="balance">
@@ -24,19 +17,15 @@
 			<WalletBalance />
 		</TabsContent>
 		<TabsContent value="history">
-			<div class="mt-5">
-				{{ t('preparingRelease') }}
-			</div>
-			<!--			<WalletHistory />-->
+			<WalletHistory />
 		</TabsContent>
 	</TabsMain>
 </template>
 
 <script setup lang="ts">
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { IconArrowRight } from 'shared/components/Icon'
 import { WalletBalance } from 'entities/Wallet/wallet-balance'
-// import { WalletHistory } from 'entities/Wallet/wallet-history'
+import { WalletHistory } from 'entities/Wallet/wallet-history'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './WalletWidgets.localization.json'
 const { t } = useTranslation(localizations)

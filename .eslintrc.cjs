@@ -3,6 +3,9 @@ module.exports = {
 	env: {
 		node: true,
 	},
+	globals: {
+		NodeJS: true,
+	},
 	parser: 'vue-eslint-parser',
 	parserOptions: {
 		parser: '@typescript-eslint/parser',

@@ -1,8 +1,19 @@
 <template>
 	<div>
+		<div class="relative z-10 flex flex-row justify-end mt-[12px]">
+			<button
+				class="flex justify-center items-center shadow-custom rounded-[16px] min-w-[50px] max-w-max py-[6px] px-[6px] mr-2 text-xxl cursor-pointer"
+				:class="{
+					'bg-forestGreen': isMicrophoneAvailable,
+				}"
+				@click="handleRequestMicrophone"
+			>
+				🎤
+			</button>
+		</div>
 		<div
 			ref="imgContainer"
-			class="img-container flex items-center justify-center h-[280px] mt-[35px] max-w-max m-auto mb-[16px] relative min-w-[280px] min-h-[280px]"
+			class="img-container flex items-center justify-center h-[280px] max-w-max m-auto mt-[-20px] mb-[16px] relative min-w-[280px] min-h-[280px]"
 			:class="{
 				'bg-transparentGreen': !store.isRapidClicking,
 				'bg-rapidClickColor': store.isRapidClicking,
@@ -44,21 +55,57 @@
 				</TransitionGroup>
 			</div>
 		</div>
+		<VModal
+			:show="isShowMicrophoneModal"
+			@close="closeMicrophoneModal"
+		>
+			<div class="flex items-center justify-between">
+				<div class="text-xl text-darkGray">
+					{{ t(MICROPHONE_MODAL_TITLE[microphoneStatus || 'NotAllowedError']) }}
+				</div>
+				<button
+					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
+					@click="closeMicrophoneModal"
+				>
+					<IconClose />
+				</button>
+			</div>
+			<div>
+				{{ t(MICROPHONE_MODAL_DESCRIPTION[microphoneStatus || 'NotAllowedError']) }}
+			</div>
+			<div class="max-w-md mx-auto">
+				<VButton
+					class="mt-[20px]"
+					:color="ButtonColors.Green"
+					@click="closeMicrophoneModal"
+				>
+					{{ t('microphoneModalSubmit') }}
+				</VButton>
+			</div>
+		</VModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { VModal } from '@/shared/components/Modal'
+import { VButton, ButtonColors } from '@/shared/components/Button'
 import { IconGold } from '@/shared/components/Icon'
-import { CLICKER_CONFIG, useAudioAnalysis, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
+import { CLICKER_CONFIG, useAudioAnalysis, MicrophoneStatus, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
+import twa from '@/shared/lib/api/twa'
+import { useTranslation } from '@/shared/lib/i18n'
+import Localization from '../CatClicker.localization.json'
+
+const { t } = useTranslation(Localization)
 
 const store = useCatClickerStore()
 
 const {
   startAudioAnalysis,
   isAudioInitialized,
-  errorMessage,
   stopAudioAnalysis,
+  getMicrophonePermissionRequest,
+  resetMicrophonePermission,
 } = useAudioAnalysis()
 
 const { addCardAndAnimate, cards, removeCard, animateClick } = useCards()
@@ -67,15 +114,47 @@ const imgContainer = ref<HTMLElement | null>(null)
 let shakeTimeout: number | null = null
 const visibleCards = computed(() => cards.value.slice(-20))
 
-const showPermissionButton = ref(true)
-const debugAcceleration = ref(0)
-const permissionGranted = ref(false)
+const syncWithBackendIntervalId = ref<NodeJS.Timeout>()
 const eventCount = ref(0)
 const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
 const isPermissionRequested = ref(false)
 
 const canClick = computed(() => Number(store.energyCurrent) > 0)
+
+const isMicrophoneAvailable = ref(false)
+const isShowMicrophoneModal = ref(false)
+const microphoneStatus = ref<MicrophoneStatus | null>(null)
+const MICROPHONE_MODAL_DESCRIPTION = {
+  UnknownError: 'microphoneUnknownErrorDescription',
+  NotAllowedError: 'microphoneNotAllowedErrorDescription',
+  NotFoundError: 'microphoneNotFoundErrorDescription',
+  Success: '',
+}
+const MICROPHONE_MODAL_TITLE = {
+  UnknownError: 'microphoneErrorTitle',
+  NotAllowedError: 'microphoneTitle',
+  NotFoundError: 'microphoneErrorTitle',
+  Success: '',
+}
+
+const closeMicrophoneModal = () => {
+  isShowMicrophoneModal.value = false
+}
+
+const handleRequestMicrophone = async () => {
+  if (isMicrophoneAvailable.value) {
+    resetMicrophonePermission()
+    isMicrophoneAvailable.value = false
+
+    return
+  }
+
+  const status = await getMicrophonePermissionRequest()
+  microphoneStatus.value = status
+  isShowMicrophoneModal.value = status !== 'Success'
+  isMicrophoneAvailable.value = status === 'Success'
+}
 
 const handleClick = (event: MouseEvent) => {
   if (!store.canClick) return
@@ -110,7 +189,7 @@ const handleClick = (event: MouseEvent) => {
       addCardAndAnimate(x, y, multiplier)
     }
 
-    if (!isAudioInitialized.value && !errorMessage.value) {
+    if (!isAudioInitialized.value && isMicrophoneAvailable.value) {
       startAudioAnalysis()
     }
   }
@@ -130,7 +209,6 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
           Math.pow(accelerationIncludingGravity.z || 0, 2)
       ) - 9.81
 
-      debugAcceleration.value = acceleration
       console.log('Calculated acceleration:', acceleration)
 
       let threshold = CLICKER_CONFIG.shake.thresholdMedium
@@ -138,6 +216,8 @@ const handleDeviceMotion = (event: DeviceMotionEvent) => {
       if (acceleration > threshold) {
         console.log('Shake detected!')
         store.setShaking(true)
+
+        twa && twa.HapticFeedback.impactOccurred('heavy')
 
         if (shakeTimeout) clearTimeout(shakeTimeout)
         shakeTimeout = window.setTimeout(() => {
@@ -156,7 +236,6 @@ const requestMotionPermission = async () => {
     if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
       const permissionState = await (DeviceMotionEvent as any).requestPermission()
       if (permissionState === 'granted') {
-        permissionGranted.value = true
         window.addEventListener('devicemotion', handleDeviceMotion)
         console.log('Motion permission granted')
       } else {
@@ -164,7 +243,6 @@ const requestMotionPermission = async () => {
         lastError.value = 'Motion permission denied. Please enable it in your device settings.'
       }
     } else {
-      permissionGranted.value = true
       window.addEventListener('devicemotion', handleDeviceMotion)
       console.log('Motion listener added without permission request')
     }
@@ -172,7 +250,6 @@ const requestMotionPermission = async () => {
     console.error('Error requesting motion permission:', error)
     lastError.value = error.message
   }
-  showPermissionButton.value = false
 }
 
 const checkDeviceMotionSupport = () => {
@@ -193,13 +270,25 @@ const handleVisibilityChange = () => {
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
 
+onMounted(() => {
+  const { initialStatsRequest, syncWithBackend, syncInterval } = store
+
+  initialStatsRequest()
+
+  syncWithBackendIntervalId.value = setInterval(syncWithBackend, syncInterval)
+})
+
+onUnmounted(() => {
+  if (syncWithBackendIntervalId.value) {
+    clearInterval(syncWithBackendIntervalId.value)
+  }
+})
+
 onMounted(async () => {
-  console.log('Component mounted')
   window.addEventListener('visibilitychange', handleVisibilityChange)
   checkDeviceMotionSupport()
   if (isDeviceMotionSupported.value) {
     if (isIOS && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
-      showPermissionButton.value = true
       console.log('Permission button shown for iOS device')
     } else {
       await requestMotionPermission()

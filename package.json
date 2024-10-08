@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@tonconnect/ui": "^2.0.0",
-    "@twa-dev/sdk": "^7.8.0",
+    "@twa-dev/sdk": "^7.10.1",
     "@vueuse/core": "^10.11.0",
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",

@@ -16,14 +16,12 @@ export const useAuthorization = () => {
 
         isLoading.value = true
         try {
-            await twa.ready()
             const twaUser = twa.initDataUnsafe.user
 
             if (!twaUser) {
                 throw new Error('User data is not available from TWA')
             }
 
-            console.log('TWA', twaUser)
             if (twaUser.language_code != undefined) {
                 sessionStore.setLang(twaUser.language_code as Locales)
             }

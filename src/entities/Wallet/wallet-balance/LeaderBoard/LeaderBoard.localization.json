@@ -1,0 +1,14 @@
+{
+    "ru": {
+        "leaderButton": "Список лидеров",
+        "rank": "Место",
+        "name": "Имя",
+        "balance": "Баланс"
+    },
+    "en": {
+        "leaderButton": "Leaderboard",
+        "rank": "Rank",
+        "name": "Name",
+        "balance": "Balance"
+    }
+}

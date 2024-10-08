@@ -1,6 +1,6 @@
 <!-- src/entities/Wallet/wallet-balance/WalletBalance.vue -->
 <template>
-	<div class="mt-[16px] mb-[60px]">
+	<div class="mt-[16px] wallet-ballance-container">
 		<div class="flex justify-between items-center px-[24px] py-[16px] shadow-custom rounded-[16px]">
 			<div class="flex gap-[10px] items-center">
 				<IconGold />
@@ -61,7 +61,7 @@
 		</div>
 		<CatClicker />
 
-		<div class="flex justify-between relative">
+		<div class="flex justify-between relative mt-8 mb-auto">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px] mr-2"
 			>
@@ -70,7 +70,7 @@
 			</div>
 
 			<div
-				class="flex items-center gap-[8px] bg-gray rounded-[16px]
+				class="flex items-center gap-[8px] bg-green rounded-[16px]
   max-w-max py-[10px] px-[20px] cursor-pointer h-[44px] relative lock-icon"
 			>
 				<div class="text-white text-sm">
@@ -79,6 +79,9 @@
 
 				<IconArrowRight v-if="!isSmallScreen" />
 			</div>
+		</div>
+		<div class="mt-[16px]">
+			<Leaderboard />
 		</div>
 	</div>
 </template>
@@ -91,7 +94,6 @@ import {
   IconEnergy,
   IconArrowRight,
   IconClose,
-  // IconDiamond
 } from '@/shared/components/Icon'
 import { VModal } from '@/shared/components/Modal'
 import { VButton } from '@/shared/components/Button'
@@ -100,6 +102,7 @@ import { useAuthWalletButton } from '@/entities/Wallet/api/useAuthButton'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './WalletBalance.localization.json'
 import CatClicker from './CatClicker/ui/CatClicker.vue'
+import Leaderboard from './LeaderBoard/LeaderBoard.vue'
 import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
 
 const { t } = useTranslation(Localization)
@@ -126,7 +129,7 @@ onMounted(async () => {
     useAuthWalletButton()
   }
 
-	loading.value = false
+  loading.value = false
 })
 
 const store = useCatClickerStore()
@@ -141,6 +144,12 @@ const formattedCurrency = computed(() => {
 </script>
 
 <style scoped lang="scss">
+.wallet-ballance-container {
+	min-height: calc(100vh - 160px);
+	display: flex;
+	flex-direction: column;
+}
+
 .lock-icon::after {
   content: '🔒';
   position: absolute;
@@ -151,7 +160,6 @@ const formattedCurrency = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.5);
   border-radius: inherit;
   font-size: 24px;
 }

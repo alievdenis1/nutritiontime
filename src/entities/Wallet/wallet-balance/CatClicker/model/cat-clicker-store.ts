@@ -23,9 +23,11 @@ export const useCatClickerStore = defineStore('catClicker', () => {
     function setShaking(value: boolean) {
         isShaking.value = value
     }
+
     function setShouting(value: boolean) {
         isShouting.value = value
     }
+
     function setRapidClicking(value: boolean) {
         isRapidClicking.value = value
     }
@@ -108,6 +110,7 @@ export const useCatClickerStore = defineStore('catClicker', () => {
 
         return true
     }
+
     async function syncWithBackend() {
         const now = Date.now()
         if (now - lastSyncTime.value < syncInterval) return
@@ -141,10 +144,10 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         lastSyncTime.value = now
     }
 
-    // Инициализация и периодическая синхронизация
-    fetchStats()
-    fetchEnergyStatus()
-    setInterval(syncWithBackend, syncInterval)
+    function initialStatsRequest() {
+        fetchStats()
+        fetchEnergyStatus()
+    }
 
     return {
         stats,
@@ -153,8 +156,10 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         energyCurrent,
         energyMax,
         canClick,
+        syncInterval,
         click,
         syncWithBackend,
+        initialStatsRequest,
         setShaking,
         setShouting,
         setRapidClicking,
