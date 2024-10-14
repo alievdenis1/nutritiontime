@@ -164,7 +164,7 @@ const shareMessage = async () => {
 }
 
 const copyShareLink = () => {
-	const textToCopy = 'https://t.me/nutritiontime_bot/nutritiontime' // Заменить на реальный URL
+	const textToCopy = `https://t.me/nutritiontime_bot/nutritiontime?startapp=${userInfo?.referral_code || ''}` // Заменить на реальный URL
 	navigator.clipboard.writeText(textToCopy).then(() => {
 		alert('Ссылка скопирована в буфер обмена')
 	}, (error) => {
