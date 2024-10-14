@@ -81,10 +81,10 @@ export const mockTWA: TWA = {
     BackButton: {
         isVisible: false,
         onClick: (callback: () => void) => {
-            callback()
+            console.log('BackButton onClick: ', callback)
         },
         offClick: (callback: () => void) => {
-            callback()
+            console.log('BackButton offClick: ', callback)
         },
         show: () => {
             console.log('Showing BackButton')
@@ -261,7 +261,8 @@ export const mockTWA: TWA = {
     onEvent: (eventName: string, eventHandler: (...args: any[]) => unknown) => {
         console.log(`Added event listener for ${eventName}`)
         if (typeof eventHandler === 'function') {
-            eventHandler()
+            const params = {}
+            eventHandler(params)
         }
     },
     offEvent: (

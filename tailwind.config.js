@@ -23,12 +23,13 @@ export default {
         lg: ['18px', '22px'],
         xl: ['20px', '24px'],
         xxl: ['28px', '32px'],
-        xxxl: ['40px', '48px']
+        xxxl: ['40px', '48px'],
+        title: ['20px', '28px'],
+        description: ['14px', '20px']
       },
       borderColor: {
         'custom-gray': '#1C1C1C0D',
       },
-
       borderWidth: {
         '1': '1px',
       },
@@ -48,7 +49,7 @@ export default {
         mainBg: '#FCFCFC',
         forestGreen: '#319A6E',
         lightGray: '#F3F3F3',
-        darkGray: '#1c1c1c',
+        darkGray: '#1C1C1C',
         slateGray: '#535353',
         transparent: 'transparent',
         gray: '#9F9FA0',
@@ -61,7 +62,7 @@ export default {
         red: '#E75854',
         yellow: '#FFD274',
         blue: {
-          DEFAULT: '0069A5',
+          DEFAULT: '#0069A5',
           100: '#019FB5'
         },
         borderRadius: {

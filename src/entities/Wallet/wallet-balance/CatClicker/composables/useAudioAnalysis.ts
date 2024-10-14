@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue'
 import { useCatClickerStore, CLICKER_CONFIG } from 'entities/Wallet/wallet-balance/CatClicker'
 
+export type MicrophoneStatus = 'Success' | 'UnknownError' | 'NotAllowedError' | 'NotFoundError'
+
 export const useAudioAnalysis = () => {
     const store = useCatClickerStore()
 
@@ -10,7 +12,6 @@ export const useAudioAnalysis = () => {
 
     const isCalibrating = ref(true)
     const isAudioInitialized = ref(false)
-    const errorMessage = ref('')
     const baselineNoiseLevel = ref(0)
     const noiseLevels = ref<number[]>([])
     const currentAudioLevel = ref(0)
@@ -22,16 +23,56 @@ export const useAudioAnalysis = () => {
 
     const isWebAudioSupported = 'AudioContext' in window || 'webkitAudioContext' in window
 
+    let stream: MediaStream | null = null
+
+    const resetMicrophonePermission = () => {
+        if (stream) {
+            const tracks = stream.getTracks()
+
+            tracks.forEach(track => track.stop())
+        }
+        stream = null
+    }
+
+    const getMicrophonePermissionRequest = async (): Promise<MicrophoneStatus> => {
+        if (!isWebAudioSupported) {
+            return 'NotFoundError'
+        }
+
+        let status: MicrophoneStatus = 'Success'
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        } catch (error) {
+            console.error('Error accessing microphone:', error)
+
+            stream = null
+
+            if (error instanceof DOMException) {
+                if (error.name === 'NotAllowedError') {
+                    status = 'NotAllowedError'
+                } else if (error.name === 'NotFoundError') {
+                    status = 'NotFoundError'
+                } else {
+                    status = 'UnknownError'
+                }
+            } else {
+                status = 'UnknownError'
+            }
+        }
+
+        return status
+    }
+
     const startAudioAnalysis = async () => {
         if (isAudioInitialized.value) return
 
-        if (!isWebAudioSupported) {
+        if (!isWebAudioSupported || !stream) {
             console.log('Web Audio API is not supported. Using alternative method.')
             return
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
             analyser = audioContext.createAnalyser()
             microphone = audioContext.createMediaStreamSource(stream)
@@ -90,7 +131,6 @@ export const useAudioAnalysis = () => {
             isAudioInitialized.value = true
         } catch (error) {
             console.error('Error accessing microphone:', error)
-            errorMessage.value = 'Не удалось получить доступ к микрофону'
         }
     }
     const stopAudioAnalysis = () => {
@@ -113,9 +153,10 @@ export const useAudioAnalysis = () => {
     return {
         startAudioAnalysis,
         stopAudioAnalysis,
+        getMicrophonePermissionRequest,
+        resetMicrophonePermission,
         isCalibrating,
         isAudioInitialized,
-        errorMessage,
-        normalizedAudioLevel
+        normalizedAudioLevel,
     }
 }

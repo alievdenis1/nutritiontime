@@ -10,6 +10,7 @@ interface LoginData {
 	telegram_id: string
 	first_name: string
 	last_name: string
+	referral_code?: string | null
 }
 
 export function login(data: LoginData) {

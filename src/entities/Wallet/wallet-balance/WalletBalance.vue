@@ -1,6 +1,6 @@
 <!-- src/entities/Wallet/wallet-balance/WalletBalance.vue -->
 <template>
-	<div class="mt-[16px] mb-[60px]">
+	<div class="mt-[16px] wallet-ballance-container">
 		<div class="flex justify-between items-center px-[24px] py-[16px] shadow-custom rounded-[16px]">
 			<div class="flex gap-[10px] items-center">
 				<IconGold />
@@ -59,9 +59,12 @@
 				</VButton>
 			</VModal>
 		</div>
-		<CatClicker />
+		<CatClicker
+			:wallet-connected="walletConnected"
+			:has-nft="hasNFT"
+		/>
 
-		<div class="flex justify-between relative">
+		<div class="flex justify-between relative mt-8 mb-auto">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px] mr-2"
 			>
@@ -69,90 +72,140 @@
 				<IconEnergy />
 			</div>
 
-			<div
-				class="flex items-center gap-[8px] bg-gray rounded-[16px]
-  max-w-max py-[10px] px-[20px] cursor-pointer h-[44px] relative lock-icon"
-			>
-				<div class="text-white text-sm">
-					{{ t('connectWalletPrompt') }}
-				</div>
-
-				<IconArrowRight v-if="!isSmallScreen" />
-			</div>
+			<TonConnectButton />
+		</div>
+		<div class="mt-[16px]">
+			<Leaderboard />
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import {
+ import { onMounted, ref, computed, watch } from 'vue'
+ import {
   IconGold,
   IconEnquiry,
   IconEnergy,
-  IconArrowRight,
   IconClose,
-  // IconDiamond
-} from '@/shared/components/Icon'
-import { VModal } from '@/shared/components/Modal'
-import { VButton } from '@/shared/components/Button'
-import { ButtonColors } from '@/shared/components/Button'
-import { useAuthWalletButton } from '@/entities/Wallet/api/useAuthButton'
-import { useTranslation } from '@/shared/lib/i18n'
-import Localization from './WalletBalance.localization.json'
-import CatClicker from './CatClicker/ui/CatClicker.vue'
-import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
+ } from '@/shared/components/Icon'
+ import { VModal } from '@/shared/components/Modal'
+ import { VButton } from '@/shared/components/Button'
+ import { ButtonColors } from '@/shared/components/Button'
+ import { useTranslation } from '@/shared/lib/i18n'
+ import Localization from './WalletBalance.localization.json'
+ import CatClicker from './CatClicker/ui/CatClicker.vue'
+ import Leaderboard from './LeaderBoard/LeaderBoard.vue'
+ import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
+ import { TonConnectButton, useTonAddress, useTonWallet } from '@townsquarelabs/ui-vue'
+ import { TonApiClient, Api } from '@ton-api/client'
+ import { Address } from '@ton/core'
 
-const { t } = useTranslation(Localization)
+ const { t } = useTranslation(Localization)
 
-const show = ref(false)
-const loading = ref(true)
+ const show = ref(false)
+ const loading = ref(true)
 
-const openModal = () => {
-	show.value = true
-}
+ const openModal = () => {
+  show.value = true
+ }
 
-const closeModal = () => {
-	show.value = false
-}
+ const closeModal = () => {
+  show.value = false
+ }
 
-const isSmallScreen = ref(window.innerWidth <= 380)
+ const store = useCatClickerStore()
 
-onMounted(async () => {
+ const currency = computed(() => store.currency)
+ const energyCurrency = computed(() => store.energyCurrent)
+
+ const formattedCurrency = computed(() => {
+  const value = currency.value ?? 0
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+ })
+
+ // Новый код для проверки NFT с использованием TonAPI.io
+ const walletConnected = ref(false)
+ const checkingNFT = ref(false)
+ const hasNFT = ref(false)
+ const userAddress = useTonAddress()
+ const wallet = useTonWallet()
+
+ const COLLECTION_ADDRESS = 'EQDERkmRDrXxzEbZUMMgo3uDJwe24qUYpnasJ83WpQZaqjJ1'
+ const collectionAddress = Address.parseFriendly(COLLECTION_ADDRESS).address
+ // Инициализация TonAPI клиента
+ const http = new TonApiClient({
+  baseUrl: 'https://tonapi.io',
+  // Замените на ваш реальный API ключ
+  apiKey: 'AHHT737POV45FDIAAAAETF62HOODTD6YZHYXOLDBRN56L6DKRI6KJE3FMCRWSOFDSKQ77XY'
+ })
+ const api = new Api(http)
+
+ async function checkNFT() {
+  if (!userAddress.value) return
+
+  checkingNFT.value = true
+  hasNFT.value = false
+
+  try {
+   const rawAddress = Address.parseFriendly(userAddress.value).address
+
+   const nftItems = await api.accounts.getAccountNftItems(rawAddress, {
+    collection: collectionAddress,
+    limit: 1,
+    offset: 0
+   })
+
+   hasNFT.value = nftItems.nftItems?.length > 0
+  } catch (error) {
+   console.error('Error checking NFT:', error)
+  } finally {
+   checkingNFT.value = false
+  }
+ }
+
+ // Следим за изменением кошелька
+ watch(wallet, (newWallet) => {
+  walletConnected.value = !!newWallet
+  if (newWallet) {
+   checkNFT()
+  } else {
+   hasNFT.value = false
+  }
+ })
+
+ onMounted(async () => {
   const isLocal = import.meta.env.VITE_USE_TWA_MOCK
 
   if (isLocal) {
-    console.warn('TWA is not available. Some features may not work correctly.')
-  } else {
-    useAuthWalletButton()
+   console.warn('TWA is not available. Some features may not work correctly.')
   }
 
-	loading.value = false
-})
+  loading.value = false
 
-const store = useCatClickerStore()
-
-const currency = computed(() => store.currency)
-const energyCurrency = computed(() => store.energyCurrent)
-
-const formattedCurrency = computed(() => {
-  const value = currency.value ?? 0
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-})
+  // Проверяем NFT при монтировании, если кошелек уже подключен
+  if (wallet.value) {
+   walletConnected.value = true
+   await checkNFT()
+  }
+ })
 </script>
 
 <style scoped lang="scss">
-.lock-icon::after {
-  content: '🔒';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: inherit;
-  font-size: 24px;
+.wallet-ballance-container {
+	min-height: calc(100vh - 160px);
+	display: flex;
+	flex-direction: column;
+}
+
+:deep(#ton-connect-button) {
+ button {
+  background-color: #319A6E !important;
+ }
+ button > div {
+  @apply text-white font-normal text-sm
+ }
+ button path {
+	fill: #fff
+ }
 }
 </style>
