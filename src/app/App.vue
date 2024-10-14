@@ -1,17 +1,17 @@
 <template>
-	<component :is="layout">
-		<div
-			v-if="isLoading"
-			class="loading"
-		>
-			<div class="loading__spinner">
-				<v-loading />
+	<TonConnectUIProvider :options="options">
+		<component :is="layout">
+			<div
+				v-if="isLoading"
+				class="loading"
+			>
+				<div class="loading__spinner">
+					<v-loading />
+				</div>
 			</div>
-		</div>
-		<div v-else>
-			<router-view />
-		</div>
-	</component>
+			<router-view v-else />
+		</component>
+	</TonConnectUIProvider>
 </template>
 
 <script setup lang="ts">
@@ -22,6 +22,7 @@ import { twa } from '@/shared/lib/api/twa'
 import { useLocaleStore } from '@/shared/lib/i18n'
 import { useAuthorization } from '@/features/Auth/log-in'
 import { useSessionStore } from '@/entities/Session'
+import { TonConnectUIProvider } from '@townsquarelabs/ui-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +39,10 @@ const authUser = async () => {
     localeStore.initializeLocale(sessionStore.lang)
   }
 }
+const options = {
+ manifestUrl: 'https://alievdenis1.github.io/nutritiontime/tonconnect-manifest.json',
+ language: sessionStore.lang
+}
 
 if (twa) {
   twa.ready()
@@ -49,9 +54,6 @@ if (twa) {
 		twa && twa.expand()
 	}
   })
-
-// TODO
-//   const startParams = twa.initDataUnsafe.start_param
 }
 
 authUser()

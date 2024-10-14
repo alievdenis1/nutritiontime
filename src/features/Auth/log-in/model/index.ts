@@ -30,6 +30,7 @@ export const useAuthorization = () => {
                 telegram_id: twaUser.id.toString(),
                 first_name: twaUser.first_name,
                 last_name: twaUser.last_name || '',
+                referral_code: twa.initDataUnsafe?.start_param || null,
             })
 
             await execute()

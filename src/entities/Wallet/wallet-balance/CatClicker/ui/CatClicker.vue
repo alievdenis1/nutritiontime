@@ -83,6 +83,16 @@
 				</VButton>
 			</div>
 		</VModal>
+		<ConnectWalletModal
+			:is-show-connect-wallet-modal="isShowConnectWalletModal"
+			:wallet-connected="props.walletConnected"
+			@close-connect-wallet-modal="closeConnectWalletModal"
+		/>
+		<BuyNftModal
+			:is-show-buy-nft-modal="isShowBuyNftModal"
+			:has-nft="props.hasNft"
+			@close-buy-nft-modal="closeBuyNftModal"
+		/>
 	</div>
 </template>
 
@@ -94,6 +104,8 @@ import { IconGold } from '@/shared/components/Icon'
 import { CLICKER_CONFIG, useAudioAnalysis, MicrophoneStatus, useCards, useCatClickerStore } from 'entities/Wallet/wallet-balance/CatClicker'
 import twa from '@/shared/lib/api/twa'
 import { useTranslation } from '@/shared/lib/i18n'
+import ConnectWalletModal from './ConnectWalletModal.vue'
+import BuyNftModal from './BuyNftModal.vue'
 import Localization from '../CatClicker.localization.json'
 
 const { t } = useTranslation(Localization)
@@ -110,6 +122,14 @@ const {
 
 const { addCardAndAnimate, cards, removeCard, animateClick } = useCards()
 
+const props = withDefaults(
+  defineProps<{ walletConnected?: boolean; hasNft?: boolean }>(),
+  {
+    walletConnected: false,
+    hasNft: false,
+  },
+)
+
 const imgContainer = ref<HTMLElement | null>(null)
 let shakeTimeout: number | null = null
 const visibleCards = computed(() => cards.value.slice(-20))
@@ -120,7 +140,18 @@ const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
 const isPermissionRequested = ref(false)
 
-const canClick = computed(() => Number(store.energyCurrent) > 0)
+const canClick = computed(() => store.canClick)
+
+const isShowConnectWalletModal = ref(false)
+const isShowBuyNftModal = ref(false)
+
+const closeConnectWalletModal = () => {
+  isShowConnectWalletModal.value = false
+}
+
+const closeBuyNftModal = () => {
+  isShowBuyNftModal.value = false
+}
 
 const isMicrophoneAvailable = ref(false)
 const isShowMicrophoneModal = ref(false)
@@ -156,8 +187,26 @@ const handleRequestMicrophone = async () => {
   isMicrophoneAvailable.value = status === 'Success'
 }
 
+const checkClickerAvailability = () => {
+  const { hasNft, walletConnected } = props
+
+	if (!walletConnected) {
+		isShowConnectWalletModal.value = true
+		return false
+	}
+
+	if (!hasNft) {
+		isShowBuyNftModal.value = true
+		return false
+	}
+
+	return true
+}
+
 const handleClick = (event: MouseEvent) => {
-  if (!store.canClick) return
+  if (!checkClickerAvailability()) return
+
+  if (!canClick.value) return
 
   if (!isPermissionRequested.value) {
     requestMotionPermission()

@@ -5,7 +5,13 @@
         "microphoneUnknownErrorDescription": "Произошла ошибка доступа к микрофону. Попробуйте перезагрузить Telegram или измените настройки доступа к микрофону.",
         "microphoneNotAllowedErrorDescription": "Чтобы заново получить доступ к микрофону - перезагрузите Telegram или измените настройки доступа к микрофону.",
         "microphoneNotFoundErrorDescription": "Микрофон не найден.",
-        "microphoneModalSubmit": "Понятно"
+        "microphoneModalSubmit": "Понятно",
+        "connectWalletModalTitle": "Доступ к кликеру",
+        "connectWalletModalDescription": "Для использования кликера необходимо подключить кошелёк.",
+        "connectWallet": "Подключить кошелёк",
+        "buyNftModalTitle": "Доступ к кликеру",
+        "buyNftModalDescription": "У вас нет NFT из нашей коллекции. Для доступа к кликеру приобретите любой наш NFT.",
+        "buyNft": "Приобрести NFT"
     },
     "en": {
         "microphoneErrorTitle": "Microphone accessing error",
@@ -13,6 +19,12 @@
         "microphoneUnknownErrorDescription": "There was an error accessing the microphone. Restart Telegram or change microphone access settings.",
         "microphoneNotAllowedErrorDescription": "To regain access to the microphone, restart Telegram or change the microphone access settings.",
         "microphoneNotFoundErrorDescription": "Microphone not found.",
-        "microphoneModalSubmit": "Ok"
+        "microphoneModalSubmit": "Ok",
+        "connectWalletModalTitle": "Clicker access",
+        "connectWalletModalDescription": "To use the clicker, you need to connect your wallet.",
+        "connectWallet": "Connect wallet",
+        "buyNftModalTitle": "Clicker access",
+        "buyNftModalDescription": "You don't have any NFT from our collection. To access the clicker, purchase any of our NFTs.",
+        "buyNft": "Buy NFT"
     }
 }

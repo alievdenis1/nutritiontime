@@ -12,10 +12,15 @@
     "lintFix": "eslint --fix --config .eslintrc.cjs --ignore-path .eslintignore src/**/*.{js,vue}"
   },
   "dependencies": {
-    "@tonconnect/ui": "^2.0.0",
+    "@ton-api/client": "^0.1.1",
+    "@ton/core": "^0.58.1",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^15.0.0",
+    "@townsquarelabs/ui-vue": "^2.0.10-beta.0",
     "@twa-dev/sdk": "^7.10.1",
     "@vueuse/core": "^10.11.0",
     "axios": "^1.7.7",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "element-plus": "^2.7.5",
@@ -25,7 +30,10 @@
     "radix-vue": "^1.8.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "ton-crypto": "^3.2.0",
     "tonapi-sdk-js": "^1.0.6",
+    "tonweb": "^0.0.66",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "vue": "^3.2.47",
     "vue-i18n": "^9.11.0",
     "vue-router": "^4.2.0"
