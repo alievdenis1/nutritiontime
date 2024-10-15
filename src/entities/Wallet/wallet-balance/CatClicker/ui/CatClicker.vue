@@ -205,7 +205,7 @@ const checkClickerAvailability = () => {
 }
 
 const handleClick = (event: MouseEvent) => {
-  if (!checkClickerAvailability()) return
+  // if (!checkClickerAvailability()) return
 
   if (!canClick.value) return
 
