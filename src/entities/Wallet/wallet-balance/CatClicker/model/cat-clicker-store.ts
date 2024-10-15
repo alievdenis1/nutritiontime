@@ -2,19 +2,32 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getClickerStats, getEnergyStatus, processClick, ClickerStats, EnergyStatus, ClickResponse, ClickRequest } from '@/features/WalletBalanceUpdate/api/walletBalanceApi'
 
+const ConfigClicker = {
+    defaultEnergyRegenerationRate: 1,
+    defaultMaxEnergy: 500,
+}
+
+const getTimestampWithTimezoneOffset = () => {
+    const timestampOffset = new Date().getTimezoneOffset() * 60 * 1000
+    const timestamp = Date.now() + timestampOffset
+
+    return timestamp
+}
+
 export const useCatClickerStore = defineStore('catClicker', () => {
     const stats = ref<ClickerStats | null>(null)
     const energyStatus = ref<EnergyStatus | null>(null)
+    const lastEnergyUpdateTimestamp = ref<number>()
     const pendingClicks = ref<{ energy_spent: number, is_multi_click: boolean, shake_clicks: number, shout_clicks: number }[]>([])
     const lastSyncTime = ref(Date.now())
-    const syncInterval = 1700 // 5 seconds
+    const syncInterval = 2000
     const localVersion = ref(0)
     const serverVersion = ref(0)
 
     const currency = computed(() => Number(stats.value?.balance ?? 0).toFixed(2))
     const energyCurrent = computed(() => Number(energyStatus.value?.current_energy ?? 0).toFixed(2))
     const energyMax = computed(() => Number(energyStatus.value?.max_energy ?? 100).toFixed(2))
-    const canClick = computed(() => Number(energyCurrent.value) > 0)
+    const canClick = computed(() => Number(energyCurrent.value) >= 1)
 
     const isShaking = ref(false)
     const isShouting = ref(false)
@@ -97,6 +110,8 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             energyStatus.value.current_energy = Math.max(0, Number(energyStatus.value.current_energy) - energySpent)
         }
         if (stats.value) {
+            // TODO: эту логику можно вынести отдельно, чтобы в при ошибке можно было посчитать сколько
+            // было потрачено энергии и накоплено монет
             const baseReward = Number(stats.value.click_reward) * energySpent
             const shakeMultiplier = 1 + (shakeClicks * 0.01) // Пример: 1% бонус за каждую тряску
             const shoutMultiplier = 1 + (shoutClicks * 0.02) // Пример: 2% бонус за каждый крик
@@ -136,17 +151,73 @@ export const useCatClickerStore = defineStore('catClicker', () => {
                 pendingClicks.value = []
                 localVersion.value++
             } else {
+                // TODO: на основе логики из функции click
+                // можно рассчитать сколько мы потратили энергии и заработали монет
+                // и это значение вычесть и отобразить ошибку (что что-то пошло не так)
                 console.error('Error processing clicks:', error.value)
+                pendingClicks.value = []
+                localVersion.value++
             }
         }
 
-        await Promise.all([fetchStats(), fetchEnergyStatus()])
         lastSyncTime.value = now
     }
 
-    function initialStatsRequest() {
-        fetchStats()
-        fetchEnergyStatus()
+    async function initialStatsRequest() {
+        await Promise.allSettled([fetchStats(), fetchEnergyStatus()])
+    }
+
+    function regenerateEnergy() {
+        if (!energyStatus.value?.last_update) return
+
+        const user = {
+            lastUpdateTimestamp: new Date(lastEnergyUpdateTimestamp.value || energyStatus.value.last_update).valueOf(),
+            lastEnergyUpdate: energyStatus.value.last_update,
+            energyRegenerationRate: energyStatus.value?.regeneration_rate || 1,
+            energy: energyStatus.value?.current_energy || 0,
+        }
+
+        const now = getTimestampWithTimezoneOffset()
+
+        const currentTimestamp = now
+        const lastUpdateTimestamp = user.lastUpdateTimestamp
+        const secondsPassed = Math.max(0, (currentTimestamp - lastUpdateTimestamp) / 1000)
+        const minutesPassed = secondsPassed / 60
+
+        const regenerationRate = user.energyRegenerationRate ?? ConfigClicker.defaultEnergyRegenerationRate
+
+        if (regenerationRate <= 0) {
+            return
+        }
+
+        const currentEnergy = user.energy
+
+        if (currentEnergy >= ConfigClicker.defaultMaxEnergy) {
+            return
+        }
+
+        const regeneratedEnergy = minutesPassed * regenerationRate
+        const minRegenerationThreshold = 0.01
+
+        if (regeneratedEnergy >= minRegenerationThreshold) {
+            const newEnergy = Math.min(ConfigClicker.defaultMaxEnergy, currentEnergy + regeneratedEnergy)
+
+            user.energy = newEnergy
+            user.lastEnergyUpdate = new Date(now).toString()
+
+            energyStatus.value = {
+                ...energyStatus.value,
+                last_update: user.lastEnergyUpdate,
+                regeneration_rate: user.energyRegenerationRate,
+                current_energy: user.energy
+            }
+
+            lastEnergyUpdateTimestamp.value = now
+        }
+    }
+
+    function resetLastEnergyUpdateTimestamp() {
+        lastEnergyUpdateTimestamp.value = 0
     }
 
     return {
@@ -163,6 +234,8 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         setShaking,
         setShouting,
         setRapidClicking,
+        regenerateEnergy,
+        resetLastEnergyUpdateTimestamp,
         isShaking,
         isShouting,
         isRapidClicking
