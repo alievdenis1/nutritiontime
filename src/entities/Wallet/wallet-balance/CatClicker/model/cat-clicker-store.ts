@@ -112,11 +112,18 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         if (stats.value) {
             // TODO: эту логику можно вынести отдельно, чтобы в при ошибке можно было посчитать сколько
             // было потрачено энергии и накоплено монет
-            const baseReward = Number(stats.value.click_reward) * energySpent
-            const shakeMultiplier = 1 + (shakeClicks * 0.01) // Пример: 1% бонус за каждую тряску
-            const shoutMultiplier = 1 + (shoutClicks * 0.02) // Пример: 2% бонус за каждый крик
-            const totalReward = baseReward * shakeMultiplier * shoutMultiplier
+            // TODO: TESTING
+            const normalClicks = energySpent - shakeClicks - shoutClicks
+            const baseReward = normalClicks * 0.01
+            const shakeMultiplier = (shakeClicks * 0.01) * 2 // Пример: 1% бонус за каждую тряску
+            const shoutMultiplier = (shoutClicks * 0.01) * 4// Пример: 2% бонус за каждый крик
+            // const baseReward = Number(stats.value.click_reward) * energySpent
+            // const shakeMultiplier = 1 + (shakeClicks * 0.01) // Пример: 1% бонус за каждую тряску
+            // const shoutMultiplier = 1 + (shoutClicks * 0.02) // Пример: 2% бонус за каждый крик
 
+            // const totalReward = baseReward * shakeMultiplier * shoutMultiplier
+            const totalReward = baseReward + shakeMultiplier + shoutMultiplier
+            console.log('totalReward', totalReward)
             stats.value.balance = Number(stats.value.balance) + totalReward
             stats.value.total_clicks++
             stats.value.total_earned = Number(stats.value.total_earned) + totalReward
