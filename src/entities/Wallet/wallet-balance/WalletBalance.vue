@@ -16,7 +16,10 @@
 				class="cursor-pointer"
 				@click="openModal"
 			/>
-			<VModal :show="show">
+			<VModal
+				:show="show"
+				@close="closeModal"
+			>
 				<div class="flex justify-between mb-[12px] items-center">
 					<h2 class="text-xl font-bold">
 						{{ t('helpTitle') }}
@@ -47,7 +50,7 @@
 									d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.216-.054-.334-.373-.118L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"
 								/>
 							</svg>
-							Присоединяйтесь к нашему Telegram каналу
+							{{ t('joinText') }}
 						</a>
 					</span>
 				</div>
@@ -63,7 +66,6 @@
 			:wallet-connected="walletConnected"
 			:has-nft="hasNFT"
 		/>
-
 		<div class="flex justify-between relative mt-8 mb-auto">
 			<div
 				class="flex gap-[4px] justify-center items-center shadow-custom rounded-[16px] max-w-max py-[6px] px-[12px] mr-2"

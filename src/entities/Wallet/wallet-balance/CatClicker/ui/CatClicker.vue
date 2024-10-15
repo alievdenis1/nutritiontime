@@ -17,7 +17,8 @@
 			:class="{
 				'bg-transparentGreen': !store.isRapidClicking,
 				'bg-rapidClickColor': store.isRapidClicking,
-				'cursor-not-allowed': !canClick
+				'cursor-not-allowed': !canClick,
+				'opacity-30': !canClick
 			}"
 			@click="handleClick"
 		>
@@ -320,17 +321,28 @@ const handleVisibilityChange = () => {
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
 
 onMounted(() => {
-  const { initialStatsRequest, syncWithBackend, syncInterval } = store
+  const fetch = async () => {
+    const { initialStatsRequest, syncWithBackend, syncInterval, regenerateEnergy } = store
 
-  initialStatsRequest()
+    await initialStatsRequest()
 
-  syncWithBackendIntervalId.value = setInterval(syncWithBackend, syncInterval)
+    syncWithBackendIntervalId.value = setInterval(() => {
+      regenerateEnergy()
+      syncWithBackend()
+    }, syncInterval)
+  }
+
+  fetch()
 })
 
 onUnmounted(() => {
+  const { resetLastEnergyUpdateTimestamp } = store
+
   if (syncWithBackendIntervalId.value) {
     clearInterval(syncWithBackendIntervalId.value)
   }
+
+  resetLastEnergyUpdateTimestamp()
 })
 
 onMounted(async () => {
