@@ -114,16 +114,17 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             // было потрачено энергии и накоплено монет
             // TODO: TESTING
             const normalClicks = energySpent - shakeClicks - shoutClicks
+            if (normalClicks < 0) return
             const baseReward = normalClicks * 0.01
-            const shakeMultiplier = (shakeClicks * 0.01) * 2 // Пример: 1% бонус за каждую тряску
-            const shoutMultiplier = (shoutClicks * 0.01) * 4// Пример: 2% бонус за каждый крик
+            const shakeMultiplier = shakeClicks * 0.01 * 2 // Пример: 1% бонус за каждую тряску
+            const shoutMultiplier = shoutClicks * 0.01 * 4// Пример: 2% бонус за каждый крик
             // const baseReward = Number(stats.value.click_reward) * energySpent
             // const shakeMultiplier = 1 + (shakeClicks * 0.01) // Пример: 1% бонус за каждую тряску
             // const shoutMultiplier = 1 + (shoutClicks * 0.02) // Пример: 2% бонус за каждый крик
 
             // const totalReward = baseReward * shakeMultiplier * shoutMultiplier
             const totalReward = baseReward + shakeMultiplier + shoutMultiplier
-            console.log('totalReward', totalReward)
+
             stats.value.balance = Number(stats.value.balance) + totalReward
             stats.value.total_clicks++
             stats.value.total_earned = Number(stats.value.total_earned) + totalReward
@@ -150,20 +151,17 @@ export const useCatClickerStore = defineStore('catClicker', () => {
                 shout_clicks: totalShoutClicks
             }
 
+            pendingClicks.value = []
             const { data, error, execute } = processClick(clickRequest)
             await execute()
 
             if (data.value && !error.value) {
-                updateStatsFromClickResponse(data.value)
-                pendingClicks.value = []
-                localVersion.value++
+                if (!pendingClicks.value.length) {
+                    updateStatsFromClickResponse(data.value)
+                }
             } else {
-                // TODO: на основе логики из функции click
-                // можно рассчитать сколько мы потратили энергии и заработали монет
-                // и это значение вычесть и отобразить ошибку (что что-то пошло не так)
                 console.error('Error processing clicks:', error.value)
                 pendingClicks.value = []
-                localVersion.value++
             }
         }
 

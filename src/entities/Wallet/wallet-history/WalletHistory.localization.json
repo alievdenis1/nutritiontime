@@ -9,7 +9,8 @@
         "transactionHistory": "Здесь будет храниться история зачислений",
         "invitation": "Приглашение",
         "invitationDescription": "Приглашаю тебя присоединиться к Nutrition Time!",
-        "referral": "Награда за приглашение: {{invitedUserName}}"
+        "referral": "Награда за приглашение: {{invitedUserName}}",
+        "mining": "Заработано за клики"
     },
     "en": {
         "inviteFriends": "Invite friends",
@@ -21,6 +22,7 @@
         "transactionHistory": "The transaction history will be stored here",
         "invitation": "Invitation",
         "invitationDescription": "I invite you to join Nutrition Time!",
-        "referral": "Referral reward for inviting {{invitedUserName}}"
+        "referral": "Referral reward for inviting {{invitedUserName}}",
+        "mining": "Earned for clicks"
     }
 }

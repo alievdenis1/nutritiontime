@@ -127,12 +127,17 @@ const getReferralDescription = (transaction: ITransaction) => {
 	return t('referral', { invitedUserName })
 }
 
+const getMiningDescription = () => {
+	return t('mining')
+}
+
 const getDescription = (transaction: ITransaction) => {
 	const type = transaction.type
 	const description = transaction.description
 
 	const selectDescriptionGetter: Record<string, (transaction: ITransaction) => string> = {
-		referral: getReferralDescription
+		referral: getReferralDescription,
+		mining: getMiningDescription,
 	}
 
 	const descriptionGetter = selectDescriptionGetter[type]
