@@ -19,10 +19,7 @@ export const useCatClickerStore = defineStore('catClicker', () => {
     const energyStatus = ref<EnergyStatus | null>(null)
     const lastEnergyUpdateTimestamp = ref<number>()
     const pendingClicks = ref<{ energy_spent: number, is_multi_click: boolean, shake_clicks: number, shout_clicks: number }[]>([])
-    const lastSyncTime = ref(Date.now())
     const syncInterval = 2000
-    const localVersion = ref(0)
-    const serverVersion = ref(0)
 
     const currency = computed(() => Number(stats.value?.balance ?? 0).toFixed(2))
     const energyCurrent = computed(() => Number(energyStatus.value?.current_energy ?? 0).toFixed(2))
@@ -72,8 +69,6 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             total_clicks: Number(serverStats.total_clicks),
             total_earned: Number(serverStats.total_earned)
         }
-        serverVersion.value++
-        localVersion.value = serverVersion.value
     }
 
     function mergeEnergyStatus(serverEnergyStatus: EnergyStatus) {
@@ -83,8 +78,6 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             regeneration_rate: Number(serverEnergyStatus.regeneration_rate),
             last_update: serverEnergyStatus.last_update
         }
-        serverVersion.value++
-        localVersion.value = serverVersion.value
     }
 
     function updateStatsFromClickResponse(response: ClickResponse) {
@@ -96,8 +89,6 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         if (energyStatus.value) {
             energyStatus.value.current_energy = Number(response.current_energy)
         }
-
-        localVersion.value++
     }
 
     function click(energySpent = 1, isMultiClick = false, shakeClicks = 0, shoutClicks = 0) {
@@ -129,16 +120,13 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             stats.value.total_clicks++
             stats.value.total_earned = Number(stats.value.total_earned) + totalReward
         }
-        localVersion.value++
 
         return true
     }
 
     async function syncWithBackend() {
-        const now = Date.now()
-        if (now - lastSyncTime.value < syncInterval) return
-
         if (pendingClicks.value.length > 0) {
+            // TODO: вместо трех циклов можно сделать один
             const totalEnergySpent = pendingClicks.value.reduce((sum, click) => sum + click.energy_spent, 0)
             const totalShakeClicks = pendingClicks.value.reduce((sum, click) => sum + click.shake_clicks, 0)
             const totalShoutClicks = pendingClicks.value.reduce((sum, click) => sum + click.shout_clicks, 0)
@@ -164,8 +152,6 @@ export const useCatClickerStore = defineStore('catClicker', () => {
                 pendingClicks.value = []
             }
         }
-
-        lastSyncTime.value = now
     }
 
     async function initialStatsRequest() {

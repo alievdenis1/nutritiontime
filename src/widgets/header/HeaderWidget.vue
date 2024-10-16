@@ -3,7 +3,7 @@
 		ref="target"
 		class="grid"
 	>
-		<header class="flex items-center gap-5 w-full justify-between	">
+		<header class="flex bg-mainBg items-center gap-5 w-full justify-between pt-[16px] pr-[16px] pl-[16px]">
 			<img
 				alt="Logo"
 				height="34"
@@ -20,35 +20,7 @@
 					<IconWallet />
 				</button>
 
-				<button
-					aria-label="Settings"
-					class="settings-button p-[12px]"
-					role="button"
-					@click="languageDropDownOpen = !languageDropDownOpen"
-				>
-					{{ t('lang') }}
-					<IconArrow
-						:icon-color="'#1C1C1C'"
-						:class="{ 'rotate-180': languageDropDownOpen }"
-					/>
-					<div
-						v-if="languageDropDownOpen"
-						class="language-dropdown"
-					>
-						<button
-							:class="{ 'active': localeStore.currentLocale === 'ru' }"
-							@click="localeStore.setLocale('ru')"
-						>
-							RUS
-						</button>
-						<button
-							:class="{ 'active': localeStore.currentLocale === 'en' }"
-							@click="localeStore.setLocale('en')"
-						>
-							ENG
-						</button>
-					</div>
-				</button>
+				<LanguageSwitcher />
 			</div>
 		</header>
 	</div>
@@ -56,21 +28,13 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useLocaleStore, useTranslation } from 'shared/lib/i18n'
-import Localization from './HeaderWidget.localization.json'
-import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import { IconWallet, IconArrow } from 'shared/components/Icon'
+import { IconWallet } from '@/shared/components/Icon'
+import { LanguageSwitcher } from '@/features/LanguageSwitcher'
 
 const router = useRouter()
 
-const localeStore = useLocaleStore()
-const { t } = useTranslation(Localization)
 const target = ref(null)
-
-const languageDropDownOpen = ref(false)
-
-onClickOutside(target, () => languageDropDownOpen.value = false)
 
 const navigateToWallet = () => {
 	router.push('/wallet')

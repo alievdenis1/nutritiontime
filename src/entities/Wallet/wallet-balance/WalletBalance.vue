@@ -4,10 +4,7 @@
 		<div class="flex justify-between items-center px-[24px] py-[16px] shadow-custom rounded-[16px]">
 			<div class="flex gap-[10px] items-center">
 				<IconGold />
-
-				<div class="text-xxxl">
-					{{ formattedCurrency }}
-				</div>
+				<CurrencyBalance :currency="currency" />
 				<div class="text-lg font-bold">
 					$RCPT
 				</div>
@@ -97,6 +94,7 @@
  import Localization from './WalletBalance.localization.json'
  import CatClicker from './CatClicker/ui/CatClicker.vue'
  import Leaderboard from './LeaderBoard/LeaderBoard.vue'
+ import CurrencyBalance from './CurrencyBalance.vue'
  import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
  import { TonConnectButton, useTonAddress, useTonWallet } from '@townsquarelabs/ui-vue'
  import { TonApiClient, Api } from '@ton-api/client'
@@ -119,11 +117,6 @@
 
  const currency = computed(() => store.currency)
  const energyCurrency = computed(() => store.energyCurrent)
-
- const formattedCurrency = computed(() => {
-  const value = currency.value ?? 0
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
- })
 
  // Новый код для проверки NFT с использованием TonAPI.io
  const walletConnected = ref(false)
