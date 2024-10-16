@@ -10,7 +10,7 @@
 				</div>
 			</div>
 			<IconEnquiry
-				class="cursor-pointer"
+				class="cursor-pointer min-w-[24px]"
 				@click="openModal"
 			/>
 			<VModal
@@ -35,7 +35,7 @@
 							href="https://t.me/recipetonru"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="mt-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+							class="mt-5 flex min-h-[52px] items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 						>
 							<svg
 								class="w-5 h-5 mr-2"

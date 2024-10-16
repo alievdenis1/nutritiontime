@@ -1,7 +1,7 @@
 <template>
 	<div
 		ref="currencyContainer"
-		class="text-xxxl max-w-[160px]"
+		class="text-xxxl max-w-[150px]"
 	>
 		<span ref="currencyElement">{{ formattedCurrency }}</span>
 	</div>
