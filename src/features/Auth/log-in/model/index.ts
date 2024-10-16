@@ -22,7 +22,7 @@ export const useAuthorization = () => {
                 throw new Error('User data is not available from TWA')
             }
 
-            if (twaUser.language_code != undefined) {
+            if (twaUser.language_code !== undefined) {
                 sessionStore.setLang(twaUser.language_code as Locales)
             }
 
