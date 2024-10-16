@@ -222,9 +222,7 @@ const debounceSyncWithBackend = () => {
 const syncWithBackendFetch = debounceSyncWithBackend()
 
 const handleClick = (event: MouseEvent) => {
-  // TODO: вернуть
-  // TODO: ВЕРНУТЬ!!!!!!!!!!!!!!!
-  // if (!checkClickerAvailability()) return
+  if (!checkClickerAvailability()) return
 
   if (!canClick.value) return
 
