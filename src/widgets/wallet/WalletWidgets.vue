@@ -36,7 +36,7 @@ const { t } = useTranslation(localizations)
 <style scoped>
 	.wallet-header {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: 1fr auto 1fr;
 		grid-template-areas: ". title lang";
 	}
 
