@@ -20,7 +20,7 @@
 				'cursor-not-allowed': !canClick,
 				'opacity-30': !canClick
 			}"
-			@click="handleClick"
+			@click="handleClickAndSync"
 		>
 			<div class="img-wrapper">
 				<img
@@ -135,7 +135,7 @@ const imgContainer = ref<HTMLElement | null>(null)
 let shakeTimeout: number | null = null
 const visibleCards = computed(() => cards.value.slice(-20))
 
-const syncWithBackendIntervalId = ref<NodeJS.Timeout>()
+const regenerateEnergyIntervalId = ref<NodeJS.Timeout>()
 const eventCount = ref(0)
 const lastError = ref('')
 const isDeviceMotionSupported = ref(false)
@@ -204,7 +204,26 @@ const checkClickerAvailability = () => {
 	return true
 }
 
+const debounceSyncWithBackend = () => {
+    let timer: NodeJS.Timeout
+
+    const { syncWithBackend } = store
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(() => {
+        syncWithBackend()
+      }, 700)
+    }
+}
+
+const syncWithBackendFetch = debounceSyncWithBackend()
+
 const handleClick = (event: MouseEvent) => {
+  // TODO: вернуть
+  // TODO: ВЕРНУТЬ!!!!!!!!!!!!!!!
   // if (!checkClickerAvailability()) return
 
   if (!canClick.value) return
@@ -243,6 +262,11 @@ const handleClick = (event: MouseEvent) => {
       startAudioAnalysis()
     }
   }
+}
+
+const handleClickAndSync = (event: MouseEvent) => {
+  handleClick(event)
+  syncWithBackendFetch()
 }
 
 const handleDeviceMotion = (event: DeviceMotionEvent) => {
@@ -322,13 +346,12 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).M
 
 onMounted(() => {
   const fetch = async () => {
-    const { initialStatsRequest, syncWithBackend, syncInterval, regenerateEnergy } = store
+    const { initialStatsRequest, syncInterval, regenerateEnergy } = store
 
     await initialStatsRequest()
 
-    syncWithBackendIntervalId.value = setInterval(() => {
+    regenerateEnergyIntervalId.value = setInterval(() => {
       regenerateEnergy()
-      syncWithBackend()
     }, syncInterval)
   }
 
@@ -338,8 +361,8 @@ onMounted(() => {
 onUnmounted(() => {
   const { resetLastEnergyUpdateTimestamp } = store
 
-  if (syncWithBackendIntervalId.value) {
-    clearInterval(syncWithBackendIntervalId.value)
+  if (regenerateEnergyIntervalId.value) {
+    clearInterval(regenerateEnergyIntervalId.value)
   }
 
   resetLastEnergyUpdateTimestamp()
