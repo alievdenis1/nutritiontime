@@ -94,6 +94,8 @@ export const useCatClickerStore = defineStore('catClicker', () => {
     function click(energySpent = 1, isMultiClick = false, shakeClicks = 0, shoutClicks = 0) {
         if (!canClick.value) return false
 
+        shakeClicks = shoutClicks ? 0 : shakeClicks
+
         pendingClicks.value.push({ energy_spent: energySpent, is_multi_click: isMultiClick, shake_clicks: shakeClicks, shout_clicks: shoutClicks })
 
         // Оптимистичное обновление
