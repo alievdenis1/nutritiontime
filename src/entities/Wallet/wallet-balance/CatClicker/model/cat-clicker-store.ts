@@ -140,10 +140,17 @@ export const useCatClickerStore = defineStore('catClicker', () => {
 
     async function syncWithBackend() {
         if (pendingClicks.value.length > 0) {
-            // TODO: вместо трех циклов можно сделать один
-            const totalEnergySpent = pendingClicks.value.reduce((sum, click) => sum + click.energy_spent, 0)
-            const totalShakeClicks = pendingClicks.value.reduce((sum, click) => sum + click.shake_clicks, 0)
-            const totalShoutClicks = pendingClicks.value.reduce((sum, click) => sum + click.shout_clicks, 0)
+            const { totalEnergySpent, totalShakeClicks, totalShoutClicks } = pendingClicks.value.reduce((sum, click) => {
+                return ({
+                    totalEnergySpent: sum.totalEnergySpent + click.energy_spent,
+                    totalShakeClicks: sum.totalShakeClicks + click.shake_clicks,
+                    totalShoutClicks: sum.totalShoutClicks + click.shout_clicks,
+                })
+            }, {
+                totalEnergySpent: 0,
+                totalShakeClicks: 0,
+                totalShoutClicks: 0,
+            })
             const isMultiClick = pendingClicks.value[0].is_multi_click // Берем значение из первого клика
 
             const clickRequest: ClickRequest = {
