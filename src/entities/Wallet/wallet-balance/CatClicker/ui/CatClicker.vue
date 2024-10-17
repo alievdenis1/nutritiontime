@@ -263,7 +263,12 @@ const handleClick = (event: MouseEvent) => {
 }
 
 const handleClickAndSync = (event: MouseEvent) => {
+  const { energyThresholdSyncRequest } = store
+
   handleClick(event)
+
+  energyThresholdSyncRequest()
+
   syncWithBackendFetch()
 }
 

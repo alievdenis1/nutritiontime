@@ -20,6 +20,7 @@ export const useCatClickerStore = defineStore('catClicker', () => {
     const lastEnergyUpdateTimestamp = ref<number>()
     const pendingClicks = ref<{ energy_spent: number, is_multi_click: boolean, shake_clicks: number, shout_clicks: number }[]>([])
     const syncInterval = 2000
+    const requestForSyncEnabled = ref(false)
 
     const currency = computed(() => Number(stats.value?.balance ?? 0).toFixed(2))
     const energyCurrent = computed(() => Number(energyStatus.value?.current_energy ?? 0).toFixed(2))
@@ -91,6 +92,16 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         }
     }
 
+    function updateTheNeedOfSync(prevEnergy: number, currentEnergy: number) {
+        const ENERGY_THRESHOLD_FOR_SYNC = 20
+
+        if (prevEnergy > ENERGY_THRESHOLD_FOR_SYNC && currentEnergy <= ENERGY_THRESHOLD_FOR_SYNC) {
+            requestForSyncEnabled.value = true
+        } else {
+            requestForSyncEnabled.value = false
+        }
+    }
+
     function click(energySpent = 1, isMultiClick = false, shakeClicks = 0, shoutClicks = 0) {
         if (!canClick.value) return false
 
@@ -100,13 +111,18 @@ export const useCatClickerStore = defineStore('catClicker', () => {
 
         // Оптимистичное обновление
         if (energyStatus.value) {
-            energyStatus.value.current_energy = Math.max(0, Number(energyStatus.value.current_energy) - energySpent)
+            const prevEnergy = energyStatus.value.current_energy
+            const currentEnergy = Math.max(0, Number(energyStatus.value.current_energy) - energySpent)
+
+            updateTheNeedOfSync(prevEnergy, currentEnergy)
+
+            energyStatus.value.current_energy = currentEnergy
         }
         if (stats.value) {
             // TODO: эту логику можно вынести отдельно, чтобы в при ошибке можно было посчитать сколько
             // было потрачено энергии и накоплено монет
             const normalClicks = energySpent - shakeClicks - shoutClicks
-            if (normalClicks < 0) return
+
             // todo: 0.01 === stats.value.click_reward
             const baseReward = normalClicks * 0.01
             const shakeMultiplier = shakeClicks * 0.01 * 2
@@ -137,18 +153,30 @@ export const useCatClickerStore = defineStore('catClicker', () => {
                 shout_clicks: totalShoutClicks
             }
 
+            const isSyncRequest = requestForSyncEnabled.value
+
             pendingClicks.value = []
             const { data, error, execute } = processClick(clickRequest)
             await execute()
 
             if (data.value && !error.value) {
-                if (!pendingClicks.value.length) {
+                if (!pendingClicks.value.length || isSyncRequest) {
                     updateStatsFromClickResponse(data.value)
+
+                    if (isSyncRequest) {
+                        pendingClicks.value = []
+                    }
                 }
             } else {
                 console.error('Error processing clicks:', error.value)
                 pendingClicks.value = []
             }
+        }
+    }
+
+    function energyThresholdSyncRequest() {
+        if (requestForSyncEnabled.value) {
+            syncWithBackend()
         }
     }
 
@@ -223,6 +251,7 @@ export const useCatClickerStore = defineStore('catClicker', () => {
         setShaking,
         setShouting,
         setRapidClicking,
+        energyThresholdSyncRequest,
         regenerateEnergy,
         resetLastEnergyUpdateTimestamp,
         isShaking,
