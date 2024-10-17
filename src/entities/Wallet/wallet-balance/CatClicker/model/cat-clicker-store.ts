@@ -129,7 +129,7 @@ export const useCatClickerStore = defineStore('catClicker', () => {
             const isMultiClick = pendingClicks.value[0].is_multi_click // Берем значение из первого клика
 
             const clickRequest: ClickRequest = {
-                energy_spent: totalEnergySpent,
+                energy_spent: totalEnergySpent > ConfigClicker.defaultMaxEnergy ? ConfigClicker.defaultMaxEnergy : totalEnergySpent,
                 is_multi_click: isMultiClick,
                 shake_clicks: totalShakeClicks,
                 shout_clicks: totalShoutClicks
