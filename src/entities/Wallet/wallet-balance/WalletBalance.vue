@@ -103,7 +103,6 @@
  const { t } = useTranslation(Localization)
 
  const show = ref(false)
- const loading = ref(true)
 
  const openModal = () => {
   show.value = true
@@ -158,10 +157,10 @@
   }
  }
 
- // Следим за изменением кошелька
- watch(wallet, (newWallet) => {
-  walletConnected.value = !!newWallet
-  if (newWallet) {
+ // Следим за изменением адреса кошелька
+ watch(userAddress, (newUserAddress) => {
+  walletConnected.value = !!newUserAddress
+  if (newUserAddress) {
    checkNFT()
   } else {
    hasNFT.value = false
@@ -169,14 +168,6 @@
  })
 
  onMounted(async () => {
-  const isLocal = import.meta.env.VITE_USE_TWA_MOCK
-
-  if (isLocal) {
-   console.warn('TWA is not available. Some features may not work correctly.')
-  }
-
-  loading.value = false
-
   // Проверяем NFT при монтировании, если кошелек уже подключен
   if (wallet.value) {
    walletConnected.value = true
