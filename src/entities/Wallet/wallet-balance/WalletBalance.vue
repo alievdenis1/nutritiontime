@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
- import { onMounted, ref, computed, watch } from 'vue'
+ import { ref, computed, watch } from 'vue'
  import {
   IconGold,
   IconEnquiry,
@@ -96,7 +96,7 @@
  import Leaderboard from './LeaderBoard/LeaderBoard.vue'
  import CurrencyBalance from './CurrencyBalance.vue'
  import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
- import { TonConnectButton, useTonAddress, useTonWallet } from '@townsquarelabs/ui-vue'
+ import { TonConnectButton, useTonAddress } from '@townsquarelabs/ui-vue'
  import { TonApiClient, Api } from '@ton-api/client'
  import { Address } from '@ton/core'
 
@@ -122,7 +122,6 @@
  const checkingNFT = ref(false)
  const hasNFT = ref(false)
  const userAddress = useTonAddress()
- const wallet = useTonWallet()
 
  const COLLECTION_ADDRESS = 'EQDERkmRDrXxzEbZUMMgo3uDJwe24qUYpnasJ83WpQZaqjJ1'
  const collectionAddress = Address.parseFriendly(COLLECTION_ADDRESS).address
@@ -165,14 +164,8 @@
   } else {
    hasNFT.value = false
   }
- })
-
- onMounted(async () => {
-  // Проверяем NFT при монтировании, если кошелек уже подключен
-  if (wallet.value) {
-   walletConnected.value = true
-   await checkNFT()
-  }
+ }, {
+   immediate: true,
  })
 </script>
 
