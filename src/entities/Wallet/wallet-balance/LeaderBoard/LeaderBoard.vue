@@ -122,4 +122,8 @@ watch(isShowLeaderboardModal, (isOpened) => {
 .row {
 	@apply grid gap-x-[10px] grid-cols-[60px_1fr_125px]
 }
+
+.row > div {
+	word-break: break-word;
+}
 </style>
