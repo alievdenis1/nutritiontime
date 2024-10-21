@@ -1,5 +1,9 @@
 {
     "ru": {
+        "motionErrorTitle": "Ошибка доступа к системе положения в пространстве",
+        "motionTitle": "Доступ к системе положения в пространстве",
+        "motionErrorDescription": "Чтобы заново получить доступ к системе положения в пространстве - перезагрузите Telegram или измените настройки доступа.",
+        "motionModalSubmit": "Понятно",
         "microphoneErrorTitle": "Ошибка доступа к микрофону",
         "microphoneTitle": "Доступ к микрофону",
         "microphoneUnknownErrorDescription": "Произошла ошибка доступа к микрофону. Попробуйте перезагрузить Telegram или измените настройки доступа к микрофону.",
@@ -14,6 +18,10 @@
         "buyNft": "Приобрести NFT"
     },
     "en": {
+        "motionErrorTitle": "Motion system accessing error",
+        "motionTitle": "Access to motion system",
+        "motionErrorDescription": "To regain access to the motion system, restart Telegram or change access settings.",
+        "motionModalSubmit": "Ok",
         "microphoneErrorTitle": "Microphone accessing error",
         "microphoneTitle": "Access to microphone",
         "microphoneUnknownErrorDescription": "There was an error accessing the microphone. Restart Telegram or change microphone access settings.",

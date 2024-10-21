@@ -13,7 +13,7 @@ interface IUser {
 export interface ILeader {
     leaderboard: ILeaderboard[];
     user_rank: number;
-    total_user: number;
+    total_users: number;
     current_user: IUser;
 }
 

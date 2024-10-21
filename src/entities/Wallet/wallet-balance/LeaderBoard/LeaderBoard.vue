@@ -37,6 +37,9 @@
 					</div>
 					...
 				</template>
+				<div class="py-[12px]">
+					{{ t('totalParticipants', { total: leaderData.total_users }) }}
+				</div>
 			</template>
 			<template v-else>
 				<VSkeleton class="w-full h-[32px] rounded-[16px] " />
@@ -74,10 +77,10 @@ const closeLeaderboardModal = () => {
 const checkUserInTop = (leaderData: ILeader | null) => {
 	if (!leaderData) return false
 
-	const leaderboard = leaderData.leaderboard
-	const currentUser = leaderData.current_user
+	const leaderboardLength = leaderData.leaderboard?.length
+	const userRank = leaderData.user_rank
 
-	const userInTop = leaderboard.some((leader) => leader.id === currentUser.id)
+	const userInTop = userRank <= leaderboardLength
 
 	return userInTop
 }

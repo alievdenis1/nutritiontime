@@ -214,8 +214,6 @@ export function updateTextSize({
   innerEl: HTMLElement;
   containerEl: HTMLElement;
 }): void {
-  const t0 = performance.now()
-
   if (!isFinite(minFontSizePx)) {
     throw new Error(`Invalid minFontSizePx (${minFontSizePx})`)
   }

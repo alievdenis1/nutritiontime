@@ -3,12 +3,14 @@
         "leaderButton": "Список лидеров",
         "rank": "Место",
         "name": "Имя",
-        "balance": "Баланс"
+        "balance": "Баланс",
+        "totalParticipants": "Всего участников: {{total}}"
     },
     "en": {
         "leaderButton": "Leaderboard",
         "rank": "Rank",
         "name": "Name",
-        "balance": "Balance"
+        "balance": "Balance",
+        "totalParticipants": "Total participants: {{total}}"
     }
 }
