@@ -10,6 +10,9 @@
 				</div>
 			</div>
 			<router-view v-else />
+			<div v-if="twa.initDataUnsafe.user.id == 644490312">
+				{{ twa?.initDataUnsafe }}
+			</div>
 		</component>
 	</TonConnectUIProvider>
 </template>
