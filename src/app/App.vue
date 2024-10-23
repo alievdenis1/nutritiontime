@@ -47,20 +47,22 @@ const options = {
  language: sessionStore.lang
 }
 
-if (twa) {
-  twa.ready()
-  twa.enableClosingConfirmation()
-  twa.disableVerticalSwipes()
-  twa.expand()
-  twa.onEvent('viewportChanged', ({ isStateStable }) => {
-	if (isStateStable) {
-		twa && twa.expand()
-	}
-  })
-}
-
 onMounted(() => {
-  authUser()
+  if (twa) {
+    twa.ready()
+    twa.enableClosingConfirmation()
+    twa.disableVerticalSwipes()
+    twa.expand()
+    twa.onEvent('viewportChanged', ({ isStateStable }) => {
+      if (isStateStable) {
+        twa && twa.expand()
+      }
+    })
+  }
+
+  setTimeout(() => {
+    authUser()
+  }, 300)
 })
 
 watch(() => route?.path, () => {
