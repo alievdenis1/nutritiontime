@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { shallowRef, watch, type Component } from 'vue'
+import { shallowRef, watch, type Component, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { DefaultLayout } from './layouts'
 import { twa } from '@/shared/lib/api/twa'
@@ -56,7 +56,9 @@ if (twa) {
   })
 }
 
-authUser()
+onMounted(() => {
+  authUser()
+})
 
 watch(() => route?.path, () => {
 	authUser()
