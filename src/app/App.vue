@@ -60,14 +60,12 @@ onMounted(() => {
     })
   }
 
-  setTimeout(() => {
-    authUser()
-  }, 300)
+  authUser()
 })
 
-// watch(() => route?.path, () => {
-// 	authUser()
-// })
+watch(() => route?.path, () => {
+	authUser()
+})
 
 watch(() => route?.meta?.layout, (newLayoutComponent) => {
 	layout.value = newLayoutComponent || DefaultLayout
