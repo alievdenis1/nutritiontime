@@ -1,25 +1,27 @@
 <template>
-	<div class="flex flex-col gap-[16px] mt-[16px] mb-[60px]">
-		<CreateRecipeBasicInfo />
+	<div class="relative flex flex-col gap-[16px] mt-[16px] mb-[62px]">
+		<CreateRecipeBasicInfo ref="basicInfo" />
 		<CreateRecipeGradation />
 		<CreateRecipeTime />
 		<CreateRecipeIngredients
-			:title="t('ingredients')"
-			desc="То, что нужно для приготовления блюда. Например, 250 грамм картошки "
+			:title="t('title')"
+			:desc="t('desc')"
 		/>
 		<CreateRecipeNutritional />
 		<StepByStepRecipe />
 		<KitchenToolsRecipe />
 		<TagsRecipe />
-		<v-button
-			:color="ButtonColors.Green"
-			@click="CheckRecipe"
-		>
-			<div class="flex gap-[12px] items-center">
-				<div>{{ t('further') }}</div>
-				<IconArrowRight icon-color="#FFFFFF" />
-			</div>
-		</v-button>
+		<div class="px-[16px] fixed bottom-[112px] left-0 w-full">
+			<v-button
+				:color="ButtonColors.Green"
+				@click="CheckRecipe"
+			>
+				<div class="flex gap-[12px] items-center">
+					<div>{{ t('further') }}</div>
+					<IconArrowRight icon-color="#ffffff" />
+				</div>
+			</v-button>
+		</div>
 	</div>
 </template>
 
@@ -40,11 +42,26 @@ import { ButtonColors, VButton } from '@/shared/components/Button'
 import { useRouter } from 'vue-router'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateOwn.localization.json'
+import { ref } from 'vue'
+import { IconArrowRight } from '@/shared/components/Icon'
 
 const router = useRouter()
 const { t } = useTranslation(localizations)
+
+const basicInfo = ref<typeof CreateRecipeBasicInfo>()
+
+const validateFields = (): boolean | void  => {
+	if (!basicInfo.value) return
+
+	const isInvalidBasicInfo = basicInfo.value.onValidate()
+	return isInvalidBasicInfo
+}
+
 const CheckRecipe = () => {
-	router.push({ path: 'check-recipe' })
+	const isValid = validateFields()
+	if (isValid) {
+		router.push({ path: 'check-recipe' })
+	}
 }
 </script>
 

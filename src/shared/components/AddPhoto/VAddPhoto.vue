@@ -1,6 +1,7 @@
 <template>
 	<div
-		class="photo-upload mb-[8px] flex justify-center items-center"
+		class="photo-upload flex justify-center items-center"
+		:class="errorClasses"
 		:style="{ height: `${heightMain}px`, background: backgrounds }"
 	>
 		<div
@@ -25,8 +26,9 @@
 			class="photo-upload-label flex justify-center items-center"
 		>
 			<input
+				ref="fileInput"
 				type="file"
-				class="photo-upload-input"
+				class="hidden"
 				@change="handleFileUpload"
 			>
 			<div class="photo-upload-content flex items-center gap-2">
@@ -42,36 +44,99 @@
 			</div>
 		</label>
 	</div>
+	<p
+		v-if="props.error"
+		class="text-xs text-coralRed max-w-xs mb-[24px]"
+	>
+		{{ props.errorMessage }}
+	</p>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { IconClose, IconPhoto } from 'shared/components/Icon'
-import { AddPhoto } from './type.ts'
+import { AddPhoto, AddPhotoEmits } from './type.ts'
 
-withDefaults(defineProps<AddPhoto>(), {
+const emits = defineEmits<AddPhotoEmits>()
+const props = withDefaults(defineProps<AddPhoto & {
+	initialImage?: string | null;
+	// TODO: переписать
+	onImageUploaded?: (imageUrl: string | null) => void;
+}>(), {
 	icon: IconPhoto,
 	iconColor: '#9F9FA0',
-	textColor: '#1C1C1C'
+	textColor: '#1C1C1C',
+	initialImage: null,
+	onImageUploaded: undefined,
+	error: false,
+	errorMessage: ''
 })
 
-const uploadedImage = ref<string | null>(null)
+const uploadedImage = ref<string | null>(props.initialImage)
+const imageTypes = ['jpeg', 'jpg', 'png']
 
-const handleFileUpload = (event: Event) => {
+const errorClasses = computed(() => props.error ? 'border-1 border-solid border-[#f04f4f]' : '')
+
+watch(() => props.initialImage, (newValue) => {
+	uploadedImage.value = newValue
+})
+
+const onUploadError = (): void => {
+	emits('update:error', true)
+}
+
+const validateFileType = (file: File): boolean => {
+	return imageTypes.some(type => file.type.includes(type))
+}
+
+const validateResult = (file: File): void => {
+	const image = new Image()
+
+	image.onerror = (): void => {
+		onUploadError()
+	}
+
+	image.src = URL.createObjectURL(file)
+	uploadedImage.value = image.src
+	emits('upload:image', image.src, file)
+}
+
+const handleFileUpload = (event: Event): void => {
 	const target = event.target as HTMLInputElement
 	const files = target.files
+
+	emits('update:error', false)
+
 	if (files && files[0]) {
-		const reader = new FileReader()
-		reader.onload = (e: ProgressEvent<FileReader>) => {
-			uploadedImage.value = e.target?.result as string
-		}
-		reader.readAsDataURL(files[0])
+		Array.from(files).forEach((file) => {
+			const isValidType = validateFileType(file)
+
+			if (!isValidType) {
+				onUploadError()
+				return
+			}
+			validateResult(file)
+		})
 	}
 }
 
 const removeImage = () => {
 	uploadedImage.value = null
+	// TODO: переписать
+	if (props.onImageUploaded) {
+		props.onImageUploaded(null)
+	}
 }
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const openFileDialog = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+defineExpose({ openFileDialog })
 </script>
 
 <style scoped>

@@ -1,0 +1,1 @@
+export { default as ModalCollectionAdding } from './ModalCollectionAdding.vue'

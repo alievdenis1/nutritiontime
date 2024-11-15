@@ -1,5 +1,7 @@
 <template>
 	<TonConnectUIProvider :options="options">
+		<VConfirm />
+
 		<component :is="layout">
 			<div
 				v-if="isLoading"
@@ -22,7 +24,9 @@ import { twa } from '@/shared/lib/api/twa'
 import { useLocaleStore } from '@/shared/lib/i18n'
 import { useAuthorization } from '@/features/Auth/log-in'
 import { useSessionStore } from '@/entities/Session'
+import { VConfirm } from '@/shared/components/Confirm'
 import { TonConnectUIProvider } from '@townsquarelabs/ui-vue'
+import WebApp from '@twa-dev/sdk'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,20 +48,39 @@ const options = {
  language: sessionStore.lang
 }
 
-onMounted(() => {
-  if (twa) {
-    twa.ready()
-    twa.enableClosingConfirmation()
-    twa.disableVerticalSwipes()
-    twa.expand()
-    twa.onEvent('viewportChanged', ({ isStateStable }) => {
-      if (isStateStable) {
-        twa && twa.expand()
-      }
-    })
-  }
+const handlePaymentRedirect = () => {
+ const startParam = WebApp.initDataUnsafe.start_param
 
-  authUser()
+ if (startParam && startParam.startsWith('payment_')) {
+  const months = startParam.replace('payment_', '')
+
+  if (['1', '3', '12'].includes(months)) {
+   router.push({
+    name: 'payment',
+    query: { months }
+   })
+  }
+ }
+}
+
+if (twa) {
+  twa.ready()
+  twa.enableClosingConfirmation()
+  twa.disableVerticalSwipes()
+  twa.expand()
+  twa.onEvent('viewportChanged', ({ isStateStable }) => {
+	if (isStateStable) {
+		twa && twa.expand()
+	}
+  })
+}
+
+authUser()
+
+onMounted(() => {
+ authUser().then(() => {
+  handlePaymentRedirect()
+ })
 })
 
 watch(() => route?.path, () => {

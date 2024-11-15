@@ -24,6 +24,10 @@ body {
 	touch-action: pan-x pan-y;
 }
 
+.layout--main {
+	height: calc(100vh - 64px);
+}
+
 @media screen and (max-width: 400px) {
 	.layout {
 		user-select: none;

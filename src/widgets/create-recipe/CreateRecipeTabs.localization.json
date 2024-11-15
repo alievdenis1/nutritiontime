@@ -1,13 +1,14 @@
 {
     "ru": {
-        "createRecipe": "Создание рецепта",
+        "createRecipe": "Добавить рецепт",
         "manualCreation": "Самостоятельно",
+        "addRecipe": "Добавить рецепт",
         "aiCreation": "С помощью AI",
         "aiDescription": "У меня есть идея рецепта, но я ещё не знаю его детали",
         "further" : "Далее"
     },
     "en": {
-        "createRecipe": "Create Recipe",
+        "createRecipe": "Add a recipe",
         "manualCreation": "Manual Creation",
         "aiCreation": "With AI",
         "aiDescription": "I have an idea for a recipe, but I don't know the details yet",

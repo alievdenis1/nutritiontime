@@ -5,7 +5,7 @@
 				<img
 					width="238"
 					alt="Logo"
-					src="/image/logo/logo-large.webp"
+					src="/image/logo/logo-default.webp"
 				>
 			</div>
 

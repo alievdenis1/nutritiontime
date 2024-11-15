@@ -1,0 +1,20 @@
+{
+    "ru": {
+        "reviews": "Отзывы",
+        "singular": "отзыв",
+        "plural": "отзыва",
+        "pluralMany": "отзывов",
+        "leaveReview": "Оставить отзыв",
+        "backButton": "Назад",
+        "commentImage": "Изображение к отзыву"
+    },
+    "en": {
+        "reviews": "Reviews",
+        "singular": "review",
+        "plural": "reviews",
+        "pluralMany": "reviews",
+        "leaveReview": "Leave a review",
+        "backButton": "Back",
+        "commentImage": "Review image"
+    }
+}

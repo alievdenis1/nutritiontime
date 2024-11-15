@@ -2,7 +2,7 @@
 	<TabsList
 		v-bind="delegatedProps"
 		:class="cn(
-			'w-[100%] inline-flex h-[44px] items-center gap-[5px] justify-center rounded-[16px] bg-lightGray p-1 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+			'w-[100%] inline-flex h-[44px] items-center gap-[5px] justify-center rounded-[16px] bg-lightGray p-1 dark:bg-slate-800',
 			props.class,
 		)"
 	>

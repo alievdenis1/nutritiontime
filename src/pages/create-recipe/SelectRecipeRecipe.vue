@@ -1,25 +1,18 @@
 <template>
-	<div>
+	<div class="p-[16px]">
 		<VLoading v-if="loading" />
 		<div v-else>
-			<div class="flex justify-between items-center mb-[16px]">
-				<button
-					class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
-					@click="$router.go(-1)"
-				>
-					<IconArrowRight icon-color="#1C1C1C" />
-				</button>
+			<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
 				<h2 class="text-center text-lg text-darkGray">
 					{{ t('chooseRecipe') }}
 				</h2>
-				<div />
 			</div>
 			<div class="mb-[80px] mt-[24px]">
 				<div
 					v-for="recipe in recipes"
 					:key="recipe.id"
 					class="max-w-md mx-auto rounded-[20px] overflow-hidden md:max-w-2xl mb-4 px-[2px] py-[2px] cursor-pointer"
-					@click="choiceRecipe(recipe)"
+					@click="choiceRecipe()"
 				>
 					<div class="flex border-custom">
 						<div class="relative">
@@ -59,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { IconFire, IconTime, IconArrowRight } from 'shared/components/Icon'
+import { IconFire, IconTime } from 'shared/components/Icon'
 import { VLoading } from 'shared/components/Loading'
 import { useRouter } from 'vue-router'
 
@@ -95,17 +88,8 @@ const recipes = [
     }
 ]
 
-const choiceRecipe = (recipe: recipeItem) => {
-    console.log(recipe)
-    router.push('/check-recipe')
-}
-
-interface recipeItem {
-    id: number;
-    title: string;
-    image: string;
-    time: string;
-    calories: string;
+const choiceRecipe = () => {
+	router.push({ name: 'check-recipe', query: { source: 'ai' } })
 }
 
 onMounted(() => {

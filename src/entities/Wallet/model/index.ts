@@ -1,1 +1,1 @@
-export * from './wallet.balance.store'
+export * from './wallet.store'

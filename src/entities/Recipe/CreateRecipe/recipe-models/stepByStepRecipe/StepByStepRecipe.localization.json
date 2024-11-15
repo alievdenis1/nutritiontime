@@ -1,16 +1,18 @@
 {
     "ru": {
-        "stepByStep": "Пошаговый рецепт",
+        "stepByStep": "Пошаговая инструкция",
         "step": "Шаг {{idx}}",
         "addStep": "Добавить шаг",
         "uploadPhoto": "Загрузить фотографию шага",
+        "errorMessage": "Не удалось загрузить эту фотографию. Попробуйте другую",
         "stepDescription": "Описание шага"
     },
     "en": {
-        "stepByStep": "Step by step",
+        "stepByStep": "Step-by-step instructions",
         "step": "Step {{idx}}",
         "addStep": "Add step",
         "uploadPhoto": "Upload step photo",
-        "stepDescription": "Step description"
+        "stepDescription": "Step description",
+        "errorMessage": "Failed to upload this photo. Try another one"
     }
 }

@@ -10,7 +10,7 @@
         "ingredientPlaceholderQuantity": "Количество",
         "InGrams": "В граммах",
         "InPieces": "В штуках",
-        "saveIngredientButton": "Сохранить ингредиент"
+        "saveIngredientButton": "Сохранить"
     },
     "en": {
         "unitGrams": "g.",
@@ -23,6 +23,6 @@
         "ingredientPlaceholderQuantity": "Quantity",
         "InGrams": "In grams",
         "InPieces": "In pieces",
-        "saveIngredientButton": "Save Ingredient"
+        "saveIngredientButton": "Save"
     }
 }

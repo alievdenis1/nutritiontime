@@ -1,20 +1,22 @@
 {
     "ru": {
-        "hour": "ч",
-        "minute": "мин",
+        "hour": "ч.",
+        "minute": "м.",
+        "minutesFull": "минут",
         "timeRecipeTitle": "Время на приготовление",
-        "kitchenTimePlaceholder": "Время на кухне",
+        "kitchenTimePlaceholder": "Время на кухне *",
         "kitchenTimeDescription": "Сколько времени нужно будет провести на кухне",
-        "cookingTimePlaceholder": "Готовность блюда",
+        "cookingTimePlaceholder": "Готовность блюда *",
         "cookingTimeDescription": "Сколько времени будет готовиться блюдо"
     },
     "en": {
-        "hour": "h",
-        "minute": "min",
+        "hour": "h.",
+        "minute": "m.",
+        "minutesFull": "minutes",
         "timeRecipeTitle": "Cooking time",
-        "kitchenTimePlaceholder": "Time in the kitchen",
+        "kitchenTimePlaceholder": "Time in the kitchen *",
         "kitchenTimeDescription": "How much time you will need to spend in the kitchen",
-        "cookingTimePlaceholder": "Dish readiness",
+        "cookingTimePlaceholder": "Dish readiness *",
         "cookingTimeDescription": "How long the dish will take to cook"
     }
 }

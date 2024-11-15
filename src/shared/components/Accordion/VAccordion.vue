@@ -26,11 +26,15 @@
 import { ref, computed, watch, onMounted, onUpdated } from 'vue'
 import { IconArrow } from 'shared/components/Icon'
 
-defineProps<{
+const props = withDefaults(defineProps<{
 	title: string;
-}>()
+	isOpen: boolean;
+}>(), {
+	title: '',
+	isOpen: false,
+})
 
-const isOpen = ref(false)
+const isOpen = ref(props.isOpen || false)
 const content = ref<HTMLElement | null>(null)
 
 const contentStyle = computed(() => ({

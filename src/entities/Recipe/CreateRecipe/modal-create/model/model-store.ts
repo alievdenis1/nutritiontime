@@ -1,23 +1,23 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useModalCreateStore = defineStore('modal', () => {
+export const useModalCreateStore = defineStore('modalCreate', () => {
 
     const isModalCreateOpen = ref<boolean>(false)
     const defaultValueTabs = ref<string>('ownRecepie')
 
-    const openModal = () => {
+    const openModalRecipe = () => {
         isModalCreateOpen.value = true
     }
 
-    const closeModal = () => {
+    const closeModalRecipe = () => {
         isModalCreateOpen.value = false
     }
 
     return {
         isModalCreateOpen,
         defaultValueTabs,
-        openModal,
-        closeModal
+        openModalRecipe,
+        closeModalRecipe
     }
 })

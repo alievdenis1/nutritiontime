@@ -34,7 +34,7 @@ function convertInitDataUnsafeToInitData(
 }
 
 const mockUser = {
-    id: 238312266,
+    id: 383055168,
     first_name: 'John',
     last_name: 'Doe',
     username: 'johndoe2',

@@ -1,0 +1,14 @@
+{
+    "ru": {
+        "errorMessage": "Нужно придумать название для коллекции",
+        "textButton": "Создать коллекцию",
+        "saveButton": "Сохранить",
+        "createButton": "Создать коллекцию"
+    },
+    "en": {
+        "errorMessage": "Need to come up with a name for the collection",
+        "textButton": "Create a collection",
+        "saveButton": "Save",
+        "createButton": "Create a collection"
+    }
+}

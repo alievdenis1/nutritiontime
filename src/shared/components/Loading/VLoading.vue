@@ -13,7 +13,7 @@
 			<div class="text-white text-lg">
 				{{ t('loadingTitle') }}
 			</div>
-			<IconAi />
+			<IconAi icon-color="#ffffff" />
 		</div>
 	</div>
 </template>

@@ -1,9 +1,9 @@
 {
     "ru": {
         "tagsTitle": "Теги",
-        "selectTag": "Выберите теги",
-        "addTagTitle": "Добавить тег",
-        "addSelectedTag": "Добавить выбранные теги"
+        "selectTag": "Выбрать теги",
+        "addTagTitle": "Добавление тега",
+        "addSelectedTag": "Добавить выбранные"
     },
     "en": {
         "tagsTitle": "Tags",

@@ -7,7 +7,7 @@
 				:data-id="tab.id"
 				class="tab-column rounded-[100px] px-[16px] py-[12px]"
 				:class="{
-					'active-tab': tab.id === selectedTab.id,
+					'active-tab': selectedTab && tab.id === selectedTab.id,
 					'draggable-tab': tab.id === draggableTabId,
 					'highlight-draggable': tab.id === draggableTabId && draggedActive,
 					'touch-active': tab.id === draggableTabId && draggedActive,
@@ -25,12 +25,12 @@
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<IconKebab
-							v-if="tab.isActiveEdit && tab.id === selectedTab.id"
-							class="mr-[6px] cursor-pointer"
+							v-if="tab.isActiveEdit && selectedTab && tab.id === selectedTab.id"
+							class="mr-[6px] cursor-pointer text-[#1C1C1C]"
 						/>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
-						<DropdownMenuItem>
+						<DropdownMenuItem @click="editTab(tab)">
 							<IconEdit class="icon" />
 							{{ t('edit') }}
 						</DropdownMenuItem>
@@ -40,31 +40,37 @@
 							{{ t('move') }}
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem
+							class="text-[#F04F4F]"
+							@click="deleteTab(tab)"
+						>
 							<IconBin class="icon" />
 							{{ t('delete') }}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<div
-					v-if="tab.isActiveEdit && tab.id !== selectedTab.id"
+					v-if="tab.isActiveEdit && selectedTab && tab.id !== selectedTab.id"
 					class="w-[22px]"
 				/>
 				<div>{{ tab.label }}</div>
-				<div class="ml-[6px] text-gray">
+				<div class="ml-[6px]">
 					{{ tab.count }}
 				</div>
 			</div>
 		</div>
-		<button class="cursor-pointer px-[13px] py-[13px] rounded-[100px] bg-lightGray ml-[8px]">
+		<button
+			class="cursor-pointer px-[13px] py-[13px] rounded-[100px] bg-lightGray ml-[8px]"
+			@click="addTab"
+		>
 			<IconPlus :icon-color="'#319A6E'" />
 		</button>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs } from 'vue'
-import { DragTypes } from './types'
+import { ref, toRefs, watch } from 'vue'
+import { DragTypes, type VDragAndDropEmits } from './types'
 import { IconPlus, IconKebab, IconBin, IconMove, IconEdit } from 'shared/components/Icon'
 import {
   DropdownMenu,
@@ -84,10 +90,11 @@ const props = defineProps({
     required: true
   }
 })
+const emits = defineEmits<VDragAndDropEmits>()
 
 const { items } = toRefs(props)
 
-const selectedTab = ref(items.value[0])
+const selectedTab = ref<DragTypes | null>(items.value[0] || null)
 const draggedTab = ref<DragTypes | null>(null)
 const draggedOverTab = ref<DragTypes | null>(null)
 const draggedActive = ref(false)
@@ -143,6 +150,8 @@ const onDrop = (event: DragEvent, tab: DragTypes) => {
 
 const onTabClick = (tab: DragTypes) => {
   selectedTab.value = tab
+  onChangeTab(tab.id)
+
   if (draggableTabId.value !== tab.id) {
     draggableTabId.value = null
     draggedActive.value = false
@@ -198,6 +207,27 @@ const onTouchEnd = (event: TouchEvent) => {
   }
   draggedTab.value = null
 }
+
+const editTab = (tab: DragTypes) => {
+  emits('edit', tab)
+}
+
+const deleteTab = (tab: DragTypes) => {
+  emits('delete', tab)
+}
+
+const addTab = () => {
+  emits('adding')
+}
+
+const onChangeTab = (id:number) => {
+  emits('change', id)
+}
+
+watch(items, () => {
+	selectedTab.value = items.value[items.value.length - 1]
+  onChangeTab(selectedTab.value.id)
+}, { deep: true })
 </script>
 
 <style lang="scss" scoped>
@@ -231,6 +261,7 @@ const onTouchEnd = (event: TouchEvent) => {
   position: relative;
   align-items: center;
   -webkit-overflow-scrolling: touch;
+  color: #9f9fa0;
 
   &.draggable-tab {
     width: 100%;

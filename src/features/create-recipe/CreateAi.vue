@@ -1,5 +1,5 @@
 <template>
-	<div class="mt-[20px] mb-[60px]">
+	<div class="pt-[20px]">
 		<GeneratorRecipe />
 	</div>
 </template>
