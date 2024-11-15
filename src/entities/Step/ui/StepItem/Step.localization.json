@@ -1,0 +1,10 @@
+{
+    "ru": {
+        "step": "Шаг {{order}}",
+        "stepImage": "Изображение шага"
+    },
+    "en": {
+        "step": "Step {{order}}",
+        "stepImage": "Step image"
+    }
+}

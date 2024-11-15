@@ -151,7 +151,12 @@ const shareMessage = async () => {
 			await navigator.share({
 				title: t('invitation'),
 				text: t('invitationDescription'),
-				url: `https://t.me/nutritiontime_bot/nutritiontime?startapp=${userInfo?.referral_code || ''}` // Заменить на реальный URL
+				// TODO: проверить, что при запуске приложения через бота - ключ тоже передаётся
+				// (не передаётся, нужно использовать приложение, а не бота)
+				url: `https://t.me/devnutritiontime_bot?startapp=${userInfo?.referral_code || ''}` // Заменить на реальный URL
+				// TODO: возможно тут в ссылку в хэш добавлять id или userName текущего пользователя
+				// А потом, когда другой пользователь перейдет по этой ссылке
+				// Из хэша берем id пользователя, который отправил ссылку, и начисляем ему монеты
 			})
 		} catch (error: any) {
 			// console.error('Ошибка при отправке сообщения:', error)
@@ -164,7 +169,7 @@ const shareMessage = async () => {
 }
 
 const copyShareLink = () => {
-	const textToCopy = `https://t.me/nutritiontime_bot/nutritiontime?startapp=${userInfo?.referral_code || ''}` // Заменить на реальный URL
+	const textToCopy = `https://t.me/devnutritiontime_bot?startapp=${userInfo?.referral_code || ''}` // Заменить на реальный URL
 	navigator.clipboard.writeText(textToCopy).then(() => {
 		alert('Ссылка скопирована в буфер обмена')
 	}, (error) => {

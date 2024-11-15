@@ -1,13 +1,14 @@
 <template>
-	<div>
-		<header-widget class="mb-[30px]" />
-		<SavedCollections />
+	<div class="">
+		<!--		<SavedCollections />-->
+		<ProfileStats />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { HeaderWidget } from 'widgets/header'
-import { SavedCollections } from '@/widgets/collection'
+// import { SavedCollections } from '@/widgets/collection'
+import { ProfileStats } from '@/entities/Profile'
+
 </script>
 
 <style lang="scss" scoped></style>

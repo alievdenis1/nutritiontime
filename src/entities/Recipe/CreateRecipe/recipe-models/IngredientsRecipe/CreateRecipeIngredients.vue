@@ -14,10 +14,13 @@
 			>
 				<span class="text-[12px]">{{ ingredient.name }}</span>
 				<div>
-					<span class="text-[#535353] text-xs">
+					<span
+						v-if="!isExclusionMode"
+						class="text-[#535353] text-xs"
+					>
 						{{ ingredient.quantity }}
-						{{ ingredient.type === 'weight' ?
-							t('unitGrams') : t('unitPieces') }}</span>
+						{{ ingredient.type === QuantityType.WEIGHT ? t('unitGrams') : t('unitPieces') }}
+					</span>
 					<button
 						class="text-forestGreen ml-[14px] cursor-pointer"
 						@click="removeIngredient(index)"
@@ -41,48 +44,63 @@
 			</button>
 			<VModal
 				:show="showModal"
+				:lifted="isModalLifted"
 				@close="closeModal"
 			>
-				<div class="p-4">
-					<h2 class="text-lg mb-4">
-						{{ t('addIngredientTitle') }}
-					</h2>
-					<div class="relative">
-						<span
-							v-if="ingredientName.length > 0"
-							class="absolute text-[12px] top-[6px] left-[12px] text-gray"
-						>
-							{{ t('ingredientPlaceholderName') }}
-						</span>
-						<input
-							ref="ingredientNameInput"
-							v-model="ingredientName"
-							type="text"
-							:placeholder="t('ingredientPlaceholderName')"
-							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
-							:class="{ activeInput: activeInputName, filledInput: notEmptyIngredientName, 'pt-[26px]': notEmptyIngredientName }"
-						>
+				<div
+					class="p-4"
+					@click="handleModalClick"
+				>
+					<div
+						class="text-gray mb-4"
+					>
+						{{ t('ingredientPlaceholderName') }}
 					</div>
-					<div class="relative">
-						<span
-							v-if="ingredientQuantity.length > 0"
-							class="absolute text-[12px] top-[6px] left-[12px] text-gray"
-						>
-							{{ t('ingredientPlaceholderQuantity') }}
-						</span>
-						<input
+					<VInput
+						v-model="ingredientName"
+						type="text"
+						class="mb-4"
+						:title="t('ingredientPlaceholderName')"
+						:error="ingredientErrors?.name"
+						name="name"
+						autofocus
+						no-digital
+						searchable
+						:max-length="maxIngredientName.title.length"
+						@clear:error="clearFieldError"
+						@focus.stop="setModalLifted(true)"
+						@blur.stop="setModalLifted(false)"
+					>
+						<template #list>
+							<InputList
+								:list="filteredList"
+								@select="selectSuggestion"
+							/>
+						</template>
+					</VInput>
+					<div
+						v-if="!isExclusionMode"
+						class="relative"
+					>
+						<VInput
 							v-model="ingredientQuantity"
 							type="text"
-							:placeholder="t('ingredientPlaceholderQuantity')"
-							class="border rounded px-[12px] py-4 text-base w-full mb-4 h-[54px]"
-							:class="{ activeInput: activeInputQuantity, filledInput: notEmptyIngredientQuantity, 'pt-[26px]': notEmptyIngredientQuantity }"
-							@input="filterNumericInput"
-						>
+							class="mb-4"
+							digital
+							:title="t('ingredientPlaceholderQuantity')"
+							:error="ingredientErrors?.quantity"
+							name="quantity"
+							:max-length="10"
+							@clear:error="clearFieldError"
+							@focus.stop="setModalLifted(true)"
+							@blur.stop="setModalLifted(false)"
+						/>
 					</div>
 					<TabsMain
+						v-if="!isExclusionMode"
 						v-model="activeTab"
 						default-value="weight"
-						class="mb-[20px] mt-[10px]"
+						class="mb-[20px]"
 					>
 						<TabsList>
 							<TabsTrigger :value="QuantityType.WEIGHT">
@@ -107,44 +125,118 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VModal } from '@/shared/components/Modal'
+import { VInput, type InputListItem, InputList } from '@/shared/components/Input'
 import { IconClose, IconPlus } from 'shared/components/Icon'
 import localization from './CreateRecipeIngredients.localization.json'
 import { TabsMain, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { QuantityType } from '../types/enum'
+import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
+import { useRoute } from 'vue-router'
 
 interface Props {
 	title: string;
-	desc: string
+	desc: string;
+	isExclusionMode?: boolean;
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+	isExclusionMode: false
+})
 
 const { t } = useTranslation(localization)
+const store = useRecipeStore()
+const route = useRoute()
 
 const showModal = ref(false)
 const ingredientName = ref<string>('')
 const ingredientQuantity = ref<string>('')
-const ingredients = ref<{ name: string, quantity: string, type: QuantityType }[]>([])
+const ingredients = ref<{ name: string; quantity?: string; type?: QuantityType }[]>([])
 const tryToSave = ref(false)
 const activeTab = ref<QuantityType>(QuantityType.WEIGHT)
-const ingredientNameInput = ref<HTMLInputElement | null>(null)
+const ingredientNameContainer = ref<HTMLElement | null>(null)
+const quantityLimitReached = ref(false)
+const isModalLifted = ref(false)
+const ingredientErrors = ref<{name: boolean, quantity: boolean}>({ name: false, quantity: false })
+
+const ingredientSuggestions:InputListItem[] = [
+	{ id: '1', title: 'Мука', value: 'Мука' },
+	{ id: '2', title: 'Сахар', value: 'Сахар' },
+	{ id: '3', title: 'Соль', value: 'Соль' },
+	{ id: '4', title: 'Яйца', value: 'Яйца' },
+	{ id: '5', title: 'Молоко', value: 'Молоко' },
+	{ id: '6', title: 'Масло', value: 'Масло' },
+	{ id: '7', title: 'Картофель', value: 'Картофель' },
+	{ id: '8', title: 'Морковь', value: 'Морковь' },
+	{ id: '9', title: 'Лук', value: 'Лук' },
+	{ id: '10', title: 'Чеснок', value: 'Чеснок' },
+	{ id: '11', title: 'Помидоры', value: 'Помидоры' },
+	{ id: '12', title: 'Огурцы', value: 'Огурцы' },
+	{ id: '13', title: 'Перец', value: 'Перец' },
+	{ id: '14', title: 'Курица', value: 'Курица' },
+	{ id: '15', title: 'Говядина', value: 'Говядина' },
+	{ id: '16', title: 'Свинина', value: 'Свинина' },
+	{ id: '17', title: 'Рыба', value: 'Рыба' },
+	{ id: '18', title: 'Рис', value: 'Рис' },
+	{ id: '19', title: 'Макароны', value: 'Макароны' },
+	{ id: '20', title: 'Сыр', value: 'Сыр' },
+]
+
+const activeSuggestionIndex = ref(-1)
+
+onMounted(() => {
+	const isCreateRoute = route.name === 'CreateRecipe'
+	if (!isCreateRoute && store.currentRecipe) {
+		ingredients.value = store.currentRecipe.ingredients.map(ingredient => ({
+			name: ingredient.name,
+			quantity: ingredient.amount?.split(' ')[0],
+			type: ingredient.type === 'weight' ? QuantityType.WEIGHT : QuantityType.QUANTITY,
+		}))
+	}
+})
 
 const openModal = () => {
 	showModal.value = true
 }
 
-const addIngredient = () => {
+const ingredientValidate = () => {
+	let errors = { name: false, quantity: false }
+
+	if (!ingredientName.value) {
+		errors.name = true
+	}
+
+	if (!ingredientQuantity.value) {
+		errors.quantity = true
+	}
+
+	return errors
+}
+
+const clearFieldError = (field: 'name' | 'quantity') => {
+	ingredientErrors.value[field] = false
+}
+
+const clearAllErrors = () => {
+	ingredientErrors.value = { name: false, quantity: false }
+}
+
+const addIngredient = (): void => {
+	ingredientErrors.value = ingredientValidate()
+
 	tryToSave.value = true
-	if (ingredientName.value && ingredientQuantity.value) {
-		ingredients.value.push({
-			name: ingredientName.value,
-			quantity: ingredientQuantity.value,
-			type: activeTab.value
-		})
+	if (ingredientName.value && (props.isExclusionMode || ingredientQuantity.value)) {
+		const newIngredient: { name: string; quantity?: string; type?: QuantityType } = {
+			name: ingredientName.value
+		}
+		if (!props.isExclusionMode) {
+			newIngredient.quantity = ingredientQuantity.value
+			newIngredient.type = activeTab.value
+		}
+		ingredients.value.push(newIngredient)
 		closeModal()
 	}
 }
@@ -154,32 +246,51 @@ const removeIngredient = (index: number) => {
 }
 
 const closeModal = () => {
+	clearAllErrors()
+
 	showModal.value = false
 	ingredientName.value = ''
 	ingredientQuantity.value = ''
 	tryToSave.value = false
+	activeSuggestionIndex.value = -1
+	quantityLimitReached.value = false
 }
 
-const filterNumericInput = (event: Event) => {
-	const target = event.target as HTMLInputElement
-	const numericValue = target.value.replace(/\D/g, '')
-	ingredientQuantity.value = numericValue
+const selectSuggestion = (item: InputListItem): void => {
+	clearFieldError('name')
+	ingredientName.value = item.title
 }
 
-const activeInputName = computed(() => tryToSave.value && !ingredientName.value)
-const notEmptyIngredientName = computed(() => ingredientName.value.length !== 0)
-const activeInputQuantity = computed(() => tryToSave.value && !ingredientQuantity.value)
-const notEmptyIngredientQuantity = computed(() => ingredientQuantity.value.length !== 0)
-
-watch(showModal, (newVal) => {
-	if (newVal) {
-		nextTick(() => {
-			if (ingredientNameInput.value) {
-				ingredientNameInput.value.focus()
-			}
-		})
+const handleModalClick = (event: MouseEvent) => {
+	const target = event.target as HTMLElement
+	if (ingredientNameContainer.value && !ingredientNameContainer.value.contains(target)) {
+		activeSuggestionIndex.value = -1
 	}
+}
+
+const setModalLifted= (isLifted: boolean) => {
+	isModalLifted.value = isLifted
+}
+
+const maxIngredientName = computed(() => {
+	return ingredientSuggestions.reduce((longest: InputListItem, currentString: InputListItem) => {
+		return currentString.title.length > longest.title.length ? currentString : longest
+  })
 })
+
+const filteredList = computed((): InputListItem[] => {
+	return ingredientSuggestions.filter((item) => item.title.toLowerCase().includes(ingredientName.value.toLowerCase()))
+})
+
+watch(ingredients, () => {
+	if (store.currentRecipe) {
+		store.currentRecipe.ingredients = ingredients.value.map(ingredient => ({
+			name: ingredient.name,
+			amount: props.isExclusionMode ? t('excluded') : `${ingredient.quantity} ${ingredient.type === QuantityType.WEIGHT ? t('unitGrams') : t('unitPieces')}`,
+			type: ingredient.type === 'weight' ? QuantityType.WEIGHT : QuantityType.QUANTITY
+		}))
+	}
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -203,13 +314,10 @@ watch(showModal, (newVal) => {
 
 .no-scrollbar {
 	-ms-overflow-style: none;
-	/* IE and Edge */
 	scrollbar-width: none;
-	/* Firefox */
 }
 
 .no-scrollbar::-webkit-scrollbar {
 	display: none;
-	/* Safari and Chrome */
 }
 </style>

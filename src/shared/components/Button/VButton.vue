@@ -1,12 +1,13 @@
 <template>
-	<el-button
+	<button
 		class="v-button"
-		:class="[colorClass, borderRadiusClass]"
+		:class="[colorClass, borderRadiusClass, disabledClass]"
 		:size="size"
+		:disabled="props.disabled"
 		@click="onButtonClicked"
 	>
 		<slot />
-	</el-button>
+	</button>
 </template>
 
 <script setup lang="ts">
@@ -20,14 +21,16 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<{
 	color?: ButtonColors,
 	size?: 'large' | 'default' | 'small',
-	borderRadius?: number
+	borderRadius?: number,
+    disabled?: boolean
 }>(), {
 	color: ButtonColors.Green,
 	size: 'default',
-	borderRadius: 15
+	borderRadius: 15,
+    disabled: false
 })
 
-const { color, size, borderRadius } = toRefs(props)
+const { color, size, borderRadius, disabled } = toRefs(props)
 
 const colorClass = computed<string>(() => {
 	if (color.value === ButtonColors.Green) return 'v-button--green'
@@ -42,6 +45,10 @@ const borderRadiusClass = computed<string>(() => {
 	return ''
 })
 
+const disabledClass = computed<string>(() => {
+	return disabled.value ? 'v-button--disabled' : ''
+})
+
 const onButtonClicked = () => {
 	emit('click')
 }
@@ -50,31 +57,18 @@ const onButtonClicked = () => {
 <style lang="scss" scoped>
 .v-button {
     @apply flex items-center justify-center text-base w-full h-[50px]
-         border-solid py-0 px-[25px] gap-[8px] border-transparent;
+         border-solid py-0 px-[15px] gap-[8px] border-transparent z-20;
 
     &--green {
         @apply bg-forestGreen text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
 
     &--white {
-        @apply bg-white border-[#3636364D] text-forestGreen shadow-[0_3px_2px_rgba(237,216,194,0.35)];
+        @apply bg-white border-forestGreen text-forestGreen shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
     &--red {
         @apply bg-red  text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
     }
-    ////// До момента пока ховеры не утвердят
-    // &:focus, &:hover {
-    //     &.v-button--green {
-    //         @apply bg-white border-green text-green;
-    //     }
-
-    //     &.v-button--white {
-    //         @apply bg-white  shadow-[0_3px_2px_rgba(237,216,194,0.35)];
-    //     }
-    //     &.v-button--red {
-    //         @apply bg-red text-white shadow-[0_3px_2px_rgba(237,216,194,0.35)];
-    //     }
-    // }
 
     &--default {
         @apply rounded-[16px];
@@ -82,5 +76,9 @@ const onButtonClicked = () => {
     &--rounding {
         @apply rounded-[40px];
     }
+
+	&--disabled {
+		@apply opacity-10;
+	}
 }
 </style>

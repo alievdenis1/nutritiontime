@@ -7,7 +7,11 @@
         "macronutrientsPer100gTitle": "БЖУ, на 100 г.",
         "proteinPer100gPlaceholder": "Белки на 100 г.",
         "fatPer100gPlaceholder": "Жиры на 100 г.",
-        "carbohydratesPer100gPlaceholder": "Углеводы на 100 г."
+        "carbohydratesPer100gPlaceholder": "Углеводы на 100 г.",
+        "caloriesPlaceholder": "Калорийность",
+        "proteinPlaceholder": "Белки",
+        "fatPlaceholder": "Жиры",
+        "carbohydratesPlaceholder": "Углеводы"
     },
     "en": {
         "nutritionalValueTitle": "Nutritional value",
@@ -17,6 +21,11 @@
         "macronutrientsPer100gTitle": "Macronutrients per 100 g.",
         "proteinPer100gPlaceholder": "Protein per 100 g.",
         "fatPer100gPlaceholder": "Fat per 100 g.",
-        "carbohydratesPer100gPlaceholder": "Carbohydrates per 100 g."
+        "carbohydratesPer100gPlaceholder": "Carbohydrates per 100 g.",
+        "caloriesPlaceholder": "Calories",
+        "proteinPlaceholder": "Protein",
+        "fatPlaceholder": "Fat",
+        "carbohydratesPlaceholder": "Carbohydrates"
+
     }
 }

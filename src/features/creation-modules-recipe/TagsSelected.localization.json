@@ -5,7 +5,7 @@
         "clarificationSubtitle": "Рецепт можно сделать точнее",
         "clarificationDescription": "Отметьте теги, которые как вам кажется должны соответствовать этому блюду",
         "generateWithSelected": "Сгенерировать с учётом отмеченного",
-        "noThanks": "Спасибо не надо"
+        "noThanks": "Спасибо, не надо"
     },
     "en": {
         "backButton": "Back",

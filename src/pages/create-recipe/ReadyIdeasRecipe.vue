@@ -1,16 +1,9 @@
 <template>
-	<div>
-		<div class="flex justify-between items-center mb-[16px]">
-			<button
-				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
-				@click="$router.go(-1)"
-			>
-				<IconArrowRight icon-color="#1C1C1C" />
-			</button>
+	<div class="p-[16px] pb-[62px]">
+		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
 			<h2 class="text-center text-lg text-darkGray">
 				{{ t('addRecipe') }}
 			</h2>
-			<div />
 		</div>
 		<div
 			v-for="(item, index) in items"
@@ -45,7 +38,7 @@
 				</p>
 			</div>
 		</div>
-		<div class="fixed bottom-[100px] left-[16px] right-[16px] flex justify-between flex-col gap-[12px]">
+		<div class="fixed bottom-[112px] left-[16px] right-[16px] flex justify-between flex-col gap-[12px]">
 			<VButton
 				:color="ButtonColors.Green"
 				class="flex-grow"
@@ -68,7 +61,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { IconArrowRight, IconAi } from 'shared/components/Icon'
+import { IconAi } from 'shared/components/Icon'
 import { VButton, ButtonColors } from 'shared/components/Button'
 import { useRouter } from 'vue-router'
 const router = useRouter()

@@ -1,0 +1,10 @@
+{
+    "ru": {
+        "ingredients": "Ингредиенты",
+        "totalWeight": "Итоговый вес блюда — {{weight}} г."
+    },
+    "en": {
+        "ingredients": "Ingredients",
+        "totalWeight": "Total dish weight — {{weight}} g."
+    }
+}

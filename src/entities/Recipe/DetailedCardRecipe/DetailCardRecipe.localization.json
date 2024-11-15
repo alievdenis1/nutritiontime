@@ -1,0 +1,36 @@
+{
+    "ru": {
+        "reviewsCount": "отзывов",
+        "ingredients": "Ингредиенты",
+        "totalWeight": "Итоговый вес блюда — ",
+        "totalWeightGram": " г.",
+        "leaveReview": "Оставить отзыв",
+        "allReviews": "Все отзывы",
+        "commentImage": "Изображение комментария",
+        "recipeAuthor": "Автор рецепта",
+        "nftOwner": "Владелец NFT",
+        "exportToPDF": "Выгрузить рецепт в PDF",
+        "moreAbout":"Подробнее",
+        "yourRecipe": "Это ваш рецепт",
+        "editInstructions": "При необходимости, вы можете отредактировать его и отправить на повторную модерацию",
+        "editButton": "Редактировать",
+        "noReviews":"Пока нет отзывов"
+    },
+    "en": {
+        "reviewsCount": "reviews",
+        "ingredients": "Ingredients",
+        "totalWeight": "Total dish weight —  ",
+        "totalWeightGram": "g.",
+        "leaveReview": "Leave a review",
+        "allReviews": "All reviews",
+        "commentImage": "Comment image",
+        "recipeAuthor": "Recipe Author",
+        "nftOwner": "NFT Owner",
+        "exportToPDF": "Export recipe to PDF",
+        "moreAbout": "Learn more",
+        "yourRecipe": "This is your recipe",
+        "editInstructions": "If needed, you can edit it and submit for re-moderation",
+        "editButton": "Edit",
+        "noReviews": "No reviews yet"
+    }
+}

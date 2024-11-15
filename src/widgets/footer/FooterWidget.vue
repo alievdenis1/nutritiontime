@@ -15,12 +15,12 @@
 					{ 'cursor-not-allowed opacity-50': isCreateRecipeRoute }
 				]"
 				:disabled="isCreateRecipeRoute"
-				@click="store.openModal"
+				@click="openModalCreateRecipe"
 			>
 				<icon-plus :icon-color="'#FFFFFF'" />
 			</button>
 			<button
-				:class="{ 'active': isCurrentRoute('/recipes') }"
+				:class="{ 'active': isCurrentRoute('/search') }"
 				class="cursor-pointer flex-grow rounded-full"
 				@click="navigateToRecipes"
 			>
@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { IconHome, IconPlus, IconSearch } from 'shared/components/Icon'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
@@ -42,8 +42,12 @@ import { ModalCreateRecipe } from 'entities/Recipe/CreateRecipe/modal-create/ui'
 import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()
+const route = useRoute()
 const { t } = useTranslation(Localization)
 
+const openModalCreateRecipe = () => {
+	store.openModalRecipe()
+}
 const isCurrentRoute = (route: string) => {
 	return router.currentRoute.value.path === route
 }
@@ -53,11 +57,14 @@ const isCreateRecipeRoute = computed(() => {
 })
 
 const navigateToHome = () => {
+	if (route.path === '/') {
+		router.go(0)
+	}
 	router.push('/')
 }
 
 const navigateToRecipes = () => {
-	router.push('/recipes')
+	router.push('/search')
 }
 
 const homeIconColor = computed(() => {
@@ -65,7 +72,7 @@ const homeIconColor = computed(() => {
 })
 
 const searchIconColor = computed(() => {
-	return isCurrentRoute('/recipes') ? '#319A6E' : '#9F9FA0'
+	return isCurrentRoute('/search') ? '#319A6E' : '#9F9FA0'
 })
 </script>
 
@@ -96,4 +103,3 @@ const searchIconColor = computed(() => {
 	opacity: 0.5;
 }
 </style>
-@/entities/Recipe/ui/CreateRecipe/modal-create/ui@/entities/Recipe/ui/CreateRecipe/modal-create/model/model-store

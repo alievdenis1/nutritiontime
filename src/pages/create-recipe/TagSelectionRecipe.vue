@@ -1,7 +1,5 @@
 <template>
-	<div>
-		<TagsSelected />
-	</div>
+	<TagsSelected />
 </template>
 
 <script setup lang="ts">

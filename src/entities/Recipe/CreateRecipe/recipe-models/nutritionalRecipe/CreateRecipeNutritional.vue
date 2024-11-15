@@ -8,18 +8,17 @@
 				<label class="block text-black text-sm font-bold mb-2">
 					{{ t('caloriesPer100gTitle') }}
 				</label>
-
 				<div class="relative">
 					<span class="absolute text-[12px] top-[6px] left-[12px] text-gray">
 						{{ t('caloriesPer100gTitle') }}
 					</span>
-					<input
+					<VInput
 						v-model="calories"
-						type="text"
-						:placeholder="t('caloriesPer100gPlaceholder')"
-						class="border rounded px-[12px] pt-[22px] pb-[12px] text-base w-full mb-4 bg-lightGray"
+						class="mb-4"
+						background="gray"
+						:title="t('caloriesPlaceholder')"
 						readonly
-					>
+					/>
 				</div>
 			</div>
 			<div>
@@ -30,37 +29,36 @@
 					<span class="absolute text-[12px] top-[6px] left-[12px] text-gray">
 						{{ t('proteinPer100gPlaceholder') }}
 					</span>
-					<input
+					<VInput
 						v-model="protein"
-						type="text"
-						:placeholder="t('proteinPer100gPlaceholder')"
-						class="border rounded px-[12px] pt-[22px] pb-[10	px] text-base w-full mb-2 bg-lightGray text-[14px]"
+						class="mb-2"
+						background="gray"
+						:title="t('proteinPlaceholder')"
 						readonly
-					>
+					/>
 				</div>
 				<div class="mb-2 relative">
 					<span class="absolute text-[12px] top-[6px] left-[12px] text-gray">
 						{{ t('fatPer100gPlaceholder') }}
 					</span>
-					<input
+					<VInput
 						v-model="fat"
-						type="text"
-						:placeholder="t('fatPer100gPlaceholder')"
-						class="border rounded px-[12px] pt-[22px] pb-[10px] text-base w-full mb-2 bg-lightGray text-[14px]"
+						class="mb-2"
+						background="gray"
+						:title="t('fatPlaceholder')"
 						readonly
-					>
+					/>
 				</div>
 				<div class="relative">
 					<span class="absolute text-[12px] top-[6px] left-[12px] text-gray">
 						{{ t('carbohydratesPer100gPlaceholder') }}
 					</span>
-					<input
+					<VInput
 						v-model="carbohydrates"
-						type="text"
-						:placeholder="t('carbohydratesPer100gPlaceholder')"
-						class="border rounded px-[12px] pt-[22px] pb-[10px] text-base w-full bg-lightGray text-[14px]"
+						background="gray"
+						:title="t('carbohydratesPlaceholder')"
 						readonly
-					>
+					/>
 				</div>
 			</div>
 		</div>
@@ -68,29 +66,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { VAccordion } from '@/shared/components/Accordion'
+import { VInput } from '@/shared/components/Input'
 import localization from './CreateRecipeNutritional.localization.json'
+import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
+import { useRoute } from 'vue-router'
 
 const { t } = useTranslation(localization)
+const store = useRecipeStore()
+const route = useRoute()
 
-const calories = ref('340')
-const protein = ref('24')
-const fat = ref('34')
-const carbohydrates = ref('105')
+const calories = ref('')
+const protein = ref('')
+const fat = ref('')
+const carbohydrates = ref('')
+
+onMounted(() => {
+	const isCreateRoute = route.name === 'CreateRecipe'
+	if (!isCreateRoute && store.currentRecipe && store.currentRecipe.nutritionInfo) {
+		calories.value = store.currentRecipe.nutritionInfo['Калорийность на 100 г.'].split(' ')[0]
+		protein.value = store.currentRecipe.nutritionInfo['Белки на 100 г.'].split(' ')[0]
+		fat.value = store.currentRecipe.nutritionInfo['Жиры на 100 г.'].split(' ')[0]
+		carbohydrates.value = store.currentRecipe.nutritionInfo['Углеводы на 100 г.'].split(' ')[0]
+	}
+})
+
+const updateNutritionInfo = () => {
+	if (store.currentRecipe) {
+		store.currentRecipe.nutritionInfo = {
+			'Калорийность на 100 г.': `${calories.value} ккал`,
+			'Белки на 100 г.': `${protein.value} г.`,
+			'Жиры на 100 г.': `${fat.value} г.`,
+			'Углеводы на 100 г.': `${carbohydrates.value} г.`
+		}
+	}
+}
+
+watch([calories, protein, fat, carbohydrates], () => {
+	updateNutritionInfo()
+})
 </script>
 
 <style scoped>
 .border {
-    border: 1px solid #E1E1E1;
+	border: 1px solid #E1E1E1;
 }
 
-.bg-lightGray {
-    background-color: #f5f5f5;
+.bg-white {
+	background-color: #ffffff;
 }
 
 .text-gray {
-    color: #9e9e9e;
+	color: #9e9e9e;
 }
 </style>

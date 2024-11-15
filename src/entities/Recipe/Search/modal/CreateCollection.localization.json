@@ -1,0 +1,28 @@
+{
+    "ru": {
+        "saveToCollection": "Сохранить в коллекцию",
+        "newCollection": "Новая коллекция",
+        "createAndSaveRecipe": "Создать коллекцию и сохранить рецепт",
+        "collection": "Коллекция",
+        "nameCollection": "Название коллекции",
+        "selectCollection": "Выберите коллекцию",
+        "upTo15Min": "Вкусняшки на завтра",
+        "15to30Min": "15-30 мин",
+        "30to60Min": "30-60 мин",
+        "back": "Назад",
+        "save": "Сохранить"
+    },
+    "en": {
+        "saveToCollection": "Save to Collection",
+        "newCollection": "New Collection",
+        "createAndSaveRecipe": "Create Collection and Save Recipe",
+        "collection": "Collection",
+        "nameCollection": "Collection Name",
+        "selectCollection": "Select Collection",
+        "upTo15Min": "Snacks for Tomorrow",
+        "15to30Min": "15-30 min",
+        "30to60Min": "30-60 min",
+        "back": "Back",
+        "save": "Save"
+    }
+}

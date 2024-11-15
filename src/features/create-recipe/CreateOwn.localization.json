@@ -1,10 +1,12 @@
 {
     "ru": {
         "further": "Далее",
-        "ingredients": "Ингредиенты"
+        "title": "Ингредиенты",
+        "desc": "То, что нужно для приготовления блюда. Например, 250 грамм картошки"
     },
     "en": {
         "further": "Further",
-        "ingredients": "Ingredients"
+        "ingredients": "Ingredients",
+        "desc": "What you need for cooking. For example, 250 grams of potatoes."
     }
 }

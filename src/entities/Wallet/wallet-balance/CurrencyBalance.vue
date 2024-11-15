@@ -1,13 +1,14 @@
 <template>
 	<div
 		ref="currencyContainer"
-		class="text-xxxl max-w-[150px]"
+		class="text-xxxl max-w-[160px]"
 	>
 		<span ref="currencyElement">{{ formattedCurrency }}</span>
 	</div>
 </template>
 <script setup lang="ts">
 import { ref, computed, watchEffect, watch, onUnmounted } from 'vue'
+
 import { autoTextSize } from '@/shared/lib/auto-text-size'
 
 type DisconnectableFunction = {

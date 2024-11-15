@@ -302,6 +302,10 @@ const handleClick = (event: MouseEvent) => {
       animateClick(x, y, imgContainer.value)
       addCardAndAnimate(x, y, multiplier)
     }
+
+    // if (!isAudioInitialized.value && isMicrophoneAvailable.value) {
+    //   startAudioAnalysis()
+    // }
   }
 }
 

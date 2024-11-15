@@ -17,7 +17,7 @@ export const useSessionStore = defineStore({
 		error: null,
 		token: null,
 		isAuthenticated: false,
-		lang: 'en',
+		lang: 'ru',
 	}),
 	getters: {
 		isAuthenticated(): boolean {

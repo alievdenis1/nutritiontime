@@ -1,0 +1,14 @@
+{
+    "ru": {
+        "ingredientsTitle": "Ингредиенты",
+        "ingredientsDescription": "То, что нужно для приготовления блюда. Например, 250 грамм картошки ",
+        "further": "Далее",
+        "editTitle":"Редактирование рецепта"
+    },
+    "en": {
+        "ingredientsTitle": "Ingredients",
+        "ingredientsDescription": "What you need for cooking. For example, 250 grams of potatoes.",
+        "further": "further",
+        "editTitle": "Editing a recipe"
+    }
+}

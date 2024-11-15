@@ -1,18 +1,18 @@
 <template>
 	<VModal
 		:show="store.isModalCreateOpen"
-		@close="store.closeModal"
+		@close="store.closeModalRecipe"
 	>
 		<div>
 			<div class="flex justify-between mb-[12px] items-center">
-				<h2 class="text-xl font-bold">
+				<h2 class="text-xl font-bold text-darkGray">
 					{{ t('createRecipe') }}
 				</h2>
 				<button
 					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
-					@click="store.closeModal"
+					@click="store.closeModalRecipe"
 				>
-					<IconClose />
+					<IconClose icon-color="#9F9FA0" />
 				</button>
 			</div>
 
@@ -22,7 +22,7 @@
 					@click="selectMethod('ownRecepie')"
 				>
 					<div class="text-left w-[255px]">
-						<h3 class="font-semibold mb-[8px] text-lg">
+						<h3 class="font-semibold mb-[8px] text-lg text-darkGray">
 							{{ t('manualCreation') }}
 						</h3>
 						<p class="text-slateGray text-xs">
@@ -39,7 +39,7 @@
 					@click="selectMethod('aiRecepie')"
 				>
 					<div class="text-left w-[255px]">
-						<h3 class="flex gap-[8px] font-semibold mb-[8px] text-lg">
+						<h3 class="flex gap-[8px] font-semibold mb-[8px] text-lg text-darkGray">
 							{{ t('aiCreation') }}
 							<IconAi :icon-color="'#319A6E'" />
 						</h3>
@@ -58,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import { VModal } from 'shared/components/Modal'
-import { IconArrowRight, IconClose, IconAi } from 'shared/components/Icon'
+import { VModal } from '@/shared/components/Modal'
+import { IconClose, IconArrowRight, IconAi } from '@/shared/components/Icon'
 import { useModalCreateStore } from '../model/model-store'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './ModalCreateRecipe.localization.json'
@@ -73,7 +73,7 @@ const selectMethod = (tabValue: string) => {
 	store.defaultValueTabs = tabValue
 	router.push('/create-recipe')
 	emit('selectMethod', tabValue)
-	store.closeModal()
+	store.closeModalRecipe()
 }
 
 </script>

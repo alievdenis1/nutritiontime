@@ -7,9 +7,10 @@
 			<img
 				alt="Logo"
 				height="34"
-				src="/image/logo/logo-small.svg"
+				src="/image/logo/logo-small.png"
 				width="178"
 				class="logo-image"
+				@click="navigateToMain"
 			>
 
 			<div class="flex items-center gap-[8px]">
@@ -20,24 +21,68 @@
 					<IconWallet />
 				</button>
 
-				<LanguageSwitcher />
+				<button
+					aria-label="Settings"
+					:aria-expanded="languageDropDownOpen"
+					class="settings-button p-[12px]"
+					role="button"
+					@click="languageDropDownOpen = !languageDropDownOpen"
+				>
+					{{ t('lang') }}
+					<IconArrow
+						:icon-color="'#1C1C1C'"
+						:icon-width="14"
+						:icon-height="14"
+						:class="{ 'rotate-180': languageDropDownOpen }"
+					/>
+					<div
+						v-show="languageDropDownOpen"
+						class="language-dropdown"
+					>
+						<button
+							:class="{ 'active': isActiveLocale('ru') }"
+							@click="localeStore.setLocale('ru')"
+						>
+							Rus
+						</button>
+						<button
+							:class="{ 'active': isActiveLocale('en') }"
+							@click="localeStore.setLocale('en')"
+						>
+							Eng
+						</button>
+					</div>
+				</button>
 			</div>
 		</header>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import Localization from './HeaderWidget.localization.json'
+import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import { IconWallet } from '@/shared/components/Icon'
-import { LanguageSwitcher } from '@/features/LanguageSwitcher'
+import { useLocaleStore, useTranslation } from '@/shared/lib/i18n'
+import { IconWallet, IconArrow } from '@/shared/components/Icon'
 
 const router = useRouter()
 
+const localeStore = useLocaleStore()
+const { t } = useTranslation(Localization)
 const target = ref(null)
+
+const languageDropDownOpen = ref(false)
+
+onClickOutside(target, () => languageDropDownOpen.value = false)
+const isActiveLocale = computed(() => (locale: string) => localeStore.currentLocale === locale)
 
 const navigateToWallet = () => {
 	router.push('/wallet')
+}
+
+const navigateToMain = () => {
+ router.push('/')
 }
 </script>
 

@@ -1,16 +1,9 @@
 <template>
-	<div>
-		<div class="flex justify-between items-center mb-[16px]">
-			<button
-				class="p-[12px] rotate-180 shadow-2xl bg-white rounded-[50%] shadow-custom cursor-pointer"
-				@click="$router.go(-1)"
-			>
-				<IconArrowRight icon-color="#1C1C1C" />
-			</button>
+	<div class="p-[16px] pb-[124px]">
+		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
 			<h2 class="text-center text-lg text-darkGray">
 				{{ t('clarificationTitle') }}
 			</h2>
-			<div />
 		</div>
 		<div class="mt-[22px] mb-[32px] flex flex-col gap-[12px]">
 			<div class="text-lg text-darkGray">
@@ -25,12 +18,12 @@
 			:modal-selected-tags="modalSelectedTags"
 			@tag-changed="handleTagChanged"
 		/>
-		<div class="fixed bottom-[12px] left-[16px] right-[16px] flex justify-between flex-col gap-[12px]">
+		<div class="fixed bottom-[20px] left-[16px] right-[16px] flex justify-between flex-col gap-[12px]">
 			<button
 				:color="ButtonColors.Green"
 				class="flex-grow"
 				:disabled="modalWatchTags"
-				:class="['flex items-center justify-center block w-full mt-4 px-[20px] h-[50px] rounded-xl text-white text-sm text-center cursor-pointer', buttonClass]"
+				:class="['flex items-center justify-center block w-full px-[20px] h-[50px] rounded-xl text-white text-sm text-center cursor-pointer', buttonClass]"
 				@click="TakingIntoMarked"
 			>
 				<div class="flex items-center gap-[4px]">
@@ -58,7 +51,7 @@
 import { ref, computed } from 'vue'
 import { TagsCollectionsItem } from 'entities/Recipe/CreateRecipe/recipe-models'
 import { VButton, ButtonColors } from 'shared/components/Button'
-import { IconArrowRight, IconAi } from 'shared/components/Icon'
+import { IconAi } from 'shared/components/Icon'
 import { useRouter } from 'vue-router'
 
 import { useTranslation } from '@/shared/lib/i18n'

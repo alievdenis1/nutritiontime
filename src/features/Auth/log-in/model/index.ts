@@ -7,6 +7,26 @@ import type { Locales } from '@/shared/lib/i18n/types.ts'
 export const useAuthorization = () => {
     const sessionStore = useSessionStore()
     const isLoading = ref<boolean>(false)
+
+    const processStartParam = (startParam: string | null): {
+        referralCode: string | null,
+        paymentMonths: string | null
+    } => {
+        if (!startParam) return { referralCode: null, paymentMonths: null }
+
+        if (startParam.startsWith('payment_')) {
+            const months = startParam.replace('payment_', '')
+            return {
+                referralCode: null,
+                paymentMonths: ['1', '3', '12'].includes(months) ? months : null
+            }
+        }
+
+        return {
+            referralCode: startParam,
+            paymentMonths: null
+        }
+    }
     const authorize = async () => {
         if (!twa) {
             console.error('TWA is not available')
@@ -22,15 +42,18 @@ export const useAuthorization = () => {
                 throw new Error('User data is not available from TWA')
             }
 
-            if (twaUser.language_code !== undefined) {
+            if (twaUser.language_code != undefined) {
                 sessionStore.setLang(twaUser.language_code as Locales)
             }
+
+            const startParam = twa.initDataUnsafe?.start_param ?? null
+            const { referralCode } = processStartParam(startParam)
 
             const { data, error: loginError, execute } = login({
                 telegram_id: twaUser.id.toString(),
                 first_name: twaUser.first_name,
                 last_name: twaUser.last_name || '',
-                referral_code: twa.initDataUnsafe?.start_param || null,
+                referral_code: referralCode,
             })
 
             await execute()

@@ -1,7 +1,5 @@
 <template>
-	<div>
-		<CheckRecipe />
-	</div>
+	<CheckRecipe />
 </template>
 
 <script setup lang="ts">

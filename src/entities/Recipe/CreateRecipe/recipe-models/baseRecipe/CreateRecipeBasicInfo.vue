@@ -1,68 +1,71 @@
 <template>
-	<VAccordion :title="t('basicInformation')">
-		<div class="mt-[20px]">
+	<VAccordion
+		:title="t('basicInformation')"
+		is-open
+	>
+		<div
+			class="mt-[20px]"
+		>
 			<VAddPhoto
+				v-model:error="isUploadError"
 				:width-image="54"
 				:height-image="54"
 				:title="t('uploadMainPhoto')"
 				:height-main="66"
 				backgrounds="#F3F3F3"
 				:icon="IconPhoto"
+				:initial-image="values.image"
+				:error-message="t('errorMessage')"
+				@upload:image="handleImageUpload"
 			/>
-			<p class="text-xs text-gray max-w-xs mb-[24px]">
+			<p
+				v-if="!isUploadError"
+				class="text-xs text-gray max-w-xs mb-[24px]"
+			>
 				{{ t('additionalPhotosInfo') }}
 			</p>
 			<div class="form-section flex flex-col gap-4">
-				<input
-					v-model="recipeTitle"
-					type="text"
-					:placeholder="t('recipeTitlePlaceholder')"
-					class="border rounded px-2 py-4 text-base"
-				>
-				<textarea
-					v-model="recipeDescription"
-					:placeholder="t('recipeDescriptionPlaceholder')"
-					class="border rounded px-2 py-4 text-base min-h-[122px]"
+				<VInput
+					v-model="values.title"
+					:title="t('recipeTitlePlaceholder')"
+					:error="!!errors?.title"
+					:error-message="errors?.title?.message"
+					:max-length="100"
+					@focusout="validateField('title')"
+				/>
+				<VInput
+					v-model="values.description"
+					:title="t('recipeDescriptionPlaceholder')"
+					textarea
+					:error="!!errors?.description"
+					:error-message="errors?.description?.message"
+					:max-length="500"
+					@focusout="validateField('description')"
 				/>
 			</div>
 
 			<div class="category-selection flex flex-col gap-[12px] mt-[12px]">
-				<div
-					class="border rounded px-2 py-4 cursor-pointer flex justify-between items-center text-gray"
-					@click="openCategoryModal('dishCategory')"
+				<span
+					v-for="category in categoryTypes"
+					:key="category"
 				>
-					<input
-						v-model="selectedCategory.dishCategory"
-						type="text"
-						:placeholder="t('dishCategory')"
+					<VInput
+						v-model="values[category]"
+						:title="t(category)"
+						class="cursor-pointer"
+						:error="!!errors?.[category]"
+						:error-message="errors?.[category]?.message"
 						readonly
+						@click="openCategoryModal(category)"
+						@focusout="validateField(category)"
 					>
-					<IconArrowRight icon-color="#1C1C1C" />
-				</div>
-				<div
-					class="border rounded px-2 py-4 cursor-pointer flex justify-between items-center text-gray"
-					@click="openCategoryModal('cuisine')"
-				>
-					<input
-						v-model="selectedCategory.cuisine"
-						type="text"
-						:placeholder="t('cuisineNationality')"
-						readonly
-					>
-					<IconArrowRight icon-color="#1C1C1C" />
-				</div>
-				<div
-					class="border rounded px-2 py-4 cursor-pointer flex justify-between items-center text-gray"
-					@click="openCategoryModal('diet')"
-				>
-					<input
-						v-model="selectedCategory.diet"
-						type="text"
-						:placeholder="t('dietType')"
-						readonly
-					>
-					<IconArrowRight icon-color="#1C1C1C" />
-				</div>
+						<template #right-icon>
+							<IconArrowRight
+								icon-color="#1C1C1C"
+							/>
+						</template>
+					</VInput>
+				</span>
 			</div>
 		</div>
 	</VAccordion>
@@ -84,16 +87,18 @@
 				</button>
 			</div>
 			<div class="relative">
-				<input
+				<VInput
 					v-model="searchQuery"
-					type="text"
-					:placeholder="t('searchCategory')"
-					class="border rounded p-[16px] text-base w-full mb-4"
+					:title="t('searchCategory')"
+					class="mb-4"
+					clearable
 				>
-				<IconSearch
-					icon-color="#1C1C1C"
-					class="absolute top-[15px] right-[14px]"
-				/>
+					<template #right-icon>
+						<IconSearch
+							icon-color="#1C1C1C"
+						/>
+					</template>
+				</VInput>
 			</div>
 
 			<div class="category-list flex-1 overflow-y-auto">
@@ -103,21 +108,43 @@
 					class="category-item p-2 border-b cursor-pointer flex items-center gap-[8px]"
 					@click="selectCategory(item)"
 				>
-					<IconRadio icon-color="#ffffff" />{{ item }}
+					<IconRadio
+						icon-color="#319a6e"
+						:active="item === selectedListItem"
+					/>
+					{{ item }}
 				</div>
 			</div>
+			<VButton
+				class="mt-5"
+				:disabled="isDisabled"
+				@click="onSave"
+			>
+				{{ t('save') }}
+			</VButton>
 		</div>
 	</VModal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
+import { createRecipeBasicInfoSchema } from 'features/create-recipe/model'
+import { useForm } from 'shared/utils/useForm'
 import { IconArrowRight, IconSearch, IconClose, IconRadio, IconPhoto } from 'shared/components/Icon'
+import { VInput } from 'shared/components/Input'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VAddPhoto } from '@/shared/components/AddPhoto'
 import { VModal } from '@/shared/components/Modal'
 import localization from './CreateRecipeBasicInfo.localization.json'
+import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
+import { useRoute } from 'vue-router'
+import { VButton } from '@/shared/components/Button'
+
+const store = useRecipeStore()
+const route = useRoute()
+
+const { t } = useTranslation(localization)
 
 interface Category {
 	dishCategory: string;
@@ -125,15 +152,35 @@ interface Category {
 	diet: string;
 }
 
-const { t } = useTranslation(localization)
 const show = ref(false)
 const searchQuery = ref('')
 const selectedType = ref<keyof Category | null>(null)
-const selectedCategory = ref({
+const isUploadError = ref<boolean>(false)
+
+const selectedItem = ref<Category>({
 	dishCategory: '',
 	cuisine: '',
 	diet: ''
 })
+const selectedCategory = ref<Category>({
+	dishCategory: '',
+	cuisine: '',
+	diet: ''
+})
+
+const { errors, values, validateField, validate } = useForm(createRecipeBasicInfoSchema, {
+	defaultValues: {
+		title: '',
+		description: '',
+		image: '',
+		dishCategory: '',
+		cuisine: '',
+		diet: '',
+	},
+})
+
+const categoryTypes: (keyof Category)[] = ['dishCategory', 'cuisine', 'diet']
+
 const categories = ref([
 	'Категория 1',
 	'Категория 2',
@@ -157,21 +204,66 @@ const categories = ref([
 	'Категория 20'
 ])
 
-const recipeTitle = ref('')
-const recipeDescription = ref('')
+// TODO: функционал, который нужен будет для работы с конкретным разделом рецепта
+// можно вынести в отдельный хук, и в общем компоненте останутся только хуки для конкретных частей рецептов
+// функционал из них будет передаваться через пропсы внутрь feature
+
+onMounted(() => {
+	const isCreateRoute = route.name === 'CreateRecipe'
+	if (!isCreateRoute && store.currentRecipe) {
+		values.title = store.currentRecipe.title
+		values.description = store.currentRecipe.description
+		values.image = store.currentRecipe.image
+		if (store.currentRecipe.recipeInfo) {
+			selectedCategory.value = {
+				dishCategory: store.currentRecipe.recipeInfo['Категория'] || '',
+				cuisine: store.currentRecipe.recipeInfo['Кухня'] || '',
+				diet: store.currentRecipe.recipeInfo['Тип диеты'] || ''
+			}
+		}
+	}
+})
+
+const handleImageUpload = (imageUrl: string | null) => {
+	if (imageUrl !== null) {
+		values.image = imageUrl
+
+		if (store.currentRecipe) {
+			store.currentRecipe.image = imageUrl
+		}
+	} else {
+		values.image = ''
+	}
+}
+
+const selectedListItem = computed(() => {
+	if (selectedType.value !== null) {
+		return selectedItem.value[selectedType.value]
+	}
+
+	return ''
+})
 
 const filteredCategories = computed(() => {
+	if (selectedListItem.value) {
+		return categories.value
+	}
+
 	return categories.value.filter(category => category.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 const categorySelectionTitle = computed(() => {
 	const titles: Record<keyof Category, string> = {
-		dishCategory: t('dishCategory'),
-		cuisine: t('cuisineNationality'),
-		diet: t('dietType')
+		dishCategory: t('categorySelection'),
+		cuisine: t('cuisineSelection'),
+		diet: t('dietSelection')
 	}
 
 	return selectedType.value ? titles[selectedType.value] : ''
+})
+
+const isDisabled = computed((): boolean => {
+	return !selectedType.value || !selectedItem.value[selectedType.value].length
 })
 
 const openCategoryModal = (type: keyof Category) => {
@@ -179,19 +271,57 @@ const openCategoryModal = (type: keyof Category) => {
 	show.value = true
 }
 
-const selectCategory = (category: string) => {
+const closeModal = (): void => {
+	show.value = false
+}
+
+const onSave = (): void => {
+	closeModal()
 	if (selectedType.value !== null) {
-		selectedCategory.value[selectedType.value] = category
-		show.value = false
+		values[selectedType.value] = selectedItem.value[selectedType.value]
 	}
 }
 
+const selectCategory = (category: string) => {
+	if (selectedType.value !== null) {
+		selectedItem.value[selectedType.value] = category
+	}
+}
+
+const onValidate = (): boolean => {
+	return validate()
+}
+
+defineExpose({ onValidate })
+
+watch(selectedListItem, () => {
+	if (selectedListItem.value) {
+		searchQuery.value = selectedListItem.value
+	} else {
+		searchQuery.value = ''
+	}
+})
+
+// Watch for changes and update store
+watch(values, () => {
+	if (store.currentRecipe) {
+		store.currentRecipe.title = values.title
+		store.currentRecipe.description = values.description
+		store.currentRecipe.image = values.image
+		if (store.currentRecipe.recipeInfo) {
+			store.currentRecipe.recipeInfo['Категория'] = values.dishCategory
+			store.currentRecipe.recipeInfo['Кухня'] = values.cuisine
+			store.currentRecipe.recipeInfo['Тип диеты'] = values.diet
+		}
+	}
+}, { deep: true })
 </script>
 
 <style scoped>
 textarea {
 	border: 1px solid #d1d5db;
 }
+
 .border {
 	border: 1px solid #E1E1E1;
 }

@@ -2,14 +2,16 @@
     "ru": {
         "addRecipe": "Добавить рецепт",
         "ingredientsTitle": "Ингредиенты",
-        "ingredientsDesc": "То, что можно использовать в генерации вашего рецепта. Например, 500 грам картошки",
+        "ingredientsDesc": "То, что можно использовать в генерации вашего рецепта. Например, 500 грамм картошки",
         "identifyByPhotoTitle": "Можем определить по фото",
         "identifyByPhotoDesc": "Сфотографируйте холодильник или продукты на столе. Ингридиенты определятся и добавятся автоматически",
         "identifyByPhotoButton": "Определить по фото",
-        "useOnlyTheseIngredients": "Использовать только эти ингридиенты",
+        "useOnlyTheseIngredients": "Использовать только эти ингредиенты",
         "excludeIngredientsTitle": "Исключая ингридиенты",
         "excludeIngredientsDesc": "То, что нельзя использовать AI в генерации вашего рецепта. Например, орехи",
-        "generateRecipeButton": "Сгенерировать рецепт"
+        "generateRecipeButton": "Сгенерировать рецепт",
+        "excludedIngredients": "Исключенные ингредиенты",
+        "excludedIngredientsDescription": "Добавьте ингредиенты, которые вы хотите исключить из рецепта"
     },
     "en": {
         "addRecipe": "Add Recipe",
@@ -21,6 +23,8 @@
         "useOnlyTheseIngredients": "Use only these ingredients",
         "excludeIngredientsTitle": "Excluding ingredients",
         "excludeIngredientsDesc": "What cannot be used by AI in generating your recipe. For example, nuts",
-        "generateRecipeButton": "Generate recipe"
+        "generateRecipeButton": "Generate recipe",
+        "excludedIngredients": "Excluded Ingredients",
+        "excludedIngredientsDescription": "Add ingredients you want to omit from the recipe"
     }
 }

@@ -2,15 +2,32 @@
     "ru": {
         "spicinessAndDifficulty": "Сложность и острота",
         "spiciness": "Острота",
-        "spicinessDescription": "Средняя острота. Скорее острое блюдо чем нет",
         "difficulty": "Сложность приготовления",
-        "difficultyDescription": "Среднее по сложности блюдо"
+        "spiciness-1": "Совсем не острое блюдо",
+        "spiciness-2": "Чуть-чуть острое блюдо",
+        "spiciness-3": "Средняя острота. Скорее острое блюдо, чем нет",
+        "spiciness-4": "Острое, но терпимое блюдо",
+        "spiciness-5": "Очень острое блюдо. Только для любителей острого!",
+        "difficulty-1": " Очень простое блюдо. Подойдет даже для начинающих",
+        "difficulty-2": "Простое блюдо. Требуется минимальный опыт",
+        "difficulty-3": "Среднее по сложности блюдо",
+        "difficulty-4": "Сложное блюдо. Требуется опыт",
+        "difficulty-5": "Очень сложное блюдо. Для опытных кулинаров"    
     },
     "en": {
         "spicinessAndDifficulty": "Spiciness and Difficulty",
         "spiciness": "Spiciness",
-        "spicinessDescription": "Moderate spiciness. More likely spicy than not",
         "difficulty": "Cooking Difficulty",
-        "difficultyDescription": "Medium difficulty dish"
+        "difficultyDescription": "Medium difficulty dish",
+        "spiciness-1": "Not a spicy dish at all",
+        "spiciness-2": "A slightly spicy dish",
+        "spiciness-3": "Moderate spiciness. More likely spicy than not",
+        "spiciness-4": "Spicy but tolerable",
+        "spiciness-5": "A very spicy dish. For spicy lovers only!",
+        "difficulty-1": "A very simple dish. Even for beginners",
+        "difficulty-2": "Simple dish. Minimal experience required",
+        "difficulty-3": "A medium-sized dish",
+        "difficulty-4": "Complex dish. Requires experience",
+        "difficulty-5": "A very complex dish. For experienced cooks"    
     }
 }
