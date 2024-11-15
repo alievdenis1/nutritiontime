@@ -274,7 +274,7 @@
    isProcessing.value = true
 
    if (selectedPaymentMethod.value.type === 'upay') {
-    WebApp.sendData('/payment')
+    WebApp.sendData('/subscription')
     return
    }
 
