@@ -49,7 +49,7 @@
 		<VButton
 			:color="ButtonColors.Green"
 			class="mt-5"
-			@click="WebApp.openTelegramLink('https://t.me/nutritiontime_bot?command=profile')"
+			@click="WebApp.sendData('/profile')"
 		>
 			{{ t('fillProfile') }}
 		</VButton>
