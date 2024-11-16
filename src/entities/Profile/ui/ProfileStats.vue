@@ -37,7 +37,7 @@
 				/>
 			</TabsContent>
 			<TabsContent value="statistic">
-				{{ t('inDevelopment') }}
+				<StatisticsTab />
 			</TabsContent>
 		</TabsMain>
 	</div>
@@ -49,7 +49,7 @@
 		<VButton
 			:color="ButtonColors.Green"
 			class="mt-5"
-			@click="WebApp.openTelegramLink('https://t.me/nutritiontime_bot?command=profile')"
+			@click="WebApp.sendData('/profile')"
 		>
 			{{ t('fillProfile') }}
 		</VButton>
@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
  import { ref, computed, onMounted, watch } from 'vue'
- import { DailyNutritionStats } from './index'
+ import { DailyNutritionStats, StatisticsTab } from './index'
  import { getProfile, getMealStats } from '../api'
  import { TabsContent, TabsList, TabsMain, TabsTrigger } from 'shared/components/ui/tabs'
  import { useRouter } from 'vue-router'
