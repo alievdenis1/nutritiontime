@@ -98,7 +98,11 @@
     "nutrition": "Питание",
     "grams": "граммы",
     "g": "г",
-    "kg": "кг"
+    "kg": "кг",
+    "progress_weight": "Прогресс веса",
+    "enterWeight": "Введите вес",
+    "add": "Добавить",
+    "update": "Обновить"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -199,6 +203,10 @@
     "nutrition": "Nutrition",
     "grams": "grams",
     "g": "g",
-    "kg": "kg"
+    "kg": "kg",
+    "progress_weight": "Weight values",
+    "enterWeight": "Enter weight",
+    "add": "Add",
+    "update": "Update"
   }
 }

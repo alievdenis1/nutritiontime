@@ -9,6 +9,13 @@ interface GetMealsParams {
  end_date?: string;
 }
 
+export interface WeightLogData {
+ id?: number
+ weight: number
+ notes?: string
+ date?: string
+}
+
 export function getProfile() {
  return useApi<ProfileResponse>('get', '/profile')
 }
@@ -23,4 +30,12 @@ export function getNotifications() {
 
 export function deleteMeal(mealId: number) {
  return useApi<{ message: string }>('delete', `/meals/${mealId}`)
+}
+
+export const logWeight = (data: WeightLogData) => {
+ return useApi<WeightLogData>('post', '/weight/log', data)
+}
+
+export const updateWeight = (logId: number, data: WeightLogData) => {
+ return useApi<WeightLogData>('put', `/weight/log/${logId}`, data)
 }

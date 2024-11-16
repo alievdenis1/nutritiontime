@@ -73,6 +73,33 @@
 					</div>
 				</div>
 
+				<!-- После блока с графиком БЖУ и его легендой -->
+				<!-- График веса -->
+				<div class="space-y-4 mt-8 border-t pt-8">
+					<!-- График веса -->
+					<div class="h-[200px]">
+						<apexchart
+							:key="weightChartKey"
+							:options="weightChartOptions"
+							:series="weightChartOptions.series"
+							height="100%"
+						/>
+					</div>
+					<!-- Легенда графика веса -->
+					<div class="flex justify-center text-sm">
+						<div class="flex items-center gap-2">
+							<div class="w-3 h-3 bg-[#319A6E] rounded" />
+							<span>{{ t('weight') }} ({{ t('kg') }})</span>
+						</div>
+					</div>
+
+					<WeightInput
+						:current-log-id="todayWeightLog?.id"
+						:current-weight="todayWeightLog?.weight"
+						@updated="handleWeightUpdated"
+					/>
+				</div>
+
 				<!-- Средние значения -->
 				<div class="p-4 bg-white border border-gray-200 rounded-lg ">
 					<h3 class="text-lg font-semibold mb-4 text-center">
@@ -114,6 +141,47 @@
 					</div>
 				</div>
 
+				<!-- Прогресс веса -->
+				<h3 class="text-lg font-semibold mb-4 text-center">
+					{{ t('progress_weight') }}
+				</h3>
+				<div
+					v-if="statisticsData?.weight_progress"
+					class="grid grid-cols-2 gap-4 mb-4"
+				>
+					<div>
+						<div class="text-sm text-gray-500 text-center">
+							{{ t('startWeight') }}
+						</div>
+						<div class="font-medium text-center">
+							{{ statisticsData.weight_progress.start }} {{ t('kg') }}
+						</div>
+					</div>
+					<div>
+						<div class="text-sm text-gray-500 text-center">
+							{{ t('currentWeight') }}
+						</div>
+						<div class="font-medium text-center">
+							{{ statisticsData.weight_progress.current }} {{ t('kg') }}
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="text-sm text-gray-500 text-center">
+						{{ t('weightChange') }}
+					</div>
+					<div
+						class="font-medium text-center"
+						:class="{
+							'text-red-500': statisticsData.weight_progress?.change > 0,
+							'text-emerald-500': statisticsData.weight_progress?.change < 0
+						}"
+					>
+						{{ statisticsData.weight_progress?.change > 0 ? '+' : '' }}
+						{{ statisticsData.weight_progress?.change }} {{ t('kg') }}
+					</div>
+				</div>
+
 				<!-- Суммарная статистика -->
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div class="p-4 bg-emerald-50 rounded-2xl">
@@ -150,67 +218,6 @@
 					</div>
 				</div>
 
-				<!-- График веса -->
-				<div
-					v-if="chartsData.weight.length > 0"
-					class="space-y-4 text-center"
-				>
-					<!-- Прогресс веса -->
-					<div
-						v-if="statisticsData.weight_progress"
-						class="grid grid-cols-3 gap-4"
-					>
-						<div>
-							<div class="text-sm text-gray-500">
-								{{ t('startWeight') }}
-							</div>
-							<div class="font-medium">
-								{{ statisticsData.weight_progress.start }} {{ t('kg') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500">
-								{{ t('currentWeight') }}
-							</div>
-							<div class="font-medium">
-								{{ statisticsData.weight_progress.current }} {{ t('kg') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500">
-								{{ t('weightChange') }}
-							</div>
-							<div
-								class="font-medium"
-								:class="{
-									'text-red-500': statisticsData.weight_progress.change > 0,
-									'text-emerald-500': statisticsData.weight_progress.change < 0
-								}"
-							>
-								{{ statisticsData.weight_progress.change > 0 ? '+' : '' }}
-								{{ statisticsData.weight_progress.change }} {{ t('kg') }}
-							</div>
-						</div>
-					</div>
-
-					<!-- Легенда графика веса -->
-					<div class="flex justify-center text-sm">
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#319A6E] rounded" />
-							<span>{{ t('weight') }} ({{ t('kg') }})</span>
-						</div>
-					</div>
-
-					<div class="h-[300px]">
-						<apexchart
-							:key="weightChartKey"
-							:options="weightChartOptions"
-							:series="weightChartOptions.series"
-							height="100%"
-						/>
-					</div>
-				</div>
-
 				<!-- Нет данных -->
 				<div
 					v-if="!hasAnyData"
@@ -229,6 +236,19 @@ import { useTranslation } from '@/shared/lib/i18n'
 import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
 import type { ApexOptions } from 'apexcharts'
+import { WeightInput } from './index'
+
+const todayWeightLog = computed(() => {
+  if (!chartsData.value?.weight.length) return null
+
+  const today = new Date().toISOString().split('T')[0]
+  return chartsData.value.weight.find(w => w.date === today)
+})
+
+// Обработчик обновления веса
+const handleWeightUpdated = () => {
+  fetchStatistics() // Перезагружаем статистику
+}
 
 // Types
 interface ChartData {
@@ -277,7 +297,7 @@ interface CustomApexOptions extends ApexOptions {
   series: Array<{
     name: string
     type?: string
-    data: number[]
+    data: (number | null)[] // Разрешаем null значения в данных
   }>
 }
 
@@ -415,7 +435,12 @@ const getComboChartOptions = (): CustomApexOptions => ({
       fontSize: '12px'
     },
     y: {
-      formatter: (value: number) => value.toFixed(1)
+      formatter: (value: number | null) => {
+        if (value === null || value === undefined) {
+          return '-'
+        }
+        return `${value.toFixed(1)} ${t('kg')}`
+      }
     }
   },
   legend: {
@@ -533,21 +558,39 @@ watch(chartsData, (newData) => {
   }
 
   // Update weight chart
-  if (newData.weight.length > 0) {
-    const dates = newData.weight.map(item => item.date)
-    const weightOptions = getWeightChartOptions()
+  if (newData.calories.length > 0) {
+    const dates = newData.calories.map(item => item.date)
+    const newWeightOptions = getComboChartOptions() // Используем базовые настройки
 
-    weightOptions.xaxis = {
-      ...weightOptions.xaxis,
+    newWeightOptions.xaxis = {
+      ...newWeightOptions.xaxis,
       categories: dates
     }
 
-    weightOptions.series = [{
+    newWeightOptions.series = [{
       name: t('weight'),
-      data: newData.weight.map(item => item.value)
+      type: 'line',
+      data: dates.map(date => {
+        const weightData = newData.weight.find(w => w.date === date)
+        return weightData ? weightData.value : null
+      })
     }]
 
-    weightChartOptions.value = weightOptions
+    newWeightOptions.colors = ['#319A6E']
+    newWeightOptions.stroke = {
+      width: 3,
+      curve: 'smooth'
+    }
+
+    newWeightOptions.yaxis = [{
+      show: false,
+      labels: {
+        formatter: (value: number) => `${value} ${t('kg')}`
+      }
+    }]
+
+    // Обновляем опции
+    weightChartOptions.value = newWeightOptions
     weightChartKey.value++
   }
 })
