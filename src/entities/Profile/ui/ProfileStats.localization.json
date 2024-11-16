@@ -82,7 +82,22 @@
     "weightLogs": "Записи веса",
     "date": "Дата",
     "value": "Значение",
-    "notes": "Заметки"
+    "notes": "Заметки",
+    "averageValues": "Средние значения",
+    "totalMeals": "Всего приемов пищи",
+    "daysTracked": "Дней отслежено",
+    "averageMealsPerDay": "Приемов пищи в день",
+    "startWeight": "Начальный вес",
+    "currentWeight": "Текущий вес",
+    "weightChange": "Изменение веса",
+    "goalsAchievement": "Достижение целей",
+    "loggingConsistency": "Регулярность записей",
+    "caloriesTargetHit": "Попадание в цель по калориям",
+    "proteinsTargetHit": "Попадание в цель по белкам",
+    "nutrition": "Питание",
+    "grams": "граммы",
+    "g": "г",
+    "kg": "кг"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -167,6 +182,21 @@
     "weightLogs": "Weight Logs",
     "date": "Date",
     "value": "Value",
-    "notes": "Notes"
+    "notes": "Notes",
+    "averageValues": "Average Values",
+    "totalMeals": "Total Meals",
+    "daysTracked": "Days Tracked",
+    "averageMealsPerDay": "Meals Per Day",
+    "startWeight": "Starting Weight",
+    "currentWeight": "Current Weight",
+    "weightChange": "Weight Change",
+    "goalsAchievement": "Goals Achievement",
+    "loggingConsistency": "Logging Consistency",
+    "caloriesTargetHit": "Calories Target Hit",
+    "proteinsTargetHit": "Proteins Target Hit",
+    "nutrition": "Nutrition",
+    "grams": "grams",
+    "g": "g",
+    "kg": "kg"
   }
 }
