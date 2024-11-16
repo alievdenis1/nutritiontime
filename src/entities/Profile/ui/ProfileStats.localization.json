@@ -68,7 +68,21 @@
     "selected": "Выбрано",
     "select": "Выбрать",
     "needFeelProfile": "Чтобы начать вести дневник, нужно заполнить профиль",
-    "to_subscribe": "оформить подписку"
+    "to_subscribe": "оформить подписку",
+    "selectPeriod": "Выберите период:",
+    "week": "Неделя",
+    "month": "Месяц",
+    "3months": "3 месяца",
+    "loading": "Загрузка...",
+    "caloriesChartTitle": "Калорийность по дням",
+    "macrosChartTitle": "Макронутриенты по дням",
+    "weightChartTitle": "Изменение веса",
+    "noData": "Нет данных для отображения",
+    "logWeight": "Записать вес",
+    "weightLogs": "Записи веса",
+    "date": "Дата",
+    "value": "Значение",
+    "notes": "Заметки"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -95,7 +109,7 @@
     "deleteMealDescription": "Are you sure you want to delete this meal?",
     "confirmDelete": "Delete",
     "cancelDelete": "Cancel",
-    "fillProfile": "fll out a profile",
+    "fillProfile": "fill out a profile",
     "addMeal": "add a meal",
     "editProfile": "change the profile",
     "diaryStreakOne": "{count} day in a row",
@@ -139,6 +153,20 @@
     "selected": "Selected",
     "select": "Select",
     "needFeelProfile": "To start keeping a diary, you need to fill out a profile",
-    "to_subscribe": "buy a subscription"
+    "to_subscribe": "buy a subscription",
+    "selectPeriod": "Select period:",
+    "week": "Week",
+    "month": "Month",
+    "3months": "3 months",
+    "loading": "Loading...",
+    "caloriesChartTitle": "Daily Calories",
+    "macrosChartTitle": "Daily Macros",
+    "weightChartTitle": "Weight Changes",
+    "noData": "No data to display",
+    "logWeight": "Log Weight",
+    "weightLogs": "Weight Logs",
+    "date": "Date",
+    "value": "Value",
+    "notes": "Notes"
   }
 }

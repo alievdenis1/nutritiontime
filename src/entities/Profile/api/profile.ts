@@ -1,6 +1,9 @@
 import useApi from '@/shared/lib/api/use-api'
-import type { ProfileResponse, MealStats, Notification } from '../model'
+import type { ProfileResponse, MealStats, Notification, StatisticsResponse } from '../model'
 
+export function getStatistics(period = 'week') {
+ return useApi<StatisticsResponse>('get', '/my-stats', { period })
+}
 interface GetMealsParams {
  start_date?: string;
  end_date?: string;

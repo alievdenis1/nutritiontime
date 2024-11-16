@@ -1,0 +1,428 @@
+<template>
+	<div class="w-full max-w-4xl p-4 bg-white rounded-lg shadow">
+		<div class="space-y-6">
+			<!-- Селектор периода -->
+			<div class="flex items-center justify-between">
+				<label class="text-sm font-medium">{{ t('selectPeriod') }}</label>
+				<select
+					v-model="selectedPeriod"
+					class="p-2 border rounded-md"
+					@change="fetchStatistics"
+				>
+					<option value="week">
+						{{ t('week') }}
+					</option>
+					<option value="month">
+						{{ t('month') }}
+					</option>
+					<option value="3months">
+						{{ t('3months') }}
+					</option>
+				</select>
+			</div>
+
+			<!-- Загрузка и ошибки -->
+			<div
+				v-if="statisticsLoading"
+				class="flex justify-center py-8"
+			>
+				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+			</div>
+
+			<div
+				v-else-if="statisticsError"
+				class="p-4 bg-red-50 text-red-600 rounded-md"
+			>
+				{{ statisticsError }}
+			</div>
+
+			<!-- Статистика -->
+			<div
+				v-else-if="chartsData"
+				class="space-y-8"
+			>
+				<!-- График калорий -->
+				<div
+					v-if="chartsData.calories.length > 0"
+					class="space-y-2"
+				>
+					<h3 class="text-lg font-semibold">
+						{{ t('caloriesChartTitle') }}
+					</h3>
+					<div class="h-[350px]">
+						<apexchart
+							:key="caloriesChartKey"
+							:options="caloriesChartOptions"
+							:series="caloriesChartOptions.series"
+							height="100%"
+						/>
+					</div>
+				</div>
+
+				<!-- График макронутриентов -->
+				<div
+					v-if="chartsData.macros.proteins.length > 0"
+					class="space-y-2"
+				>
+					<h3 class="text-lg font-semibold">
+						{{ t('macrosChartTitle') }}
+					</h3>
+					<div class="h-[350px]">
+						<apexchart
+							:key="macrosChartKey"
+							:options="macrosChartOptions"
+							:series="macrosChartOptions.series"
+							height="100%"
+						/>
+					</div>
+				</div>
+
+				<!-- График веса -->
+				<div
+					v-if="chartsData.weight.length > 0"
+					class="space-y-2"
+				>
+					<h3 class="text-lg font-semibold">
+						{{ t('weightChartTitle') }}
+					</h3>
+					<div class="h-[350px]">
+						<apexchart
+							:key="weightChartKey"
+							:options="weightChartOptions"
+							:series="weightChartOptions.series"
+							height="100%"
+						/>
+					</div>
+				</div>
+
+				<!-- Нет данных -->
+				<div
+					v-if="!hasAnyData"
+					class="text-center py-8 text-gray-500"
+				>
+					{{ t('noData') }}
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useTranslation } from '@/shared/lib/i18n'
+import localization from './ProfileStats.localization.json'
+import { getStatistics } from '../api'
+import type { ApexOptions } from 'apexcharts'
+
+// Types
+interface ChartData {
+  date: string
+  value: number
+}
+
+export interface StatisticsResponse {
+  period: {
+    start: string
+    end: string
+  }
+  summary: {
+    total_meals: number
+    days_tracked: number
+    average_meals_per_day: number
+  }
+  averages: {
+    calories: number
+    proteins: number
+    fats: number
+    carbs: number
+  }
+  charts: {
+    calories: ChartData[]
+    macros: {
+      proteins: ChartData[]
+      fats: ChartData[]
+      carbs: ChartData[]
+    }
+    weight: ChartData[]
+  }
+  weight_progress?: {
+    start: number
+    current: number
+    change: number
+  } | null
+  goals_achievement?: {
+    logging_consistency: number
+    calories_target_hit: number
+    proteins_target_hit: number
+  } | null
+}
+
+interface CustomApexOptions extends ApexOptions {
+  series: Array<{
+    name: string
+    data: number[]
+  }>
+}
+
+// Translations
+const { t } = useTranslation(localization)
+
+// State
+const statisticsData = ref<StatisticsResponse | null>(null)
+const statisticsLoading = ref(false)
+const statisticsError = ref<string | null>(null)
+const selectedPeriod = ref('week')
+
+// Chart keys for forcing re-render
+const caloriesChartKey = ref(0)
+const macrosChartKey = ref(0)
+const weightChartKey = ref(0)
+
+// Base chart options
+const getBaseChartOptions = (title: string): CustomApexOptions => ({
+  chart: {
+    type: 'line',
+    height: '100%',
+    fontFamily: 'inherit',
+    toolbar: {
+      show: true,
+      tools: {
+        download: true,
+        selection: true,
+        zoom: true,
+        zoomin: true,
+        zoomout: true,
+        pan: true,
+        reset: true
+      }
+    },
+    zoom: {
+      enabled: true
+    }
+  },
+  series: [],
+  stroke: {
+    curve: 'smooth',
+    width: 2
+  },
+  colors: ['#10B981', '#F59E0B', '#3B82F6'],
+  dataLabels: {
+    enabled: false
+  },
+  grid: {
+    show: true,
+    borderColor: '#E5E7EB',
+    strokeDashArray: 0,
+    position: 'back'
+  },
+  xaxis: {
+    type: 'category',
+    categories: [],
+    title: {
+      text: t('date'),
+      style: {
+        fontSize: '12px',
+        fontWeight: 500,
+        cssClass: 'text-gray-500'
+      }
+    },
+    labels: {
+      style: {
+        fontSize: '12px',
+        cssClass: 'text-gray-500'
+      }
+    },
+    axisBorder: {
+      show: true,
+      color: '#E5E7EB'
+    },
+    axisTicks: {
+      show: true,
+      color: '#E5E7EB'
+    }
+  },
+  yaxis: {
+    title: {
+      text: title,
+      style: {
+        fontSize: '12px',
+        fontWeight: 500,
+        cssClass: 'text-gray-500'
+      }
+    },
+    labels: {
+      style: {
+        fontSize: '12px',
+        cssClass: 'text-gray-500'
+      }
+    }
+  },
+  tooltip: {
+    enabled: true,
+    shared: true,
+    intersect: false,
+    theme: 'light',
+    style: {
+      fontSize: '12px'
+    },
+    y: {
+      formatter: (value: number) => value.toFixed(1)
+    }
+  },
+  legend: {
+    show: true,
+    position: 'bottom',
+    fontSize: '12px',
+    markers: {
+      size: 12,
+      strokeWidth: 0,
+      shape: 'circle',
+      offsetX: 0,
+      offsetY: 0
+    }
+  },
+  responsive: [
+    {
+      breakpoint: 640,
+      options: {
+        chart: {
+          height: 300
+        },
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  ]
+})
+
+// Initialize chart options
+const caloriesChartOptions = ref<CustomApexOptions>(getBaseChartOptions(t('calories')))
+const macrosChartOptions = ref<CustomApexOptions>(getBaseChartOptions(t('macros')))
+const weightChartOptions = ref<CustomApexOptions>(getBaseChartOptions(t('weight')))
+
+// Helper function to validate chart data
+const getValidChartData = (data: ChartData[] | undefined): ChartData[] => {
+  return Array.isArray(data) ? data.filter(item => item && typeof item.value === 'number') : []
+}
+
+// Computed properties
+const chartsData = computed(() => {
+  if (!statisticsData.value) return null
+
+  return {
+    calories: getValidChartData(statisticsData.value.charts.calories),
+    macros: {
+      proteins: getValidChartData(statisticsData.value.charts.macros?.proteins),
+      fats: getValidChartData(statisticsData.value.charts.macros?.fats),
+      carbs: getValidChartData(statisticsData.value.charts.macros?.carbs)
+    },
+    weight: getValidChartData(statisticsData.value.charts.weight)
+  }
+})
+
+const hasAnyData = computed(() => {
+  const data = chartsData.value
+  if (!data) return false
+
+  return (
+      data.calories.length > 0 ||
+      data.macros.proteins.length > 0 ||
+      data.weight.length > 0
+  )
+})
+
+// Methods
+const fetchStatistics = async () => {
+  statisticsLoading.value = true
+  statisticsError.value = null
+
+  try {
+    const statsApi = getStatistics(selectedPeriod.value)
+    await statsApi.execute()
+
+    if (statsApi.error.value) {
+      statisticsError.value = statsApi.error.value
+    } else {
+      statisticsData.value = statsApi.data.value
+    }
+  } catch (error) {
+    statisticsError.value = error instanceof Error ? error.message : String(error)
+  } finally {
+    statisticsLoading.value = false
+  }
+}
+
+// Watchers
+watch(chartsData, (newData) => {
+  if (!newData) return
+
+  // Update calories chart
+  if (newData.calories.length > 0) {
+    const dates = newData.calories.map(item => item.date)
+    caloriesChartOptions.value = {
+      ...getBaseChartOptions(t('calories')),
+      xaxis: {
+        ...caloriesChartOptions.value.xaxis,
+        categories: dates
+      },
+      series: [{
+        name: t('calories'),
+        data: newData.calories.map(item => item.value)
+      }]
+    }
+    caloriesChartKey.value++
+  }
+
+  // Update macros chart
+  if (newData.macros.proteins.length > 0) {
+    const dates = newData.macros.proteins.map(item => item.date)
+    macrosChartOptions.value = {
+      ...getBaseChartOptions(t('macros')),
+      xaxis: {
+        ...macrosChartOptions.value.xaxis,
+        categories: dates
+      },
+      series: [
+        {
+          name: t('proteins'),
+          data: newData.macros.proteins.map(item => item.value)
+        },
+        {
+          name: t('fats'),
+          data: newData.macros.fats.map(item => item.value)
+        },
+        {
+          name: t('carbs'),
+          data: newData.macros.carbs.map(item => item.value)
+        }
+      ]
+    }
+    macrosChartKey.value++
+  }
+
+  // Update weight chart
+  if (newData.weight.length > 0) {
+    const dates = newData.weight.map(item => item.date)
+    weightChartOptions.value = {
+      ...getBaseChartOptions(t('weight')),
+      xaxis: {
+        ...weightChartOptions.value.xaxis,
+        categories: dates
+      },
+      series: [{
+        name: t('weight'),
+        data: newData.weight.map(item => item.value)
+      }]
+    }
+    weightChartKey.value++
+  }
+})
+
+watch(selectedPeriod, () => {
+  fetchStatistics()
+})
+
+// Initial fetch
+fetchStatistics()
+</script>
