@@ -40,8 +40,11 @@ export const updateWeight = (logId: number, data: WeightLogData) => {
  return useApi<WeightLogData>('put', `/weight/log/${logId}`, data)
 }
 
-export function sendToSubscription() {
- return useApi('get', '/to-subscription')
+interface SubscriptionParams {
+ months?: number
+}
+export function sendToSubscription(params?: SubscriptionParams) {
+ return useApi('get', '/to-subscription', params)
 }
 
 export function sendToProfile() {
