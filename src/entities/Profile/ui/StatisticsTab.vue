@@ -42,7 +42,11 @@
 				<div
 					v-if="chartsData.calories.length > 0 && chartsData.macros.proteins.length > 0"
 				>
-					<div class="h-[320px]">
+					<div class="h-[320px] mt-10">
+						<div class="w-full flex justify-between text-sm pl-5 pr-10">
+							<span>{{ t('kcal') }}.</span>
+							<span>{{ t('g') }}.</span>
+						</div>
 						<apexchart
 							:key="nutritionChartKey"
 							:options="nutritionChartOptions"
