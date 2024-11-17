@@ -55,11 +55,11 @@
 						/>
 					</div>
 					<!-- Легенда графика -->
-					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4">
+					<div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4">
 						<button
 							v-for="series in nutritionSeries"
 							:key="series.id"
-							class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 transition-all"
+							class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 transition-all justify-center"
 							:class="{ 'font-bold': series.visible }"
 							@click="toggleSeries(series.id)"
 						>
@@ -74,9 +74,12 @@
 
 				<!-- После блока с графиком БЖУ и его легендой -->
 				<!-- График веса -->
-				<div class="space-y-4 mt-8 border-t pt-8">
+				<div class="space-y-4 border-t pt-8">
 					<!-- График веса -->
 					<div class="h-[200px]">
+						<div class="w-full flex justify-between text-sm pl-5 pr-10">
+							<span>{{ t('kg') }}.</span>
+						</div>
 						<apexchart
 							:key="weightChartKey"
 							:options="weightChartOptions"
@@ -86,7 +89,7 @@
 					</div>
 					<!-- Легенда графика веса -->
 					<div class="flex justify-center text-sm">
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-2 mt-5">
 							<div class="w-3 h-3 bg-[#319A6E] rounded" />
 							<span>{{ t('weight') }} ({{ t('kg') }})</span>
 						</div>
@@ -182,7 +185,7 @@
 				</div>
 
 				<!-- Суммарная статистика -->
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div class="p-4 bg-emerald-50 rounded-2xl">
 						<h3 class="mt-5 text-lg font-semibold mb-4 text-center">
 							{{ t('summary') }}
@@ -390,9 +393,6 @@ const updateCharts = () => {
   const yAxisConfig = [
     {
       seriesName: 'calories',
-      title: {
-        text: 'ккал'
-      },
       min: 0,
       show: caloriesSeries?.visible ?? false,
       labels: {
@@ -402,9 +402,6 @@ const updateCharts = () => {
     {
       seriesName: 'nutrients',
       opposite: true,
-      title: {
-        text: 'г'
-      },
       min: 0,
       show: nutrientSeries.some(s => s.visible),
       labels: {
@@ -646,9 +643,6 @@ const getWeightChartOptions = (): CustomApexOptions => {
     },
     yaxis: {
       show: true,
-      title: {
-        text: 'кг'
-      },
       labels: {
         formatter: (value: number) => `${value.toFixed(1)}`
       },
