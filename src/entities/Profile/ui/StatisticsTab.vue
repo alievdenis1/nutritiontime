@@ -236,12 +236,28 @@ import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
 import type { ApexOptions } from 'apexcharts'
 import { WeightInput } from './index'
-const toggleSeries = (seriesId: string) => {
-  const series = nutritionSeries.value.find(s => s.id === seriesId)
-  if (series) {
-    series.visible = !series.visible
-    updateCharts() // Обновляем графики
+
+type YAxisOptions = {
+  seriesName?: string
+  title?: {
+    text: string
   }
+  min?: number
+  show?: boolean
+  opposite?: boolean
+  labels?: {
+    formatter?: (value: number) => string
+  }
+}
+interface CustomApexOptions extends ApexOptions {
+  series: Array<{
+    name: string
+    type?: 'line' | 'column'
+    color?: string
+    data: (number | null)[]
+    yAxisIndex?: number
+  }>
+  yaxis?: YAxisOptions | YAxisOptions[]
 }
 
 interface ChartData {
@@ -268,13 +284,43 @@ interface NutritionSeries {
   color: string
   visible: boolean
   unit: string
+  type: 'column' | 'line'
 }
 
+// Обновленное определение серий с явным указанием типа
 const nutritionSeries = ref<NutritionSeries[]>([
-  { id: 'calories', label: 'calories', color: '#f1e3cb', visible: true, unit: 'ккал' },
-  { id: 'proteins', label: 'proteins', color: '#319A6E', visible: true, unit: 'г' },
-  { id: 'fats', label: 'fats', color: '#FDC755', visible: true, unit: 'г' },
-  { id: 'carbs', label: 'carbs', color: '#FFA767', visible: true, unit: 'г' }
+  {
+    id: 'calories',
+    label: 'calories',
+    color: '#f1e3cb',
+    visible: true,
+    unit: 'ккал',
+    type: 'column'
+  },
+  {
+    id: 'proteins',
+    label: 'proteins',
+    color: '#319A6E',
+    visible: true,
+    unit: 'г',
+    type: 'line'
+  },
+  {
+    id: 'fats',
+    label: 'fats',
+    color: '#FDC755',
+    visible: true,
+    unit: 'г',
+    type: 'line'
+  },
+  {
+    id: 'carbs',
+    label: 'carbs',
+    color: '#FFA767',
+    visible: true,
+    unit: 'г',
+    type: 'line'
+  }
 ])
 
 // Функция для получения данных серии
@@ -292,52 +338,149 @@ const updateCharts = () => {
   if (!chartsData.value) return
 
   const dates = chartsData.value.calories.map(item => new Date(item.date).getTime())
-  const comboChartOptions = getComboChartOptions()
 
-  comboChartOptions.xaxis = {
-    ...comboChartOptions.xaxis,
-    categories: dates,
-    type: 'datetime'
+  // Обновляем оба графика с одинаковыми настройками дат
+  const commonXAxisSettings = {
+    ...getComboChartOptions().xaxis,
+    categories: dates
   }
 
-  const visibleSeries = nutritionSeries.value
+  // Сначала подготовим все серии независимо от их видимости
+  const allSeries = nutritionSeries.value.map(s => ({
+    id: s.id,
+    name: t(s.label),
+    type: s.type,
+    color: s.color,
+    data: getSeriesData(chartsData.value, s.id),
+    visible: s.visible
+  }))
+
+  // Отделяем калории от остальных серий
+  const caloriesSeries = allSeries.find(s => s.id === 'calories')
+  const nutrientSeries = allSeries.filter(s => s.id !== 'calories')
+
+  // Формируем финальные серии для отображения
+  const visibleSeries = []
+
+  // Добавляем калории, если они видимы
+  if (caloriesSeries?.visible) {
+    visibleSeries.push({
+      name: caloriesSeries.name,
+      type: caloriesSeries.type,
+      color: caloriesSeries.color,
+      data: caloriesSeries.data,
+      yAxisIndex: 0 // Калории всегда на первой оси
+    })
+  }
+
+  // Добавляем видимые нутриенты
+  nutrientSeries
       .filter(s => s.visible)
-      .map(s => ({
-        name: t(s.label),
-        type: s.id === 'calories' ? 'column' : 'line',
-        data: getSeriesData(chartsData.value, s.id)
-      }))
+      .forEach(series => {
+        visibleSeries.push({
+          name: series.name,
+          type: series.type,
+          color: series.color,
+          data: series.data,
+          yAxisIndex: 1 // Нутриенты всегда на второй оси
+        })
+      })
 
+  // Формируем настройки осей
+  const yAxisConfig = [
+    {
+      seriesName: 'calories',
+      title: {
+        text: 'ккал'
+      },
+      min: 0,
+      show: caloriesSeries?.visible ?? false,
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
+    },
+    {
+      seriesName: 'nutrients',
+      opposite: true,
+      title: {
+        text: 'г'
+      },
+      min: 0,
+      show: nutrientSeries.some(s => s.visible),
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
+    }
+  ]
+
+  // Обновляем настройки графика
   nutritionChartOptions.value = {
-    ...comboChartOptions,
-    series: visibleSeries
+    ...getComboChartOptions(),
+    series: visibleSeries,
+    xaxis: commonXAxisSettings,
+    yaxis: yAxisConfig
   }
+
+  // Добавляем отладочную информацию
+  console.log('Chart update:', {
+    visibleSeries: visibleSeries.map(s => ({ name: s.name, visible: true })),
+    yAxisConfig: yAxisConfig.map(axis => ({ show: axis.show })),
+    hasVisibleNutrients: nutrientSeries.some(s => s.visible),
+    totalSeriesCount: visibleSeries.length
+  })
+
   nutritionChartKey.value++
 }
 
+// Обновленная функция переключения видимости
+const toggleSeries = (seriesId: string) => {
+  const series = nutritionSeries.value.find(s => s.id === seriesId)
+  if (series) {
+    series.visible = !series.visible
+    console.log(`Toggling series ${seriesId}:`, {
+      newVisibility: series.visible,
+      allSeries: nutritionSeries.value.map(s => ({ id: s.id, visible: s.visible }))
+    })
+    updateCharts()
+  }
+}
+
 const updateWeightChart = (newData: ChartsData) => {
-  if (newData.weight.length === 0) return
+  if (!newData.weight.length) return
 
   const dates = newData.calories.map(item => new Date(item.date).getTime())
   const weightOptions = getWeightChartOptions()
 
-  weightOptions.xaxis = {
-    ...weightOptions.xaxis,
-    categories: dates,
-    type: 'datetime'
+  weightChartOptions.value = {
+    ...weightOptions,
+    series: [{
+      name: t('weight'),
+      type: 'line',
+      data: dates.map(timestamp => {
+        const date = new Date(timestamp).toISOString().split('T')[0]
+        const weightData = newData.weight.find(w => w.date === date)
+        return weightData ? weightData.value : null
+      })
+    }],
+    xaxis: {
+      ...weightOptions.xaxis,
+      type: 'datetime',
+      categories: dates,
+      labels: {
+        formatter: function(value: string) {
+          return formatDate(value, selectedPeriod.value)
+        },
+        style: {
+          fontSize: '10px',
+          colors: '#6B7280'
+        },
+        rotateAlways: false,
+        hideOverlappingLabels: true,
+        maxHeight: 50
+      }
+    }
   }
 
-  weightOptions.series = [{
-    name: t('weight'),
-    type: 'line',
-    data: dates.map(timestamp => {
-      const date = new Date(timestamp).toISOString().split('T')[0]
-      const weightData = newData.weight.find(w => w.date === date)
-      return weightData ? weightData.value : null
-    })
-  }]
-
-  weightChartOptions.value = weightOptions
   weightChartKey.value++
 }
 
@@ -383,14 +526,6 @@ export interface StatisticsResponse {
   } | null
 }
 
-interface CustomApexOptions extends ApexOptions {
-  series: Array<{
-    name: string
-    type?: string
-    data: (number | null)[] // Разрешаем null значения в данных
-  }>
-}
-
 // Translations
 const { t } = useTranslation(localization)
 
@@ -407,189 +542,130 @@ const weightChartKey = ref(0)
 // Date formatting
 // Форматирование даты с учетом периода
 // Обновленная функция форматирования даты
-const formatDate = (date: string, period: string): string => {
-  const dateObj = new Date(date)
-  const day = String(dateObj.getDate()).padStart(2, '0')
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-  const year = dateObj.getFullYear().toString().slice(2)
-
-  // Определяем, нужно ли показывать эту дату
-  const shouldShowDate = () => {
-    switch (period) {
-      case 'week':
-        return true
-      case 'month':
-        return dateObj.getDate() % 3 === 0 // Каждый третий день
-      case '3months':
-        return dateObj.getDate() % 7 === 0 // Каждый седьмой день
-      default:
-        return true
-    }
+// Base chart options
+const getComboChartOptions = (): CustomApexOptions => {
+  const baseOptions: CustomApexOptions = {
+    chart: {
+      type: 'line',
+      height: '100%',
+      fontFamily: 'inherit',
+      toolbar: {
+        show: false
+      },
+      animations: {
+        enabled: false
+      },
+      stacked: false
+    },
+    // Добавляем пустой массив series в базовые настройки
+    series: [],
+    stroke: {
+      width: 3,
+      curve: 'smooth'
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: '60%'
+      }
+    },
+    markers: {
+      size: 4,
+      hover: {
+        size: 6
+      }
+    },
+    tooltip: {
+      shared: true,
+      intersect: false,
+      y: {
+        formatter: (value: number | null, { seriesIndex }) => {
+          if (value === null || value === undefined) return '-'
+          const series = nutritionSeries.value[seriesIndex]
+          return `${value.toFixed(1)} ${series.unit}`
+        }
+      }
+    },
+    legend: {
+      show: false
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        formatter: function(value: string) {
+          return formatDate(value, selectedPeriod.value)
+        },
+        style: {
+          fontSize: '10px',
+          colors: '#6B7280'
+        },
+        rotateAlways: false,
+        hideOverlappingLabels: true, // Скрываем перекрывающиеся метки
+        maxHeight: 50
+      },
+      tickAmount: selectedPeriod.value === 'week' ? 7 :
+          selectedPeriod.value === 'month' ? 6 : 9, // Контролируем количество отображаемых тиков
+      axisBorder: {
+        show: false
+      },
+      axisTicks: {
+        show: true
+      }
+    },
   }
 
-  return shouldShowDate() ? `${day}.${month}.${year}` : ''
+  return baseOptions
 }
-// Base chart options
-const getComboChartOptions = (): CustomApexOptions => ({
-  chart: {
-    type: 'line',
-    height: '100%',
-    fontFamily: 'inherit',
-    toolbar: {
-      show: false,
-      tools: {
-        download: false,
-        zoom: false,
-        zoomin: false,
-        zoomout: false,
-        pan: false,
-        reset: false
-      },
-    },
-    animations: {
-      enabled: false // Отключаем анимации для лучшей производительности
-    }
-  },
-  series: [],
-  stroke: {
-    width: [0, 3, 3, 3], // [calories, proteins, fats, carbs]
-    curve: 'smooth'
-  },
-  colors: ['#f1e3cb', '#319A6E', '#FDC755', '#FFA767'],
-  dataLabels: {
-    enabled: false
-  },
-  markers: {
-    size: 4,
-    hover: {
-      size: 6
-    }
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: '60%'
-    }
-  },
-  grid: {
-    show: true,
-    borderColor: '#E5E7EB',
-    strokeDashArray: 0,
-    position: 'back',
-    xaxis: {
-      lines: {
+
+const getWeightChartOptions = (): CustomApexOptions => {
+  const baseOptions = getComboChartOptions()
+  return {
+    ...baseOptions,
+    chart: {
+      type: 'line',
+      height: '100%',
+      fontFamily: 'inherit',
+      toolbar: {
         show: false
+      },
+      animations: {
+        enabled: false
+      }
+    },
+    colors: ['#319A6E'], // Зеленый цвет для графика веса
+    stroke: {
+      width: 3,
+      curve: 'smooth'
+    },
+    markers: {
+      size: 4,
+      colors: ['#319A6E'],
+      strokeColors: '#319A6E',
+      hover: {
+        size: 6
       }
     },
     yaxis: {
-      lines: {
-        show: false
-      }
+      show: true,
+      title: {
+        text: 'кг'
+      },
+      labels: {
+        formatter: (value: number) => `${value.toFixed(1)}`
+      },
+      min: undefined, // Позволяем ApexCharts автоматически определить минимум
     },
-    padding: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0
-    }
-  },
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      formatter: function(value: string) {
-        if (typeof value === 'string') {
-          return formatDate(value, selectedPeriod.value)
+    tooltip: {
+      shared: false,
+      intersect: true,
+      y: {
+        formatter: (value: number | null) => {
+          if (value === null || value === undefined) return '-'
+          return `${value.toFixed(1)} кг`
         }
-        const date = new Date(value)
-        return formatDate(date.toISOString(), selectedPeriod.value)
-      },
-      style: {
-        fontSize: '10px',
-        colors: '#6B7280'
-      },
-      rotateAlways: false,
-      datetimeUTC: false // Используем локальное время
-    },
-    axisBorder: {
-      show: false
-    },
-    axisTicks: {
-      show: true
-    }
-  },
-  yaxis: [
-    {
-      show: true,
-      title: {
-        text: 'ккал'
-      },
-      labels: {
-        formatter: (value: number) => `${Math.round(value)}`
-      }
-    },
-    {
-      show: true,
-      opposite: true,
-      title: {
-        text: 'г'
-      },
-      labels: {
-        formatter: (value: number) => `${Math.round(value)}`
-      }
-    }
-  ],
-  tooltip: {
-    enabled: true,
-    shared: true,
-    intersect: false,
-    theme: 'light',
-    style: {
-      fontSize: '12px'
-    },
-    y: {
-      formatter: (value: number | null, { seriesIndex }) => {
-        if (value === null || value === undefined) return '-'
-
-        const series = nutritionSeries.value[seriesIndex]
-        return `${value.toFixed(1)} ${series.unit}`
-      }
-    }
-  },
-  legend: {
-    show: false // Скрываем легенду, так как она вынесена отдельно
-  }
-})
-
-const getWeightChartOptions = (): CustomApexOptions => ({
-  ...getComboChartOptions(), // Наследуем базовые опции
-  stroke: {
-    width: 3,
-    curve: 'smooth'
-  },
-  colors: ['#319A6E'],
-  markers: {
-    size: 4,
-    hover: {
-      size: 6
-    }
-  },
-  yaxis: [{
-    show: true,
-    title: {
-      text: 'кг'
-    },
-    labels: {
-      formatter: (value: number) => `${value.toFixed(1)}`
-    }
-  }],
-  tooltip: {
-    y: {
-      formatter: (value: number | null) => {
-        if (value === null || value === undefined) return '-'
-        return `${value.toFixed(1)} кг`
       }
     }
   }
-})
+}
 // Initialize chart options
 const nutritionChartOptions = ref<CustomApexOptions>(getComboChartOptions())
 const weightChartOptions = ref<CustomApexOptions>(getWeightChartOptions())
@@ -668,6 +744,44 @@ const periods = [
   { value: 'month', label: 'month' },
   { value: '3months', label: '3months' }
 ]
+
+const formatDate = (dateValue: string | number, period: string): string => {
+  const date = new Date(dateValue)
+
+  // Функция для форматирования в нужный вид (DD.MM.YY)
+  const formatToPattern = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear().toString().slice(-2)
+    return `${day}.${month}.${year}`
+  }
+
+  // Определяем частоту отображения дат в зависимости от периода
+  const shouldShowDate = (date: Date): boolean => {
+    const day = date.getDate()
+
+    switch (period) {
+      case 'week':
+        // Для недели показываем каждый день
+        return true
+      case 'month':
+        // Для месяца показываем каждые 5 дней и последний день месяца
+        return day % 5 === 0 || day === getLastDayOfMonth(date)
+      case '3months':
+        // Для 3 месяцев показываем каждые 10 дней и последние дни месяцев
+        return day % 10 === 0 || day === getLastDayOfMonth(date)
+      default:
+        return true
+    }
+  }
+
+  // Вспомогательная функция для определения последнего дня месяца
+  const getLastDayOfMonth = (date: Date): number => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+  }
+
+  return shouldShowDate(date) ? formatToPattern(date) : ''
+}
 
 // Initial fetch
 fetchStatistics()
