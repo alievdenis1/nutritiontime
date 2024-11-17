@@ -17,7 +17,7 @@
 			</button>
 		</div>
 
-		<div class="p-4 space-y-6">
+		<div class="space-y-6">
 			<!-- Загрузка -->
 			<div
 				v-if="statisticsLoading"
@@ -37,12 +37,10 @@
 			<!-- Статистика -->
 			<div
 				v-else-if="statisticsData && chartsData"
-				class="space-y-6"
 			>
 				<!-- Комбинированный график калорий и БЖУ -->
 				<div
 					v-if="chartsData.calories.length > 0 && chartsData.macros.proteins.length > 0"
-					class="space-y-4"
 				>
 					<div class="h-[320px]">
 						<apexchart
@@ -55,7 +53,7 @@
 					<!-- Легенда графика -->
 					<div class="flex flex-wrap justify-center gap-4 text-sm">
 						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#FBF3E6] rounded" />
+							<div class="w-3 h-3 bg-[#f1e3cb] rounded" />
 							<span>{{ t('calories') }} ({{ t('kcal') }})</span>
 						</div>
 						<div class="flex items-center gap-2">
@@ -342,12 +340,12 @@ const getComboChartOptions = (): CustomApexOptions => ({
     height: '100%',
     fontFamily: 'inherit',
     toolbar: {
-      show: true,
+      show: false,
       tools: {
-        download: true,
+        download: false,
         zoom: false,
-        zoomin: true,
-        zoomout: true,
+        zoomin: false,
+        zoomout: false,
         pan: false,
         reset: false
       },
@@ -361,7 +359,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
     width: [0, 3, 3, 3], // [calories, proteins, fats, carbs]
     curve: 'smooth'
   },
-  colors: ['#FBF3E6', '#319A6E', '#FDC755', '#FFA767'],
+  colors: ['#f1e3cb', '#319A6E', '#FDC755', '#FFA767'],
   dataLabels: {
     enabled: false
   },
@@ -415,15 +413,17 @@ const getComboChartOptions = (): CustomApexOptions => ({
       show: false
     },
     axisTicks: {
-      show: false
+      show: true
     }
   },
   yaxis: [
     {
-      show: false // Скрываем оси
+      show: true,
+      // floating: true,
     },
     {
-      show: false // Скрываем оси
+      show: true,
+      opposite: true,
     }
   ],
   tooltip: {
@@ -439,7 +439,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
         if (value === null || value === undefined) {
           return '-'
         }
-        return `${value.toFixed(1)} ${t('kg')}`
+        return `${value.toFixed(1)} ${t('g')}`
       }
     }
   },
