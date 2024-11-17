@@ -39,3 +39,15 @@ export const logWeight = (data: WeightLogData) => {
 export const updateWeight = (logId: number, data: WeightLogData) => {
  return useApi<WeightLogData>('put', `/weight/log/${logId}`, data)
 }
+
+export function sendToSubscription() {
+ return useApi('get', '/subscription')
+}
+
+export function sendToProfile() {
+ return useApi('get', '/subscription')
+}
+
+export function sendToAddMeal() {
+ return useApi('get', '/subscription')
+}

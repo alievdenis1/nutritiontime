@@ -98,13 +98,13 @@
 								<template v-if="!profile">
 									<span
 										class="text-green hover:text-[#ff9142] transition-colors"
-										@click="WebApp.sendData('/profile')"
+										@click="handleToProfile()"
 									>{{ t('fillProfile') }}</span>
 								</template>
 								<template v-else-if="isToday">
 									<span
 										class="text-green underline transition-colors"
-										@click="WebApp.sendData('/add_meal')"
+										@click="handleAddMeal()"
 									>
 										{{ t('addMeal') }}
 									</span>
@@ -195,7 +195,7 @@
 			<VButton
 				:color="ButtonColors.Green"
 				class="mt-5"
-				@click="WebApp.sendData('/profile')"
+				@click="handleToProfile()"
 			>
 				{{ t('editProfile') }}
 			</VButton>
@@ -218,6 +218,7 @@
  import { MealsList } from './index'
  import { ButtonColors, VButton } from 'shared/components/Button'
  import WebApp from '@twa-dev/sdk'
+ import { sendToAddMeal, sendToProfile } from 'entities/Profile'
 
  interface Props {
   modelValue: string
@@ -242,8 +243,18 @@
   (e: 'meal-deleted'): void
  }>()
 
+ const handleToProfile = async () => {
+   await sendToProfile().execute()
+   WebApp.close()
+ }
+
  const handleMealDeleted = () => {
   emit('meal-deleted')
+ }
+
+ const handleAddMeal = async () => {
+   await sendToAddMeal().execute()
+   WebApp.close()
  }
 
  // Локализация

@@ -129,7 +129,10 @@
  import { ButtonColors, VButton } from '@/shared/components/Button'
  import { VLoading } from '@/shared/components/Loading'
  import { SubscriptionPlan, PaymentMethod, PaymentsList } from './index.ts'
- import { createPayment, getUserPayments, calculateAmount } from '../api'
+ import {
+   createPayment, getUserPayments, calculateAmount,
+   sendToSubscription
+ } from '../api'
  import type { SubscriptionPayment } from '../model'
  import WebApp from '@twa-dev/sdk'
  import localization from './ProfileStats.localization.json'
@@ -274,7 +277,8 @@
    isProcessing.value = true
 
    if (selectedPaymentMethod.value.type === 'upay') {
-    WebApp.sendData('/subscription')
+     await sendToSubscription().execute()
+     WebApp.close()
     return
    }
 
