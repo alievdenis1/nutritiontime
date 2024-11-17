@@ -49,7 +49,7 @@
 		<VButton
 			:color="ButtonColors.Green"
 			class="mt-5"
-			@click="WebApp.sendData('/profile')"
+			@click="handleToProfile()"
 		>
 			{{ t('fillProfile') }}
 		</VButton>
@@ -66,7 +66,7 @@
 <script setup lang="ts">
  import { ref, computed, onMounted, watch } from 'vue'
  import { DailyNutritionStats, StatisticsTab } from './index'
- import { getProfile, getMealStats } from '../api'
+ import { getProfile, getMealStats, sendToProfile } from '../api'
  import { TabsContent, TabsList, TabsMain, TabsTrigger } from 'shared/components/ui/tabs'
  import { useRouter } from 'vue-router'
  import localization from './ProfileStats.localization.json'
@@ -105,6 +105,11 @@
   start_date: selectedDate.value,
   end_date: selectedDate.value
  })
+
+ const handleToProfile = async () => {
+   await sendToProfile().execute()
+   WebApp.close()
+ }
 
  // Вычисляемые свойства
  const loading = computed(() => profileApi.loading.value || mealStatsApi.loading.value)
