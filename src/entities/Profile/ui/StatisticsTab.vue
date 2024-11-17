@@ -55,23 +55,20 @@
 						/>
 					</div>
 					<!-- Легенда графика -->
-					<div class="flex flex-wrap justify-center gap-4 text-sm">
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#f1e3cb] rounded" />
-							<span>{{ t('calories') }} ({{ t('kcal') }})</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#319A6E] rounded" />
-							<span>{{ t('proteins') }} ({{ t('g') }})</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#FDC755] rounded" />
-							<span>{{ t('fats') }} ({{ t('g') }})</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 bg-[#FFA767] rounded" />
-							<span>{{ t('carbs') }} ({{ t('g') }})</span>
-						</div>
+					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4">
+						<button
+							v-for="series in nutritionSeries"
+							:key="series.id"
+							class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 transition-all"
+							:class="{ 'font-bold': series.visible }"
+							@click="toggleSeries(series.id)"
+						>
+							<div
+								class="w-3 h-3 rounded"
+								:style="{ backgroundColor: series.color }"
+							/>
+							<span>{{ t(series.label) }} ({{ series.unit }})</span>
+						</button>
 					</div>
 				</div>
 
@@ -239,23 +236,84 @@ import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
 import type { ApexOptions } from 'apexcharts'
 import { WeightInput } from './index'
+const toggleSeries = (seriesId: string) => {
+  const series = nutritionSeries.value.find(s => s.id === seriesId)
+  if (series) {
+    series.visible = !series.visible
+    updateCharts() // Обновляем графики
+  }
+}
 
-const todayWeightLog = computed(() => {
-  if (!chartsData.value?.weight.length) return null
+interface ChartData {
+  date: string
+  value: number
+}
 
-  const today = new Date().toISOString().split('T')[0]
-  return chartsData.value.weight.find(w => w.date === today)
-})
+interface MacrosData {
+  proteins: ChartData[]
+  fats: ChartData[]
+  carbs: ChartData[]
+}
+
+interface ChartsData {
+  calories: ChartData[]
+  macros: MacrosData
+  weight: ChartData[]
+}
+
+// Тип для серии данных
+interface NutritionSeries {
+  id: 'calories' | 'proteins' | 'fats' | 'carbs'
+  label: string
+  color: string
+  visible: boolean
+  unit: string
+}
+
+const nutritionSeries = ref<NutritionSeries[]>([
+  { id: 'calories', label: 'calories', color: '#f1e3cb', visible: true, unit: 'ккал' },
+  { id: 'proteins', label: 'proteins', color: '#319A6E', visible: true, unit: 'г' },
+  { id: 'fats', label: 'fats', color: '#FDC755', visible: true, unit: 'г' },
+  { id: 'carbs', label: 'carbs', color: '#FFA767', visible: true, unit: 'г' }
+])
+
+// Функция для получения данных серии
+const getSeriesData = (data: ChartsData | null, seriesId: NutritionSeries['id']): number[] => {
+  if (!data) return []
+
+  if (seriesId === 'calories') {
+    return data.calories.map(item => item.value)
+  }
+  return data.macros[seriesId].map(item => item.value)
+}
+
+// Обновление графиков с учетом видимости серий
+const updateCharts = () => {
+  if (!chartsData.value) return
+
+  const dates = chartsData.value.calories.map(item => item.date)
+  const comboChartOptions = getComboChartOptions()
+
+  comboChartOptions.xaxis = {
+    ...comboChartOptions.xaxis,
+    categories: dates
+  }
+
+  const visibleSeries = nutritionSeries.value
+      .filter(s => s.visible)
+      .map(s => ({
+        name: t(s.label),
+        type: s.id === 'calories' ? 'column' : 'line',
+        data: getSeriesData(chartsData.value, s.id)
+      }))
+
+  nutritionChartOptions.value.series = visibleSeries
+  nutritionChartKey.value++
+}
 
 // Обработчик обновления веса
 const handleWeightUpdated = () => {
   fetchStatistics() // Перезагружаем статистику
-}
-
-// Types
-interface ChartData {
-  date: string
-  value: number
 }
 
 export interface StatisticsResponse {
@@ -317,26 +375,29 @@ const nutritionChartKey = ref(0)
 const weightChartKey = ref(0)
 
 // Date formatting
+// Форматирование даты с учетом периода
 const formatDate = (date: string, period: string): string => {
   const dateObj = new Date(date)
-  if (period === '3months') {
-    // Для трехмесячного периода показываем даты каждые 5 дней
-    const day = dateObj.getDate()
-    if (day % 5 === 0) {
-      return dateObj.toLocaleDateString('ru-RU', {
-        month: 'short',
-        year: 'numeric'
-      })
-    }
-    return ''
-  }
-  // Для остальных периодов показываем месяц и год
-  return dateObj.toLocaleDateString('ru-RU', {
-    month: 'short',
-    year: 'numeric'
-  })
-}
+  const day = dateObj.getDate()
+  const month = dateObj.getMonth() + 1
+  const year = dateObj.getFullYear().toString().slice(2)
 
+  // Определяем, нужно ли показывать эту дату
+  const shouldShowDate = () => {
+    switch (period) {
+      case 'week':
+        return true
+      case 'month':
+        return day % 3 === 0 // Показывать каждый третий день
+      case '3months':
+        return day % 7 === 0 // Показывать каждый седьмой день
+      default:
+        return true
+    }
+  }
+
+  return shouldShowDate() ? `${day}.${month}.${year}` : ''
+}
 // Base chart options
 const getComboChartOptions = (): CustomApexOptions => ({
   chart: {
@@ -423,11 +484,22 @@ const getComboChartOptions = (): CustomApexOptions => ({
   yaxis: [
     {
       show: true,
-      // floating: true,
+      title: {
+        text: 'ккал'
+      },
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
     },
     {
       show: true,
       opposite: true,
+      title: {
+        text: 'г'
+      },
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
     }
   ],
   tooltip: {
@@ -439,11 +511,11 @@ const getComboChartOptions = (): CustomApexOptions => ({
       fontSize: '12px'
     },
     y: {
-      formatter: (value: number | null) => {
-        if (value === null || value === undefined) {
-          return '-'
-        }
-        return `${value.toFixed(1)} ${t('g')}`
+      formatter: (value: number | null, { seriesIndex }) => {
+        if (value === null || value === undefined) return '-'
+
+        const series = nutritionSeries.value[seriesIndex]
+        return `${value.toFixed(1)} ${series.unit}`
       }
     }
   },
@@ -463,6 +535,23 @@ const getWeightChartOptions = (): CustomApexOptions => ({
     size: 4,
     hover: {
       size: 6
+    }
+  },
+  yaxis: [{
+    show: true,
+    title: {
+      text: 'кг'
+    },
+    labels: {
+      formatter: (value: number) => `${value.toFixed(1)}`
+    }
+  }],
+  tooltip: {
+    y: {
+      formatter: (value: number | null) => {
+        if (value === null || value === undefined) return '-'
+        return `${value.toFixed(1)} кг`
+      }
     }
   }
 })
@@ -522,56 +611,25 @@ const fetchStatistics = async () => {
 }
 
 // Watchers
+// Обновляем watch для chartsData
 watch(chartsData, (newData) => {
   if (!newData) return
 
   if (newData.calories.length > 0 && newData.macros.proteins.length > 0) {
-    const dates = newData.calories.map(item => item.date)
-    const comboChartOptions = getComboChartOptions()
-
-    comboChartOptions.xaxis = {
-      ...comboChartOptions.xaxis,
-      categories: dates
-    }
-
-    comboChartOptions.series = [
-      {
-        name: t('calories'),
-        type: 'column',
-        data: newData.calories.map(item => item.value)
-      },
-      {
-        name: t('proteins'),
-        type: 'line',
-        data: newData.macros.proteins.map(item => item.value)
-      },
-      {
-        name: t('fats'),
-        type: 'line',
-        data: newData.macros.fats.map(item => item.value)
-      },
-      {
-        name: t('carbs'),
-        type: 'line',
-        data: newData.macros.carbs.map(item => item.value)
-      }
-    ]
-
-    nutritionChartOptions.value = comboChartOptions
-    nutritionChartKey.value++
+    updateCharts()
   }
 
-  // Update weight chart
-  if (newData.calories.length > 0) {
+  // Обновление графика веса
+  if (newData.weight.length > 0) {
     const dates = newData.calories.map(item => item.date)
-    const newWeightOptions = getComboChartOptions() // Используем базовые настройки
+    const weightOptions = getWeightChartOptions()
 
-    newWeightOptions.xaxis = {
-      ...newWeightOptions.xaxis,
+    weightOptions.xaxis = {
+      ...weightOptions.xaxis,
       categories: dates
     }
 
-    newWeightOptions.series = [{
+    weightOptions.series = [{
       name: t('weight'),
       type: 'line',
       data: dates.map(date => {
@@ -580,21 +638,7 @@ watch(chartsData, (newData) => {
       })
     }]
 
-    newWeightOptions.colors = ['#319A6E']
-    newWeightOptions.stroke = {
-      width: 3,
-      curve: 'smooth'
-    }
-
-    newWeightOptions.yaxis = [{
-      show: false,
-      labels: {
-        formatter: (value: number) => `${value} ${t('kg')}`
-      }
-    }]
-
-    // Обновляем опции
-    weightChartOptions.value = newWeightOptions
+    weightChartOptions.value = weightOptions
     weightChartKey.value++
   }
 })
