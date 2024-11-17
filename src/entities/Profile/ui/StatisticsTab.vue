@@ -291,12 +291,13 @@ const getSeriesData = (data: ChartsData | null, seriesId: NutritionSeries['id'])
 const updateCharts = () => {
   if (!chartsData.value) return
 
-  const dates = chartsData.value.calories.map(item => item.date)
+  const dates = chartsData.value.calories.map(item => new Date(item.date).getTime())
   const comboChartOptions = getComboChartOptions()
 
   comboChartOptions.xaxis = {
     ...comboChartOptions.xaxis,
-    categories: dates
+    categories: dates,
+    type: 'datetime'
   }
 
   const visibleSeries = nutritionSeries.value
@@ -307,8 +308,37 @@ const updateCharts = () => {
         data: getSeriesData(chartsData.value, s.id)
       }))
 
-  nutritionChartOptions.value.series = visibleSeries
+  nutritionChartOptions.value = {
+    ...comboChartOptions,
+    series: visibleSeries
+  }
   nutritionChartKey.value++
+}
+
+const updateWeightChart = (newData: ChartsData) => {
+  if (newData.weight.length === 0) return
+
+  const dates = newData.calories.map(item => new Date(item.date).getTime())
+  const weightOptions = getWeightChartOptions()
+
+  weightOptions.xaxis = {
+    ...weightOptions.xaxis,
+    categories: dates,
+    type: 'datetime'
+  }
+
+  weightOptions.series = [{
+    name: t('weight'),
+    type: 'line',
+    data: dates.map(timestamp => {
+      const date = new Date(timestamp).toISOString().split('T')[0]
+      const weightData = newData.weight.find(w => w.date === date)
+      return weightData ? weightData.value : null
+    })
+  }]
+
+  weightChartOptions.value = weightOptions
+  weightChartKey.value++
 }
 
 // Обработчик обновления веса
@@ -376,10 +406,11 @@ const weightChartKey = ref(0)
 
 // Date formatting
 // Форматирование даты с учетом периода
+// Обновленная функция форматирования даты
 const formatDate = (date: string, period: string): string => {
   const dateObj = new Date(date)
-  const day = dateObj.getDate()
-  const month = dateObj.getMonth() + 1
+  const day = String(dateObj.getDate()).padStart(2, '0')
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
   const year = dateObj.getFullYear().toString().slice(2)
 
   // Определяем, нужно ли показывать эту дату
@@ -388,9 +419,9 @@ const formatDate = (date: string, period: string): string => {
       case 'week':
         return true
       case 'month':
-        return day % 3 === 0 // Показывать каждый третий день
+        return dateObj.getDate() % 3 === 0 // Каждый третий день
       case '3months':
-        return day % 7 === 0 // Показывать каждый седьмой день
+        return dateObj.getDate() % 7 === 0 // Каждый седьмой день
       default:
         return true
     }
@@ -462,17 +493,21 @@ const getComboChartOptions = (): CustomApexOptions => ({
     }
   },
   xaxis: {
-    type: 'category',
-    categories: [],
+    type: 'datetime',
     labels: {
       formatter: function(value: string) {
-        return formatDate(value, selectedPeriod.value)
+        if (typeof value === 'string') {
+          return formatDate(value, selectedPeriod.value)
+        }
+        const date = new Date(value)
+        return formatDate(date.toISOString(), selectedPeriod.value)
       },
       style: {
         fontSize: '10px',
         colors: '#6B7280'
       },
-      rotateAlways: false
+      rotateAlways: false,
+      datetimeUTC: false // Используем локальное время
     },
     axisBorder: {
       show: false
@@ -619,27 +654,8 @@ watch(chartsData, (newData) => {
     updateCharts()
   }
 
-  // Обновление графика веса
   if (newData.weight.length > 0) {
-    const dates = newData.calories.map(item => item.date)
-    const weightOptions = getWeightChartOptions()
-
-    weightOptions.xaxis = {
-      ...weightOptions.xaxis,
-      categories: dates
-    }
-
-    weightOptions.series = [{
-      name: t('weight'),
-      type: 'line',
-      data: dates.map(date => {
-        const weightData = newData.weight.find(w => w.date === date)
-        return weightData ? weightData.value : null
-      })
-    }]
-
-    weightChartOptions.value = weightOptions
-    weightChartKey.value++
+    updateWeightChart(newData)
   }
 })
 
