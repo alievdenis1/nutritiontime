@@ -41,13 +41,13 @@ export const updateWeight = (logId: number, data: WeightLogData) => {
 }
 
 export function sendToSubscription() {
- return useApi('get', '/subscription')
+ return useApi('get', '/to-subscription')
 }
 
 export function sendToProfile() {
- return useApi('get', '/subscription')
+ return useApi('get', '/to-send-profile')
 }
 
 export function sendToAddMeal() {
- return useApi('get', '/subscription')
+ return useApi('get', '/to-add-meal')
 }
