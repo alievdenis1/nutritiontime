@@ -504,24 +504,18 @@ const toggleSeries = (seriesId: string) => {
 const updateWeightChart = (newData: ChartsData) => {
   if (!newData.weight.length) return
 
-  // Сортируем данные веса по дате
-  const sortedWeightData = [...newData.weight].sort((a, b) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-  )
-
   const { start, end } = getDateRange(selectedPeriod.value)
   const dates = generateDateRange(start, end)
+
+  // Заполняем пропущенные дни последним известным весом
+  const weightValues = fillMissingWeightData(newData.weight, dates)
 
   weightChartOptions.value = {
     ...getWeightChartOptions(),
     series: [{
       name: t('weight'),
       type: 'line',
-      data: dates.map(timestamp => {
-        const date = new Date(timestamp).toISOString().split('T')[0]
-        const weightData = sortedWeightData.find(w => w.date === date)
-        return weightData ? weightData.value : null
-      })
+      data: weightValues
     }],
     xaxis: {
       type: 'datetime',
@@ -852,6 +846,25 @@ const generateDateRange = (start: Date, end: Date) => {
   }
 
   return dates
+}
+
+const fillMissingWeightData = (weightData: ChartData[], dates: number[]): (number | null)[] => {
+  let lastKnownWeight: number | null = null
+  const sortedWeightData = [...weightData].sort((a, b) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+
+  return dates.map(timestamp => {
+    const date = new Date(timestamp).toISOString().split('T')[0]
+    const weightDataPoint = sortedWeightData.find(w => w.date === date)
+
+    if (weightDataPoint) {
+      lastKnownWeight = weightDataPoint.value
+      return weightDataPoint.value
+    }
+
+    return lastKnownWeight
+  })
 }
 
 // Initial fetch
