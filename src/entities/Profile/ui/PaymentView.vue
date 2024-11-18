@@ -289,7 +289,6 @@
    isProcessing.value = true
 
    if (selectedPaymentMethod.value.type === 'upay') {
-     console.log(selectedPlan.value.months )
      await sendToSubscription({ months: selectedPlan.value.months }).execute()
      WebApp.close()
     return
