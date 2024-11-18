@@ -96,8 +96,7 @@
 					</div>
 
 					<WeightInput
-						:current-log-id="todayWeightLog?.id"
-						:current-weight="todayWeightLog?.weight"
+						:today-weight="todayWeight"
 						@updated="handleWeightUpdated"
 					/>
 				</div>
@@ -264,6 +263,7 @@ interface CustomApexOptions extends ApexOptions {
 }
 
 interface ChartData {
+  id?: number // Добавляем id в базовый интерфейс
   date: string
   value: number
 }
@@ -714,6 +714,20 @@ const fetchStatistics = async () => {
     statisticsLoading.value = false
   }
 }
+
+const todayWeight = computed(() => {
+  if (!statisticsData.value?.charts.weight.length) return null
+
+  const today = new Date().toISOString().split('T')[0]
+  const lastWeight = statisticsData.value.charts.weight.find(
+      entry => entry.date === today
+  )
+
+  return lastWeight ? {
+    weight: lastWeight.value,
+    date: lastWeight.date
+  } : null
+})
 
 // Watchers
 // Обновляем watch для chartsData
