@@ -372,7 +372,8 @@ interface YAxisConfig {
 const updateCharts = () => {
   if (!chartsData.value) return
 
-  const dates = chartsData.value.calories.map(item => new Date(item.date).getTime())
+  const { start, end } = getDateRange(selectedPeriod.value)
+  const dates = generateDateRange(start, end)
 
   const visibleSeries = nutritionSeries.value
       .filter(s => s.visible)
@@ -503,24 +504,30 @@ const toggleSeries = (seriesId: string) => {
 const updateWeightChart = (newData: ChartsData) => {
   if (!newData.weight.length) return
 
-  // Получаем все даты из диапазона
-
   // Сортируем данные веса по дате
   const sortedWeightData = [...newData.weight].sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
   )
+
+  const { start, end } = getDateRange(selectedPeriod.value)
+  const dates = generateDateRange(start, end)
 
   weightChartOptions.value = {
     ...getWeightChartOptions(),
     series: [{
       name: t('weight'),
       type: 'line',
-      data: sortedWeightData.map(item => item.value)
+      data: dates.map(timestamp => {
+        const date = new Date(timestamp).toISOString().split('T')[0]
+        const weightData = sortedWeightData.find(w => w.date === date)
+        return weightData ? weightData.value : null
+      })
     }],
     xaxis: {
-      ...getWeightChartOptions().xaxis,
       type: 'datetime',
-      categories: sortedWeightData.map(item => new Date(item.date).getTime()),
+      categories: dates,
+      tickAmount: selectedPeriod.value === 'week' ? 7 :
+          selectedPeriod.value === 'month' ? 6 : 9,
       labels: {
         formatter: function(value: string) {
           return formatDate(value, selectedPeriod.value)
@@ -535,29 +542,8 @@ const updateWeightChart = (newData: ChartsData) => {
       }
     },
     stroke: {
-      width: 3,
-      curve: 'smooth', // Делаем линию плавной
-      lineCap: 'round'
-    },
-    chart: {
-      type: 'line',
-      height: '100%',
-      fontFamily: 'inherit',
-      toolbar: {
-        show: false
-      },
-      animations: {
-        enabled: true, // Включаем анимации
-        speed: 800,
-        animateGradually: {
-          enabled: true,
-          delay: 150
-        },
-        dynamicAnimation: {
-          enabled: true,
-          speed: 350
-        }
-      }
+      curve: 'smooth',
+      width: 3
     },
     markers: {
       size: 5,
@@ -567,24 +553,11 @@ const updateWeightChart = (newData: ChartsData) => {
       hover: {
         size: 7
       }
-    },
-    tooltip: {
-      shared: false,
-      intersect: true,
-      x: {
-        formatter: function(value: number) {
-          return formatDate(value.toString(), selectedPeriod.value)
-        }
-      },
-      y: {
-        formatter: (value: number) => `${value.toFixed(1)} ${t('kg')}`
-      }
     }
   }
 
   weightChartKey.value++
 }
-
 // Обработчик обновления веса
 const handleWeightUpdated = () => {
   fetchStatistics() // Перезагружаем статистику
@@ -644,79 +617,37 @@ const weightChartKey = ref(0)
 // Форматирование даты с учетом периода
 // Обновленная функция форматирования даты
 // Base chart options
-const getComboChartOptions = (): CustomApexOptions => {
-  const baseOptions: CustomApexOptions = {
-    chart: {
-      type: 'line',
-      height: '100%',
-      fontFamily: 'inherit',
-      toolbar: {
-        show: false
-      },
-      animations: {
-        enabled: false
-      },
-      stacked: false
-    },
-    // Добавляем пустой массив series в базовые настройки
-    series: [],
-    stroke: {
-      width: 3,
-      curve: 'smooth'
-    },
-    plotOptions: {
-      bar: {
-        columnWidth: '60%'
-      }
-    },
-    markers: {
-      size: 4,
-      hover: {
-        size: 6
-      }
-    },
-    tooltip: {
-      shared: true,
-      intersect: false,
-      y: {
-        formatter: (value: number | null, { seriesIndex }) => {
-          if (value === null || value === undefined) return '-'
-          const series = nutritionSeries.value[seriesIndex]
-          return `${value.toFixed(1)} ${series.unit}`
-        }
-      }
-    },
-    legend: {
+const getComboChartOptions = (): CustomApexOptions => ({
+  chart: {
+    type: 'line',
+    height: '100%',
+    fontFamily: 'inherit',
+    toolbar: {
       show: false
     },
-    xaxis: {
-      type: 'datetime',
-      labels: {
-        formatter: function(value: string) {
-          return formatDate(value, selectedPeriod.value)
-        },
-        style: {
-          fontSize: '10px',
-          colors: '#6B7280'
-        },
-        rotateAlways: false,
-        hideOverlappingLabels: true, // Скрываем перекрывающиеся метки
-        maxHeight: 50
+    animations: {
+      enabled: false,
+    }
+  },
+  xaxis: {
+    type: 'datetime',
+    labels: {
+      formatter: function(value: string) {
+        return formatDate(value, selectedPeriod.value)
       },
-      tickAmount: selectedPeriod.value === 'week' ? 7 :
-          selectedPeriod.value === 'month' ? 6 : 9, // Контролируем количество отображаемых тиков
-      axisBorder: {
-        show: false
+      style: {
+        fontSize: '10px',
+        colors: '#6B7280'
       },
-      axisTicks: {
-        show: true
-      }
+      rotateAlways: false,
+      hideOverlappingLabels: true,
+      maxHeight: 50
     },
-  }
-
-  return baseOptions
-}
-
+    tickAmount: selectedPeriod.value === 'week' ? 7 :
+        selectedPeriod.value === 'month' ? 6 : 9
+  },
+  series: [] // добавляем пустой массив серий по умолчанию
+})
 const getWeightChartOptions = (): CustomApexOptions => {
   const baseOptions = getComboChartOptions()
   return {
@@ -858,9 +789,8 @@ const periods = [
 ]
 
 const formatDate = (dateValue: string | number, period: string): string => {
-  const date = new Date(dateValue)
+  const date = new Date(Number(dateValue))
 
-  // Функция для форматирования в нужный вид (DD.MM.YY)
   const formatToPattern = (date: Date): string => {
     const day = date.getDate().toString().padStart(2, '0')
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -874,25 +804,54 @@ const formatDate = (dateValue: string | number, period: string): string => {
 
     switch (period) {
       case 'week':
-        // Для недели показываем каждый день
         return true
       case 'month':
-        // Для месяца показываем каждые 5 дней и последний день месяца
         return day % 5 === 0 || day === getLastDayOfMonth(date)
       case '3months':
-        // Для 3 месяцев показываем каждые 10 дней и последние дни месяцев
         return day % 10 === 0 || day === getLastDayOfMonth(date)
       default:
         return true
     }
   }
 
-  // Вспомогательная функция для определения последнего дня месяца
   const getLastDayOfMonth = (date: Date): number => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
   }
 
   return shouldShowDate(date) ? formatToPattern(date) : ''
+}
+
+// Функция для получения диапазона дат в зависимости от периода
+const getDateRange = (period: string) => {
+  const end = new Date() // Сегодняшний день
+  const start = new Date()
+
+  switch(period) {
+    case 'week':
+      start.setDate(end.getDate() - 6) // последние 7 дней включая сегодня
+      break
+    case 'month':
+      start.setDate(end.getDate() - 29) // последние 30 дней включая сегодня
+      break
+    case '3months':
+      start.setDate(end.getDate() - 89) // последние 90 дней включая сегодня
+      break
+  }
+
+  return { start, end }
+}
+
+// Функция для генерации массива дат
+const generateDateRange = (start: Date, end: Date) => {
+  const dates = []
+  const current = new Date(start)
+
+  while (current <= end) {
+    dates.push(new Date(current).getTime())
+    current.setDate(current.getDate() + 1)
+  }
+
+  return dates
 }
 
 // Initial fetch
