@@ -64,8 +64,10 @@
 									:class="{
 										'text-gray-400': !isFilledDate(formatDate(data.day)),
 										'font-bold text-emerald-600': isFilledDate(formatDate(data.day)),
-										'bg-emerald-50': isCurrentDate(data.day)
+										'bg-emerald-50': isCurrentDate(data.day),
+										'opacity-50 cursor-not-allowed': isFutureDate(data.day)
 									}"
+									@click="handleDateClick(data.day)"
 								>
 									{{ new Date(data.day).getDate() }}
 								</div>
@@ -268,15 +270,34 @@
  const today = computed(() =>
      formatDateWithTimezone(new Date(), props.profile?.timezone || 0)
  )
+
+ // Добавляем проверку на будущую дату
+ const isFutureDate = (date: string) => {
+   const selectedDate = new Date(date)
+   const currentDate = new Date(today.value)
+   selectedDate.setHours(0, 0, 0, 0)
+   currentDate.setHours(0, 0, 0, 0)
+   return selectedDate > currentDate
+ }
+
+ // Добавляем обработчик клика по дате
+ const handleDateClick = (date: string) => {
+   if (isFutureDate(date)) {
+     return // Игнорируем клик по будущим датам
+   }
+   calendarDate.value = new Date(date)
+ }
  // Календарь
  const calendarDate = computed({
    get: () => new Date(props.modelValue),
    set: (value: Date) => {
-     emit('update:modelValue', formatDateWithTimezone(value, props.profile?.timezone || 0))
-     showCalendar.value = false
+     // Проверяем, не является ли выбранная дата будущей
+     if (!isFutureDate(value.toISOString())) {
+       emit('update:modelValue', formatDateWithTimezone(value, props.profile?.timezone || 0))
+       showCalendar.value = false
+     }
    }
  })
-
  // Закрытие календаря при клике вне
  const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
