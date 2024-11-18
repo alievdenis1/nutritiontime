@@ -445,24 +445,25 @@ const toggleSeries = (seriesId: string) => {
 const updateWeightChart = (newData: ChartsData) => {
   if (!newData.weight.length) return
 
+  // Получаем все даты из диапазона
   const dates = newData.calories.map(item => new Date(item.date).getTime())
-  const weightOptions = getWeightChartOptions()
+
+  // Сортируем данные веса по дате
+  const sortedWeightData = [...newData.weight].sort((a, b) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
 
   weightChartOptions.value = {
-    ...weightOptions,
+    ...getWeightChartOptions(),
     series: [{
       name: t('weight'),
       type: 'line',
-      data: dates.map(timestamp => {
-        const date = new Date(timestamp).toISOString().split('T')[0]
-        const weightData = newData.weight.find(w => w.date === date)
-        return weightData ? weightData.value : null
-      })
+      data: sortedWeightData.map(item => item.value)
     }],
     xaxis: {
-      ...weightOptions.xaxis,
+      ...getWeightChartOptions().xaxis,
       type: 'datetime',
-      categories: dates,
+      categories: sortedWeightData.map(item => new Date(item.date).getTime()),
       labels: {
         formatter: function(value: string) {
           return formatDate(value, selectedPeriod.value)
@@ -474,6 +475,53 @@ const updateWeightChart = (newData: ChartsData) => {
         rotateAlways: false,
         hideOverlappingLabels: true,
         maxHeight: 50
+      }
+    },
+    stroke: {
+      width: 3,
+      curve: 'smooth', // Делаем линию плавной
+      lineCap: 'round'
+    },
+    chart: {
+      type: 'line',
+      height: '100%',
+      fontFamily: 'inherit',
+      toolbar: {
+        show: false
+      },
+      animations: {
+        enabled: true, // Включаем анимации
+        easing: 'easeinout',
+        speed: 800,
+        animateGradually: {
+          enabled: true,
+          delay: 150
+        },
+        dynamicAnimation: {
+          enabled: true,
+          speed: 350
+        }
+      }
+    },
+    markers: {
+      size: 5,
+      colors: ['#fff'],
+      strokeColors: '#319A6E',
+      strokeWidth: 2,
+      hover: {
+        size: 7
+      }
+    },
+    tooltip: {
+      shared: false,
+      intersect: true,
+      x: {
+        formatter: function(value: number) {
+          return formatDate(value.toString(), selectedPeriod.value)
+        }
+      },
+      y: {
+        formatter: (value: number) => `${value.toFixed(1)} ${t('kg')}`
       }
     }
   }
