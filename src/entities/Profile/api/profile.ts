@@ -36,10 +36,6 @@ export const logWeight = (data: WeightLogData) => {
  return useApi<WeightLogData>('post', '/weight/log', data)
 }
 
-export const updateWeight = (logId: number, data: WeightLogData) => {
- return useApi<WeightLogData>('put', `/weight/log/${logId}`, data)
-}
-
 interface SubscriptionParams {
  months?: number
 }
