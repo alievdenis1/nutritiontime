@@ -12,7 +12,7 @@
 			>{{ t('extend') }}</span>
 		</div>
 		<TabsMain
-			default-value="report"
+			:default-value="defaultTab"
 		>
 			<TabsList>
 				<TabsTrigger value="report">
@@ -73,6 +73,14 @@
  import { useTranslation } from '@/shared/lib/i18n'
  import { ButtonColors, VButton } from 'shared/components/Button'
  import WebApp from '@twa-dev/sdk'
+ import { useRoute } from 'vue-router'
+
+ const route = useRoute()
+
+ // Определяем начальную вкладку на основе параметра URL
+ const defaultTab = computed(() => {
+   return route.query.tab === 'statistics' ? 'statistic' : 'report'
+ })
 
  const { t } = useTranslation(localization)
 
