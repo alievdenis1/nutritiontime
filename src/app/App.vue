@@ -59,7 +59,7 @@ const handleStartParamRedirect = () => {
     const months = startParam.replace('payment_', '')
     if (['1', '3', '12'].includes(months)) {
       router.push({
-        name: '/',
+        name: 'payment',
         query: { months }
       })
     }
@@ -69,7 +69,7 @@ const handleStartParamRedirect = () => {
   // Обработка параметра statistics
   if (startParam === 'statistics') {
     router.push({
-      name: 'profile',
+      name: 'main',
       query: { tab: 'statistics' }
     })
   }
