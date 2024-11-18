@@ -50,7 +50,6 @@ const options = {
 
 const handleStartParamRedirect = () => {
   const startParam = WebApp.initDataUnsafe.start_param
-  console.log('startParam', startParam)
 
   if (!startParam) return
 

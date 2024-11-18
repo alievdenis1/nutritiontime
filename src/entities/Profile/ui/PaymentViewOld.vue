@@ -318,7 +318,6 @@
 
      tonConnectUI.sendTransaction(transaction)
       .then((result: SendTransactionResponse) => {
-       console.log('Transaction sent:', result)
        if (paymentInfo.value) {
         monitorPaymentStatus(paymentInfo.value.payment_id)
        }
