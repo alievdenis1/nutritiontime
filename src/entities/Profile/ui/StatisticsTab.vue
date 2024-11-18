@@ -55,7 +55,7 @@
 						/>
 					</div>
 					<!-- Легенда графика -->
-					<div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4">
+					<div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2 p-2 text-sm">
 						<button
 							v-for="series in nutritionSeries"
 							:key="series.id"
@@ -639,6 +639,9 @@ const getComboChartOptions = (): CustomApexOptions => ({
     },
     tickAmount: selectedPeriod.value === 'week' ? 7 :
         selectedPeriod.value === 'month' ? 6 : 9
+  },
+  legend: {
+    show: false // Отключаем встроенную легенду
   },
   series: [] // добавляем пустой массив серий по умолчанию
 })
