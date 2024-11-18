@@ -330,10 +330,42 @@ const nutritionSeries = ref<NutritionSeries[]>([
 const getSeriesData = (data: ChartsData | null, seriesId: NutritionSeries['id']): number[] => {
   if (!data) return []
 
+  let values: ChartData[] = []
   if (seriesId === 'calories') {
-    return data.calories.map(item => item.value)
+    values = data.calories
+  } else {
+    values = data.macros[seriesId]
   }
-  return data.macros[seriesId].map(item => item.value)
+
+  // Проверяем наличие данных и преобразуем их
+  if (!values || values.length === 0) return []
+
+  return values.map(item => item.value)
+}
+
+// Обновляем интерфейсы
+interface TooltipContext {
+  seriesIndex: number;
+  w: {
+    config: {
+      series: Array<{
+        name: string;
+      }>;
+    };
+  };
+}
+
+interface YAxisConfig {
+  seriesName?: string;
+  title?: {
+    text: string;
+  };
+  min?: number;
+  show?: boolean;
+  opposite?: boolean;
+  labels?: {
+    formatter: (value: number) => string;
+  };
 }
 
 // Обновление графиков с учетом видимости серий
@@ -342,89 +374,115 @@ const updateCharts = () => {
 
   const dates = chartsData.value.calories.map(item => new Date(item.date).getTime())
 
-  // Обновляем оба графика с одинаковыми настройками дат
-  const commonXAxisSettings = {
-    ...getComboChartOptions().xaxis,
-    categories: dates
-  }
-
-  // Сначала подготовим все серии независимо от их видимости
-  const allSeries = nutritionSeries.value.map(s => ({
-    id: s.id,
-    name: t(s.label),
-    type: s.type,
-    color: s.color,
-    data: getSeriesData(chartsData.value, s.id),
-    visible: s.visible
-  }))
-
-  // Отделяем калории от остальных серий
-  const caloriesSeries = allSeries.find(s => s.id === 'calories')
-  const nutrientSeries = allSeries.filter(s => s.id !== 'calories')
-
-  // Формируем финальные серии для отображения
-  const visibleSeries = []
-
-  // Добавляем калории, если они видимы
-  if (caloriesSeries?.visible) {
-    visibleSeries.push({
-      name: caloriesSeries.name,
-      type: caloriesSeries.type,
-      color: caloriesSeries.color,
-      data: caloriesSeries.data,
-      yAxisIndex: 0 // Калории всегда на первой оси
-    })
-  }
-
-  // Добавляем видимые нутриенты
-  nutrientSeries
+  const visibleSeries = nutritionSeries.value
       .filter(s => s.visible)
-      .forEach(series => {
-        visibleSeries.push({
-          name: series.name,
-          type: series.type,
-          color: series.color,
-          data: series.data,
-          yAxisIndex: 1 // Нутриенты всегда на второй оси
-        })
-      })
+      .map(series => ({
+        name: t(series.label),
+        type: series.type as 'line' | 'column',
+        color: series.color,
+        data: getSeriesData(chartsData.value, series.id)
+      }))
 
-  // Формируем настройки осей
-  const yAxisConfig = [
-    {
-      seriesName: 'calories',
-      min: 0,
-      show: caloriesSeries?.visible ?? false,
-      labels: {
-        formatter: (value: number) => `${Math.round(value)}`
+  if (visibleSeries.length === 0) {
+    nutritionChartOptions.value = getComboChartOptions()
+    nutritionChartKey.value++
+    return
+  }
+
+  const hasCalories = visibleSeries.some(s => s.name === t('calories'))
+  const hasNutrients = visibleSeries.some(s => s.name !== t('calories'))
+
+  const baseOptions: CustomApexOptions = {
+    ...getComboChartOptions(),
+    series: visibleSeries,
+    chart: {
+      ...getComboChartOptions().chart,
+      type: 'line',
+      animations: {
+        enabled: true,
+        speed: 800
       }
     },
-    {
-      seriesName: 'nutrients',
-      opposite: true,
+    xaxis: {
+      ...getComboChartOptions().xaxis,
+      categories: dates,
+      type: 'datetime'
+    },
+    stroke: {
+      width: 3,
+      curve: 'smooth'
+    },
+    markers: {
+      size: 4,
+      strokeWidth: 2,
+      hover: {
+        size: 6
+      }
+    },
+    tooltip: {
+      shared: true,
+      intersect: false,
+      y: {
+        formatter: (value: number, context: TooltipContext) => {
+          if (value === null || value === undefined) return '-'
+          const seriesName = context.w.config.series[context.seriesIndex].name
+          const unit = seriesName === t('calories') ? t('kcal') : t('g')
+          return `${value.toFixed(1)} ${unit}`
+        }
+      }
+    }
+  }
+
+  // Настройка осей в зависимости от видимых серий
+  if (hasCalories && !hasNutrients) {
+    // Только калории
+    const yAxisConfig: YAxisConfig = {
       min: 0,
-      show: nutrientSeries.some(s => s.visible),
       labels: {
         formatter: (value: number) => `${Math.round(value)}`
       }
     }
-  ]
 
-  // Обновляем настройки графика
-  nutritionChartOptions.value = {
-    ...getComboChartOptions(),
-    series: visibleSeries,
-    xaxis: commonXAxisSettings,
-    yaxis: yAxisConfig
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
+  } else if (!hasCalories && hasNutrients) {
+    // Только нутриенты
+    const yAxisConfig: YAxisConfig = {
+      min: 0,
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
+    }
+
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
+  } else {
+    // Обе оси
+    const yAxisConfig: YAxisConfig[] = [
+      {
+        min: 0,
+        labels: {
+          formatter: (value: number) => `${Math.round(value)}`
+        }
+      },
+      {
+        opposite: true,
+        min: 0,
+        labels: {
+          formatter: (value: number) => `${Math.round(value)}`
+        }
+      }
+    ]
+
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
   }
-
-  // Добавляем отладочную информацию
-  console.log('Chart update:', {
-    visibleSeries: visibleSeries.map(s => ({ name: s.name, visible: true })),
-    yAxisConfig: yAxisConfig.map(axis => ({ show: axis.show })),
-    hasVisibleNutrients: nutrientSeries.some(s => s.visible),
-    totalSeriesCount: visibleSeries.length
-  })
 
   nutritionChartKey.value++
 }
@@ -446,7 +504,6 @@ const updateWeightChart = (newData: ChartsData) => {
   if (!newData.weight.length) return
 
   // Получаем все даты из диапазона
-  const dates = newData.calories.map(item => new Date(item.date).getTime())
 
   // Сортируем данные веса по дате
   const sortedWeightData = [...newData.weight].sort((a, b) =>
@@ -491,7 +548,6 @@ const updateWeightChart = (newData: ChartsData) => {
       },
       animations: {
         enabled: true, // Включаем анимации
-        easing: 'easeinout',
         speed: 800,
         animateGradually: {
           enabled: true,
