@@ -48,19 +48,30 @@ const options = {
  language: sessionStore.lang
 }
 
-const handlePaymentRedirect = () => {
- const startParam = WebApp.initDataUnsafe.start_param
+const handleStartParamRedirect = () => {
+  const startParam = WebApp.initDataUnsafe.start_param
 
- if (startParam && startParam.startsWith('payment_')) {
-  const months = startParam.replace('payment_', '')
+  if (!startParam) return
 
-  if (['1', '3', '12'].includes(months)) {
-   router.push({
-    name: 'payment',
-    query: { months }
-   })
+  // Обработка параметра payment
+  if (startParam.startsWith('payment_')) {
+    const months = startParam.replace('payment_', '')
+    if (['1', '3', '12'].includes(months)) {
+      router.push({
+        name: 'payment',
+        query: { months }
+      })
+    }
+    return
   }
- }
+
+  // Обработка параметра statistics
+  if (startParam === 'statistics') {
+    router.push({
+      name: 'profile',
+      query: { tab: 'statistics' }
+    })
+  }
 }
 
 if (twa) {
@@ -79,7 +90,7 @@ authUser()
 
 onMounted(() => {
  authUser().then(() => {
-  handlePaymentRedirect()
+   handleStartParamRedirect()
  })
 })
 

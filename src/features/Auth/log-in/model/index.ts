@@ -10,21 +10,36 @@ export const useAuthorization = () => {
 
     const processStartParam = (startParam: string | null): {
         referralCode: string | null,
-        paymentMonths: string | null
+        paymentMonths: string | null,
+        statisticsTab: boolean
     } => {
-        if (!startParam) return { referralCode: null, paymentMonths: null }
+        if (!startParam) return {
+            referralCode: null,
+            paymentMonths: null,
+            statisticsTab: false
+        }
 
         if (startParam.startsWith('payment_')) {
             const months = startParam.replace('payment_', '')
             return {
                 referralCode: null,
-                paymentMonths: ['1', '3', '12'].includes(months) ? months : null
+                paymentMonths: ['1', '3', '12'].includes(months) ? months : null,
+                statisticsTab: false
+            }
+        }
+
+        if (startParam === 'statistics') {
+            return {
+                referralCode: null,
+                paymentMonths: null,
+                statisticsTab: true
             }
         }
 
         return {
             referralCode: startParam,
-            paymentMonths: null
+            paymentMonths: null,
+            statisticsTab: false
         }
     }
     const authorize = async () => {
