@@ -102,7 +102,11 @@
     "progress_weight": "Прогресс веса",
     "enterWeight": "Введите вес",
     "add": "Добавить",
-    "update": "Обновить"
+    "update": "Обновить",
+    "caloriesAverage": "Потребление калорий от цели",
+    "proteinsAverage": "Потребление белков от цели",
+    "fatsAverage": "Потребление жиров от цели",
+    "carbsAverage": "Потребление углеводов от цели"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -207,6 +211,10 @@
     "progress_weight": "Weight values",
     "enterWeight": "Enter weight",
     "add": "Add",
-    "update": "Update"
+    "update": "Update",
+    "caloriesAverage": "Calories intake of target",
+    "proteinsAverage": "Protein intake of target",
+    "fatsAverage": "Fat intake of target",
+    "carbsAverage": "Carbs intake of target"
   }
 }

@@ -38,6 +38,46 @@
 			<div
 				v-else-if="statisticsData && chartsData"
 			>
+				<!-- Средние значения -->
+				<div class="p-4 bg-white border border-gray-200 rounded-lg ">
+					<h3 class="text-lg font-semibold mb-4 text-center">
+						{{ t('averageValues') }}
+					</h3>
+					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('calories') }}
+							</div>
+							<div class="font-medium text-center">
+								{{ Math.round(statisticsData.averages.calories) }} {{ t('kcal') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('proteins') }}
+							</div>
+							<div class="font-medium text-[#319A6E] text-center">
+								{{ Math.round(statisticsData.averages.proteins) }} {{ t('g') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('fats') }}
+							</div>
+							<div class="font-medium text-[#FDC755] text-center">
+								{{ Math.round(statisticsData.averages.fats) }} {{ t('g') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('carbs') }}
+							</div>
+							<div class="font-medium text-[#FFA767] text-center">
+								{{ Math.round(statisticsData.averages.carbs) }} {{ t('g') }}
+							</div>
+						</div>
+					</div>
+				</div>
 				<!-- Комбинированный график калорий и БЖУ -->
 				<div
 					v-if="chartsData.calories.length > 0 && chartsData.macros.proteins.length > 0"
@@ -55,7 +95,7 @@
 						/>
 					</div>
 					<!-- Легенда графика -->
-					<div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4">
+					<div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2 p-2 text-sm">
 						<button
 							v-for="series in nutritionSeries"
 							:key="series.id"
@@ -101,49 +141,8 @@
 					/>
 				</div>
 
-				<!-- Средние значения -->
-				<div class="p-4 bg-white border border-gray-200 rounded-lg ">
-					<h3 class="text-lg font-semibold mb-4 text-center">
-						{{ t('averageValues') }}
-					</h3>
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('calories') }}
-							</div>
-							<div class="font-medium text-center">
-								{{ Math.round(statisticsData.averages.calories) }} {{ t('kcal') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('proteins') }}
-							</div>
-							<div class="font-medium text-[#319A6E] text-center">
-								{{ Math.round(statisticsData.averages.proteins) }} {{ t('g') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('fats') }}
-							</div>
-							<div class="font-medium text-[#FDC755] text-center">
-								{{ Math.round(statisticsData.averages.fats) }} {{ t('g') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('carbs') }}
-							</div>
-							<div class="font-medium text-[#FFA767] text-center">
-								{{ Math.round(statisticsData.averages.carbs) }} {{ t('g') }}
-							</div>
-						</div>
-					</div>
-				</div>
-
 				<!-- Прогресс веса -->
-				<h3 class="text-lg font-semibold mb-4 text-center">
+				<h3 class="text-lg font-semibold my-4 text-center">
 					{{ t('progress_weight') }}
 				</h3>
 				<div
@@ -210,10 +209,16 @@
 								{{ t('loggingConsistency') }}: {{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%
 							</div>
 							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('caloriesTargetHit') }}: {{ Math.round(statisticsData.goals_achievement.calories_target_hit) }}%
+								{{ t('caloriesAverage') }}: {{ Math.round(statisticsData.goals_achievement.calories_average) }}%
+							</div>
+							<div class="text-sm text-gray-500 mb-2 text-center">
+								{{ t('proteinsAverage') }}: {{ Math.round(statisticsData.goals_achievement.proteins_average) }}%
+							</div>
+							<div class="text-sm text-gray-500 mb-2 text-center">
+								{{ t('fatsAverage') }}: {{ Math.round(statisticsData.goals_achievement.fats_average) }}%
 							</div>
 							<div class="text-sm text-gray-500 mb-5 text-center">
-								{{ t('proteinsTargetHit') }}: {{ Math.round(statisticsData.goals_achievement.proteins_target_hit) }}%
+								{{ t('carbsAverage') }}: {{ Math.round(statisticsData.goals_achievement.carbs_average) }}%
 							</div>
 						</div>
 					</div>
@@ -236,6 +241,7 @@ import { ref, computed, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
+import { StatisticsResponse, ChartsData, ChartData } from '../model'
 import type { ApexOptions } from 'apexcharts'
 import { WeightInput } from './index'
 
@@ -260,24 +266,6 @@ interface CustomApexOptions extends ApexOptions {
     yAxisIndex?: number
   }>
   yaxis?: YAxisOptions | YAxisOptions[]
-}
-
-interface ChartData {
-  id?: number // Добавляем id в базовый интерфейс
-  date: string
-  value: number
-}
-
-interface MacrosData {
-  proteins: ChartData[]
-  fats: ChartData[]
-  carbs: ChartData[]
-}
-
-interface ChartsData {
-  calories: ChartData[]
-  macros: MacrosData
-  weight: ChartData[]
 }
 
 // Тип для серии данных
@@ -330,101 +318,160 @@ const nutritionSeries = ref<NutritionSeries[]>([
 const getSeriesData = (data: ChartsData | null, seriesId: NutritionSeries['id']): number[] => {
   if (!data) return []
 
+  let values: ChartData[] = []
   if (seriesId === 'calories') {
-    return data.calories.map(item => item.value)
+    values = data.calories
+  } else {
+    values = data.macros[seriesId]
   }
-  return data.macros[seriesId].map(item => item.value)
+
+  // Проверяем наличие данных и преобразуем их
+  if (!values || values.length === 0) return []
+
+  return values.map(item => item.value)
+}
+
+// Обновляем интерфейсы
+interface TooltipContext {
+  seriesIndex: number;
+  w: {
+    config: {
+      series: Array<{
+        name: string;
+      }>;
+    };
+  };
+}
+
+interface YAxisConfig {
+  seriesName?: string;
+  title?: {
+    text: string;
+  };
+  min?: number;
+  show?: boolean;
+  opposite?: boolean;
+  labels?: {
+    formatter: (value: number) => string;
+  };
 }
 
 // Обновление графиков с учетом видимости серий
 const updateCharts = () => {
   if (!chartsData.value) return
 
-  const dates = chartsData.value.calories.map(item => new Date(item.date).getTime())
+  const { start, end } = getDateRange(selectedPeriod.value)
+  const dates = generateDateRange(start, end)
 
-  // Обновляем оба графика с одинаковыми настройками дат
-  const commonXAxisSettings = {
-    ...getComboChartOptions().xaxis,
-    categories: dates
-  }
-
-  // Сначала подготовим все серии независимо от их видимости
-  const allSeries = nutritionSeries.value.map(s => ({
-    id: s.id,
-    name: t(s.label),
-    type: s.type,
-    color: s.color,
-    data: getSeriesData(chartsData.value, s.id),
-    visible: s.visible
-  }))
-
-  // Отделяем калории от остальных серий
-  const caloriesSeries = allSeries.find(s => s.id === 'calories')
-  const nutrientSeries = allSeries.filter(s => s.id !== 'calories')
-
-  // Формируем финальные серии для отображения
-  const visibleSeries = []
-
-  // Добавляем калории, если они видимы
-  if (caloriesSeries?.visible) {
-    visibleSeries.push({
-      name: caloriesSeries.name,
-      type: caloriesSeries.type,
-      color: caloriesSeries.color,
-      data: caloriesSeries.data,
-      yAxisIndex: 0 // Калории всегда на первой оси
-    })
-  }
-
-  // Добавляем видимые нутриенты
-  nutrientSeries
+  const visibleSeries = nutritionSeries.value
       .filter(s => s.visible)
-      .forEach(series => {
-        visibleSeries.push({
-          name: series.name,
-          type: series.type,
-          color: series.color,
-          data: series.data,
-          yAxisIndex: 1 // Нутриенты всегда на второй оси
-        })
-      })
+      .map(series => ({
+        name: t(series.label),
+        type: series.type as 'line' | 'column',
+        color: series.color,
+        data: getSeriesData(chartsData.value, series.id)
+      }))
 
-  // Формируем настройки осей
-  const yAxisConfig = [
-    {
-      seriesName: 'calories',
-      min: 0,
-      show: caloriesSeries?.visible ?? false,
-      labels: {
-        formatter: (value: number) => `${Math.round(value)}`
+  if (visibleSeries.length === 0) {
+    nutritionChartOptions.value = getComboChartOptions()
+    nutritionChartKey.value++
+    return
+  }
+
+  const hasCalories = visibleSeries.some(s => s.name === t('calories'))
+  const hasNutrients = visibleSeries.some(s => s.name !== t('calories'))
+
+  const baseOptions: CustomApexOptions = {
+    ...getComboChartOptions(),
+    series: visibleSeries,
+    chart: {
+      ...getComboChartOptions().chart,
+      type: 'line',
+      animations: {
+        enabled: true,
+        speed: 800
       }
     },
-    {
-      seriesName: 'nutrients',
-      opposite: true,
+    xaxis: {
+      ...getComboChartOptions().xaxis,
+      categories: dates,
+      type: 'datetime'
+    },
+    stroke: {
+      width: 3,
+      curve: 'smooth'
+    },
+    markers: {
+      size: 4,
+      strokeWidth: 2,
+      hover: {
+        size: 6
+      }
+    },
+    tooltip: {
+      shared: true,
+      intersect: false,
+      y: {
+        formatter: (value: number, context: TooltipContext) => {
+          if (value === null || value === undefined) return '-'
+          const seriesName = context.w.config.series[context.seriesIndex].name
+          const unit = seriesName === t('calories') ? t('kcal') : t('g')
+          return `${value.toFixed(1)} ${unit}`
+        }
+      }
+    }
+  }
+
+  // Настройка осей в зависимости от видимых серий
+  if (hasCalories && !hasNutrients) {
+    // Только калории
+    const yAxisConfig: YAxisConfig = {
       min: 0,
-      show: nutrientSeries.some(s => s.visible),
       labels: {
         formatter: (value: number) => `${Math.round(value)}`
       }
     }
-  ]
 
-  // Обновляем настройки графика
-  nutritionChartOptions.value = {
-    ...getComboChartOptions(),
-    series: visibleSeries,
-    xaxis: commonXAxisSettings,
-    yaxis: yAxisConfig
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
+  } else if (!hasCalories && hasNutrients) {
+    // Только нутриенты
+    const yAxisConfig: YAxisConfig = {
+      min: 0,
+      labels: {
+        formatter: (value: number) => `${Math.round(value)}`
+      }
+    }
+
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
+  } else {
+    // Обе оси
+    const yAxisConfig: YAxisConfig[] = [
+      {
+        min: 0,
+        labels: {
+          formatter: (value: number) => `${Math.round(value)}`
+        }
+      },
+      {
+        opposite: true,
+        min: 0,
+        labels: {
+          formatter: (value: number) => `${Math.round(value)}`
+        }
+      }
+    ]
+
+    nutritionChartOptions.value = {
+      ...baseOptions,
+      yaxis: yAxisConfig
+    }
   }
-
-  // Добавляем отладочную информацию
-  console.log('Chart update:', {
-    visibleSeries: visibleSeries.map(s => ({ name: s.name, visible: true })),
-    yAxisConfig: yAxisConfig.map(axis => ({ show: axis.show })),
-    hasVisibleNutrients: nutrientSeries.some(s => s.visible),
-    totalSeriesCount: visibleSeries.length
-  })
 
   nutritionChartKey.value++
 }
@@ -445,25 +492,24 @@ const toggleSeries = (seriesId: string) => {
 const updateWeightChart = (newData: ChartsData) => {
   if (!newData.weight.length) return
 
-  // Получаем все даты из диапазона
-  const dates = newData.calories.map(item => new Date(item.date).getTime())
+  const { start, end } = getDateRange(selectedPeriod.value)
+  const dates = generateDateRange(start, end)
 
-  // Сортируем данные веса по дате
-  const sortedWeightData = [...newData.weight].sort((a, b) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-  )
+  // Заполняем пропущенные дни последним известным весом
+  const weightValues = fillMissingWeightData(newData.weight, dates)
 
   weightChartOptions.value = {
     ...getWeightChartOptions(),
     series: [{
       name: t('weight'),
       type: 'line',
-      data: sortedWeightData.map(item => item.value)
+      data: weightValues
     }],
     xaxis: {
-      ...getWeightChartOptions().xaxis,
       type: 'datetime',
-      categories: sortedWeightData.map(item => new Date(item.date).getTime()),
+      categories: dates,
+      tickAmount: selectedPeriod.value === 'week' ? 7 :
+          selectedPeriod.value === 'month' ? 6 : 9,
       labels: {
         formatter: function(value: string) {
           return formatDate(value, selectedPeriod.value)
@@ -478,30 +524,8 @@ const updateWeightChart = (newData: ChartsData) => {
       }
     },
     stroke: {
-      width: 3,
-      curve: 'smooth', // Делаем линию плавной
-      lineCap: 'round'
-    },
-    chart: {
-      type: 'line',
-      height: '100%',
-      fontFamily: 'inherit',
-      toolbar: {
-        show: false
-      },
-      animations: {
-        enabled: true, // Включаем анимации
-        easing: 'easeinout',
-        speed: 800,
-        animateGradually: {
-          enabled: true,
-          delay: 150
-        },
-        dynamicAnimation: {
-          enabled: true,
-          speed: 350
-        }
-      }
+      curve: 'smooth',
+      width: 3
     },
     markers: {
       size: 5,
@@ -511,64 +535,14 @@ const updateWeightChart = (newData: ChartsData) => {
       hover: {
         size: 7
       }
-    },
-    tooltip: {
-      shared: false,
-      intersect: true,
-      x: {
-        formatter: function(value: number) {
-          return formatDate(value.toString(), selectedPeriod.value)
-        }
-      },
-      y: {
-        formatter: (value: number) => `${value.toFixed(1)} ${t('kg')}`
-      }
     }
   }
 
   weightChartKey.value++
 }
-
 // Обработчик обновления веса
 const handleWeightUpdated = () => {
   fetchStatistics() // Перезагружаем статистику
-}
-
-export interface StatisticsResponse {
-  period: {
-    start: string
-    end: string
-  }
-  summary: {
-    total_meals: number
-    days_tracked: number
-    average_meals_per_day: number
-  }
-  averages: {
-    calories: number
-    proteins: number
-    fats: number
-    carbs: number
-  }
-  charts: {
-    calories: ChartData[]
-    macros: {
-      proteins: ChartData[]
-      fats: ChartData[]
-      carbs: ChartData[]
-    }
-    weight: ChartData[]
-  }
-  weight_progress?: {
-    start: number
-    current: number
-    change: number
-  } | null
-  goals_achievement?: {
-    logging_consistency: number
-    calories_target_hit: number
-    proteins_target_hit: number
-  } | null
 }
 
 // Translations
@@ -588,79 +562,40 @@ const weightChartKey = ref(0)
 // Форматирование даты с учетом периода
 // Обновленная функция форматирования даты
 // Base chart options
-const getComboChartOptions = (): CustomApexOptions => {
-  const baseOptions: CustomApexOptions = {
-    chart: {
-      type: 'line',
-      height: '100%',
-      fontFamily: 'inherit',
-      toolbar: {
-        show: false
-      },
-      animations: {
-        enabled: false
-      },
-      stacked: false
-    },
-    // Добавляем пустой массив series в базовые настройки
-    series: [],
-    stroke: {
-      width: 3,
-      curve: 'smooth'
-    },
-    plotOptions: {
-      bar: {
-        columnWidth: '60%'
-      }
-    },
-    markers: {
-      size: 4,
-      hover: {
-        size: 6
-      }
-    },
-    tooltip: {
-      shared: true,
-      intersect: false,
-      y: {
-        formatter: (value: number | null, { seriesIndex }) => {
-          if (value === null || value === undefined) return '-'
-          const series = nutritionSeries.value[seriesIndex]
-          return `${value.toFixed(1)} ${series.unit}`
-        }
-      }
-    },
-    legend: {
+const getComboChartOptions = (): CustomApexOptions => ({
+  chart: {
+    type: 'line',
+    height: '100%',
+    fontFamily: 'inherit',
+    toolbar: {
       show: false
     },
-    xaxis: {
-      type: 'datetime',
-      labels: {
-        formatter: function(value: string) {
-          return formatDate(value, selectedPeriod.value)
-        },
-        style: {
-          fontSize: '10px',
-          colors: '#6B7280'
-        },
-        rotateAlways: false,
-        hideOverlappingLabels: true, // Скрываем перекрывающиеся метки
-        maxHeight: 50
+    animations: {
+      enabled: false,
+    }
+  },
+  xaxis: {
+    type: 'datetime',
+    labels: {
+      formatter: function(value: string) {
+        return formatDate(value, selectedPeriod.value)
       },
-      tickAmount: selectedPeriod.value === 'week' ? 7 :
-          selectedPeriod.value === 'month' ? 6 : 9, // Контролируем количество отображаемых тиков
-      axisBorder: {
-        show: false
+      style: {
+        fontSize: '10px',
+        colors: '#6B7280'
       },
-      axisTicks: {
-        show: true
-      }
+      rotateAlways: false,
+      hideOverlappingLabels: true,
+      maxHeight: 50
     },
-  }
-
-  return baseOptions
-}
-
+    tickAmount: selectedPeriod.value === 'week' ? 7 :
+        selectedPeriod.value === 'month' ? 6 : 9
+  },
+  legend: {
+    show: false // Отключаем встроенную легенду
+  },
+  series: [] // добавляем пустой массив серий по умолчанию
+})
 const getWeightChartOptions = (): CustomApexOptions => {
   const baseOptions = getComboChartOptions()
   return {
@@ -802,9 +737,8 @@ const periods = [
 ]
 
 const formatDate = (dateValue: string | number, period: string): string => {
-  const date = new Date(dateValue)
+  const date = new Date(Number(dateValue))
 
-  // Функция для форматирования в нужный вид (DD.MM.YY)
   const formatToPattern = (date: Date): string => {
     const day = date.getDate().toString().padStart(2, '0')
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -818,25 +752,73 @@ const formatDate = (dateValue: string | number, period: string): string => {
 
     switch (period) {
       case 'week':
-        // Для недели показываем каждый день
         return true
       case 'month':
-        // Для месяца показываем каждые 5 дней и последний день месяца
         return day % 5 === 0 || day === getLastDayOfMonth(date)
       case '3months':
-        // Для 3 месяцев показываем каждые 10 дней и последние дни месяцев
         return day % 10 === 0 || day === getLastDayOfMonth(date)
       default:
         return true
     }
   }
 
-  // Вспомогательная функция для определения последнего дня месяца
   const getLastDayOfMonth = (date: Date): number => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
   }
 
   return shouldShowDate(date) ? formatToPattern(date) : ''
+}
+
+// Функция для получения диапазона дат в зависимости от периода
+const getDateRange = (period: string) => {
+  const end = new Date() // Сегодняшний день
+  const start = new Date()
+
+  switch(period) {
+    case 'week':
+      start.setDate(end.getDate() - 6) // последние 7 дней включая сегодня
+      break
+    case 'month':
+      start.setDate(end.getDate() - 29) // последние 30 дней включая сегодня
+      break
+    case '3months':
+      start.setDate(end.getDate() - 89) // последние 90 дней включая сегодня
+      break
+  }
+
+  return { start, end }
+}
+
+// Функция для генерации массива дат
+const generateDateRange = (start: Date, end: Date) => {
+  const dates = []
+  const current = new Date(start)
+
+  while (current <= end) {
+    dates.push(new Date(current).getTime())
+    current.setDate(current.getDate() + 1)
+  }
+
+  return dates
+}
+
+const fillMissingWeightData = (weightData: ChartData[], dates: number[]): (number | null)[] => {
+  let lastKnownWeight: number | null = null
+  const sortedWeightData = [...weightData].sort((a, b) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+
+  return dates.map(timestamp => {
+    const date = new Date(timestamp).toISOString().split('T')[0]
+    const weightDataPoint = sortedWeightData.find(w => w.date === date)
+
+    if (weightDataPoint) {
+      lastKnownWeight = weightDataPoint.value
+      return weightDataPoint.value
+    }
+
+    return lastKnownWeight
+  })
 }
 
 // Initial fetch

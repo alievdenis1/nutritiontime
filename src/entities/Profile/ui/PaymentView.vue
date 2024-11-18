@@ -31,6 +31,7 @@
 						:price="plan.price"
 						:features="plan.features"
 						:selected="false"
+						:discount="plan.discount"
 						@select="selectPlan(plan)"
 					/>
 				</div>
@@ -191,12 +192,23 @@
  })
 
  // Данные тарифных планов
- const subscriptionPlans = [
-  { months: 1, price: 490, features: [] },
-  { months: 3, price: 1290, features: [] },
-  { months: 12, price: 4490, features: [] }
- ]
+ const monthlyPrice = 490
 
+ const subscriptionPlans = [
+   { months: 1, price: 490, features: [] },
+   {
+     months: 3,
+     price: 1290,
+     features: [],
+     discount: Math.round((1 - (1290 / 3 / monthlyPrice)) * 100) // будет примерно 12%
+   },
+   {
+     months: 12,
+     price: 4490,
+     features: [],
+     discount: Math.round((1 - (4490 / 12 / monthlyPrice)) * 100) // будет примерно 23%
+   }
+ ]
  // Методы оплаты
  const paymentMethods = [
   {
