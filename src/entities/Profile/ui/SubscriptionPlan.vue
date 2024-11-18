@@ -1,18 +1,28 @@
 <template>
 	<div
-		class="p-6 rounded-lg shadow-sm transition-all"
+		class="p-6 rounded-lg shadow-sm transition-all relative"
 		:class="[
 			selected
 				? 'border-green-500 bg-green-900/50'
 				: 'border-gray-700 hover:border-green-500/50'
 		]"
 	>
+		<div
+			v-if="discount > 0"
+			class="absolute -top-3 -right-3 text-white bg-[#FFA767] px-2 py-1
+			rounded-full text-sm font-medium"
+		>
+			-{{ discount }} %
+		</div>
 		<div class="flex justify-between">
 			<h3 class="text-xl font-bold mb-2">
 				{{ months }} {{ getMonthForm(months) }}
 			</h3>
-			<p class="text-xl mb-4">
-				{{ t('price').replace('%{amount}', price.toString()) }}
+			<p class="mb-4">
+				<span class="text-xl">
+					{{ t('price').replace('%{amount}', price.toString()) }}
+				</span><br>
+				<span class="text-gray">({{ price/100 }} $)</span>
 			</p>
 		</div>
 
@@ -58,12 +68,15 @@
 
  const { t } = useTranslation(localization)
 
-defineProps<{
+ withDefaults(defineProps<{
   months: number
   price: number
   features: string[]
   selected: boolean
- }>()
+  discount: number
+}>(), {
+   discount: 0
+ })
 
  const getMonthDeclension = (months: number) => {
   const lastDigit = months % 10
