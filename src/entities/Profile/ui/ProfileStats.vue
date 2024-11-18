@@ -79,7 +79,7 @@
 
  // Определяем начальную вкладку на основе параметра URL
  const defaultTab = computed(() => {
-   console.log(route.query.tab)
+   console.log(route.query)
    return route.query.tab === 'statistics' ? 'statistic' : 'report'
  })
 
