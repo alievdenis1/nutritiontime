@@ -221,26 +221,20 @@
  import { sendToAddMeal, sendToProfile } from 'entities/Profile'
 
  interface Props {
-  modelValue: string
-  profile: Profile | null
-  mealStats: MealStats | null
-  loading: boolean
-  error: string | null
+   modelValue: string
+   profile: Profile | null
+   mealStats: MealStats | null
+   loading: boolean
+   error: string | null
  }
 
- const props = withDefaults(defineProps<Props>(), {
-   modelValue: () => formatDateWithTimezone(new Date(), 0),
-   profile: null,
-   mealStats: null,
-   loading: false,
-   error: null
- })
+ const props = defineProps<Props>()
 
  const emit = defineEmits<{
-  (e: 'update:modelValue', date: string): void
-  (e: 'setGoals'): void
-  (e: 'retry'): void
-  (e: 'meal-deleted'): void
+   (e: 'update:modelValue', date: string): void
+   (e: 'setGoals'): void
+   (e: 'retry'): void
+   (e: 'meal-deleted'): void
  }>()
 
  const formatDateWithTimezone = (date: string | Date, timezone: number): string => {
@@ -315,7 +309,6 @@
      return t('reportToday')
    }
 
-   // Сравниваем с вчерашней датой с учетом таймзоны
    const yesterdayDate = new Date(currentDate)
    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
    if (date.toISOString().split('T')[0] === yesterdayDate.toISOString().split('T')[0]) {
