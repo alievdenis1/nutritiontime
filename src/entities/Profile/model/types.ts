@@ -109,40 +109,59 @@ export interface Notification {
  created_at: string;
 }
 
-// src/model/index.ts
+export interface ChartData {
+ id?: number
+ date: string
+ value: number
+}
+
+export interface MacrosData {
+ proteins: ChartData[]
+ fats: ChartData[]
+ carbs: ChartData[]
+}
+
+export interface ChartsData {
+ calories: ChartData[]
+ macros: MacrosData
+ weight: ChartData[]
+}
+
 export interface StatisticsResponse {
  period: {
-  start: string;
-  end: string;
- };
+  start: string
+  end: string
+ }
  summary: {
-  total_meals: number;
-  days_tracked: number;
-  average_meals_per_day: number;
- };
+  total_meals: number
+  days_tracked: number
+  average_meals_per_day: number
+ }
  averages: {
-  calories: number;
-  proteins: number;
-  fats: number;
-  carbs: number;
- };
+  calories: number
+  proteins: number
+  fats: number
+  carbs: number
+ }
  charts: {
-  calories: Array<{ date: string; value: number }>;
+  calories: ChartData[]
   macros: {
-   proteins: Array<{ date: string; value: number }>;
-   fats: Array<{ date: string; value: number }>;
-   carbs: Array<{ date: string; value: number }>;
-  };
-  weight: Array<{ date: string; value: number }>;
- };
+   proteins: ChartData[]
+   fats: ChartData[]
+   carbs: ChartData[]
+  }
+  weight: ChartData[]
+ }
  weight_progress?: {
-  start: number;
-  current: number;
-  change: number;
- } | null;
+  start: number
+  current: number
+  change: number
+ } | null
  goals_achievement?: {
-  logging_consistency: number;
-  calories_target_hit: number;
-  proteins_target_hit: number;
- } | null;
+  logging_consistency: number
+  calories_average: number
+  proteins_average: number
+  fats_average: number
+  carbs_average: number
+ } | null
 }

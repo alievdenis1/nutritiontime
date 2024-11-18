@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4 bg-white border border-gray-200 rounded-lg">
-		<h3 class="text-lg font-semibold mb-4">
+		<h3 class="text-lg font-semibold mb-4 text-center">
 			{{ t('currentWeight') }}
 		</h3>
 

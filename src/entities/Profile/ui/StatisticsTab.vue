@@ -38,6 +38,46 @@
 			<div
 				v-else-if="statisticsData && chartsData"
 			>
+				<!-- Средние значения -->
+				<div class="p-4 bg-white border border-gray-200 rounded-lg ">
+					<h3 class="text-lg font-semibold mb-4 text-center">
+						{{ t('averageValues') }}
+					</h3>
+					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('calories') }}
+							</div>
+							<div class="font-medium text-center">
+								{{ Math.round(statisticsData.averages.calories) }} {{ t('kcal') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('proteins') }}
+							</div>
+							<div class="font-medium text-[#319A6E] text-center">
+								{{ Math.round(statisticsData.averages.proteins) }} {{ t('g') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('fats') }}
+							</div>
+							<div class="font-medium text-[#FDC755] text-center">
+								{{ Math.round(statisticsData.averages.fats) }} {{ t('g') }}
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-gray-500 text-center">
+								{{ t('carbs') }}
+							</div>
+							<div class="font-medium text-[#FFA767] text-center">
+								{{ Math.round(statisticsData.averages.carbs) }} {{ t('g') }}
+							</div>
+						</div>
+					</div>
+				</div>
 				<!-- Комбинированный график калорий и БЖУ -->
 				<div
 					v-if="chartsData.calories.length > 0 && chartsData.macros.proteins.length > 0"
@@ -101,49 +141,8 @@
 					/>
 				</div>
 
-				<!-- Средние значения -->
-				<div class="p-4 bg-white border border-gray-200 rounded-lg ">
-					<h3 class="text-lg font-semibold mb-4 text-center">
-						{{ t('averageValues') }}
-					</h3>
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('calories') }}
-							</div>
-							<div class="font-medium text-center">
-								{{ Math.round(statisticsData.averages.calories) }} {{ t('kcal') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('proteins') }}
-							</div>
-							<div class="font-medium text-[#319A6E] text-center">
-								{{ Math.round(statisticsData.averages.proteins) }} {{ t('g') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('fats') }}
-							</div>
-							<div class="font-medium text-[#FDC755] text-center">
-								{{ Math.round(statisticsData.averages.fats) }} {{ t('g') }}
-							</div>
-						</div>
-						<div>
-							<div class="text-sm text-gray-500 text-center">
-								{{ t('carbs') }}
-							</div>
-							<div class="font-medium text-[#FFA767] text-center">
-								{{ Math.round(statisticsData.averages.carbs) }} {{ t('g') }}
-							</div>
-						</div>
-					</div>
-				</div>
-
 				<!-- Прогресс веса -->
-				<h3 class="text-lg font-semibold mb-4 text-center">
+				<h3 class="text-lg font-semibold my-4 text-center">
 					{{ t('progress_weight') }}
 				</h3>
 				<div
@@ -210,10 +209,16 @@
 								{{ t('loggingConsistency') }}: {{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%
 							</div>
 							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('caloriesTargetHit') }}: {{ Math.round(statisticsData.goals_achievement.calories_target_hit) }}%
+								{{ t('caloriesAverage') }}: {{ Math.round(statisticsData.goals_achievement.calories_average) }}%
+							</div>
+							<div class="text-sm text-gray-500 mb-2 text-center">
+								{{ t('proteinsAverage') }}: {{ Math.round(statisticsData.goals_achievement.proteins_average) }}%
+							</div>
+							<div class="text-sm text-gray-500 mb-2 text-center">
+								{{ t('fatsAverage') }}: {{ Math.round(statisticsData.goals_achievement.fats_average) }}%
 							</div>
 							<div class="text-sm text-gray-500 mb-5 text-center">
-								{{ t('proteinsTargetHit') }}: {{ Math.round(statisticsData.goals_achievement.proteins_target_hit) }}%
+								{{ t('carbsAverage') }}: {{ Math.round(statisticsData.goals_achievement.carbs_average) }}%
 							</div>
 						</div>
 					</div>
@@ -236,6 +241,7 @@ import { ref, computed, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
+import { StatisticsResponse, ChartsData, ChartData } from '../model'
 import type { ApexOptions } from 'apexcharts'
 import { WeightInput } from './index'
 
@@ -260,24 +266,6 @@ interface CustomApexOptions extends ApexOptions {
     yAxisIndex?: number
   }>
   yaxis?: YAxisOptions | YAxisOptions[]
-}
-
-interface ChartData {
-  id?: number // Добавляем id в базовый интерфейс
-  date: string
-  value: number
-}
-
-interface MacrosData {
-  proteins: ChartData[]
-  fats: ChartData[]
-  carbs: ChartData[]
-}
-
-interface ChartsData {
-  calories: ChartData[]
-  macros: MacrosData
-  weight: ChartData[]
 }
 
 // Тип для серии данных
@@ -555,43 +543,6 @@ const updateWeightChart = (newData: ChartsData) => {
 // Обработчик обновления веса
 const handleWeightUpdated = () => {
   fetchStatistics() // Перезагружаем статистику
-}
-
-export interface StatisticsResponse {
-  period: {
-    start: string
-    end: string
-  }
-  summary: {
-    total_meals: number
-    days_tracked: number
-    average_meals_per_day: number
-  }
-  averages: {
-    calories: number
-    proteins: number
-    fats: number
-    carbs: number
-  }
-  charts: {
-    calories: ChartData[]
-    macros: {
-      proteins: ChartData[]
-      fats: ChartData[]
-      carbs: ChartData[]
-    }
-    weight: ChartData[]
-  }
-  weight_progress?: {
-    start: number
-    current: number
-    change: number
-  } | null
-  goals_achievement?: {
-    logging_consistency: number
-    calories_target_hit: number
-    proteins_target_hit: number
-  } | null
 }
 
 // Translations
