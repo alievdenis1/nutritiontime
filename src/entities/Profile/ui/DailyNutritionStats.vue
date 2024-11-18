@@ -488,4 +488,120 @@
   padding: 4px;
   text-align: center;
  }
+
+ /* Кастомные стили для календаря Element Plus */
+ .custom-calendar {
+   --el-color-primary: #059669 !important; /* emerald-600 */
+ }
+
+ .custom-calendar .el-calendar__header {
+   padding: 8px 12px; /* Уменьшаем отступы в шапке */
+ }
+
+ .custom-calendar {
+   --el-color-primary: #059669 !important; /* emerald-600 */
+   border-radius: 8px; /* Скругление для всего календаря */
+   overflow: hidden; /* Чтобы содержимое не выходило за пределы скругления */
+ }
+
+ .custom-calendar .el-calendar__header {
+   padding: 8px 12px;
+   border-top-left-radius: 8px;
+   border-top-right-radius: 8px;
+ }
+
+ .custom-calendar .el-calendar__body {
+   padding: 8px 12px;
+   border-bottom-left-radius: 8px;
+   border-bottom-right-radius: 8px;
+ }
+
+ /* Скругляем углы у таблицы */
+ .custom-calendar .el-calendar-table {
+   border-radius: 8px;
+ }
+
+ /* Скругляем углы у первой и последней ячеек в первой строке */
+ .custom-calendar .el-calendar-table tr:first-child th:first-child {
+   border-top-left-radius: 8px;
+ }
+
+ .custom-calendar .el-calendar-table tr:first-child th:last-child {
+   border-top-right-radius: 8px;
+ }
+
+ /* Скругляем углы у первой и последней ячеек в последней строке */
+ .custom-calendar .el-calendar-table tr:last-child td:first-child {
+   border-bottom-left-radius: 8px;
+ }
+
+ .custom-calendar .el-calendar-table tr:last-child td:last-child {
+   border-bottom-right-radius: 8px;
+ }
+
+ .custom-calendar .el-button--primary {
+   --el-button-bg-color: #059669;
+   --el-button-border-color: #059669;
+   --el-button-hover-bg-color: #047857;
+   --el-button-hover-border-color: #047857;
+   height: 28px; /* Уменьшаем высоту кнопок */
+   padding: 4px 12px; /* Уменьшаем padding кнопок */
+ }
+
+ .custom-calendar .el-button--primary.is-plain {
+   --el-button-bg-color: #f1f5f9;
+   --el-button-border-color: #e2e8f0;
+   --el-button-hover-bg-color: #059669;
+   --el-button-hover-border-color: #059669;
+   --el-button-hover-text-color: white;
+ }
+
+ .custom-calendar .el-calendar-table td.is-selected .text-center,
+ .custom-calendar .el-calendar-table td.is-selected {
+   background-color: #059669;
+   color: white;
+ }
+
+ .custom-calendar .el-calendar-table th {
+   text-align: center;
+   padding: 4px; /* Уменьшаем padding в заголовках */
+   color: #64748b;
+   font-size: 12px; /* Уменьшаем размер шрифта */
+ }
+
+ .custom-calendar .el-calendar-table td {
+   padding: 2px; /* Уменьшаем padding в ячейках */
+   text-align: center;
+   height: 32px; /* Фиксируем высоту ячеек */
+ }
+
+ .custom-calendar .el-calendar-table .el-calendar-day {
+   height: 28px; /* Уменьшаем высоту дней */
+   line-height: 28px;
+   font-size: 12px; /* Уменьшаем размер шрифта */
+   padding: 0;
+ }
+
+ /* Стили для текста внутри ячеек */
+ .custom-calendar .text-center {
+   padding: 4px;
+   line-height: 1;
+ }
+
+ .custom-calendar .cursor-not-allowed {
+   pointer-events: none;
+ }
+
+ /* Уменьшаем размер шрифта в шапке календаря */
+ .custom-calendar .el-calendar__header .el-button {
+   font-size: 12px;
+ }
+
+ /* Уменьшаем отступы в заголовке текущего месяца */
+ .custom-calendar .el-calendar__title {
+   font-size: 14px;
+   height: 28px;
+   line-height: 28px;
+ }
+
 </style>
