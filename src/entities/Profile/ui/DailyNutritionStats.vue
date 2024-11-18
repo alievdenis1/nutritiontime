@@ -229,11 +229,11 @@
  }
 
  const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => new Date().toISOString().split('T')[0],
-  profile: null,
-  mealStats: null,
-  loading: false,
-  error: null
+   modelValue: () => formatDateWithTimezone(new Date(), 0),
+   profile: null,
+   mealStats: null,
+   loading: false,
+   error: null
  })
 
  const emit = defineEmits<{
@@ -242,6 +242,15 @@
   (e: 'retry'): void
   (e: 'meal-deleted'): void
  }>()
+
+ const formatDateWithTimezone = (date: string | Date, timezone: number): string => {
+   const d = new Date(date)
+   const userOffset = timezone * 60
+   const localOffset = -d.getTimezoneOffset()
+   const offsetDiff = (userOffset - localOffset) * 60 * 1000
+
+   return new Date(d.getTime() + offsetDiff).toISOString().split('T')[0]
+ }
 
  const handleToProfile = async () => {
    await sendToProfile().execute()
@@ -262,15 +271,16 @@
 
  // Состояние
  const showCalendar = ref(false)
- const today = new Date().toISOString().split('T')[0]
-
+ const today = computed(() =>
+     formatDateWithTimezone(new Date(), props.profile?.timezone || 0)
+ )
  // Календарь
  const calendarDate = computed({
-  get: () => new Date(props.modelValue),
-  set: (value: Date) => {
-   emit('update:modelValue', formatDate(value))
-   showCalendar.value = false
-  }
+   get: () => new Date(props.modelValue),
+   set: (value: Date) => {
+     emit('update:modelValue', formatDateWithTimezone(value, props.profile?.timezone || 0))
+     showCalendar.value = false
+   }
  })
 
  // Закрытие календаря при клике вне
@@ -282,6 +292,9 @@
  }
 
  onMounted(() => {
+   if (props.profile?.timezone) {
+     emit('update:modelValue', formatDateWithTimezone(new Date(), props.profile.timezone))
+   }
   document.addEventListener('click', handleClickOutside)
  })
 
@@ -290,24 +303,26 @@
  })
 
  // Вычисляемые свойства
- const isToday = computed(() => props.modelValue === today)
+ const isToday = computed(() =>
+     props.modelValue === today.value
+ )
 
  const headerTitle = computed(() => {
-  const date = new Date(props.modelValue)
-  const currentDate = new Date()
+   const date = new Date(props.modelValue)
+   const currentDate = new Date(today.value)
 
-  currentDate.setHours(0, 0, 0, 0)
-  date.setHours(0, 0, 0, 0)
+   if (date.toISOString().split('T')[0] === currentDate.toISOString().split('T')[0]) {
+     return t('reportToday')
+   }
 
-  if (date.getTime() === currentDate.getTime()) {
-   return t('reportToday')
-  }
+   // Сравниваем с вчерашней датой с учетом таймзоны
+   const yesterdayDate = new Date(currentDate)
+   yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+   if (date.toISOString().split('T')[0] === yesterdayDate.toISOString().split('T')[0]) {
+     return t('reportYesterday')
+   }
 
-  if (date.getTime() === currentDate.getTime() - 86400000) {
-   return t('reportYesterday')
-  }
-
-  return t('reportForDate').replace('{date}', date.toLocaleDateString('ru-RU'))
+   return t('reportForDate').replace('{date}', date.toLocaleDateString('ru-RU'))
  })
 
  const dayStats = computed(() => {
@@ -329,8 +344,7 @@
 
  // Методы
  const formatDate = (date: Date | string): string => {
-  const d = new Date(date)
-  return d.toISOString().split('T')[0]
+   return formatDateWithTimezone(date, props.profile?.timezone || 0)
  }
 
  const formatNumber = (value: string | number | undefined | null): string => {
@@ -349,16 +363,16 @@
  }
 
  const handlePrevDay = () => {
-  const date = new Date(props.modelValue)
-  date.setDate(date.getDate() - 1)
-  emit('update:modelValue', formatDate(date))
+   const date = new Date(props.modelValue)
+   date.setDate(date.getDate() - 1)
+   emit('update:modelValue', formatDateWithTimezone(date, props.profile?.timezone || 0))
  }
 
  const handleNextDay = () => {
-  if (isToday.value) return
-  const date = new Date(props.modelValue)
-  date.setDate(date.getDate() + 1)
-  emit('update:modelValue', formatDate(date))
+   if (isToday.value) return
+   const date = new Date(props.modelValue)
+   date.setDate(date.getDate() + 1)
+   emit('update:modelValue', formatDateWithTimezone(date, props.profile?.timezone || 0))
  }
 
  const toggleCalendar = (event: MouseEvent) => {
