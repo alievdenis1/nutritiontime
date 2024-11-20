@@ -61,7 +61,7 @@
 						>
 							<template #date-cell="{ data }">
 								<div
-									class="text-center cursor-pointer py-2"
+									class="text-center cursor-pointer py-2 h-[100%]"
 									:class="{
 										'text-gray-400': !isFilledDate(formatDate(data.day)),
 										'font-bold text-emerald-600': isFilledDate(formatDate(data.day)),
