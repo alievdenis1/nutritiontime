@@ -1,23 +1,25 @@
 <template>
 	<TonConnectUIProvider :options="options">
-		<VConfirm />
+		<ElConfigProvider :locale="elementPlusLocale">
+			<VConfirm />
 
-		<component :is="layout">
-			<div
-				v-if="isLoading"
-				class="loading"
-			>
-				<div class="loading__spinner">
-					<v-loading />
+			<component :is="layout">
+				<div
+					v-if="isLoading"
+					class="loading"
+				>
+					<div class="loading__spinner">
+						<v-loading />
+					</div>
 				</div>
-			</div>
-			<router-view v-else />
-		</component>
+				<router-view v-else />
+			</component>
+		</ElConfigProvider>
 	</TonConnectUIProvider>
 </template>
 
 <script setup lang="ts">
-import { shallowRef, watch, type Component, onMounted } from 'vue'
+import { shallowRef, watch, computed, type Component, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { DefaultLayout } from './layouts'
 import { twa } from '@/shared/lib/api/twa'
@@ -27,6 +29,9 @@ import { useSessionStore } from '@/entities/Session'
 import { VConfirm } from '@/shared/components/Confirm'
 import { TonConnectUIProvider } from '@townsquarelabs/ui-vue'
 import WebApp from '@twa-dev/sdk'
+import { ElConfigProvider } from 'element-plus'
+import ru from 'element-plus/es/locale/lang/ru'
+import en from 'element-plus/es/locale/lang/en'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,6 +41,15 @@ const layout = shallowRef<Component>(DefaultLayout)
 const { isLoading, authorize } = useAuthorization()
 const sessionStore = useSessionStore()
 const localeStore = useLocaleStore()
+
+const elementPlusLocale = computed(() => {
+	const langs = {
+		ru,
+		en,
+	}
+
+	return langs[localeStore.currentLocale] || ru
+})
 
 const authUser = async () => {
   if (!sessionStore.isAuthenticated) {

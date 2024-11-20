@@ -44,7 +44,7 @@
 						<!-- Шапка календаря -->
 						<div class="flex items-center justify-between p-4 border-b">
 							<h4 class="text-lg font-medium">
-								Выберите дату
+								{{ t('selectDate') }}
 							</h4>
 							<button
 								class="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -55,6 +55,7 @@
 						</div>
 
 						<el-calendar
+							ref="calendar"
 							v-model="calendarDate"
 							class="custom-calendar"
 						>
@@ -72,6 +73,32 @@
 									{{ new Date(data.day).getDate() }}
 								</div>
 							</template>
+							<template #header="{ date }">
+								<div class="flex justify-between w-[100%] flex-wrap gap-[16px]">
+									<span>{{ date }}</span>
+									<el-button-group class="flex">
+										<el-button
+											size="small"
+											@click="selectDate('prev-month')"
+										>
+											{{ t('prevMonth') }}
+										</el-button>
+										<el-button
+											size="small"
+											@click="selectDate('today')"
+										>
+											{{ t('today') }}
+										</el-button>
+										<el-button
+											:disabled="isNextMonthDisabled(calendarDate)"
+											size="small"
+											@click="selectDate('next-month')"
+										>
+											{{ t('nextMonth') }}
+										</el-button>
+									</el-button-group>
+								</div>
+							</template>
 						</el-calendar>
 					</div>
 				</div>
@@ -84,7 +111,7 @@
 		/>
 
 		<div
-			v-if="dayStats || !dayStats?.meals?.length"
+			v-if="dayStats"
 			class="p-6 bg-white rounded-lg shadow-sm"
 		>
 			<!-- Калории и приемы пищи -->
@@ -92,7 +119,7 @@
 				<div class="flex flex-col items-center mb-2">
 					<div class="text-base text-gray-500 mb-1">
 						<template v-if="dayStats?.meals?.length">
-							{{ t('mealsCount').replace('{count}', dayStats.meals_count.toString()) }}
+							{{ t('mealsCount', { count: dayStats.meals_count.toString() }) }}
 						</template>
 						<template v-else>
 							<div class="text-center">
@@ -213,7 +240,7 @@
 <script setup lang="ts">
  import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
  import { useTranslation } from '@/shared/lib/i18n'
- import { ElCalendar } from 'element-plus'
+ import { ElCalendar, CalendarInstance, CalendarDateType, ElButtonGroup, ElButton } from 'element-plus'
  import { VLoading } from '@/shared/components/Loading'
  import type { Profile, MealStats } from '../model'
  import localization from './ProfileStats.localization.json'
@@ -286,6 +313,13 @@
    return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), timezone)
  })
 
+ // Добавляем проверку на будущий месяц
+ const isNextMonthDisabled = (chosenDate: Date | string) => {
+  const nextMonth = new Date(chosenDate).getMonth() + 1
+  const todayMonth = new Date(today.value).getMonth()
+
+  return nextMonth > todayMonth
+ }
  // Добавляем проверку на будущую дату
  const isFutureDate = (date: string) => {
    const timezone = props.profile?.timezone || 0
@@ -307,14 +341,25 @@
    showCalendar.value = false
  }
  // Календарь
+ const calendarDateType = ref<CalendarDateType | null>(null)
+ const calendar = ref<CalendarInstance>()
+ const selectDate = (val: CalendarDateType) => {
+  if (!calendar.value) return
+  calendarDateType.value = val
+  calendar.value.selectDate(val)
+ }
+
  const calendarDate = computed({
    get: () => new Date(props.modelValue),
    set: (value: Date) => {
      const timezone = props.profile?.timezone || 0
      if (!isFutureDate(value.toISOString())) {
        emit('update:modelValue', formatDateWithTimezone(value, timezone))
-       showCalendar.value = false
-     }
+       if (calendarDateType.value !== 'next-month' && calendarDateType.value !== 'prev-month') {
+         showCalendar.value = false
+       }
+      }
+      calendarDateType.value = null
    }
  })
 

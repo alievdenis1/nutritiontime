@@ -11,7 +11,7 @@
     "target": "цель",
     "setGoals": "Задать цели",
     "noDataForDate": "Нет данных за выбранную дату",
-    "mealsCount": "Приёмов пищи: {count}",
+    "mealsCount": "Приёмов пищи: {{count}}",
     "tryAgain": "Попробовать снова",
     "out_of": "из",
     "meals": "Приемы пищи",
@@ -106,7 +106,11 @@
     "caloriesAverage": "Потребление калорий от цели",
     "proteinsAverage": "Потребление белков от цели",
     "fatsAverage": "Потребление жиров от цели",
-    "carbsAverage": "Потребление углеводов от цели"
+    "carbsAverage": "Потребление углеводов от цели",
+    "nextMonth": "Следующий месяц",
+    "today": "Сегодня",
+    "prevMonth": "Предыдущий месяц",
+    "selectDate": "Выберите дату"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -120,7 +124,7 @@
     "target": "target",
     "setGoals": "Set Goals",
     "noDataForDate": "No data for selected date",
-    "mealsCount": "Meals count: {count}",
+    "mealsCount": "Meals count: {{count}}",
     "tryAgain": "Try again",
     "out_of": "of",
     "meals": "Meals",
@@ -215,6 +219,10 @@
     "caloriesAverage": "Calories intake of target",
     "proteinsAverage": "Protein intake of target",
     "fatsAverage": "Fat intake of target",
-    "carbsAverage": "Carbs intake of target"
+    "carbsAverage": "Carbs intake of target",
+    "nextMonth": "Next Month",
+    "today": "Today",
+    "prevMonth": "Previous Month",
+    "selectDate": "Select date"
   }
 }
