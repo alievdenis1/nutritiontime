@@ -361,6 +361,11 @@
    emit('update:modelValue', formatDateWithTimezone(new Date(date), timezone))
    showCalendar.value = false
  }
+
+ const getFormattedDate = (date: Date) => {
+	return new Date(date).toLocaleDateString().replace(/(\d{2}).(\d{2}).(\d{4})/,'$3-$2-$1')
+ }
+
  // Календарь
  const calendarDateType = ref<CalendarDateType | null>(null)
  const calendar = ref<CalendarInstance>()
@@ -373,10 +378,9 @@
  const calendarDate = computed({
    get: () => getDateWithTimezone(props.modelValue, props.profile?.timezone || 0),
    set: (value: Date) => {
-	// console.log('value', value)
-     const timezone = props.profile?.timezone || 0
-     if (!isFutureDate(value.toISOString())) {
-       emit('update:modelValue', formatDateWithTimezone(value, timezone))
+    //  const timezone = props.profile?.timezone || 0
+     if (!isFutureDate(getFormattedDate(value))) {
+       emit('update:modelValue', formatDateWithTimezone(value, 0))
        if (calendarDateType.value !== 'next-month' && calendarDateType.value !== 'prev-month') {
          showCalendar.value = false
        }
