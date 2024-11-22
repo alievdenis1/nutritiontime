@@ -279,7 +279,7 @@
    const offsetDiff = (userTimezoneOffset) * 60 * 1000
 
    // Создаем новую дату с учетом смещения
-   const adjustedDate = new Date(d.getTime() + offsetDiff)
+   const adjustedDate = new Date(d.getTime() - offsetDiff)
    return adjustedDate.toLocaleDateString().replace(/(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1')
  }
 
