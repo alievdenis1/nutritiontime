@@ -292,6 +292,21 @@
 	return new Date()
  }
 
+ const getDateWithTimezone = (date: string | Date, timezone: number): Date => {
+   // Создаем дату в UTC
+   const d = new Date(date)
+   // Получаем текущее смещение пользователя в минутах
+   const userTimezoneOffset = timezone * 60
+   // Получаем смещение системы в минутах
+//    const systemOffset = new Date().getTimezoneOffset()
+   // Вычисляем разницу в миллисекундах, учитывая оба смещения
+//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
+   const offsetDiff = (userTimezoneOffset) * 60 * 1000
+
+   // Создаем новую дату с учетом смещения
+   return new Date(d.getTime() - offsetDiff)
+ }
+
  const handleToProfile = async () => {
    await sendToProfile().execute()
    WebApp.close()
@@ -356,7 +371,7 @@
  }
 
  const calendarDate = computed({
-   get: () => new Date(props.modelValue),
+   get: () => getDateWithTimezone(props.modelValue, props.profile?.timezone || 0),
    set: (value: Date) => {
 	// console.log('value', value)
      const timezone = props.profile?.timezone || 0
