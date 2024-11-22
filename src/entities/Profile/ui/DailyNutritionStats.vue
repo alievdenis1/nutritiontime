@@ -70,7 +70,7 @@
 									}"
 									@click="handleDateClick(data.day)"
 								>
-									{{ new Date(data.day).getDate() }}
+									{{ getDateWithTimezone(data.day, props.profile?.timezone || 0).getDate() }}
 								</div>
 							</template>
 							<template #header="{ date }">
@@ -352,7 +352,6 @@
  }
  // Добавляем обработчик клика по дате
  const handleDateClick = (date: string) => {
-	// console.log('click date', date)
    const timezone = props.profile?.timezone || 0
    if (isFutureDate(date)) {
      return
