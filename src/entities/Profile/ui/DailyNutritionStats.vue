@@ -280,7 +280,8 @@
 
    // Создаем новую дату с учетом смещения
    const adjustedDate = new Date(d.getTime() - offsetDiff)
-   return adjustedDate.toLocaleDateString().replace(/(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1')
+   const [day, month, year] = adjustedDate.toLocaleDateString().split('.')
+   return `${year}-${month}-${day}`
  }
 
  const getCurrentDateWithTimezone = (timezone: number): Date => {
@@ -362,7 +363,8 @@
  }
 
  const getFormattedDate = (date: Date) => {
-	return new Date(date).toLocaleDateString().replace(/(\d{2}).(\d{2}).(\d{4})/,'$3-$2-$1')
+	const [day, month, year] = new Date(date).toLocaleDateString().split('.')
+   return `${year}-${month}-${day}`
  }
 
  // Календарь
