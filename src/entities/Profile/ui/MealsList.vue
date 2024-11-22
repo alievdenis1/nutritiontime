@@ -41,7 +41,7 @@
 						{{ meal.dish_name }}
 					</h5>
 					<span class="text-sm text-gray-500 text-slateGray">
-						{{ formatTime(meal.created_at) }}
+						{{ formatDateWithTimezone(meal.created_at, profile?.timezone || 0) }}
 					</span>
 				</div>
 
@@ -105,7 +105,7 @@
  import { useTranslation } from '@/shared/lib/i18n'
  import { deleteMeal } from '../api'
  import { openConfirm } from '@/shared/components/Confirm'
- import type { MealItem } from '../model'
+ import type { MealItem, Profile } from '../model'
  import localization from './ProfileStats.localization.json'
 
  const { t } = useTranslation({ ...localization })
@@ -113,7 +113,8 @@
 defineProps<{
   dayStats: {
    meals: MealItem[]
-  } | null
+  } | null,
+  profile: Profile | null,
  }>()
 
  const emit = defineEmits(['meal-deleted'])
@@ -144,12 +145,18 @@ defineProps<{
   }
  }
 
- // Форматирование времени
- const formatTime = (dateString: string): string => {
-  return new Date(dateString).toLocaleTimeString('ru-RU', {
-   hour: '2-digit',
-   minute: '2-digit'
-  })
+ const formatDateWithTimezone = (date: string | Date, timezone: number): string => {
+   // Создаем дату в UTC
+   const d = new Date(date)
+   // Получаем текущее смещение пользователя в минутах
+   const userTimezoneOffset = timezone * 60
+
+   const offsetDiff = (userTimezoneOffset) * 60 * 1000
+
+   // Создаем новую дату с учетом смещения
+   const adjustedDate = new Date(d.getTime() + offsetDiff)
+
+   return adjustedDate.toLocaleTimeString().match(/\d\d:\d\d/)?.[0] || ''
  }
 
  // Форматирование чисел

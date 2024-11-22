@@ -162,7 +162,7 @@
 							{{ t('currentWeight') }}
 						</div>
 						<div class="font-medium text-center">
-							{{ statisticsData.weight_progress.current }} {{ t('kg') }}
+							{{ statisticsData.weight_progress.current ?? '-' }} {{ t('kg') }}
 						</div>
 					</div>
 				</div>
@@ -173,12 +173,12 @@
 					<div
 						class="font-medium text-center"
 						:class="{
-							'text-red-500': statisticsData.weight_progress?.change > 0,
-							'text-emerald-500': statisticsData.weight_progress?.change < 0
+							'text-red': (statisticsData.weight_progress?.change ?? 0) > 0,
+							'text-forestGreen': (statisticsData.weight_progress?.change ?? 0) < 0
 						}"
 					>
-						{{ statisticsData.weight_progress?.change > 0 ? '+' : '' }}
-						{{ statisticsData.weight_progress?.change }} {{ t('kg') }}
+						{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
+						{{ statisticsData.weight_progress?.change ?? '-' }} {{ t('kg') }}
 					</div>
 				</div>
 

@@ -231,6 +231,7 @@
 		</div>
 
 		<MealsList
+			:profile="profile"
 			:day-stats="dayStats"
 			@meal-deleted="handleMealDeleted"
 		/>
@@ -272,21 +273,23 @@
    // Получаем текущее смещение пользователя в минутах
    const userTimezoneOffset = timezone * 60
    // Получаем смещение системы в минутах
-   const systemOffset = new Date().getTimezoneOffset()
+//    const systemOffset = new Date().getTimezoneOffset()
    // Вычисляем разницу в миллисекундах, учитывая оба смещения
-   const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
+//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
+   const offsetDiff = (userTimezoneOffset) * 60 * 1000
 
    // Создаем новую дату с учетом смещения
    const adjustedDate = new Date(d.getTime() + offsetDiff)
-   return adjustedDate.toISOString().split('T')[0]
+   return adjustedDate.toLocaleDateString().replace(/(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1')
  }
 
  const getCurrentDateWithTimezone = (timezone: number): Date => {
-   const now = new Date()
-   const userTimezoneOffset = timezone * 60
-   const systemOffset = now.getTimezoneOffset()
-   const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
-   return new Date(now.getTime() + offsetDiff)
+//    const now = new Date()
+//    const userTimezoneOffset = timezone * 60
+//    const systemOffset = now.getTimezoneOffset()
+//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
+//    return new Date(now.getTime() + offsetDiff)
+	return new Date()
  }
 
  const handleToProfile = async () => {
@@ -310,7 +313,8 @@
  const showCalendar = ref(false)
  const today = computed(() => {
    const timezone = props.profile?.timezone || 0
-   return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), timezone)
+//    return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), timezone)
+	return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), 0)
  })
 
  // Добавляем проверку на будущий месяц
@@ -333,10 +337,12 @@
  }
  // Добавляем обработчик клика по дате
  const handleDateClick = (date: string) => {
+	// console.log('click date', date)
    const timezone = props.profile?.timezone || 0
    if (isFutureDate(date)) {
      return
    }
+//    console.log('formatted date', formatDateWithTimezone(new Date(date), timezone))
    emit('update:modelValue', formatDateWithTimezone(new Date(date), timezone))
    showCalendar.value = false
  }
@@ -352,6 +358,7 @@
  const calendarDate = computed({
    get: () => new Date(props.modelValue),
    set: (value: Date) => {
+	// console.log('value', value)
      const timezone = props.profile?.timezone || 0
      if (!isFutureDate(value.toISOString())) {
        emit('update:modelValue', formatDateWithTimezone(value, timezone))
@@ -392,6 +399,7 @@
 
  // Вычисляемые свойства
  const isToday = computed(() =>
+//  new Date().toLocaleDateString() === props.modelValue.toLocaleDateString()
      props.modelValue === today.value
  )
 
@@ -401,6 +409,7 @@
    const date = new Date(props.modelValue)
    const currentDate = getCurrentDateWithTimezone(timezone)
 
+	// if (isToday) {}
    if (formatDateWithTimezone(date, timezone) === formatDateWithTimezone(currentDate, timezone)) {
      return t('reportToday')
    }
@@ -408,6 +417,7 @@
    const yesterdayDate = new Date(currentDate)
    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
 
+	// if (isYesterday) {}
    if (formatDateWithTimezone(date, timezone) === formatDateWithTimezone(yesterdayDate, timezone)) {
      return t('reportYesterday')
    }
@@ -454,6 +464,7 @@
 
  const handlePrevDay = () => {
    const timezone = props.profile?.timezone || 0
+//    console.log('props.modelValue', props.modelValue)
    const date = new Date(props.modelValue)
    // Вычитаем один день (24 часа)
    date.setDate(date.getDate() - 1)
