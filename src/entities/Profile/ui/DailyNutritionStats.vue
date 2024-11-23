@@ -111,10 +111,7 @@
 			class="h-64"
 		/>
 
-		<div
-			v-if="dayStats"
-			class="p-6 bg-white rounded-lg shadow-sm"
-		>
+		<div class="p-6 bg-white rounded-lg shadow-sm">
 			<!-- Калории и приемы пищи -->
 			<div class="mb-6">
 				<div class="flex flex-col items-center mb-2">
