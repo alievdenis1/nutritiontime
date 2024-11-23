@@ -509,7 +509,7 @@ const updateWeightChart = (newData: ChartsData) => {
     xaxis: {
       type: 'datetime',
       categories: dates,
-      tickAmount: selectedPeriod.value === 'week' ? 7 :
+      tickAmount: selectedPeriod.value === 'week' ? 5 :
           selectedPeriod.value === 'month' ? 6 : 9,
       labels: {
         formatter: function(value: string) {
@@ -589,7 +589,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
       hideOverlappingLabels: true,
       maxHeight: 50
     },
-    tickAmount: selectedPeriod.value === 'week' ? 7 :
+    tickAmount: selectedPeriod.value === 'week' ? 5 :
         selectedPeriod.value === 'month' ? 6 : 9
   },
   legend: {
