@@ -1,3 +1,4 @@
+// DailyNutritionStats.vue
 <template>
 	<div class="space-y-4">
 		<!-- Заголовок с календарем -->
@@ -70,7 +71,7 @@
 									}"
 									@click="handleDateClick(data.day)"
 								>
-									{{ getDateWithTimezone(data.day, props.profile?.timezone || 0).getDate() }}
+									{{ new Date(data.day).getDate() }}
 								</div>
 							</template>
 							<template #header="{ date }">
@@ -267,47 +268,6 @@
    (e: 'meal-deleted'): void
  }>()
 
- const formatDateWithTimezone = (date: string | Date, timezone: number): string => {
-   // Создаем дату в UTC
-   const d = new Date(date)
-   // Получаем текущее смещение пользователя в минутах
-   const userTimezoneOffset = timezone * 60
-   // Получаем смещение системы в минутах
-//    const systemOffset = new Date().getTimezoneOffset()
-   // Вычисляем разницу в миллисекундах, учитывая оба смещения
-//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
-   const offsetDiff = (userTimezoneOffset) * 60 * 1000
-
-   // Создаем новую дату с учетом смещения
-   const adjustedDate = new Date(d.getTime() - offsetDiff)
-   const [day, month, year] = adjustedDate.toLocaleDateString().split('.')
-   return `${year}-${month}-${day}`
- }
-
- const getCurrentDateWithTimezone = (timezone: number): Date => {
-//    const now = new Date()
-//    const userTimezoneOffset = timezone * 60
-//    const systemOffset = now.getTimezoneOffset()
-//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
-//    return new Date(now.getTime() + offsetDiff)
-	return new Date()
- }
-
- const getDateWithTimezone = (date: string | Date, timezone: number): Date => {
-   // Создаем дату в UTC
-   const d = new Date(date)
-   // Получаем текущее смещение пользователя в минутах
-   const userTimezoneOffset = timezone * 60
-   // Получаем смещение системы в минутах
-//    const systemOffset = new Date().getTimezoneOffset()
-   // Вычисляем разницу в миллисекундах, учитывая оба смещения
-//    const offsetDiff = (userTimezoneOffset + systemOffset) * 60 * 1000
-   const offsetDiff = (userTimezoneOffset) * 60 * 1000
-
-   // Создаем новую дату с учетом смещения
-   return new Date(d.getTime() - offsetDiff)
- }
-
  const handleToProfile = async () => {
    await sendToProfile().execute()
    WebApp.close()
@@ -328,11 +288,8 @@
  // Состояние
  const showCalendar = ref(false)
  const today = computed(() => {
-   const timezone = props.profile?.timezone || 0
-//    return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), timezone)
-	return formatDateWithTimezone(getCurrentDateWithTimezone(timezone), 0)
+   return getServerDate.value?.toISOString().split('T')[0] || ''
  })
-
  // Добавляем проверку на будущий месяц
  const isNextMonthDisabled = (chosenDate: Date | string) => {
   const nextMonth = new Date(chosenDate).getMonth() + 1
@@ -342,29 +299,20 @@
  }
  // Добавляем проверку на будущую дату
  const isFutureDate = (date: string) => {
-   const timezone = props.profile?.timezone || 0
-   const selectedDate = new Date(formatDateWithTimezone(date, timezone))
-   const currentDate = new Date(today.value)
-
+   if (!getServerDate.value) return true
+   const selectedDate = new Date(date)
    selectedDate.setHours(0, 0, 0, 0)
-   currentDate.setHours(0, 0, 0, 0)
 
-   return selectedDate > currentDate
+   const serverDate = new Date(getServerDate.value)
+   serverDate.setHours(0, 0, 0, 0)
+
+   return selectedDate > serverDate
  }
  // Добавляем обработчик клика по дате
  const handleDateClick = (date: string) => {
-   const timezone = props.profile?.timezone || 0
-   if (isFutureDate(date)) {
-     return
-   }
-//    console.log('formatted date', formatDateWithTimezone(new Date(date), timezone))
-   emit('update:modelValue', formatDateWithTimezone(new Date(date), timezone))
+   if (isFutureDate(date)) return
+   emit('update:modelValue', new Date(date).toISOString().split('T')[0])
    showCalendar.value = false
- }
-
- const getFormattedDate = (date: Date) => {
-	const [day, month, year] = new Date(date).toLocaleDateString().split('.')
-   return `${year}-${month}-${day}`
  }
 
  // Календарь
@@ -377,25 +325,22 @@
  }
 
  const calendarDate = computed({
-   get: () => getDateWithTimezone(props.modelValue, props.profile?.timezone || 0),
+   get: () => new Date(props.modelValue),
    set: (value: Date) => {
-    //  const timezone = props.profile?.timezone || 0
-     if (!isFutureDate(getFormattedDate(value))) {
-       emit('update:modelValue', formatDateWithTimezone(value, 0))
+     const dateString = value.toISOString().split('T')[0]
+     if (!isFutureDate(dateString)) {
+       emit('update:modelValue', dateString)
        if (calendarDateType.value !== 'next-month' && calendarDateType.value !== 'prev-month') {
          showCalendar.value = false
        }
-      }
-      calendarDateType.value = null
+     }
+     calendarDateType.value = null
    }
  })
 
  // Форматирование даты для отображения
  const formatDateForDisplay = (date: string | Date): string => {
-   const d = new Date(date)
-   return d.toLocaleDateString('ru-RU', {
-     timeZone: `Etc/GMT${props.profile?.timezone && props.profile.timezone > 0 ? '-' : '+'}${Math.abs(props.profile?.timezone || 0)}`
-   })
+   return new Date(date).toLocaleDateString('ru-RU')
  }
 
  // Закрытие календаря при клике вне
@@ -407,14 +352,20 @@
  }
 
  onMounted(() => {
-   if (props.profile?.timezone) {
-     emit('update:modelValue', formatDateWithTimezone(new Date(), props.profile.timezone))
+   if (props.profile?.server_datetime) {
+     emit('update:modelValue', new Date(props.profile.server_datetime).toISOString().split('T')[0])
    }
-  document.addEventListener('click', handleClickOutside)
+   document.addEventListener('click', handleClickOutside)
  })
 
  onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+ })
+
+ const getServerDate = computed(() => {
+   return props.profile?.server_datetime ?
+       new Date(props.profile.server_datetime) :
+       null
  })
 
  // Вычисляемые свойства
@@ -425,24 +376,30 @@
 
  // Обновляем headerTitle
  const headerTitle = computed(() => {
-   const timezone = props.profile?.timezone || 0
-   const date = new Date(props.modelValue)
-   const currentDate = getCurrentDateWithTimezone(timezone)
+   if (!getServerDate.value) return ''
 
-	// if (isToday) {}
-   if (formatDateWithTimezone(date, timezone) === formatDateWithTimezone(currentDate, timezone)) {
+   const selectedDateTime = new Date(props.modelValue)
+   const serverDateTime = getServerDate.value
+
+   // Сравниваем даты, игнорируя время
+   const isToday = selectedDateTime.toISOString().split('T')[0] ===
+       serverDateTime.toISOString().split('T')[0]
+
+   if (isToday) {
      return t('reportToday')
    }
 
-   const yesterdayDate = new Date(currentDate)
-   yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+   const yesterday = new Date(serverDateTime)
+   yesterday.setDate(yesterday.getDate() - 1)
 
-	// if (isYesterday) {}
-   if (formatDateWithTimezone(date, timezone) === formatDateWithTimezone(yesterdayDate, timezone)) {
+   const isYesterday = selectedDateTime.toISOString().split('T')[0] ===
+       yesterday.toISOString().split('T')[0]
+
+   if (isYesterday) {
      return t('reportYesterday')
    }
 
-   return t('reportForDate').replace('{date}', formatDateForDisplay(date))
+   return t('reportForDate').replace('{date}', formatDateForDisplay(selectedDateTime))
  })
 
  const dayStats = computed(() => {
@@ -462,11 +419,6 @@
   ]
  })
 
- // Методы
- const formatDate = (date: Date | string): string => {
-   return formatDateWithTimezone(date, props.profile?.timezone || 0)
- }
-
  const formatNumber = (value: string | number | undefined | null): string => {
   if (value == null) return '0'
   return Math.round(Number(value)).toString()
@@ -483,22 +435,16 @@
  }
 
  const handlePrevDay = () => {
-   const timezone = props.profile?.timezone || 0
-//    console.log('props.modelValue', props.modelValue)
    const date = new Date(props.modelValue)
-   // Вычитаем один день (24 часа)
    date.setDate(date.getDate() - 1)
-   emit('update:modelValue', formatDateWithTimezone(date, timezone))
+   emit('update:modelValue', date.toISOString().split('T')[0])
  }
  const handleNextDay = () => {
    if (isToday.value) return
-   const timezone = props.profile?.timezone || 0
    const date = new Date(props.modelValue)
-   // Добавляем один день (24 часа)
    date.setDate(date.getDate() + 1)
-   emit('update:modelValue', formatDateWithTimezone(date, timezone))
+   emit('update:modelValue', date.toISOString().split('T')[0])
  }
-
  const toggleCalendar = (event: MouseEvent) => {
   event.stopPropagation()
   showCalendar.value = !showCalendar.value
@@ -510,6 +456,10 @@
 
  const closeCalendar = () => {
   showCalendar.value = false
+ }
+
+ const formatDate = (date: Date | string): string => {
+   return new Date(date).toISOString().split('T')[0]
  }
 
  const isCurrentDate = (date: string) => {

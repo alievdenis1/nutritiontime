@@ -1,3 +1,4 @@
+// ProfileStats.vue
 <template>
 	<div
 		v-if="profile"
@@ -105,7 +106,11 @@
  const router = useRouter()
 
  // Состояние
- const selectedDate = ref(new Date().toISOString().split('T')[0])
+ const selectedDate = ref('')
+ const serverDate = computed(() => {
+   if (!profile.value?.server_datetime) return ''
+   return new Date(profile.value.server_datetime).toISOString().split('T')[0]
+ })
 
  // API запросы
  const profileApi = getProfile()
@@ -161,6 +166,13 @@
 
  // Инициализация
  onMounted(() => {
-  fetchData()
+   // Инициализируем дату только после получения данных с сервера
+   watch(serverDate, (newDate) => {
+     if (newDate && !selectedDate.value) {
+       selectedDate.value = newDate
+     }
+   }, { immediate: true })
+
+   fetchData()
  })
 </script>
