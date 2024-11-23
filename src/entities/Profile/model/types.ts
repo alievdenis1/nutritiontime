@@ -20,7 +20,7 @@ export interface Profile {
  diet_type: string;
  recommended_steps: number;
  water_intake: number;
- timezone: number;
+ server_datetime: string;
 }
 
 export interface User {
