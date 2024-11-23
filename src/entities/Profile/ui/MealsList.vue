@@ -41,7 +41,7 @@
 						{{ meal.dish_name }}
 					</h5>
 					<span class="text-sm text-gray-500 text-slateGray">
-						{{ formatDateWithTimezone(meal.created_at, profile?.timezone || 0) }}
+						{{ formatTime(meal.created_at) }}
 					</span>
 				</div>
 
@@ -101,67 +101,62 @@
 </template>
 
 <script setup lang="ts">
- import { ref } from 'vue'
- import { useTranslation } from '@/shared/lib/i18n'
- import { deleteMeal } from '../api'
- import { openConfirm } from '@/shared/components/Confirm'
- import type { MealItem, Profile } from '../model'
- import localization from './ProfileStats.localization.json'
+import { ref } from 'vue'
+import { useTranslation } from '@/shared/lib/i18n'
+import { deleteMeal } from '../api'
+import { openConfirm } from '@/shared/components/Confirm'
+import type { MealItem, Profile } from '../model'
+import localization from './ProfileStats.localization.json'
 
- const { t } = useTranslation({ ...localization })
+const { t } = useTranslation({ ...localization })
 
 defineProps<{
   dayStats: {
-   meals: MealItem[]
+    meals: MealItem[]
   } | null,
   profile: Profile | null,
- }>()
+}>()
 
- const emit = defineEmits(['meal-deleted'])
+const emit = defineEmits(['meal-deleted'])
 
- // Состояние для процесса удаления
- const isDeleting = ref(false)
+// Состояние для процесса удаления
+const isDeleting = ref(false)
 
- // Функция подтверждения удаления
- const confirmDelete = async (meal: MealItem) => {
+// Функция подтверждения удаления
+const confirmDelete = async (meal: MealItem) => {
   const confirmed = await openConfirm({
-   title: t('deleteMealTitle'),
-   description: t('deleteMealDescription'),
-   confirmButtonText: t('confirmDelete'),
-   cancelButtonText: t('cancelDelete')
+    title: t('deleteMealTitle'),
+    description: t('deleteMealDescription'),
+    confirmButtonText: t('confirmDelete'),
+    cancelButtonText: t('cancelDelete')
   })
 
   if (confirmed) {
-   isDeleting.value = true
-   try {
-    const { execute } = deleteMeal(meal.id)
-    await execute()
-    emit('meal-deleted', meal.id)
-   } catch (error) {
-    console.error('Error deleting meal:', error)
-   } finally {
-    isDeleting.value = false
-   }
+    isDeleting.value = true
+    try {
+      const { execute } = deleteMeal(meal.id)
+      await execute()
+      emit('meal-deleted', meal.id)
+    } catch (error) {
+      console.error('Error deleting meal:', error)
+    } finally {
+      isDeleting.value = false
+    }
   }
- }
+}
 
- const formatDateWithTimezone = (date: string | Date, timezone: number): string => {
-   // Создаем дату в UTC
-   const d = new Date(date)
-   // Получаем текущее смещение пользователя в минутах
-   const userTimezoneOffset = timezone * 60
+// Заменяем formatDateWithTimezone на простой formatTime
+const formatTime = (dateString: string): string => {
+  const date = new Date(dateString)
+  return date.toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
-   const offsetDiff = (userTimezoneOffset) * 60 * 1000
-
-   // Создаем новую дату с учетом смещения
-   const adjustedDate = new Date(d.getTime() + offsetDiff)
-
-   return adjustedDate.toLocaleTimeString().match(/\d\d:\d\d/)?.[0] || ''
- }
-
- // Форматирование чисел
- const formatNumber = (value: string | number | undefined | null): string => {
+// Форматирование чисел остается без изменений
+const formatNumber = (value: string | number | undefined | null): string => {
   if (value == null) return '0'
   return Math.round(Number(value)).toString()
- }
+}
 </script>
