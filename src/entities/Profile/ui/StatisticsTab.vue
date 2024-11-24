@@ -773,6 +773,8 @@ const formatDate = (dateValue: string | number, period: string): string => {
 // Функция для получения диапазона дат в зависимости от периода
 const getDateRange = (period: string) => {
   const end = new Date() // Сегодняшний день
+  end.setDate(end.getDate() + 1)
+
   const start = new Date()
 
   switch(period) {
