@@ -5,7 +5,7 @@ export default [
 	{
 		name: 'main',
 		component: () => import('pages/main/MainPage.vue'),
-		// component: () => import('pages/wallet/UserWallet.vue'), // Важно: динасический импорт, чтобы код работал в production при build
+		// component: () => import('pages/wallet/UserWallet.vue'), // Важно: динамический импорт, чтобы код работал в production при build
 		path: '/',
 		meta: {
 			title: 'NutritionTime',
@@ -16,6 +16,16 @@ export default [
 		path: '/payment/',
 		component: () => import('pages/payment/PaymentPage.vue'),
 		name: 'payment',
+		meta: {
+			title: 'NutritionTime',
+			layout: MainLayout,
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/profile/',
+		component: () => import('pages/profile/ProfilePage.vue'),
+		name: 'profile',
 		meta: {
 			title: 'NutritionTime',
 			layout: MainLayout,
