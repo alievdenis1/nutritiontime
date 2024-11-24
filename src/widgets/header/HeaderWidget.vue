@@ -16,9 +16,9 @@
 			<div class="flex items-center gap-[8px]">
 				<button
 					class="settings-button py-[10px] px-[16px] relative"
-					@click="navigateToWallet"
+					@click="navigateToProfile"
 				>
-					<IconWallet />
+					<IconProfile />
 				</button>
 
 				<button
@@ -64,7 +64,7 @@ import Localization from './HeaderWidget.localization.json'
 import { onClickOutside } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useLocaleStore, useTranslation } from '@/shared/lib/i18n'
-import { IconWallet, IconArrow } from '@/shared/components/Icon'
+import { IconProfile, IconArrow } from '@/shared/components/Icon'
 
 const router = useRouter()
 
@@ -77,8 +77,8 @@ const languageDropDownOpen = ref(false)
 onClickOutside(target, () => languageDropDownOpen.value = false)
 const isActiveLocale = computed(() => (locale: string) => localeStore.currentLocale === locale)
 
-const navigateToWallet = () => {
-	router.push('/wallet')
+const navigateToProfile = () => {
+	router.push('/profile')
 }
 
 const navigateToMain = () => {

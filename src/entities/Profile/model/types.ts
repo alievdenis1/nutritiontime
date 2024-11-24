@@ -1,3 +1,14 @@
+export interface ReferralUser {
+ id: number;
+ name: string;
+ telegram_username: string | null;
+ has_active_subscription: boolean;
+ has_trial: boolean;
+ ever_had_subscription: boolean;
+ current_streak: number;
+ referrals_count: number;
+}
+
 export interface Profile {
  gender: string;
  age: number;
@@ -36,13 +47,14 @@ export interface User {
  diary_streak: number;
  is_trial: boolean;
  subscription_days_left: number;
+ referrer: ReferralUser | null;
+ referrals: ReferralUser[];
 }
 
 export interface ProfileResponse {
  user: User;
  profile: Profile;
 }
-
 export interface Meal {
  id: number;
  dish_name: string;
