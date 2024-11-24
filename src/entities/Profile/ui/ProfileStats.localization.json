@@ -110,7 +110,8 @@
     "nextMonth": "Следующий месяц",
     "today": "Сегодня",
     "prevMonth": "Предыдущий месяц",
-    "selectDate": "Выберите дату"
+    "selectDate": "Выберите дату",
+    "mealAt": "Прием пищи в"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -223,6 +224,7 @@
     "nextMonth": "Next Month",
     "today": "Today",
     "prevMonth": "Previous Month",
-    "selectDate": "Select date"
+    "selectDate": "Select date",
+    "mealAt": "Meal at"
   }
 }
