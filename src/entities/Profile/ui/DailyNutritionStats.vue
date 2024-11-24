@@ -241,7 +241,7 @@
  import { useTranslation } from '@/shared/lib/i18n'
  import { ElCalendar, CalendarInstance, CalendarDateType, ElButtonGroup, ElButton } from 'element-plus'
  import { VLoading } from '@/shared/components/Loading'
- import type { Profile, MealStats } from '../model'
+ import type { Profile, MealStats, MealItem } from '../model'
  import localization from './ProfileStats.localization.json'
  import { MealsList } from './index'
  import { ButtonColors, VButton } from 'shared/components/Button'
@@ -399,13 +399,6 @@
    return t('reportForDate').replace('{date}', formatDateForDisplay(selectedDateTime))
  })
 
- const dayStats = computed(() => {
-  if (!props.mealStats?.daily_stats?.length) return null
-  return props.mealStats.daily_stats.find(
-   day => day.date === props.modelValue
-  ) ?? null
- })
-
  const macrosPercentages = computed(() => {
   if (!dayStats.value || !props.profile) return [0, 0, 0]
 
@@ -501,6 +494,61 @@
   },
   colors: ['#319A6E', '#FDC755', '#FFA767']
  })
+
+ const dayStats = computed(() => {
+   if (!props.mealStats?.daily_stats?.length) return null
+   const stats = props.mealStats.daily_stats.find(
+       day => day.date === props.modelValue
+   )
+   if (!stats) return null
+
+   interface MealGroup {
+     meals: MealItem[]
+   }
+
+   // Группируем приемы пищи по времени (разница менее часа)
+   const groupedMeals: MealGroup[] = []
+   let currentGroup: MealGroup | null = null
+
+   if (stats.meals) {
+     // Сортируем приемы пищи по времени
+     const sortedMeals = [...stats.meals].sort((a, b) =>
+         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+     )
+
+     sortedMeals.forEach((meal) => {
+       const mealTime = new Date(meal.created_at)
+
+       if (!currentGroup || getTimeDifferenceInMinutes(
+           new Date(currentGroup.meals[currentGroup.meals.length - 1].created_at),
+           mealTime
+       ) > 60) {
+         if (currentGroup) {
+           groupedMeals.push(currentGroup)
+         }
+         currentGroup = {
+           meals: [meal]
+         }
+       } else {
+         currentGroup.meals.push(meal)
+       }
+     })
+
+     if (currentGroup) {
+       groupedMeals.push(currentGroup)
+     }
+   }
+
+   return {
+     ...stats,
+     meals_count: groupedMeals.length // Количество групп приемов пищи
+   }
+ })
+
+ // Добавим функцию для подсчета разницы во времени
+ const getTimeDifferenceInMinutes = (date1: Date, date2: Date): number => {
+   return Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60)
+ }
 </script>
 
 <style>
