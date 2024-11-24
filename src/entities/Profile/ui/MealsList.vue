@@ -25,9 +25,9 @@
 					</div>
 
 					<!-- Общая статистика группы -->
-					<div class="flex flex-wrap items-center gap-6">
+					<div class="flex flex-wrap items-center justify-between">
 						<!-- Белки -->
-						<div class="flex items-center gap-2 min-w-[80px]">
+						<div class="flex items-center gap-2 min-w-[80px] mb-1">
 							<div
 								class="w-2.5 h-2.5 rounded-full"
 								style="background-color: #319A6E"
@@ -37,7 +37,7 @@
 							</span>
 						</div>
 						<!-- Жиры -->
-						<div class="flex items-center gap-2 min-w-[80px]">
+						<div class="flex items-center gap-2 min-w-[80px] mb-1">
 							<div
 								class="w-2.5 h-2.5 rounded-full"
 								style="background-color: #FDC755"
@@ -47,7 +47,7 @@
 							</span>
 						</div>
 						<!-- Углеводы -->
-						<div class="flex items-center gap-2 min-w-[80px]">
+						<div class="flex items-center gap-2 min-w-[80px] mb-1">
 							<div
 								class="w-2.5 h-2.5 rounded-full"
 								style="background-color: #FFA767"
@@ -56,8 +56,7 @@
 								{{ t('carbsShort') }}: {{ formatNumber(group.totalStats.carbs) }} {{ t('gram') }}
 							</span>
 						</div>
-						<!-- Вес -->
-						<div class="text-gray-600">
+						<div class="text-gray-600 mb-1">
 							{{ formatNumber(group.totalStats.weight) }} {{ t('gram') }}
 						</div>
 					</div>
