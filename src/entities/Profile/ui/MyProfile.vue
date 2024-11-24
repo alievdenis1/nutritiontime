@@ -39,6 +39,25 @@
 							<IconGold />
 							<span class="ml-2">$RECIPETON</span>
 						</div>
+
+						<div class="mb-6 text-center">
+							<VButton
+								:color="ButtonColors.Green"
+								class="w-full flex items-center justify-center gap-2"
+								@click="copyShareLink"
+							>
+								Поделиться реферальной ссылкой {{ userInfo?.referral_code }}
+							</VButton>
+							<!-- Уведомление о копировании -->
+							<div
+								v-if="showCopyNotification"
+								class="fixed top-4 right-4 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
+								:class="{ 'opacity-0': fadeOutNotification }"
+							>
+								Ссылка скопирована в буфер обмена
+							</div>
+						</div>
+
 						<!-- Основные параметры -->
 						<div class="space-y-2">
 							<h3 class="font-semibold text-lg">
@@ -206,6 +225,7 @@ import { IconClose, IconGold } from '@/shared/components/Icon'
 import WebApp from '@twa-dev/sdk'
 import type { ReferralUser } from '../model'
 import { useRouter } from 'vue-router'
+import { useSessionStore } from '@/entities/Session'
 
 const router = useRouter()
 
@@ -214,6 +234,39 @@ const navigateToWallet = () => {
 }
 
 const { t } = useTranslation(localization)
+
+const showCopyNotification = ref(false)
+const fadeOutNotification = ref(false)
+
+const sessionStore = useSessionStore()
+const { userInfo } = sessionStore
+
+// Функция копирования реферальной ссылки
+const copyShareLink = async () => {
+  const referralCode = userInfo?.referral_code || ''
+  const textToCopy = `https://t.me/nutritiontime_bot?start=${referralCode}`
+
+  try {
+    await navigator.clipboard.writeText(textToCopy)
+
+    // Показываем уведомление
+    showCopyNotification.value = true
+    fadeOutNotification.value = false
+
+    // Начинаем анимацию исчезновения через 2 секунды
+    setTimeout(() => {
+      fadeOutNotification.value = true
+    }, 2000)
+
+    // Скрываем уведомление полностью через 2.3 секунды
+    setTimeout(() => {
+      showCopyNotification.value = false
+      fadeOutNotification.value = false
+    }, 2300)
+  } catch (error) {
+    console.error('Ошибка при копировании текста:', error)
+  }
+}
 
 // Состояние
 const activeTab = ref('profile')
@@ -271,3 +324,14 @@ onMounted(() => {
   profileApi.execute()
 })
 </script>
+
+<style scoped>
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.opacity-0 {
+  opacity: 0;
+}
+</style>
