@@ -243,7 +243,10 @@ const { userInfo } = sessionStore
 
 // Функция копирования реферальной ссылки
 const copyShareLink = async () => {
+
   const referralCode = userInfo?.referral_code || ''
+  WebApp.openTelegramLink(`https://t.me/share/url?url=https://t.me/nutritiontime_bot?start=${referralCode}`)
+
   const textToCopy = `https://t.me/nutritiontime_bot?start=${referralCode}`
 
   try {
