@@ -15,7 +15,7 @@
 
 			<div class="flex items-center gap-[8px]">
 				<button
-					class="settings-button py-[10px] px-[16px] relative"
+					class="settings-button py-[14px] px-[16px] h-full relative"
 					@click="navigateToProfile"
 				>
 					<IconProfile />
