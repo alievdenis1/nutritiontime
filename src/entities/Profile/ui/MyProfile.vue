@@ -153,7 +153,7 @@
 												@{{ referral.telegram_username }}
 											</div>
 											<div class="text-sm">
-												{{ t('streakCount', { count: referral.current_streak }) }}
+												{{ t('streakCount').replace('{count}', referral.current_streak.toString()) }}
 											</div>
 											<div class="text-sm">
 												{{ getSubscriptionStatus(referral) }}
@@ -327,13 +327,7 @@ const formatGender = (gender: string): string => {
 }
 
 const formatGoal = (goal: string): string => {
-  const goals: Record<string, string> = {
-    'muscle_gain_aggressive': 'Интенсивный набор массы',
-    'muscle_gain': 'Набор массы',
-    'fat_loss': 'Снижение веса',
-    'maintenance': 'Поддержание веса'
-  }
-  return goals[goal] || goal
+  return t(`${goal}`) || goal
 }
 
 const showUserStats = (user: ReferralUser) => {
