@@ -46,7 +46,7 @@
 								class="w-full flex items-center justify-center gap-2"
 								@click="copyShareLink"
 							>
-								Поделиться реферальной ссылкой {{ userInfo?.referral_code }}
+								Поделиться ссылкой и получить 3 бесплатных дня
 							</VButton>
 							<!-- Уведомление о копировании -->
 							<div
