@@ -186,41 +186,40 @@
 				</div>
 			</TabsContent>
 		</TabsMain>
-
-		<VModal
-			:show="showModal"
-			@close="closeModal"
-		>
-			<div class="flex justify-between mb-[12px] items-center">
-				<h2 class="text-xl font-bold">
-					{{ selectedUser?.name }}
-				</h2>
-				<button
-					class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
-					@click="closeModal"
-				>
-					<IconClose />
-				</button>
-			</div>
-			<div class="flex flex-col gap-[20px] text-sm mb-[20px]">
-				<div class="space-y-2">
-					<div>{{ t('username') }}: @{{ selectedUser?.telegram_username }}</div>
-					<div>{{ t('currentStreak') }}: {{ selectedUser?.current_streak }}</div>
-					<div>{{ t('referralsCount') }}: {{ selectedUser?.referrals_count }}</div>
-					<div>
-						{{ t('subscriptionStatus') }}:
-						{{ selectedUser ? getSubscriptionStatus(selectedUser) : '' }}
-					</div>
-				</div>
-			</div>
-			<VButton
-				:color="ButtonColors.Green"
+	</div>
+	<VModal
+		:show="showModal"
+		@close="closeModal"
+	>
+		<div class="flex justify-between mb-[12px] items-center">
+			<h2 class="text-xl font-bold">
+				{{ selectedUser?.name }}
+			</h2>
+			<button
+				class="text-2xl w-[48px] h-[48px] bg-lightGray rounded-[50%] p-[14px] cursor-pointer"
 				@click="closeModal"
 			>
-				{{ t('buttonClose') }}
-			</VButton>
-		</VModal>
-	</div>
+				<IconClose />
+			</button>
+		</div>
+		<div class="flex flex-col gap-[20px] text-sm mb-[20px]">
+			<div class="space-y-2">
+				<div>{{ t('username') }}: @{{ selectedUser?.telegram_username }}</div>
+				<div>{{ t('currentStreak') }}: {{ selectedUser?.current_streak }}</div>
+				<div>{{ t('referralsCount') }}: {{ selectedUser?.referrals_count }}</div>
+				<div>
+					{{ t('subscriptionStatus') }}:
+					{{ selectedUser ? getSubscriptionStatus(selectedUser) : '' }}
+				</div>
+			</div>
+		</div>
+		<VButton
+			:color="ButtonColors.Green"
+			@click="closeModal"
+		>
+			{{ t('buttonClose') }}
+		</VButton>
+	</VModal>
 </template>
 
 <script setup lang="ts">
