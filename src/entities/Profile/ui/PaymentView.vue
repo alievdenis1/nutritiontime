@@ -204,9 +204,9 @@
    },
    {
      months: 12,
-     price: 4400,
+     price: 4000,
      features: [],
-     discount: Math.round((1 - (4400 / 12 / monthlyPrice)) * 100) // будет примерно 23%
+     discount: Math.round((1 - (4000 / 12 / monthlyPrice)) * 100) // будет примерно 23%
    }
  ]
  // Методы оплаты
