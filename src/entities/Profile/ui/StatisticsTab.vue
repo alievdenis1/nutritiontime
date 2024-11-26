@@ -174,8 +174,9 @@
 					<div
 						class="font-medium text-center"
 						:class="{
-							'text-red': (statisticsData.weight_progress?.change ?? 0) > 0,
-							'text-forestGreen': (statisticsData.weight_progress?.change ?? 0) < 0
+							'text-red': shouldShowRed(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+							'text-forestGreen': shouldShowGreen(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+							'text-black': shouldShowBlack(statisticsData.profile_goal)
 						}"
 					>
 						{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
@@ -854,4 +855,32 @@ const fillMissingWeightData = (weightData: ChartData[], dates: number[]): (numbe
 
 // Initial fetch
 fetchStatistics()
+
+// Helper functions for weight change color logic
+const isWeightLossGoal = (goal: string) => {
+  return ['weight_loss_aggressive', 'weight_loss_medium', 'weight_loss_mild'].includes(goal)
+}
+
+const isMuscleGainGoal = (goal: string) => {
+  return ['muscle_gain_aggressive', 'muscle_gain_medium'].includes(goal)
+}
+
+const isMaintenanceGoal = (goal: string) => {
+  return ['maintenance', 'maintenance_recomp'].includes(goal)
+}
+
+const shouldShowRed = (goal: string | undefined, change: number | null | undefined): boolean => {
+  if (!goal || change === null || change === undefined) return false
+  return (isWeightLossGoal(goal) && change > 0) || (isMuscleGainGoal(goal) && change < 0)
+}
+
+const shouldShowGreen = (goal: string | undefined, change: number | null | undefined): boolean => {
+  if (!goal || change === null || change === undefined) return false
+  return (isWeightLossGoal(goal) && change < 0) || (isMuscleGainGoal(goal) && change > 0)
+}
+
+const shouldShowBlack = (goal: string | undefined): boolean => {
+  if (!goal) return false
+  return isMaintenanceGoal(goal)
+}
 </script>
