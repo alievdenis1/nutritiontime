@@ -169,6 +169,7 @@ export interface StatisticsResponse {
   current: number
   change: number
  } | null
+ profile_goal: string
  goals_achievement?: {
   logging_consistency: number
   calories_average: number
