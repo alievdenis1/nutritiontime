@@ -8,7 +8,14 @@
 			class="space-y-4"
 			@submit.prevent="handleSubmit"
 		>
-			<div class="flex gap-4">
+			<div class="flex gap-2 items-center">
+				<button
+					type="button"
+					class="h-14 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+					@click="decrementWeight"
+				>
+					-
+				</button>
 				<div class="flex-1">
 					<VInput
 						v-model="weightInput"
@@ -25,10 +32,20 @@
 						</template>
 					</VInput>
 				</div>
+				<button
+					type="button"
+					class="h-14 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+					@click="incrementWeight"
+				>
+					+
+				</button>
+			</div>
 
+			<div class="w-full flex justify-center  items-center">
 				<button
 					type="submit"
-					class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 h-14"
+					class="w-[70%] px-4 py-2 bg-emerald-600 text-white text-center
+				rounded-lg hover:bg-emerald-700 disabled:opacity-50"
 					:disabled="loading || !isValid"
 				>
 					<span
@@ -54,25 +71,43 @@ interface WeightLog {
   date: string
 }
 
+interface ChartWeight {
+  date: string
+  value: number
+}
+
 const props = defineProps<{
   todayWeight?: WeightLog | null
+  weightHistory?: ChartWeight[]
 }>()
 
 const emit = defineEmits<{
   (e: 'updated'): void
 }>()
 
-// Translations
 const { t } = useTranslation(localization)
 
 const weightInput = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-// Следим за изменением todayWeight и обновляем input
+const incrementWeight = () => {
+  const current = Number(weightInput.value) || 0
+  weightInput.value = (current + 0.1).toFixed(1)
+}
+
+const decrementWeight = () => {
+  const current = Number(weightInput.value) || 0
+  weightInput.value = (current - 0.1).toFixed(1)
+}
+
 watch(() => props.todayWeight, (newWeight) => {
   if (newWeight) {
     weightInput.value = newWeight.weight.toString()
+  } else if (props.weightHistory?.length) {
+    const lastWeight = [...props.weightHistory]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+    weightInput.value = lastWeight.value.toString()
   } else {
     weightInput.value = ''
   }
@@ -90,14 +125,10 @@ const handleSubmit = async () => {
   error.value = null
 
   const weight = Number(weightInput.value)
-  // const today = new Date().toISOString().split('T')[0]
 
   try {
-    const logApi = logWeight({
-      weight,
-    })
+    const logApi = logWeight({ weight })
     await logApi.execute()
-
     emit('updated')
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Error saving weight'
