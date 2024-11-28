@@ -808,51 +808,25 @@ const generateDateRange = (start: Date, end: Date) => {
 
 // Обновляем функцию заполнения данных
 const fillMissingWeightData = (weightData: ChartData[], dates: number[]): (number | null)[] => {
-  // Для одной точки заполняем только два дня
-  if (weightData.length === 1) {
-    return dates.map(timestamp => {
-      const currentDate = new Date(timestamp).toISOString().split('T')[0]
-      const weightDate = new Date(weightData[0].date)
-      const prevDate = new Date(weightDate)
-      prevDate.setDate(prevDate.getDate() - 1)
-
-      if (currentDate === weightData[0].date ||
-          currentDate === prevDate.toISOString().split('T')[0]) {
-        return weightData[0].value
-      }
-      return null
-    })
-  }
+  if (!weightData.length) return dates.map(() => null)
 
   const sortedWeightData = [...weightData].sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
   )
+
+  let lastKnownWeight = sortedWeightData[0].value
 
   return dates.map(timestamp => {
     const currentDate = new Date(timestamp).toISOString().split('T')[0]
     const weightDataPoint = sortedWeightData.find(w => w.date === currentDate)
 
     if (weightDataPoint) {
-      // Нашли запись для текущей даты
+      lastKnownWeight = weightDataPoint.value
       return weightDataPoint.value
     }
-
-    // Проверяем, является ли текущая дата предыдущим днем для какой-либо записи
-    const isNextDayWeight = sortedWeightData.find(w => {
-      const weightDate = new Date(w.date)
-      const prevDate = new Date(weightDate)
-      prevDate.setDate(prevDate.getDate() - 1)
-      return currentDate === prevDate.toISOString().split('T')[0]
-    })
-
-    if (isNextDayWeight) {
-      return isNextDayWeight.value
-    }
-
-    return null
+    return lastKnownWeight
   })
 }
-
 // Initial fetch
 fetchStatistics()
 
