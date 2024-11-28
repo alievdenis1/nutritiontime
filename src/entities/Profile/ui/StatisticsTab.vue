@@ -858,15 +858,28 @@ fetchStatistics()
 
 // Helper functions for weight change color logic
 const isWeightLossGoal = (goal: string) => {
-  return ['weight_loss_aggressive', 'weight_loss_medium', 'weight_loss_mild'].includes(goal)
+  return [
+    'weight_loss',
+    'weight_loss_mild',
+    'weight_loss_medium',
+    'weight_loss_aggressive'
+  ].includes(goal)
 }
 
 const isMuscleGainGoal = (goal: string) => {
-  return ['muscle_gain_aggressive', 'muscle_gain_medium'].includes(goal)
+  return [
+    'muscle_gain',
+    'muscle_gain_mild',
+    'muscle_gain_medium',
+    'muscle_gain_aggressive'
+  ].includes(goal)
 }
 
 const isMaintenanceGoal = (goal: string) => {
-  return ['maintenance', 'maintenance_recomp'].includes(goal)
+  return [
+    'maintenance',
+    'maintenance_recomp'
+  ].includes(goal)
 }
 
 const shouldShowRed = (goal: string | undefined, change: number | null | undefined): boolean => {
