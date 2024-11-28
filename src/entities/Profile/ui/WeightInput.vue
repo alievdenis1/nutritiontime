@@ -90,12 +90,11 @@ const handleSubmit = async () => {
   error.value = null
 
   const weight = Number(weightInput.value)
-  const today = new Date().toISOString().split('T')[0]
+  // const today = new Date().toISOString().split('T')[0]
 
   try {
     const logApi = logWeight({
       weight,
-      date: today
     })
     await logApi.execute()
 
