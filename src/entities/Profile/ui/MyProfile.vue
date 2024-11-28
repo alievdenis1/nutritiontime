@@ -26,18 +26,11 @@
 			<TabsContent value="profile">
 				<div class="p-6 bg-white rounded-lg shadow-sm mt-3 space-y-6">
 					<template v-if="profile?.profile">
-						<img
-							src="/public/image/avatar.png"
-							alt="Avatar"
-							class="w-[200px] m-auto"
-						>
-						<div
-							class="cursor-pointer relative flex items-center gap-[2px] rounded-[16px] shadow-lg font-bold p-5 justify-center"
-							@click="navigateToWallet"
-						>
-							<IconGold />
-							<span class="ml-2">$RECIPETON</span>
-						</div>
+						<!--						<img-->
+						<!--							src="/public/image/avatar.png"-->
+						<!--							alt="Avatar"-->
+						<!--							class="w-[200px] m-auto"-->
+						<!--						>-->
 
 						<div class="mb-6">
 							<VButton
@@ -116,6 +109,14 @@
 						>
 							{{ t('editProfile') }}
 						</VButton>
+
+						<div
+							class="cursor-pointer relative flex items-center gap-[2px] rounded-[16px] shadow-lg font-bold p-5 justify-center"
+							@click="navigateToWallet"
+						>
+							<IconGold />
+							<span class="ml-2">$RECIPETON</span>
+						</div>
 					</template>
 				</div>
 			</TabsContent>
