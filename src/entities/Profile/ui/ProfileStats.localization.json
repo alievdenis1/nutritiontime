@@ -146,10 +146,17 @@
     "referralsCount": "Количество приглашенных",
     "subscriptionStatus": "Статус подписки",
     "buttonClose": "Закрыть",
-    "muscle_gain_aggressive": "Интенсивный набор массы",
-    "muscle_gain": "Набор массы",
     "fat_loss": "Снижение веса",
-    "maintenance": "Поддержание веса"
+    "maintenance": "Поддержание веса",
+    "maintenance_recomp": "Улучшение формы",
+    "weight_loss": "Снижение веса",
+    "weight_loss_mild": "Мягкое снижение веса",
+    "weight_loss_medium": "Умеренное снижение веса",
+    "weight_loss_aggressive": "Интенсивное снижение веса",
+    "muscle_gain": "Набор мышечной массы",
+    "muscle_gain_mild": "Мягкий набор массы",
+    "muscle_gain_medium": "Умеренный набор массы",
+    "muscle_gain_aggressive": "Интенсивный набор массы"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -298,9 +305,16 @@
     "referralsCount": "Number of referrals",
     "subscriptionStatus": "Subscription status",
     "buttonClose": "Close",
-    "muscle_gain_aggressive": "Aggressive muscle gain",
-    "muscle_gain": "Muscle gain",
     "fat_loss": "Fat loss",
-    "maintenance": "Weight maintenance"
+    "maintenance": "Weight maintenance",
+    "maintenance_recomp": "Body recomposition",
+    "weight_loss": "Weight loss",
+    "weight_loss_mild": "Mild weight loss",
+    "weight_loss_medium": "Moderate weight loss",
+    "weight_loss_aggressive": "Aggressive weight loss",
+    "muscle_gain": "Muscle gain",
+    "muscle_gain_mild": "Mild muscle gain",
+    "muscle_gain_medium": "Moderate muscle gain",
+    "muscle_gain_aggressive": "Aggressive muscle gain"
   }
 }
