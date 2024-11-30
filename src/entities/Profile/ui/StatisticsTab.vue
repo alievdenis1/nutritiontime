@@ -377,9 +377,7 @@ const updateCharts = () => {
   if (!chartsData.value) return
 
   const { start, end } = getDateRange(selectedPeriod.value)
-  console.log(start, end)
   const dates = generateDateRange(start, end)
-  console.log(dates)
 
   const visibleSeries = nutritionSeries.value
       .filter(s => s.visible)
@@ -389,8 +387,6 @@ const updateCharts = () => {
         color: series.color,
         data: getSeriesData(chartsData.value, series.id)
       }))
-
-  console.log(visibleSeries)
 
   if (visibleSeries.length === 0) {
     nutritionChartOptions.value = getComboChartOptions()
@@ -501,10 +497,6 @@ const toggleSeries = (seriesId: string) => {
   const series = nutritionSeries.value.find(s => s.id === seriesId)
   if (series) {
     series.visible = !series.visible
-    console.log(`Toggling series ${seriesId}:`, {
-      newVisibility: series.visible,
-      allSeries: nutritionSeries.value.map(s => ({ id: s.id, visible: s.visible }))
-    })
     updateCharts()
   }
 }
