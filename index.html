@@ -7,6 +7,17 @@
     <title>Nutrition Time</title>
   </head>
   <body>
+  <script>
+      (function() {
+          // Проверяем, есть ли сохраненное перенаправление
+          const redirect = sessionStorage.getItem('redirect')
+          if (redirect) {
+              sessionStorage.removeItem('redirect')
+              const { pathname, search, hash } = JSON.parse(redirect)
+              window.location.replace(pathname + search + hash)
+          }
+      })()
+  </script>
   <!-- Yandex.Metrika counter -->
   <script type="text/javascript" >
       (function(m,e,t,r,i,k,a){m[i]=m[i]function(){(m[i].a=m[i].a[]).push(arguments)};
