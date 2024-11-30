@@ -38,7 +38,9 @@
 				/>
 			</TabsContent>
 			<TabsContent value="statistic">
-				<StatisticsTab />
+				<StatisticsTab
+					:profile="profile"
+				/>
 			</TabsContent>
 		</TabsMain>
 	</div>

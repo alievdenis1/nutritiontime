@@ -1,6 +1,13 @@
 // DailyNutritionStats.vue
 <template>
 	<div class="space-y-4">
+		<WeightInput
+			v-if="profile"
+			:profile="profile"
+			:visible-button="false"
+			@updated="$emit('retry')"
+		/>
+
 		<!-- Заголовок с календарем -->
 		<div class="flex items-center justify-between p-4">
 			<div class="flex items-center justify-center w-full gap-2">
@@ -14,7 +21,7 @@
 
 				<!-- Заголовок -->
 				<h3
-					class="text-lg"
+					class="text-lg font-bold"
 					@click="toggleCalendar"
 				>
 					{{ headerTitle }}
@@ -243,7 +250,7 @@
  import { VLoading } from '@/shared/components/Loading'
  import type { Profile, MealStats, MealItem } from '../model'
  import localization from './ProfileStats.localization.json'
- import { MealsList } from './index'
+ import { MealsList, WeightInput } from './index'
  import { ButtonColors, VButton } from 'shared/components/Button'
  import WebApp from '@twa-dev/sdk'
  import { sendToAddMeal, sendToProfile } from 'entities/Profile'

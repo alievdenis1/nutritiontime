@@ -83,15 +83,15 @@
     "date": "Дата",
     "value": "Значение",
     "notes": "Заметки",
-    "averageValues": "Средние значения",
+    "averageValues": "Средние значения / день",
     "totalMeals": "Всего приемов пищи",
     "daysTracked": "Дней отслежено",
     "averageMealsPerDay": "Приемов пищи в день",
     "startWeight": "Начальный вес",
     "currentWeight": "Текущий вес",
     "weightChange": "Изменение веса",
-    "goalsAchievement": "Достижение целей",
-    "summary": "Сводка",
+    "goalsAchievement": "Достижение целей в день",
+    "summary": "Сводка за период",
     "loggingConsistency": "Регулярность записей",
     "caloriesTargetHit": "Попадание в цель по калориям",
     "proteinsTargetHit": "Попадание в цель по белкам",
@@ -156,7 +156,8 @@
     "muscle_gain": "Набор мышечной массы",
     "muscle_gain_mild": "Мягкий набор массы",
     "muscle_gain_medium": "Умеренный набор массы",
-    "muscle_gain_aggressive": "Интенсивный набор массы"
+    "muscle_gain_aggressive": "Интенсивный набор массы",
+    "ideal_weight": "Идеальный вес"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -242,15 +243,15 @@
     "date": "Date",
     "value": "Value",
     "notes": "Notes",
-    "averageValues": "Average Values",
+    "averageValues": "Average values / days",
     "totalMeals": "Total Meals",
     "daysTracked": "Days Tracked",
     "averageMealsPerDay": "Meals Per Day",
     "startWeight": "Starting Weight",
     "currentWeight": "Current Weight",
     "weightChange": "Weight Change",
-    "goalsAchievement": "Goals Achievement",
-    "summary": "Summary",
+    "goalsAchievement": "Achieving goals per day",
+    "summary": "Summary for the period",
     "loggingConsistency": "Logging Consistency",
     "caloriesTargetHit": "Calories Target Hit",
     "proteinsTargetHit": "Proteins Target Hit",
@@ -315,6 +316,7 @@
     "muscle_gain": "Muscle gain",
     "muscle_gain_mild": "Mild muscle gain",
     "muscle_gain_medium": "Moderate muscle gain",
-    "muscle_gain_aggressive": "Aggressive muscle gain"
+    "muscle_gain_aggressive": "Aggressive muscle gain",
+    "ideal_weight": "Ideal weight"
   }
 }
