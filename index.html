@@ -5,19 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nutrition Time</title>
+      <script>
+          (function() {
+              const redirect = localStorage.getItem('path');
+              if (redirect) {
+                  localStorage.removeItem('path');
+                  const repo = '/nutritiontime';
+                  window.history.replaceState(null, null, repo + redirect);
+              }
+          })()
+      </script>
   </head>
   <body>
-  <script>
-      (function() {
-          // Проверяем, есть ли сохраненное перенаправление
-          const redirect = sessionStorage.getItem('redirect')
-          if (redirect) {
-              sessionStorage.removeItem('redirect')
-              const { pathname, search, hash } = JSON.parse(redirect)
-              window.location.replace(pathname + search + hash)
-          }
-      })()
-  </script>
   <!-- Yandex.Metrika counter -->
   <script type="text/javascript" >
       (function(m,e,t,r,i,k,a){m[i]=m[i]function(){(m[i].a=m[i].a[]).push(arguments)};
