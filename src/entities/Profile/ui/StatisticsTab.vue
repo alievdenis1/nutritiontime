@@ -421,7 +421,7 @@ const updateCharts = () => {
       size: 4,
       strokeWidth: 2,
       hover: {
-        size: 6
+        size: 7
       }
     },
     tooltip: {
@@ -497,10 +497,6 @@ const toggleSeries = (seriesId: string) => {
   const series = nutritionSeries.value.find(s => s.id === seriesId)
   if (series) {
     series.visible = !series.visible
-    console.log(`Toggling series ${seriesId}:`, {
-      newVisibility: series.visible,
-      allSeries: nutritionSeries.value.map(s => ({ id: s.id, visible: s.visible }))
-    })
     updateCharts()
   }
 }
@@ -524,11 +520,11 @@ const updateWeightChart = (newData: ChartsData) => {
     xaxis: {
       type: 'datetime',
       categories: dates,
-      tickAmount: selectedPeriod.value === 'week' ? 5 :
+      tickAmount: selectedPeriod.value === 'week' ? 6 :
           selectedPeriod.value === 'month' ? 6 : 9,
       labels: {
         formatter: function(value: string) {
-          return formatDate(value, selectedPeriod.value)
+          return formatDate(value)
         },
         style: {
           fontSize: '10px',
@@ -594,7 +590,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
     type: 'datetime',
     labels: {
       formatter: function(value: string) {
-        return formatDate(value, selectedPeriod.value)
+        return formatDate(value)
       },
       style: {
         fontSize: '10px',
@@ -604,7 +600,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
       hideOverlappingLabels: true,
       maxHeight: 50
     },
-    tickAmount: selectedPeriod.value === 'week' ? 5 :
+    tickAmount: selectedPeriod.value === 'week' ? 6 :
         selectedPeriod.value === 'month' ? 6 : 9
   },
   legend: {
