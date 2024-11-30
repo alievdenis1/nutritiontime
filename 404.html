@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+        // Сохраняем текущий путь в sessionStorage
+        const segment = '1' // Увеличивайте это значение, если у вас более глубокая вложенность путей
+        const l = window.location
+        sessionStorage.setItem('redirect', JSON.stringify({
+            pathname: l.pathname.split('/').slice(segment).join('/'),
+            search: l.search,
+            hash: l.hash,
+        }))
+        // Перенаправляем на главную
+        l.replace(
+            l.pathname.split('/').slice(0, segment).join('/') + '/index.html'
+        )
+    </script>
+</head>
+<body>
+Redirecting...
+</body>
+</html>
