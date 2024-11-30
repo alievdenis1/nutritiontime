@@ -63,6 +63,13 @@
 		>
 			{{ t('to_subscribe') }}
 		</VButton>
+		<div
+			class="mt-5 cursor-pointer relative flex items-center gap-[2px] rounded-[16px] shadow-lg font-bold p-5 justify-center"
+			@click="navigateToWallet"
+		>
+			<IconGold />
+			<span class="ml-2">$RECIPETON</span>
+		</div>
 	</div>
 </template>
 
@@ -77,6 +84,7 @@
  import { ButtonColors, VButton } from 'shared/components/Button'
  import WebApp from '@twa-dev/sdk'
  import { useRoute } from 'vue-router'
+ import { IconGold } from 'shared/components/Icon'
 
  const route = useRoute()
 
@@ -106,6 +114,10 @@
  }
 
  const router = useRouter()
+
+ const navigateToWallet = () => {
+   route
+ }
 
  // Состояние
  const selectedDate = ref('')
