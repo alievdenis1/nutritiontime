@@ -377,7 +377,9 @@ const updateCharts = () => {
   if (!chartsData.value) return
 
   const { start, end } = getDateRange(selectedPeriod.value)
+  console.log(start, end)
   const dates = generateDateRange(start, end)
+  console.log(dates)
 
   const visibleSeries = nutritionSeries.value
       .filter(s => s.visible)
@@ -387,6 +389,8 @@ const updateCharts = () => {
         color: series.color,
         data: getSeriesData(chartsData.value, series.id)
       }))
+
+  console.log(visibleSeries)
 
   if (visibleSeries.length === 0) {
     nutritionChartOptions.value = getComboChartOptions()
@@ -421,7 +425,7 @@ const updateCharts = () => {
       size: 4,
       strokeWidth: 2,
       hover: {
-        size: 6
+        size: 7
       }
     },
     tooltip: {
@@ -524,11 +528,11 @@ const updateWeightChart = (newData: ChartsData) => {
     xaxis: {
       type: 'datetime',
       categories: dates,
-      tickAmount: selectedPeriod.value === 'week' ? 5 :
+      tickAmount: selectedPeriod.value === 'week' ? 6 :
           selectedPeriod.value === 'month' ? 6 : 9,
       labels: {
         formatter: function(value: string) {
-          return formatDate(value, selectedPeriod.value)
+          return formatDate(value)
         },
         style: {
           fontSize: '10px',
@@ -594,7 +598,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
     type: 'datetime',
     labels: {
       formatter: function(value: string) {
-        return formatDate(value, selectedPeriod.value)
+        return formatDate(value)
       },
       style: {
         fontSize: '10px',
@@ -604,7 +608,7 @@ const getComboChartOptions = (): CustomApexOptions => ({
       hideOverlappingLabels: true,
       maxHeight: 50
     },
-    tickAmount: selectedPeriod.value === 'week' ? 5 :
+    tickAmount: selectedPeriod.value === 'week' ? 6 :
         selectedPeriod.value === 'month' ? 6 : 9
   },
   legend: {
