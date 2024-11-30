@@ -1,77 +1,50 @@
 <template>
 	<div class="p-4 bg-white border border-gray-200 rounded-lg">
-		<h3 class="text-lg font-semibold mb-4 text-center">
+		<h3 class="text-xl font-semibold text-center">
 			{{ t('currentWeight') }}
 		</h3>
-
-		<form
-			class="space-y-4"
-			@submit.prevent="handleSubmit"
+		<div
+			v-if="props.profile?.ideal_weight"
+			class="text-center mt-2 text-gray"
 		>
-			<div class="flex gap-2 items-center">
-				<button
-					type="button"
-					class="h-14 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-					@click="decrementWeight"
-				>
-					-
-				</button>
-				<div class="flex-1">
-					<VInput
-						v-model="weightInput"
-						type="number"
-						:title="t('enterWeight')"
-						name="weight"
-						:max-length="5"
-						digital
-						:error="!!error"
-						:error-message="error || ''"
-					>
-						<template #right-icon>
-							<span class="text-gray-500">{{ t('kg') }}</span>
-						</template>
-					</VInput>
-				</div>
-				<button
-					type="button"
-					class="h-14 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-					@click="incrementWeight"
-				>
-					+
-				</button>
+			({{ t('target') }}: {{ props.profile.ideal_weight }} {{ t('kg') }})
+		</div>
+
+		<div class="flex items-center justify-center gap-8 text-emerald-700">
+			<button
+				type="button"
+				class="h-16 w-16 text-2xl bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center"
+				@click="decrementWeight"
+			>
+				—
+			</button>
+
+			<div class="text-4xl font-semibold text-center flex items-center gap-2 min-w-[160px] justify-center">
+				{{ weightInput }}
+				<span class="text-gray-500 text-2xl">{{ t('kg') }}</span>
 			</div>
 
-			<div
-				v-if="visibleButton"
-				class="w-full flex justify-center items-center"
+			<button
+				type="button"
+				class="h-16 w-16 text-2xl bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center"
+				@click="incrementWeight"
 			>
-				<button
-					type="submit"
-					class="w-[70%] px-4 py-2 bg-emerald-600 text-white text-center rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-					:disabled="loading || !isValid"
-				>
-					<span
-						v-if="loading"
-						class="inline-block animate-spin mr-2"
-					>⌛</span>
-					{{ weightInput ? t('update') : t('add') }}
-				</button>
-			</div>
-		</form>
+				+
+			</button>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+// Скрипт остается без изменений за исключением удаления логики для visibleButton
 import { ref, computed, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { logWeight } from '../api'
 import localization from './ProfileStats.localization.json'
-import { VInput } from 'shared/components/Input'
 import type { Profile } from '../model'
 
 const props = defineProps<{
   profile: Profile | null
-  visibleButton?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -93,23 +66,19 @@ const debouncedEmit = () => {
   debounceTimer = setTimeout(async () => {
     if (!isValid.value || loading.value) return
     await handleSubmit()
-  }, 1000) // Задержка в 1 секунду
+  }, 1000)
 }
 
 const incrementWeight = () => {
   const current = Number(weightInput.value) || 0
   weightInput.value = (current + 0.1).toFixed(1)
-  if (!props.visibleButton) {
-    debouncedEmit()
-  }
+  debouncedEmit()
 }
 
 const decrementWeight = () => {
   const current = Number(weightInput.value) || 0
   weightInput.value = (current - 0.1).toFixed(1)
-  if (!props.visibleButton) {
-    debouncedEmit()
-  }
+  debouncedEmit()
 }
 
 watch(() => props.profile?.weight, (newWeight) => {

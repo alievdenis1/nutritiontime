@@ -136,15 +136,15 @@
 						</div>
 					</div>
 
-					<WeightInput
-						:profile="profile"
-						:visible-button="true"
-						@updated="handleWeightUpdated"
-					/>
+					<!--					<WeightInput-->
+					<!--						:profile="profile"-->
+					<!--						:visible-button="true"-->
+					<!--						@updated="handleWeightUpdated"-->
+					<!--					/>-->
 				</div>
 
 				<!-- Прогресс веса -->
-				<h3 class="text-lg font-semibold my-4 text-center">
+				<h3 class="text-lg font-semibold my-4 mt-10 text-center">
 					{{ t('progress_weight') }}
 				</h3>
 				<div
@@ -152,7 +152,7 @@
 					class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"
 				>
 					<div>
-						<div class="text-sm text-gray-500 text-center">
+						<div class="text-sm text-gray text-center">
 							{{ t('startWeight') }}
 						</div>
 						<div class="font-medium text-center">
@@ -160,7 +160,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-sm text-gray-500 text-center">
+						<div class="text-sm text-gray text-center">
 							{{ t('currentWeight') }}
 						</div>
 						<div class="font-medium text-center">
@@ -168,7 +168,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-sm text-gray-500 text-center">
+						<div class="text-sm text-gray text-center">
 							{{ t('weightChange') }}
 						</div>
 						<div
@@ -184,7 +184,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-sm text-gray-500 text-center">
+						<div class="text-sm text-gray text-center">
 							{{ t('ideal_weight') }}
 						</div>
 						<div class="font-medium text-center">
@@ -208,6 +208,9 @@
 						<div class="text-sm text-gray-500 mb-2 text-center">
 							{{ t('averageMealsPerDay') }}: {{ statisticsData.summary.average_meals_per_day }}
 						</div>
+						<div class="text-sm text-gray-500 mb-2 text-center">
+							{{ t('loggingConsistency') }}: {{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%
+						</div>
 
 						<!-- Достижение целей -->
 						<div
@@ -216,9 +219,6 @@
 							<h3 class="mt-5 text-lg font-semibold mb-4 text-center">
 								{{ t('goalsAchievement') }}
 							</h3>
-							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('loggingConsistency') }}: {{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%
-							</div>
 							<div class="text-sm text-gray-500 mb-2 text-center">
 								{{ t('caloriesAverage') }}: {{ Math.round(statisticsData.goals_achievement.calories_average) }}%
 							</div>
