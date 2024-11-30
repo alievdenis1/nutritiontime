@@ -83,7 +83,7 @@
     "date": "Дата",
     "value": "Значение",
     "notes": "Заметки",
-    "averageValues": "Средние значения",
+    "averageValues": "Средние значения / день",
     "totalMeals": "Всего приемов пищи",
     "daysTracked": "Дней отслежено",
     "averageMealsPerDay": "Приемов пищи в день",
@@ -156,7 +156,8 @@
     "muscle_gain": "Набор мышечной массы",
     "muscle_gain_mild": "Мягкий набор массы",
     "muscle_gain_medium": "Умеренный набор массы",
-    "muscle_gain_aggressive": "Интенсивный набор массы"
+    "muscle_gain_aggressive": "Интенсивный набор массы",
+    "ideal_weight": "Идеальный вес"
   },
   "en": {
     "dailyStats": "Daily Statistics",
@@ -242,7 +243,7 @@
     "date": "Date",
     "value": "Value",
     "notes": "Notes",
-    "averageValues": "Average Values",
+    "averageValues": "Average values / days",
     "totalMeals": "Total Meals",
     "daysTracked": "Days Tracked",
     "averageMealsPerDay": "Meals Per Day",
@@ -315,6 +316,7 @@
     "muscle_gain": "Muscle gain",
     "muscle_gain_mild": "Mild muscle gain",
     "muscle_gain_medium": "Moderate muscle gain",
-    "muscle_gain_aggressive": "Aggressive muscle gain"
+    "muscle_gain_aggressive": "Aggressive muscle gain",
+    "ideal_weight": "Ideal weight"
   }
 }

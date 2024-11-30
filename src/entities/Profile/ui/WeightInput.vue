@@ -41,18 +41,20 @@
 				</button>
 			</div>
 
-			<div class="w-full flex justify-center  items-center">
+			<div
+				v-if="visibleButton"
+				class="w-full flex justify-center items-center"
+			>
 				<button
 					type="submit"
-					class="w-[70%] px-4 py-2 bg-emerald-600 text-white text-center
-				rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+					class="w-[70%] px-4 py-2 bg-emerald-600 text-white text-center rounded-lg hover:bg-emerald-700 disabled:opacity-50"
 					:disabled="loading || !isValid"
 				>
 					<span
 						v-if="loading"
 						class="inline-block animate-spin mr-2"
 					>⌛</span>
-					{{ todayWeight ? t('update') : t('add') }}
+					{{ weightInput ? t('update') : t('add') }}
 				</button>
 			</div>
 		</form>
@@ -65,20 +67,11 @@ import { useTranslation } from '@/shared/lib/i18n'
 import { logWeight } from '../api'
 import localization from './ProfileStats.localization.json'
 import { VInput } from 'shared/components/Input'
-
-interface WeightLog {
-  weight: number
-  date: string
-}
-
-interface ChartWeight {
-  date: string
-  value: number
-}
+import type { Profile } from '../model'
 
 const props = defineProps<{
-  todayWeight?: WeightLog | null
-  weightHistory?: ChartWeight[]
+  profile: Profile | null
+  visibleButton?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -90,26 +83,38 @@ const { t } = useTranslation(localization)
 const weightInput = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
+let debounceTimer: ReturnType<typeof setTimeout>
+
+const debouncedEmit = () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+
+  debounceTimer = setTimeout(async () => {
+    if (!isValid.value || loading.value) return
+    await handleSubmit()
+  }, 1000) // Задержка в 1 секунду
+}
 
 const incrementWeight = () => {
   const current = Number(weightInput.value) || 0
   weightInput.value = (current + 0.1).toFixed(1)
+  if (!props.visibleButton) {
+    debouncedEmit()
+  }
 }
 
 const decrementWeight = () => {
   const current = Number(weightInput.value) || 0
   weightInput.value = (current - 0.1).toFixed(1)
+  if (!props.visibleButton) {
+    debouncedEmit()
+  }
 }
 
-watch(() => props.todayWeight, (newWeight) => {
+watch(() => props.profile?.weight, (newWeight) => {
   if (newWeight) {
-    weightInput.value = newWeight.weight.toString()
-  } else if (props.weightHistory?.length) {
-    const lastWeight = [...props.weightHistory]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
-    weightInput.value = lastWeight.value.toString()
-  } else {
-    weightInput.value = ''
+    weightInput.value = newWeight.toString()
   }
 }, { immediate: true })
 

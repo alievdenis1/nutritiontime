@@ -46,35 +46,35 @@
 					</h3>
 					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 						<div>
-							<div class="text-sm text-gray-500 text-center">
+							<div class="text-sm text-gray text-center">
 								{{ t('calories') }}
 							</div>
 							<div class="font-medium text-center">
-								{{ Math.round(statisticsData.averages.calories) }} {{ t('kcal') }}
+								{{ Math.round(statisticsData.averages.calories) }} / {{ props.profile.target_calories }} {{ t('kcal') }}
 							</div>
 						</div>
 						<div>
-							<div class="text-sm text-gray-500 text-center">
+							<div class="text-sm text-gray text-center">
 								{{ t('proteins') }}
 							</div>
 							<div class="font-medium text-[#319A6E] text-center">
-								{{ Math.round(statisticsData.averages.proteins) }} {{ t('g') }}
+								{{ Math.round(statisticsData.averages.proteins) }} / {{ props.profile.macro_proteins }} {{ t('g') }}
 							</div>
 						</div>
 						<div>
-							<div class="text-sm text-gray-500 text-center">
+							<div class="text-sm text-gray text-center">
 								{{ t('fats') }}
 							</div>
 							<div class="font-medium text-[#FDC755] text-center">
-								{{ Math.round(statisticsData.averages.fats) }} {{ t('g') }}
+								{{ Math.round(statisticsData.averages.fats) }} / {{ props.profile.macro_fats }} {{ t('g') }}
 							</div>
 						</div>
 						<div>
-							<div class="text-sm text-gray-500 text-center">
+							<div class="text-sm text-gray text-center">
 								{{ t('carbs') }}
 							</div>
 							<div class="font-medium text-[#FFA767] text-center">
-								{{ Math.round(statisticsData.averages.carbs) }} {{ t('g') }}
+								{{ Math.round(statisticsData.averages.carbs) }} / {{ props.profile.macro_carbs }} {{ t('g') }}
 							</div>
 						</div>
 					</div>
@@ -137,7 +137,8 @@
 					</div>
 
 					<WeightInput
-						:today-weight="todayWeight"
+						:profile="profile"
+						:visible-button="true"
 						@updated="handleWeightUpdated"
 					/>
 				</div>
@@ -148,7 +149,7 @@
 				</h3>
 				<div
 					v-if="statisticsData?.weight_progress"
-					class="grid grid-cols-2 gap-4 mb-4"
+					class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"
 				>
 					<div>
 						<div class="text-sm text-gray-500 text-center">
@@ -166,21 +167,29 @@
 							{{ statisticsData.weight_progress.current ?? '-' }} {{ t('kg') }}
 						</div>
 					</div>
-				</div>
-				<div>
-					<div class="text-sm text-gray-500 text-center">
-						{{ t('weightChange') }}
+					<div>
+						<div class="text-sm text-gray-500 text-center">
+							{{ t('weightChange') }}
+						</div>
+						<div
+							class="font-medium text-center"
+							:class="{
+								'text-red': shouldShowRed(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+								'text-forestGreen': shouldShowGreen(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+								'text-black': shouldShowBlack(statisticsData.profile_goal)
+							}"
+						>
+							{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
+							{{ statisticsData.weight_progress?.change ?? '-' }} {{ t('kg') }}
+						</div>
 					</div>
-					<div
-						class="font-medium text-center"
-						:class="{
-							'text-red': shouldShowRed(statisticsData.profile_goal, statisticsData.weight_progress?.change),
-							'text-forestGreen': shouldShowGreen(statisticsData.profile_goal, statisticsData.weight_progress?.change),
-							'text-black': shouldShowBlack(statisticsData.profile_goal)
-						}"
-					>
-						{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
-						{{ statisticsData.weight_progress?.change ?? '-' }} {{ t('kg') }}
+					<div>
+						<div class="text-sm text-gray-500 text-center">
+							{{ t('ideal_weight') }}
+						</div>
+						<div class="font-medium text-center">
+							{{ props.profile?.ideal_weight ?? '-' }} {{ t('kg') }}
+						</div>
 					</div>
 				</div>
 
@@ -243,9 +252,15 @@ import { ref, computed, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
-import { StatisticsResponse, ChartsData, ChartData } from '../model'
+import { StatisticsResponse, ChartsData, ChartData, type Profile } from '../model'
 import type { ApexOptions } from 'apexcharts'
 import { WeightInput } from './index'
+
+interface Props {
+  profile: Profile | null
+}
+
+const props = defineProps<Props>()
 
 type YAxisOptions = {
   seriesName?: string
@@ -700,19 +715,19 @@ const fetchStatistics = async () => {
   }
 }
 
-const todayWeight = computed(() => {
-  if (!statisticsData.value?.charts.weight.length) return null
-
-  const today = new Date().toISOString().split('T')[0]
-  const lastWeight = statisticsData.value.charts.weight.find(
-      entry => entry.date === today
-  )
-
-  return lastWeight ? {
-    weight: lastWeight.value,
-    date: lastWeight.date
-  } : null
-})
+// const todayWeight = computed(() => {
+//   if (!statisticsData.value?.charts.weight.length) return null
+//
+//   const today = new Date().toISOString().split('T')[0]
+//   const lastWeight = statisticsData.value.charts.weight.find(
+//       entry => entry.date === today
+//   )
+//
+//   return lastWeight ? {
+//     weight: lastWeight.value,
+//     date: lastWeight.date
+//   } : null
+// })
 
 // Watchers
 // Обновляем watch для chartsData
