@@ -193,22 +193,22 @@
 					</div>
 				</div>
 				<!-- Суммарная статистика -->
-				<div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 text-green">
 					<div class="p-4 bg-emerald-50 rounded-2xl">
 						<h3 class="mt-5 text-lg font-semibold mb-4 text-center">
 							{{ t('summary') }}
 						</h3>
 						<div class="text-sm text-gray-500 mb-2 text-center">
-							{{ t('totalMeals') }}: {{ statisticsData.summary.total_meals }}
+							{{ t('totalMeals') }}: <span class="font-semibold">{{ statisticsData.summary.total_meals }}</span>
 						</div>
 						<div class="text-sm text-gray-500 mb-2 text-center">
-							{{ t('daysTracked') }}: {{ statisticsData.summary.days_tracked }}
+							{{ t('daysTracked') }}: <span class="font-semibold">{{ statisticsData.summary.days_tracked }}</span>
 						</div>
 						<div class="text-sm text-gray-500 mb-2 text-center">
-							{{ t('averageMealsPerDay') }}: {{ statisticsData.summary.average_meals_per_day }}
+							{{ t('averageMealsPerDay') }}: <span class="font-semibold">{{ statisticsData.summary.average_meals_per_day }}</span>
 						</div>
 						<div class="text-sm text-gray-500 mb-2 text-center">
-							{{ t('loggingConsistency') }}: {{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%
+							{{ t('loggingConsistency') }}: <span class="font-semibold">{{ Math.round(statisticsData.goals_achievement.logging_consistency) }}%</span>
 						</div>
 
 						<!-- Достижение целей -->
@@ -219,16 +219,16 @@
 								{{ t('goalsAchievement') }}
 							</h3>
 							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('caloriesAverage') }}: {{ Math.round(statisticsData.goals_achievement.calories_average) }}%
+								{{ t('caloriesAverage') }}: <span class="font-semibold">{{ Math.round(statisticsData.goals_achievement.calories_average) }}%</span>
 							</div>
 							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('proteinsAverage') }}: {{ Math.round(statisticsData.goals_achievement.proteins_average) }}%
+								{{ t('proteinsAverage') }}: <span class="font-semibold">{{ Math.round(statisticsData.goals_achievement.proteins_average) }}%</span>
 							</div>
 							<div class="text-sm text-gray-500 mb-2 text-center">
-								{{ t('fatsAverage') }}: {{ Math.round(statisticsData.goals_achievement.fats_average) }}%
+								{{ t('fatsAverage') }}: <span class="font-semibold">{{ Math.round(statisticsData.goals_achievement.fats_average) }}%</span>
 							</div>
 							<div class="text-sm text-gray-500 mb-5 text-center">
-								{{ t('carbsAverage') }}: {{ Math.round(statisticsData.goals_achievement.carbs_average) }}%
+								{{ t('carbsAverage') }}: <span class="font-semibold">{{ Math.round(statisticsData.goals_achievement.carbs_average) }}%</span>
 							</div>
 						</div>
 					</div>
