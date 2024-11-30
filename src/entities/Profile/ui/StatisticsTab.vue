@@ -167,32 +167,31 @@
 							{{ statisticsData.weight_progress.current ?? '-' }} {{ t('kg') }}
 						</div>
 					</div>
-					<div>
-						<div class="text-sm text-gray text-center">
-							{{ t('weightChange') }}
-						</div>
-						<div
-							class="font-medium text-center"
-							:class="{
-								'text-red': shouldShowRed(statisticsData.profile_goal, statisticsData.weight_progress?.change),
-								'text-forestGreen': shouldShowGreen(statisticsData.profile_goal, statisticsData.weight_progress?.change),
-								'text-black': shouldShowBlack(statisticsData.profile_goal)
-							}"
-						>
-							{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
-							{{ statisticsData.weight_progress?.change ?? '-' }} {{ t('kg') }}
-						</div>
+					<!--					<div>-->
+					<!--						<div class="text-sm text-gray text-center">-->
+					<!--							{{ t('ideal_weight') }}-->
+					<!--						</div>-->
+					<!--						<div class="font-medium text-center">-->
+					<!--							{{ props.profile?.ideal_weight ?? '-' }} {{ t('kg') }}-->
+					<!--						</div>-->
+					<!--					</div>-->
+				</div>
+				<div>
+					<div class="text-sm text-gray text-center">
+						{{ t('weightChange') }}
 					</div>
-					<div>
-						<div class="text-sm text-gray text-center">
-							{{ t('ideal_weight') }}
-						</div>
-						<div class="font-medium text-center">
-							{{ props.profile?.ideal_weight ?? '-' }} {{ t('kg') }}
-						</div>
+					<div
+						class="font-medium text-center"
+						:class="{
+							'text-red': shouldShowRed(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+							'text-forestGreen': shouldShowGreen(statisticsData.profile_goal, statisticsData.weight_progress?.change),
+							'text-black': shouldShowBlack(statisticsData.profile_goal)
+						}"
+					>
+						{{ (statisticsData.weight_progress?.change ?? 0) > 0 ? '+' : '' }}
+						{{ statisticsData.weight_progress?.change ?? '-' }} {{ t('kg') }}
 					</div>
 				</div>
-
 				<!-- Суммарная статистика -->
 				<div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div class="p-4 bg-emerald-50 rounded-2xl">
@@ -254,7 +253,7 @@ import localization from './ProfileStats.localization.json'
 import { getStatistics } from '../api'
 import { StatisticsResponse, ChartsData, ChartData, type Profile } from '../model'
 import type { ApexOptions } from 'apexcharts'
-import { WeightInput } from './index'
+// import { WeightInput } from './index'
 
 interface Props {
   profile: Profile | null
@@ -558,9 +557,9 @@ const updateWeightChart = (newData: ChartsData) => {
   weightChartKey.value++
 }
 // Обработчик обновления веса
-const handleWeightUpdated = () => {
-  fetchStatistics() // Перезагружаем статистику
-}
+// const handleWeightUpdated = () => {
+//   fetchStatistics() // Перезагружаем статистику
+// }
 
 // Translations
 const { t } = useTranslation(localization)
@@ -753,55 +752,33 @@ const periods = [
   { value: '3months', label: '3months' }
 ]
 
-const formatDate = (dateValue: string | number, period: string): string => {
+const formatDate = (dateValue: string | number): string => {
   const date = new Date(Number(dateValue))
 
-  const formatToPattern = (date: Date): string => {
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear().toString().slice(-2)
-    return `${day}.${month}.${year}`
-  }
-
-  // Определяем частоту отображения дат в зависимости от периода
-  const shouldShowDate = (date: Date): boolean => {
-    const day = date.getDate()
-
-    switch (period) {
-      case 'week':
-        return true
-      case 'month':
-        return day % 5 === 0 || day === getLastDayOfMonth(date)
-      case '3months':
-        return day % 10 === 0 || day === getLastDayOfMonth(date)
-      default:
-        return true
-    }
-  }
-
-  const getLastDayOfMonth = (date: Date): number => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  }
-
-  return shouldShowDate(date) ? formatToPattern(date) : ''
+  return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}`
 }
-
 // Функция для получения диапазона дат в зависимости от периода
 const getDateRange = (period: string) => {
-  const end = new Date() // Сегодняшний день
-  end.setDate(end.getDate() + 1)
+  // Используем даты из данных статистики
+  if (statisticsData.value?.period) {
+    const start = new Date(statisticsData.value.period.start)
+    const end = new Date(statisticsData.value.period.end)
+    return { start, end }
+  }
 
+  // Fallback на случай если нет данных о периоде
+  const end = new Date()
   const start = new Date()
 
   switch(period) {
     case 'week':
-      start.setDate(end.getDate() - 6) // последние 7 дней включая сегодня
+      start.setDate(end.getDate() - 6)
       break
     case 'month':
-      start.setDate(end.getDate() - 29) // последние 30 дней включая сегодня
+      start.setDate(end.getDate() - 29)
       break
     case '3months':
-      start.setDate(end.getDate() - 89) // последние 90 дней включая сегодня
+      start.setDate(end.getDate() - 89)
       break
   }
 
@@ -812,9 +789,10 @@ const getDateRange = (period: string) => {
 const generateDateRange = (start: Date, end: Date) => {
   const dates = []
   const current = new Date(start)
+  current.setHours(0, 0, 0, 0) // Устанавливаем время в начало дня
 
   while (current <= end) {
-    dates.push(new Date(current).getTime())
+    dates.push(current.getTime())
     current.setDate(current.getDate() + 1)
   }
 
