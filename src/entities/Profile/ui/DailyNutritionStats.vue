@@ -8,117 +8,116 @@
 			@updated="$emit('retry')"
 		/>
 
-		<!-- Заголовок с календарем -->
-		<div class="flex items-center justify-between p-4">
-			<div class="flex items-center justify-center w-full gap-2">
-				<!-- Стрелка влево -->
-				<button
-					class="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold"
-					@click="handlePrevDay"
-				>
-					{{ '<' }}
-				</button>
-
-				<!-- Заголовок -->
-				<h3
-					class="text-lg font-bold"
-					@click="toggleCalendar"
-				>
-					{{ headerTitle }}
-				</h3>
-
-				<!-- Стрелка вправо -->
-				<button
-					class="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold"
-					:disabled="isToday"
-					:class="{ 'opacity-50 cursor-not-allowed': isToday }"
-					@click="handleNextDay"
-				>
-					{{ '>' }}
-				</button>
-			</div>
-
-			<!-- Календарь -->
-			<Teleport to="body">
-				<div
-					v-if="showCalendar"
-					class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
-					@click="closeCalendar"
-				>
-					<div
-						class="bg-white w-full max-w-lg rounded-lg mx-4"
-						@click.stop
-					>
-						<!-- Шапка календаря -->
-						<div class="flex items-center justify-between p-4 border-b">
-							<h4 class="text-lg font-medium">
-								{{ t('selectDate') }}
-							</h4>
-							<button
-								class="p-2 hover:bg-gray-100 rounded-full transition-colors"
-								@click="closeCalendar"
-							>
-								✕
-							</button>
-						</div>
-
-						<el-calendar
-							ref="calendar"
-							v-model="calendarDate"
-							class="custom-calendar"
-						>
-							<template #date-cell="{ data }">
-								<div
-									class="text-center cursor-pointer py-2 h-[100%]"
-									:class="{
-										'text-gray-400': !isFilledDate(formatDate(data.day)),
-										'font-bold text-emerald-600': isFilledDate(formatDate(data.day)),
-										'bg-emerald-50': isCurrentDate(data.day),
-										'opacity-50 cursor-not-allowed': isFutureDate(data.day)
-									}"
-									@click="handleDateClick(data.day)"
-								>
-									{{ new Date(data.day).getDate() }}
-								</div>
-							</template>
-							<template #header="{ date }">
-								<div class="flex justify-between w-[100%] flex-wrap gap-[16px]">
-									<span>{{ date }}</span>
-									<el-button-group class="flex">
-										<el-button
-											size="small"
-											@click="selectDate('prev-month')"
-										>
-											{{ t('prevMonth') }}
-										</el-button>
-										<el-button
-											size="small"
-											@click="selectDate('today')"
-										>
-											{{ t('today') }}
-										</el-button>
-										<el-button
-											:disabled="isNextMonthDisabled(calendarDate)"
-											size="small"
-											@click="selectDate('next-month')"
-										>
-											{{ t('nextMonth') }}
-										</el-button>
-									</el-button-group>
-								</div>
-							</template>
-						</el-calendar>
-					</div>
-				</div>
-			</Teleport>
-		</div>
-
 		<VLoading
 			v-if="loading"
 			class="h-64"
 		/>
 
 		<div class="p-6 bg-white rounded-lg shadow-sm">
+			<!-- Заголовок с календарем -->
+			<div class="flex items-center justify-between p-4">
+				<div class="flex items-center justify-center w-full gap-2">
+					<!-- Стрелка влево -->
+					<button
+						class="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold"
+						@click="handlePrevDay"
+					>
+						{{ '<' }}
+					</button>
+
+					<!-- Заголовок -->
+					<h3
+						class="text-lg font-bold"
+						@click="toggleCalendar"
+					>
+						{{ headerTitle }}
+					</h3>
+
+					<!-- Стрелка вправо -->
+					<button
+						class="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold"
+						:disabled="isToday"
+						:class="{ 'opacity-50 cursor-not-allowed': isToday }"
+						@click="handleNextDay"
+					>
+						{{ '>' }}
+					</button>
+				</div>
+
+				<!-- Календарь -->
+				<Teleport to="body">
+					<div
+						v-if="showCalendar"
+						class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+						@click="closeCalendar"
+					>
+						<div
+							class="bg-white w-full max-w-lg rounded-lg mx-4"
+							@click.stop
+						>
+							<!-- Шапка календаря -->
+							<div class="flex items-center justify-between p-4 border-b">
+								<h4 class="text-lg font-medium">
+									{{ t('selectDate') }}
+								</h4>
+								<button
+									class="p-2 hover:bg-gray-100 rounded-full transition-colors"
+									@click="closeCalendar"
+								>
+									✕
+								</button>
+							</div>
+
+							<el-calendar
+								ref="calendar"
+								v-model="calendarDate"
+								class="custom-calendar"
+							>
+								<template #date-cell="{ data }">
+									<div
+										class="text-center cursor-pointer py-2 h-[100%]"
+										:class="{
+											'text-gray-400': !isFilledDate(formatDate(data.day)),
+											'font-bold text-emerald-600': isFilledDate(formatDate(data.day)),
+											'bg-emerald-50': isCurrentDate(data.day),
+											'opacity-50 cursor-not-allowed': isFutureDate(data.day)
+										}"
+										@click="handleDateClick(data.day)"
+									>
+										{{ new Date(data.day).getDate() }}
+									</div>
+								</template>
+								<template #header="{ date }">
+									<div class="flex justify-between w-[100%] flex-wrap gap-[16px]">
+										<span>{{ date }}</span>
+										<el-button-group class="flex">
+											<el-button
+												size="small"
+												@click="selectDate('prev-month')"
+											>
+												{{ t('prevMonth') }}
+											</el-button>
+											<el-button
+												size="small"
+												@click="selectDate('today')"
+											>
+												{{ t('today') }}
+											</el-button>
+											<el-button
+												:disabled="isNextMonthDisabled(calendarDate)"
+												size="small"
+												@click="selectDate('next-month')"
+											>
+												{{ t('nextMonth') }}
+											</el-button>
+										</el-button-group>
+									</div>
+								</template>
+							</el-calendar>
+						</div>
+					</div>
+				</Teleport>
+			</div>
 			<!-- Калории и приемы пищи -->
 			<div class="mb-6">
 				<div class="flex flex-col items-center mb-2">

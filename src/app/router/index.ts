@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 
-const BASE_URL = 'nutritiontime'
+// const BASE_URL = 'nutritiontime'
 
 export default createRouter({
-	history: createWebHistory(BASE_URL),
+	history: createWebHashHistory(),
 	scrollBehavior() {
 		return { top: 0 }
 	},
