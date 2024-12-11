@@ -9,13 +9,21 @@
 			class="max-w-md mx-auto rounded-[20px] overflow-hidden md:max-w-2xl [&:not(:last-of-type)]:mb-4 px-[2px] py-[2px] cursor-pointer"
 			@click="router.push(`/recipe/${recipe.id}`)"
 		>
-			<div class="flex bg-white border-custom">
+			<div class="flex bg-white border-custom h-[140px]">
 				<div class="relative">
-					<img
-						class="img object-cover rounded-[20px]"
+					<el-image
+						class="img object-cover rounded-[20px] h-full"
 						:src="recipe.image"
 						alt="recipe image"
 					>
+						<template #error>
+							<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+								<el-icon>
+									<el-icon-picture />
+								</el-icon>
+							</div>
+						</template>
+					</el-image>
 					<div
 						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-white bg-forestGreen rounded-[100px]"
 					>
@@ -53,11 +61,17 @@
 			>
 				<div class="flex justify-center items-center">
 					<div class="flex justify-center items-center gap-[8px] mr-[20px]">
-						<img
+						<el-image
 							class="h-[20px] w-[20px]"
 							:src="recipe.author.image"
 							:alt="recipe.author.name"
 						>
+							<template #error>
+								<el-icon>
+									<el-icon-user />
+								</el-icon>
+							</template>
+						</el-image>
 						{{ recipe.author.name }}
 					</div>
 					<button
