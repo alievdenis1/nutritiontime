@@ -122,6 +122,10 @@ const buttonClass = computed(() => {
 	// return modalSelectedTags.value.length > 0 ? 'bg-forestGreen' : 'bg-disabled cursor-not-allowed'
 })
 
+onMounted(() => {
+ modalSelectedTags.value = store.filters.tags ?? []
+})
+
 const isTagActive = (tag: Tag) => {
  if (tag.category === 'quick_search') {
   return store.activeQuickSearchTag === tag.id

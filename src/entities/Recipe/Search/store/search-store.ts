@@ -12,6 +12,7 @@ export const useSearchStore = defineStore('search-store', () => {
     const activeQuickSearchTag = ref<number | null>(null)
     const modalIsActive = ref(false)
     const secondModalIsActive = ref(false)
+    const selectedIngredients = ref<Ingredient[]>([])
 
     const isExcludeIngredientsMode = ref(false)
 
@@ -115,6 +116,7 @@ export const useSearchStore = defineStore('search-store', () => {
         toggleSecondModalClose,
         totalRecipes,
         filters,
-        isExcludeIngredientsMode
+        isExcludeIngredientsMode,
+        selectedIngredients
     }
 })

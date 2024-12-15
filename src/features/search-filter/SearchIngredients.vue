@@ -102,7 +102,7 @@ import { IconClose } from '@/shared/components/Icon'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './SearchFilter.localization.json'
 import { useSearchStore } from 'entities/Recipe/Search'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onScopeDispose, ref, watch } from 'vue'
 import { getIngredientList } from 'entities/Ingredient'
 import { Check as ElIconCheck } from '@element-plus/icons-vue'
 import { onClickOutside, useElementBounding } from '@vueuse/core'
@@ -160,12 +160,21 @@ onMounted(() => {
 
 const selectedIngredients = ref<Ingredient[]>([])
 
+onScopeDispose(() => {
+ store.selectedIngredients = selectedIngredients.value
+})
+
+onMounted(() => {
+ selectedIngredients.value = store.selectedIngredients
+})
+
 const selectedIngredientsIdSet = computed(() => {
  return new Set(selectedIngredients.value.map(ingredient => ingredient.id))
 })
 
 const setIngredientsToStore = (ingredients: Ingredient[]) => {
  const mappedIngredients = ingredients.map(ingredient => ingredient.id)
+ store.selectedIngredients = ingredients
 
  if (store.isExcludeIngredientsMode) {
   store.filters.excluded_ingredients = mappedIngredients

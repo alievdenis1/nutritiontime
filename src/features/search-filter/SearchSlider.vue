@@ -173,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { VSlider } from '@/shared/components/ui/slider'
 import { IconArrow } from '@/shared/components/Icon'
 import { useTranslation } from '@/shared/lib/i18n'
@@ -289,6 +289,20 @@ const selectTime = (time: TimeOption) => {
  store.filters.min_cooking_time = time.range.min
  store.filters.max_cooking_time = time.range.max
 }
+
+onMounted(() => {
+ if (typeof store.filters.min_rating === 'number' && typeof store.filters.max_rating === 'number') {
+  ratingModelValue.value = [store.filters.min_rating, store.filters.max_rating]
+ }
+
+ if (typeof store.filters.min_difficulty === 'number' && typeof store.filters.max_difficulty === 'number') {
+  difficultyModelValue.value = [store.filters.min_difficulty, store.filters.max_difficulty]
+ }
+
+ if (typeof store.filters.min_spiciness === 'number' && typeof store.filters.max_spiciness === 'number') {
+  spicyModelValue.value = [store.filters.min_spiciness, store.filters.max_spiciness]
+ }
+})
 </script>
 
 <style scoped>
