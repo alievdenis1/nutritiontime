@@ -6,17 +6,17 @@
 			class="mb-5"
 		>
 			<h3 :class="['mb-3.5 text-lg', {'text-sm': isSubtitle}]">
-				{{ category?.name }}
+				{{ category.title ?? category.name }}
 			</h3>
 			<!-- Оборачиваем строки тегов в контейнер с боковым скроллом -->
 			<div>
 				<div class="tag-grid">
 					<div
 						v-for="rowTags in chunkTags(category.tags, props.chunkAmount)"
-						:key="rowTags[0]"
+						:key="rowTags[0].id"
 						class="tag-row mb-[10px]"
 						:class="{
-							'has-active-tag': rowTags.some(tag => hasTag(tag) || tag.length > 8),
+							'has-active-tag': rowTags.some(tag => hasTag(tag)),
 							'overflow-x-auto': !isSubtitle
 						}"
 					>
@@ -29,7 +29,7 @@
 								:class="['tag-button', { 'bg-forestGreen text-white': hasTag(tag), 'bg-lightGray': !hasTag(tag) }]"
 								@click="selectTag(tag)"
 							>
-								<span class="tag-text">{{ tag }}</span>
+								<span class="tag-text">{{ tag.title ?? tag.name }}</span>
 								<span
 									v-if="hasTag(tag)"
 									class="tag-close"
@@ -52,15 +52,17 @@
 <script setup lang="ts">
 import { ref, toRefs, watch } from 'vue'
 import { IconClose } from 'shared/components/Icon'
+import { Tag } from 'entities/Tag'
 
 interface Category {
-	name?: string;
-	tags: string[];
+	name: string;
+ id?: number,
+	tags: Tag[];
 }
 
 const props = withDefaults(defineProps<{
 	categoriesTags: Category[];
-	modalSelectedTags: string[];
+	modalSelectedTags: number[];
 	isSubtitle?: boolean;
 	chunkAmount: number;
 }>(), {
@@ -69,41 +71,43 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-	(event: 'tagChanged', tags: string[]): void;
+	(event: 'tagChanged', tags: number[]): void;
 }>()
 
 const { categoriesTags } = toRefs(props)
-const selectedTags = ref<string[]>([...props.modalSelectedTags])
+const selectedTags = ref<number[]>([...props.modalSelectedTags])
 
 watch(() => props.modalSelectedTags, (newTags) => {
 	selectedTags.value = [...newTags]
 })
 
 // Разбиваем теги на строки по 5 элементов
-const chunkTags = (tags: string[], chunkSize: number) => {
+const chunkTags = (tags: Tag[], chunkSize: number) => {
 	const result = []
+
 	for (let i = 0; i < tags.length; i += chunkSize) {
 		result.push(tags.slice(i, i + chunkSize))
 	}
+
 	return result
 }
 
-const selectTag = (tag: string) => {
-	if (!selectedTags.value.includes(tag)) {
-		selectedTags.value.push(tag)
+const selectTag = (tag: Tag) => {
+	if (!selectedTags.value.includes(tag.id)) {
+		selectedTags.value.push(tag.id)
 		emit('tagChanged', selectedTags.value)
 	}
 }
 
-const removeTag = (tag: string) => {
-	const index = selectedTags.value.indexOf(tag)
+const removeTag = (tag: Tag) => {
+	const index = selectedTags.value.indexOf(tag.id)
 	if (index > -1) {
 		selectedTags.value.splice(index, 1)
 		emit('tagChanged', selectedTags.value)
 	}
 }
 
-const hasTag = (tag: string): boolean => selectedTags.value.includes(tag)
+const hasTag = (tag: Tag): boolean => selectedTags.value.includes(tag.id)
 </script>
 
 <style scoped>

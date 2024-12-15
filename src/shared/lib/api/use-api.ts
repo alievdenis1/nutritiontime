@@ -1,5 +1,5 @@
 // src/shared/lib/api/use-api.ts
-import { ref, Ref } from 'vue'
+import { MaybeRefOrGetter, ref, Ref, toRaw, toValue } from 'vue'
 import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
@@ -48,7 +48,11 @@ api.interceptors.response.use(
 
 type ApiMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
-export function useApi<T>(method: ApiMethod, url: string, payload?: any) {
+export function useApi<T, PayloadType = any>(
+ method: ApiMethod,
+ url: MaybeRefOrGetter<string>,
+ payload?: MaybeRefOrGetter<PayloadType>
+) {
   const data: Ref<T | null> = ref(null)
   const error: Ref<string | null> = ref(null)
   const loading: Ref<boolean> = ref(false)
@@ -61,14 +65,18 @@ export function useApi<T>(method: ApiMethod, url: string, payload?: any) {
     if (cancelTokenSource) {
       cancelTokenSource.cancel('Operation canceled by the user.')
     }
-    cancelTokenSource = axios.CancelToken.source()
 
+    const normalizedPayload = toRaw(toValue(payload))
+    const normalizedUrl = toRaw(toValue(url))
+
+    cancelTokenSource = axios.CancelToken.source()
+    console.log(toValue(payload))
     try {
       const response: AxiosResponse<T> = await api.request<T>({
         method,
-        url,
-        data: method !== 'get' ? payload : undefined,
-        params: method === 'get' ? payload : undefined,
+        url: normalizedUrl,
+        data: method !== 'get' ? normalizedPayload : undefined,
+        params: method === 'get' ? normalizedPayload : undefined,
         cancelToken: cancelTokenSource.token,
       })
       data.value = response.data
