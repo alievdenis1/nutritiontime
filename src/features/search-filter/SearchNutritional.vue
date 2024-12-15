@@ -68,8 +68,10 @@ import { VAccordion } from '@/shared/components/Accordion'
 import { VSlider } from '@/shared/components/ui/slider'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './SearchFilter.localization.json'
+import { useSearchStore } from 'entities/Recipe/Search'
 
 const { t } = useTranslation(localization)
+const store = useSearchStore()
 
 interface Nutrient {
     title: string;
@@ -124,6 +126,26 @@ const nutrients = reactive<Record<string, Nutrient>>({
         unit: t('gramUnit')
     }
 })
+
+watch(() => nutrients.calories.value, (newCaloriesRange) => {
+ store.filters.min_calories = newCaloriesRange[0]
+ store.filters.max_calories = newCaloriesRange[1]
+}, { deep: true })
+
+watch(() => nutrients.protein.value, (newProteinsRange) => {
+ store.filters.min_proteins = newProteinsRange[0]
+ store.filters.max_calories = newProteinsRange[1]
+}, { deep: true })
+
+watch(() => nutrients.fat.value, (newFatsRange) => {
+ store.filters.min_fats = newFatsRange[0]
+ store.filters.max_fats = newFatsRange[1]
+}, { deep: true })
+
+watch(() => nutrients.carbs.value, (newCarbsRange) => {
+ store.filters.min_carbohydrates = newCarbsRange[0]
+ store.filters.max_carbohydrates = newCarbsRange[1]
+}, { deep: true })
 
 const getNutritientStyle = (nutrientValue: number) => {
     const nutrientBlockPaddingLeft = 13

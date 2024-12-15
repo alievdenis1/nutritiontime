@@ -49,7 +49,7 @@
 						>
 							<IconFire />
 							<span>
-								{{ recipe.calories }}
+								{{ recipe.nutritionInfo.calories }}
 							</span>
 						</div>
 					</div>
@@ -84,19 +84,19 @@
 				</div>
 				<div class="flex items-center justify-between gap-[16px]">
 					<IconFavorites
-						:is-liked="favoritesStates[recipe.id]"
+						:is-liked="!!recipe.collection_ids?.length"
 						active-color="#319A6E"
-						:disabled="isFavoriting[recipe.id]"
-						@toggle="toggleFavorite(recipe.id)"
+						:disabled="!!isChangingCollection.get(recipe.id)"
 					/>
 					<div @click="toggleLike(recipe.id)">
 						<div class="flex justify-center items-center gap-[8px] text-[#535353]">
 							<IconHeart
-								:is-liked="likedStates[recipe.id]"
+								:is-liked="recipe.favourited"
 								icon-color="#319A6E"
-								:disabled="isLiking[recipe.id]"
+								:disabled="!!isFavouriting.get(recipe.id)"
+								@toggle="toggleFavorite(recipe.id)"
 							/>
-							<p :class="{ 'text-green': likedStates[recipe.id] }">
+							<p :class="{ 'text-green': recipe.favourited }">
 								{{ recipe.likes }}
 							</p>
 						</div>
@@ -119,63 +119,36 @@ import CreateCollection from '../Search/modal/CreateCollection.vue'
 const store = useSearchStore()
 const router = useRouter()
 
+const isFavouriting = ref(new Map<number, boolean>())
+const isChangingCollection = ref(new Map<number, boolean>())
+
+// const emit = defineEmits<{
+//  toggleFavourite: [recipeId: number],
+//  toggle
+// }>()
+
 interface Props {
 	recipesData: RecipesItem[]
 }
+
+// const isFavourited = (recipe: RecipesItem) => {
+//  return recipe.favourited
+// }
+//
+// const isLiked = (recipe: RecipesItem) => {
+//  return
+// }
 
 const props = withDefaults(defineProps<Props>(), {
 	recipesData: () => []
 })
 
-const likedStates = ref<Record<number, boolean>>({})
-const isLiking = ref<Record<number, boolean>>({})
-const favoritesStates = ref<Record<number, boolean>>({})
-const isFavoriting = ref<Record<number, boolean>>({})
-
-props.recipesData.forEach(recipe => {
-	likedStates.value[recipe.id] = false
-	isLiking.value[recipe.id] = false
-	favoritesStates.value[recipe.id] = false
-	isFavoriting.value[recipe.id] = false
-})
-
 const toggleLike = async (recipeId: number) => {
-	if (isLiking.value[recipeId]) return
-
-	isLiking.value[recipeId] = true
-	try {
-		// Здесь должна быть логика для отправки запроса на сервер
-		likedStates.value[recipeId] = !likedStates.value[recipeId]
-		// Обновление количества лайков
-		const recipe = props.recipesData.find(r => r.id === recipeId)
-		if (recipe) {
-			if (likedStates.value[recipeId]) {
-				recipe.likes++
-			} else {
-				recipe.likes--
-			}
-		}
-	} catch (error) {
-		console.error('Error toggling like:', error)
-	} finally {
-		isLiking.value[recipeId] = false
-	}
+ //
 }
 
 const toggleFavorite = async (recipeId: number) => {
-	if (isFavoriting.value[recipeId]) return
-
-	isFavoriting.value[recipeId] = true
-	try {
-		// Здесь должна быть логика для отправки запроса на сервер
-		favoritesStates.value[recipeId] = !favoritesStates.value[recipeId]
-		store.toggleModalOpen()
-		// Дополнительная логика, если необходимо
-	} catch (error) {
-		console.error('Error toggling favorite:', error)
-	} finally {
-		isFavoriting.value[recipeId] = false
-	}
+//
 }
 
 </script>

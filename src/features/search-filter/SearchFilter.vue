@@ -77,14 +77,17 @@
 				:color="ButtonColors.Green"
 				@click="searchFilter"
 			>
-				440 {{ t('recipes') }}
+				{{ store.totalRecipes }} {{ t('recipes') }}
+				<ElIcon>
+					<ElIconLoading v-if="store.isLoading" />
+				</ElIcon>
 			</VButton>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+ import { ref, onMounted, computed, watch } from 'vue'
 import { IconCheck } from 'shared/components/Icon'
 import { VAccordion } from 'shared/components/Accordion'
 import { VButton, ButtonColors } from 'shared/components/Button'
@@ -95,12 +98,16 @@ import Simplebar from 'simplebar-vue'
 import 'simplebar/dist/simplebar.min.css'
 import SimpleBar from 'simplebar'
 import 'simplebar/dist/simplebar.css'
+import { Loading as ElIconLoading } from '@element-plus/icons-vue'
 
 import { useSearchStore } from 'entities/Recipe/Search'
-const store = useSearchStore()
-
-const { t } = useTranslation(localization)
 import { useRouter } from 'vue-router'
+import { getCuisineList } from 'entities/Cuisine'
+import { getDietTypeList } from 'entities/DietType'
+
+const store = useSearchStore()
+const { t } = useTranslation(localization)
+
 const router = useRouter()
 
 interface FilterOption {
@@ -109,30 +116,28 @@ interface FilterOption {
     checked: boolean;
 }
 
-const cuisines = ref<FilterOption[]>([
-    { id: 1, name: 'Греческая', checked: false },
-    { id: 2, name: 'Грузинская', checked: false },
-    { id: 3, name: 'Европейская', checked: false },
-    { id: 4, name: 'Русская', checked: false },
-    { id: 5, name: 'Украинская', checked: false },
-    { id: 6, name: 'Кавказская', checked: false },
-    { id: 7, name: 'Турецкая', checked: false },
-    { id: 7, name: 'Американская', checked: false },
-    { id: 7, name: 'Индийская', checked: false },
-])
+const cuisines = ref<FilterOption[]>([])
 
-const diets = ref<FilterOption[]>([
-    { id: 1, name: 'Тип диеты 1', checked: false },
-    { id: 2, name: 'Тип диеты 2', checked: false },
-    { id: 3, name: 'Тип диеты 3', checked: false },
-    { id: 4, name: 'Тип диеты 4', checked: false },
-    { id: 5, name: 'Тип диеты 5', checked: false },
-    { id: 6, name: 'Тип диеты 6', checked: false },
-    { id: 7, name: 'Тип диеты 7', checked: false },
-    { id: 8, name: 'Тип диеты 8', checked: false },
-    { id: 9, name: 'Тип диеты 9', checked: false },
-    { id: 10, name: 'Тип диеты 10', checked: false },
-])
+const reduceFilterOptions = (filterOptions: FilterOption[]) => {
+  return filterOptions.reduce((acc, cur) => {
+   if (cur.checked) {
+    acc.push(cur.id)
+   }
+
+   return acc
+  }, [] as number[])
+}
+
+watch(cuisines, (newCuisines) => {
+ store.filters.cuisine_id = reduceFilterOptions(newCuisines)
+}, { deep: true })
+
+const diets = ref<FilterOption[]>([])
+
+watch(diets, (newDiets) => {
+ store.filters.diet_type_id = reduceFilterOptions(newDiets)
+}, { deep: true })
+
 const showResetButton = computed(() => {
     return cuisines.value.some(cuisine => cuisine.checked) || diets.value.some(diet => diet.checked)
 })
@@ -157,7 +162,10 @@ const updateFilters = () => {
     // Здесь можно добавить логику обновления фильтров
 }
 
-onMounted(() => {
+const getCuisinesApi = getCuisineList()
+const getDietTypesApi = getDietTypeList()
+
+onMounted(async () => {
 	setTimeout(() => {
 		const simplebarElement = document.querySelector('.simplebar-content-wrapper')
 		if (simplebarElement) {
@@ -165,6 +173,11 @@ onMounted(() => {
 			simplebarInstance.recalculate()
 		}
 	}, 100)
+
+ await Promise.allSettled([getCuisinesApi.execute(), getDietTypesApi.execute()])
+
+ cuisines.value = getCuisinesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
+ diets.value = getDietTypesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
 })
 
 </script>
@@ -209,4 +222,4 @@ onMounted(() => {
     border: 1px solid #319A6E33;
     border-radius: 4px;
 }
-</style>@/entities/Recipe/Search
+</style>

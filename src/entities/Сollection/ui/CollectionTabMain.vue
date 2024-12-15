@@ -13,14 +13,14 @@
 		</TabsList>
 		<TabsContent value="collections">
 			<VDragAndDrop
-				:items="store.dragAndDropItems"
+				:items="collectionListForDragAndDrop"
 				class="mt-[16px]"
 				@edit="onEdit"
 				@delete="onDelete"
 				@adding="onAdding"
-				@change="onChangeCollection"
+				@change="onCollectionSelected"
 			/>
-			<RecipesList :recipes-data="recipesList" />
+			<RecipesList :recipes-data="recipeList.data" />
 			<VContentBlock
 				v-if="mockRecipes.length === 0"
 				:image="addPrefix('/image/start-screen-image.webp')"
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+ import { ref, onMounted, computed } from 'vue'
 import RecipesList from '../../Recipe/RecipesList/RecipesList.vue'
 import { VContentBlock } from 'shared/components/ContentBlock'
 import { mockRecipes, addPrefix } from '../mocks/mock-recipes'
@@ -60,11 +60,14 @@ import { useModalStore } from '../store/collections.store'
 import ModalCollection from '../../Сollection/modal/ModalCollection.vue'
 
 import { useModalCreateStore } from '../../Recipe/CreateRecipe/modal-create/model/model-store'
+import { useRecipeStore } from 'entities/Recipe/DetailedCardRecipe'
+
 const modalCreateStore = useModalCreateStore()
 
 const store = useModalStore()
 const { t } = useTranslation(Localization)
-const recipesList = ref(mockRecipes)
+
+const recipeStore = useRecipeStore()
 
 const onEdit = (tab: DragTypes) => {
 	store.collectionId = tab.id
@@ -84,7 +87,7 @@ const onDelete = async (tab: DragTypes) => {
 	})
 
 	if (isConfirmed) {
-		store.deleteCollection()
+		await store.deleteCollection()
 	}
 }
 
@@ -92,13 +95,40 @@ const onAdding = () => {
 	store.openModal('create')
 }
 
-const onChangeCollection = (id:number) => {
-	recipesList.value = mockRecipes.filter(recipe => recipe.collectionId === id)
-}
+// const onChangeCollection = (id:number) => {
+//   if (store.savedCollections?.length) {
+//    recipesList.value = store.savedCollections.filter(recipe => recipe.collectionId === id)
+//   }
+// }
+const recipeList = computed(() => {
+ if (typeof store.collectionId !== 'number') {
+  return { data: recipeStore.recipes }
+ }
+
+ if (store.collectionId === 0) {
+  return { data: recipeStore.favouriteRecipes }
+ }
+
+ return store.recipesByCollections.get(store.collectionId) ?? { data: [] }
+})
+
+const collectionListForDragAndDrop = computed(() => {
+ return store.collectionList.map(({ id, name }) => ({ id, label: name, isActiveEdit: true }))
+})
 
 onMounted(() => {
-	onChangeCollection(1)
+ store.getCollections().then(() => {
+  if (store.savedCollections?.length > 0) {
+   store.getAllCollectionsRecipes(store.savedCollections.map(({ id }) => id))
+  }
+ })
+
+ recipeStore.getFavouriteRecipes()
 })
+
+const onCollectionSelected = (id: number) => {
+  store.collectionId = id
+}
 </script>
 
 <style lang="scss" scoped></style>

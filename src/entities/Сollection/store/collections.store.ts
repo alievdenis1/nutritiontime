@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { DragTypes } from 'shared/components/DragAndDrop/types'
+import {
+  createCollection,
+  deleteCollection as removeCollection,
+  getCollectionList,
+  getCollectionRecipes,
+  updateCollection,
+} from 'entities/Сollection/api'
+import { Recipe } from 'entities/Recipe'
 
 export const useModalStore = defineStore('modal', () => {
   const isModalOpen = ref<boolean>(false)
@@ -9,14 +17,15 @@ export const useModalStore = defineStore('modal', () => {
   const inputValue = ref<string>('')
   const initialInputValue = ref<string>('')
   const collectionId = ref<number | null>(null)
-  const savedCollections = ref<DragTypes[]>(JSON.parse(localStorage.getItem('collections') || 'null'))
+  const savedCollections = ref<DragTypes[]>([])
 
-  const dragAndDropItems = ref<DragTypes[]>(
-    savedCollections.value || [{ id: 1, label: 'Мне понравилось', isActiveEdit: false, count: 5 }]
-  )
+  // TODO: мне понравилось - динамическое значение, надо забирать с бэка
+  const collectionList = computed(() => {
+    return [{ id: 0, name: 'Мне понравилось', isActiveEdit: false, count: 5 }].concat(savedCollections.value)
+  })
 
   const currentCollection = computed(() =>
-    dragAndDropItems.value.find(item => item.id === collectionId.value)
+   savedCollections.value.find(item => item.id === collectionId.value)
   )
 
   const openModal = (mode: 'create' | 'edit') => {
@@ -30,8 +39,8 @@ export const useModalStore = defineStore('modal', () => {
     } else if (mode === 'edit' && currentCollection.value) {
       titleModal.value = 'Редактирование коллекции'
       descModal.value = ''
-      inputValue.value = currentCollection.value.label
-      initialInputValue.value = currentCollection.value.label
+      inputValue.value = currentCollection.value.name
+      initialInputValue.value = currentCollection.value.name
     }
   }
 
@@ -41,32 +50,81 @@ export const useModalStore = defineStore('modal', () => {
     inputValue.value = ''
   }
 
-  const saveCollection = () => {
+  const createCollectionApi = createCollection(() => ({
+    name: inputValue.value
+  }))
+
+  const updateCollectionApi = updateCollection(() => ({
+    id: collectionId.value,
+    name: inputValue.value
+  }))
+
+  const saveCollection = async () => {
     if (inputValue.value.trim()) {
       if (collectionId.value === null) {
-        const newId = Math.max(...dragAndDropItems.value.map(item => item.id), 0) + 1
-        dragAndDropItems.value.push({
-          id: newId,
-          label: inputValue.value.trim(),
-          isActiveEdit: true,
-          count: 0
-        })
+        await createCollectionApi.execute()
 
-        localStorage.setItem('collections', JSON.stringify(dragAndDropItems.value))
+        if (createCollectionApi.data.value?.collection) {
+          savedCollections.value.push(createCollectionApi.data.value.collection)
+        }
       } else {
-        const index = dragAndDropItems.value.findIndex(item => item.id === collectionId.value)
+        await updateCollectionApi.execute()
+        console.log(updateCollectionApi.data.value)
+
+        const index = savedCollections.value.findIndex(item => item.id === collectionId.value)
+
         if (index !== -1) {
-          dragAndDropItems.value[index].label = inputValue.value.trim()
+          savedCollections.value[index].name = inputValue.value.trim()
         }
       }
       closeModal()
     }
   }
 
-  const deleteCollection = () => {
-      dragAndDropItems.value = dragAndDropItems.value.filter(item => item.id !== collectionId.value)
-      localStorage.setItem('collections', JSON.stringify(dragAndDropItems.value))
-      collectionId.value = null
+  const deleteCollection = async () => {
+    if (!collectionId.value) {
+      return
+    }
+
+    const deleteCollectionApi = removeCollection(collectionId.value)
+    await deleteCollectionApi.execute()
+
+    const exactCollectionIndex = savedCollections.value
+     .findIndex(item => item.id === collectionId.value)
+
+    if (exactCollectionIndex !== -1) {
+      savedCollections.value.splice(exactCollectionIndex, 1)
+    }
+
+    collectionId.value = null
+  }
+
+  const collectionListApi = getCollectionList()
+  const isLoadingCollections = computed(() => collectionListApi.loading.value)
+  const getCollections = async () => {
+    await collectionListApi.execute()
+    savedCollections.value = collectionListApi.data.value
+  }
+
+  const recipesByCollections = ref(new Map<number, Recipe[]>())
+
+  const loadingCollectionsRecipesSet = ref(new Set<number>())
+
+  const getCollectionRecipeList = async (id: number) => {
+    const getCollectionRecipesApi = getCollectionRecipes(id)
+
+    loadingCollectionsRecipesSet.value.add(id)
+    await getCollectionRecipesApi.execute()
+
+    if (getCollectionRecipesApi.data.value) {
+      recipesByCollections.value.set(id, getCollectionRecipesApi.data.value)
+    }
+
+    loadingCollectionsRecipesSet.value.delete(id)
+  }
+
+  const getAllCollectionsRecipes = async (ids: number[]) => {
+    await Promise.allSettled(ids.map(id => getCollectionRecipeList(id)))
   }
 
   return {
@@ -77,10 +135,17 @@ export const useModalStore = defineStore('modal', () => {
     descModal,
     inputValue,
     initialInputValue,
-    dragAndDropItems,
+    collectionList,
     saveCollection,
+    savedCollections,
     deleteCollection,
     collectionId,
-    currentCollection
+    currentCollection,
+
+    getCollections,
+    isLoadingCollections,
+    getCollectionRecipeList,
+    getAllCollectionsRecipes,
+    recipesByCollections
   }
 })

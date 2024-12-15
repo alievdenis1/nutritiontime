@@ -10,7 +10,10 @@ export interface RecipesItem {
 	title: string;
 	rating: number;
 	time: string;
-	calories: number;
+	// calories: number;
+	nutritionInfo: {
+		calories: string
+	}
 	author: Author;
 	commentsCount: number;
 	cookingTime: number;

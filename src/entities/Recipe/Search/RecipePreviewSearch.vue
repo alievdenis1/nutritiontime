@@ -6,22 +6,39 @@
 	>
 		<div class="recipe-card-inner">
 			<div class="flex items-center mb-[12px]">
-				<img
+				<el-image
 					class="w-8 h-8 rounded-full mr-2"
 					:src="recipe.author.image"
 					:alt="recipe.author.name"
 				>
+					<template #error>
+						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+							<el-icon>
+								<el-icon-user />
+							</el-icon>
+						</div>
+					</template>
+				</el-image>
 				<span class="text-sm text-gray-600">{{ recipe.author.name }}</span>
 			</div>
 			<div
 				class="relative"
 				@click="router.push(`/recipe/${recipe.id}`)"
 			>
-				<img
+				<ElImage
 					class="w-full h-[343px] object-cover rounded-[12px]"
 					:src="recipe.image"
 					:alt="recipe.title"
 				>
+					<template #error>
+						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+							<el-icon>
+								<el-icon-picture />
+							</el-icon>
+						</div>
+					</template>
+				</ElImage>
+
 				<div
 					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"
 				>
@@ -83,6 +100,8 @@ import CreateCollection from '../Search/modal/CreateCollection.vue'
 import { useTranslation } from 'shared/lib/i18n'
 import localization from './SearchBar.localization.json'
 import { useSearchStore } from './store/search-store'
+import { ElImage } from 'element-plus'
+import { Picture as ElIconPicture, User as ElIconUser } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const { t } = useTranslation(localization)

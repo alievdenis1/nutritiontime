@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Recipe } from '../types/recipe'
 import { mockRecipe } from '../mocks/mock-recipes-item'
+import { getFavoriteRecipeList, getRecipeList } from 'entities/Recipe/api'
+import { RecipesItem } from 'entities/Recipe/RecipesList'
 
 // TODO: похоже, что этот файл нужно перенести в Entity/Recipe/model/store.ts
 // Так как он много где используется
@@ -46,6 +48,31 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     // TODO: recipes наверное нужно убрать
     const recipes = ref<Recipe[]>(mockRecipe.value)
 
+    const getRecipesFilters = ref<{
+        query: string
+        tags: number[]
+    }>({
+        query: '',
+        tags: []
+    })
+
+    const isLoadingRecipes = ref(false)
+
+    const getRecipeListApi = getRecipeList({
+        search: getRecipesFilters.value.query,
+        tags: [...getRecipesFilters.value.tags]
+    })
+
+    const getRecipes = async () => {
+        getRecipeListApi.cancel()
+
+        isLoadingRecipes.value = true
+        await getRecipeListApi.execute()
+        isLoadingRecipes.value = false
+
+        return getRecipeListApi.data.value
+    }
+
     const currentRecipe = computed(() => {
         const recipeId = route.params.id as string
         const currentRecipeInfo = recipes.value.find(recipe => recipe.id === recipeId)
@@ -81,11 +108,31 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         }
     }
 
+    const favouriteRecipes = ref<RecipesItem[]>([])
+
+    const favouriteRecipesApi = getFavoriteRecipeList()
+
+    const isLoadingFavouriteRecipes = computed(() => {
+        return favouriteRecipesApi.loading.value
+    })
+
+    const getFavouriteRecipes = async () => {
+        await favouriteRecipesApi.execute()
+        favouriteRecipes.value = favouriteRecipesApi.data.value
+    }
+
     return {
         recipes,
         currentRecipe,
         setRecipeInfoField,
         setRecipeRating,
         toggleRecipeFavourited,
+        getRecipesFilters,
+        getRecipes,
+        isLoadingRecipes,
+
+        getFavouriteRecipes,
+        favouriteRecipes,
+        isLoadingFavouriteRecipes
     }
 })
