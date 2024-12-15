@@ -39,11 +39,11 @@
 					</template>
 				</ElImage>
 
-				<div
-					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"
-				>
-					{{ recipe.average_rating?.toFixed(1) }}
-				</div>
+				<!--				<div-->
+				<!--					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"-->
+				<!--				>-->
+				<!--					{{ recipe.average_rating?.toFixed(1) }}-->
+				<!--				</div>-->
 			</div>
 
 			<div class="flex items-center text-sm text-gray-600 mb-4 mt-[12px]">

@@ -47,57 +47,57 @@
 				</div>
 			</div>
 		</div>
-		<div class="p-[16px] shadow-custom mx-[16px] mt-[24px] mb-[16px] rounded-[16px]">
-			<div class="text-slateGray text-lg mb-[12px]">
-				{{ t('yourRecipe') }}
-			</div>
-			<div class="text-xs text-slateGray mb-[12px]">
-				{{ t('editInstructions') }}
-			</div>
-			<VButton
-				:color="ButtonColors.White"
-				@click="editingRecipe"
-			>
-				<div class="flex items-center justify-center gap-[12px]">
-					<div>{{ t('editButton') }}</div>
-					<div>
-						<IconArrowRight icon-color="#319A6E" />
-					</div>
-				</div>
-			</VButton>
-		</div>
+		<!--		<div class="p-[16px] shadow-custom mx-[16px] mt-[24px] mb-[16px] rounded-[16px]">-->
+		<!--			<div class="text-slateGray text-lg mb-[12px]">-->
+		<!--				{{ t('yourRecipe') }}-->
+		<!--			</div>-->
+		<!--			<div class="text-xs text-slateGray mb-[12px]">-->
+		<!--				{{ t('editInstructions') }}-->
+		<!--			</div>-->
+		<!--			<VButton-->
+		<!--				:color="ButtonColors.White"-->
+		<!--				@click="editingRecipe"-->
+		<!--			>-->
+		<!--				<div class="flex items-center justify-center gap-[12px]">-->
+		<!--					<div>{{ t('editButton') }}</div>-->
+		<!--					<div>-->
+		<!--						<IconArrowRight icon-color="#319A6E" />-->
+		<!--					</div>-->
+		<!--				</div>-->
+		<!--			</VButton>-->
+		<!--		</div>-->
 
 		<div class="mx-auto p-[16px]">
-			<div class="flex items-center mb-[16px] mt-[24px]">
-				<ElImage
-					:src="recipe?.author?.image"
-					:alt="recipe?.author?.name"
-					class="w-8 h-8 rounded-full mr-2"
-				>
-					<template #error>
-						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
-							<el-icon>
-								<el-icon-user />
-							</el-icon>
-						</div>
-					</template>
-				</ElImage>
-				<span class="text-sm text-slateGray">{{ recipe?.author?.name }}</span>
-				<div
-					v-if="recipe?.comments?.length && recipe.comments.length > 0"
-					class=" ml-auto flex items-center"
-				>
-					<span class="text-xs text-slateGray mr-[8px]">
-						{{ recipe?.reviewsCount }}
-						{{ t('reviewsCount') }}
-					</span>
-					<span
-						class="text-sm text-white w-[32px] h-[32px] rounded-[50%] bg-forestGreen flex items-center justify-center"
-					>
-						{{ recipe?.rating.toFixed(1) }}
-					</span>
-				</div>
-			</div>
+			<!--			<div class="flex items-center mb-[16px] mt-[24px]">-->
+			<!--				<ElImage-->
+			<!--					:src="recipe?.author?.image"-->
+			<!--					:alt="recipe?.author?.name"-->
+			<!--					class="w-8 h-8 rounded-full mr-2"-->
+			<!--				>-->
+			<!--					<template #error>-->
+			<!--						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">-->
+			<!--							<el-icon>-->
+			<!--								<el-icon-user />-->
+			<!--							</el-icon>-->
+			<!--						</div>-->
+			<!--					</template>-->
+			<!--				</ElImage>-->
+			<!--				<span class="text-sm text-slateGray">{{ recipe?.author?.name }}</span>-->
+			<!--				<div-->
+			<!--					v-if="recipe?.comments?.length && recipe.comments.length > 0"-->
+			<!--					class=" ml-auto flex items-center"-->
+			<!--				>-->
+			<!--					<span class="text-xs text-slateGray mr-[8px]">-->
+			<!--						{{ recipe?.reviewsCount }}-->
+			<!--						{{ t('reviewsCount') }}-->
+			<!--					</span>-->
+			<!--					<span-->
+			<!--						class="text-sm text-white w-[32px] h-[32px] rounded-[50%] bg-forestGreen flex items-center justify-center"-->
+			<!--					>-->
+			<!--						{{ recipe?.rating.toFixed(1) }}-->
+			<!--					</span>-->
+			<!--				</div>-->
+			<!--			</div>-->
 
 			<h2 class="text-xl font-bold text-darkGray mb-[8px]">
 				{{ recipe?.title }}
@@ -127,83 +127,83 @@
 				:recipe="recipe"
 			/>
 
-			<div class="shadow-custom mt-[40px] p-[16px] rounded-[12px] flex items-center justify-between">
-				<div v-if="!!recipe?.comments?.length">
-					<span
-						class="text-sm text-white w-[32px] h-[32px] rounded-[50%] bg-forestGreen flex items-center justify-center mb-[12px]"
-					>
-						{{ recipe?.rating.toFixed(1) }}
-					</span>
-					<span class="text-nowrap">{{ recipe?.reviewsCount }} {{ t('reviewsCount') }}</span>
-				</div>
-				<div
-					v-if="!recipe?.comments?.length"
-					class="text-sm text-darkGray"
-				>
-					{{ t('noReviews') }}
-				</div>
-				<div class="w-max">
-					<VButton
-						:color="ButtonColors.White"
-						@click="openReviewModal"
-					>
-						<div class="flex items-center justify-center gap-[12px]">
-							<div>{{ t('leaveReview') }}</div>
-							<div>
-								<IconArrowRight icon-color="#319A6E" />
-							</div>
-						</div>
-					</VButton>
-				</div>
-			</div>
-			<div class="space-y-[12px]">
-				<div
-					v-for="(comment, index) in latestComments"
-					:key="index"
-					class="rounded-lg mt-[24px] flex flex-col gap-[12px] mb-[24px]"
-				>
-					<div class="flex items-center">
-						<img
-							v-if="comment.authorImage"
-							:src="comment.authorImage"
-							:alt="comment.author"
-							class="w-8 h-8 rounded-full mr-2"
-						>
-						<span class="font-xs text-slateGray">{{ comment.author }}</span>
-					</div>
-					<p class="text-darkGray">
-						{{ comment.text }}
-					</p>
-					<img
-						v-if="comment.image"
-						:src="comment.image"
-						:alt="t('recipe.commentImage')"
-						class="w-full h-auto object-cover aspect-video rounded-lg"
-					>
-					<div class="flex items-center gap-1">
-						<div v-if="recipe">
-							<IconHeart
-								:is-liked="likedStates[recipe.id] ?? false"
-								:disabled="isLiking[recipe.id] ?? false"
-							/>
-						</div>
-						<span class="text-slateGray text-xs">{{ comment.likes }}</span>
-					</div>
-					<div class="w-full h-[1px] bg-[#1C1C1C0D]" />
-				</div>
-			</div>
-			<VButton
-				:color="ButtonColors.White"
-				class="mt-[24px]"
-				@click="allCommentPage"
-			>
-				<div class="flex items-center justify-center gap-[12px]">
-					<div>{{ t('allReviews') }}</div>
-					<div>
-						<IconArrowRight icon-color="#319A6E" />
-					</div>
-				</div>
-			</VButton>
+			<!--			<div class="shadow-custom mt-[40px] p-[16px] rounded-[12px] flex items-center justify-between">-->
+			<!--				<div v-if="!!recipe?.comments?.length">-->
+			<!--					<span-->
+			<!--						class="text-sm text-white w-[32px] h-[32px] rounded-[50%] bg-forestGreen flex items-center justify-center mb-[12px]"-->
+			<!--					>-->
+			<!--						{{ recipe?.rating.toFixed(1) }}-->
+			<!--					</span>-->
+			<!--					<span class="text-nowrap">{{ recipe?.reviewsCount }} {{ t('reviewsCount') }}</span>-->
+			<!--				</div>-->
+			<!--				<div-->
+			<!--					v-if="!recipe?.comments?.length"-->
+			<!--					class="text-sm text-darkGray"-->
+			<!--				>-->
+			<!--					{{ t('noReviews') }}-->
+			<!--				</div>-->
+			<!--				<div class="w-max">-->
+			<!--					<VButton-->
+			<!--						:color="ButtonColors.White"-->
+			<!--						@click="openReviewModal"-->
+			<!--					>-->
+			<!--						<div class="flex items-center justify-center gap-[12px]">-->
+			<!--							<div>{{ t('leaveReview') }}</div>-->
+			<!--							<div>-->
+			<!--								<IconArrowRight icon-color="#319A6E" />-->
+			<!--							</div>-->
+			<!--						</div>-->
+			<!--					</VButton>-->
+			<!--				</div>-->
+			<!--			</div>-->
+			<!--			<div class="space-y-[12px]">-->
+			<!--				<div-->
+			<!--					v-for="(comment, index) in latestComments"-->
+			<!--					:key="index"-->
+			<!--					class="rounded-lg mt-[24px] flex flex-col gap-[12px] mb-[24px]"-->
+			<!--				>-->
+			<!--					<div class="flex items-center">-->
+			<!--						<img-->
+			<!--							v-if="comment.authorImage"-->
+			<!--							:src="comment.authorImage"-->
+			<!--							:alt="comment.author"-->
+			<!--							class="w-8 h-8 rounded-full mr-2"-->
+			<!--						>-->
+			<!--						<span class="font-xs text-slateGray">{{ comment.author }}</span>-->
+			<!--					</div>-->
+			<!--					<p class="text-darkGray">-->
+			<!--						{{ comment.text }}-->
+			<!--					</p>-->
+			<!--					<img-->
+			<!--						v-if="comment.image"-->
+			<!--						:src="comment.image"-->
+			<!--						:alt="t('recipe.commentImage')"-->
+			<!--						class="w-full h-auto object-cover aspect-video rounded-lg"-->
+			<!--					>-->
+			<!--					<div class="flex items-center gap-1">-->
+			<!--						<div v-if="recipe">-->
+			<!--							<IconHeart-->
+			<!--								:is-liked="likedStates[recipe.id] ?? false"-->
+			<!--								:disabled="isLiking[recipe.id] ?? false"-->
+			<!--							/>-->
+			<!--						</div>-->
+			<!--						<span class="text-slateGray text-xs">{{ comment.likes }}</span>-->
+			<!--					</div>-->
+			<!--					<div class="w-full h-[1px] bg-[#1C1C1C0D]" />-->
+			<!--				</div>-->
+			<!--			</div>-->
+			<!--			<VButton-->
+			<!--				:color="ButtonColors.White"-->
+			<!--				class="mt-[24px]"-->
+			<!--				@click="allCommentPage"-->
+			<!--			>-->
+			<!--				<div class="flex items-center justify-center gap-[12px]">-->
+			<!--					<div>{{ t('allReviews') }}</div>-->
+			<!--					<div>-->
+			<!--						<IconArrowRight icon-color="#319A6E" />-->
+			<!--					</div>-->
+			<!--				</div>-->
+			<!--			</VButton>-->
 		</div>
 		<div class="px-[16px]">
 			<div class="shadow-custom mt-[32px] p-[16px] rounded-[12px] flex items-center justify-between">
@@ -225,51 +225,51 @@
 				<div />
 			</div>
 		</div>
-		<div class="px-[16px]">
-			<div class="shadow-custom mt-[32px] p-[16px] rounded-[12px] flex items-center justify-between">
-				<div>
-					<div class="text-lg text-darkGray">
-						{{ t('nftOwner') }}
-					</div>
-					<div class="flex items-center gap-[8px] mt-[12px]">
-						<img
-							:src="recipe.nftOwner?.image"
-							:alt="recipe.nftOwner?.name"
-							class="w-[20px] h-[20px]"
-						>
-						<div class="text-xs text-slateGray">
-							{{ recipe.nftOwner?.name }}
-						</div>
-					</div>
-				</div>
-				<div class="w-max">
-					<VButton :color="ButtonColors.White">
-						<div class="flex items-center justify-center gap-[12px]">
-							<div>{{ t('moreAbout') }}</div>
-							<div>
-								<IconArrowRight
-									v-if="!isSmallScreen"
-									icon-color="#319A6E"
-								/>
-							</div>
-						</div>
-					</VButton>
-				</div>
-			</div>
-		</div>
-		<div class="px-[16px] mt-[24px] mb-[16px]">
-			<VButton
-				:color="ButtonColors.White"
-				@click="exportToPDF"
-			>
-				<div class="flex items-center justify-center gap-[12px]">
-					<div>{{ t('exportToPDF') }}</div>
-					<div>
-						<IconLoad />
-					</div>
-				</div>
-			</VButton>
-		</div>
+		<!--		<div class="px-[16px]">-->
+		<!--			<div class="shadow-custom mt-[32px] p-[16px] rounded-[12px] flex items-center justify-between">-->
+		<!--				<div>-->
+		<!--					<div class="text-lg text-darkGray">-->
+		<!--						{{ t('nftOwner') }}-->
+		<!--					</div>-->
+		<!--					<div class="flex items-center gap-[8px] mt-[12px]">-->
+		<!--						<img-->
+		<!--							:src="recipe.nftOwner?.image"-->
+		<!--							:alt="recipe.nftOwner?.name"-->
+		<!--							class="w-[20px] h-[20px]"-->
+		<!--						>-->
+		<!--						<div class="text-xs text-slateGray">-->
+		<!--							{{ recipe.nftOwner?.name }}-->
+		<!--						</div>-->
+		<!--					</div>-->
+		<!--				</div>-->
+		<!--				<div class="w-max">-->
+		<!--					<VButton :color="ButtonColors.White">-->
+		<!--						<div class="flex items-center justify-center gap-[12px]">-->
+		<!--							<div>{{ t('moreAbout') }}</div>-->
+		<!--							<div>-->
+		<!--								<IconArrowRight-->
+		<!--									v-if="!isSmallScreen"-->
+		<!--									icon-color="#319A6E"-->
+		<!--								/>-->
+		<!--							</div>-->
+		<!--						</div>-->
+		<!--					</VButton>-->
+		<!--				</div>-->
+		<!--			</div>-->
+		<!--		</div>-->
+		<!--		<div class="px-[16px] mt-[24px] mb-[16px]">-->
+		<!--			<VButton-->
+		<!--				:color="ButtonColors.White"-->
+		<!--				@click="exportToPDF"-->
+		<!--			>-->
+		<!--				<div class="flex items-center justify-center gap-[12px]">-->
+		<!--					<div>{{ t('exportToPDF') }}</div>-->
+		<!--					<div>-->
+		<!--						<IconLoad />-->
+		<!--					</div>-->
+		<!--				</div>-->
+		<!--			</VButton>-->
+		<!--		</div>-->
 		<VModal
 			:show="isReviewModalOpen"
 			@close="closeReviewModal"
