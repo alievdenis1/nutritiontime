@@ -131,9 +131,9 @@ const removeImage = () => {
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const openFileDialog = () => {
-  if (fileInput.value) {
-    fileInput.value.click()
-  }
+	if (fileInput.value) {
+		fileInput.value.click()
+	}
 }
 
 defineExpose({ openFileDialog })

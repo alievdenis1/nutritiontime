@@ -49,9 +49,9 @@ const confirmButtonText = computed((): string => confirmStore.props?.confirmButt
 const cancelButtonText = computed((): string => confirmStore.props?.cancelButtonText || t('cancel'))
 
 const onConfirm = (): void => {
-    confirmStore.onClose(true)
+	confirmStore.onClose(true)
 }
 const onClose = (value: boolean): void => {
-    if (!value) confirmStore.onClose(false)
+	if (!value) confirmStore.onClose(false)
 }
 </script>

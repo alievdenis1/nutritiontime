@@ -27,26 +27,19 @@ module.exports = {
 			'alignAttributesVertically': true,
 			'ignores': []
 		}],
-		'vue/attributes-order': ['error', {
-			'order': [
-				'DEFINITION',
-				'CONDITIONALS',
-				'LIST_RENDERING',
-				'RENDER_MODIFIERS',
-				'GLOBAL',
-				['UNIQUE', 'SLOT'],
-				'TWO_WAY_BINDING',
-				'OTHER_DIRECTIVES',
-				'OTHER_ATTR',
-				'EVENTS',
-				'CONTENT'
-			],
-			'alphabetical': false
+		"vue/max-attributes-per-line": ["error", {
+			"singleline": {
+				"max": 1
+			},
+			"multiline": {
+				"max": 1
+			}
 		}],
 		'object-curly-spacing': ['error', 'always'],
 		'quotes': ['error', 'single'],
 		'no-trailing-spaces': 'error',
 		'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
-		'semi': ['error', 'never']
+		'semi': ['error', 'never'],
+		'@typescript-eslint/indent': ['warn', 'tab'],
 	}
 }

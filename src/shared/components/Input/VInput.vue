@@ -76,46 +76,46 @@ import { IconClose } from 'shared/components/Icon'
 type InputBackground = 'default' | 'gray'
 
 export type InputEmits = {
-    'update:modelValue': [string]
-    'update:error': [boolean]
-    focusout: [void]
-    'clear:error': [string]
+	'update:modelValue': [string]
+	'update:error': [boolean]
+	focusout: [void]
+	'clear:error': [string]
 }
 
 export interface InputProps {
-    modelValue: string;
-    title: string;
-    name: string;
-    required?: boolean;
-    error?: boolean;
-    errorMessage?: string;
-    disabled?: boolean;
-    textarea?: boolean;
-    readonly?: boolean;
-    clearable?: boolean;
-    digital?: boolean;
-    noDigital?: boolean;
-    background?: InputBackground;
-    autofocus?: boolean;
-    searchable?: boolean;
-    zIndex?: string;
-    maxLength?: number;
+	modelValue: string;
+	title: string;
+	name: string;
+	required?: boolean;
+	error?: boolean;
+	errorMessage?: string;
+	disabled?: boolean;
+	textarea?: boolean;
+	readonly?: boolean;
+	clearable?: boolean;
+	digital?: boolean;
+	noDigital?: boolean;
+	background?: InputBackground;
+	autofocus?: boolean;
+	searchable?: boolean;
+	zIndex?: string;
+	maxLength?: number;
 }
 
 defineSlots<{
-    default(props: object): never;
-    'right-icon'(props: object): never;
-    'list'(props: object): never;
+	default(props: object): never;
+	'right-icon'(props: object): never;
+	'list'(props: object): never;
 }>()
 
 const props = withDefaults(
-    defineProps<InputProps>(),
-    {
-        background: 'default',
-        errorMessage: '',
-        zIndex: '',
-        maxLength: 100
-    }
+	defineProps<InputProps>(),
+	{
+		background: 'default',
+		errorMessage: '',
+		zIndex: '',
+		maxLength: 100
+	}
 )
 
 const emits = defineEmits<InputEmits>()
@@ -128,55 +128,55 @@ const titleClasses = ref<string>('')
 const hasError = computed((): boolean => props.error || (!!props.errorMessage && props.error))
 
 const inputClasses = computed(() => {
-    const classes = []
+	const classes = []
 
-    if (hasError.value) classes.push('error')
-    if (props.modelValue?.length || props.modelValue) classes.push('focused')
-    if (props.readonly) classes.push('readonly')
-    if (props.background !== 'default') classes.push(props.background)
+	if (hasError.value) classes.push('error')
+	if (props.modelValue?.length || props.modelValue) classes.push('focused')
+	if (props.readonly) classes.push('readonly')
+	if (props.background !== 'default') classes.push(props.background)
 
-    return classes
+	return classes
 })
 
 const onInput = (event: Event): void => {
-    let value = (event.target as HTMLInputElement).value
+	let value = (event.target as HTMLInputElement).value
 
-    if (props.noDigital) {
-        value = value.replace(/\d/g, '')
-    }
-    if (props.digital) {
-        value = value.replace(/[^\d]/g, '')
-    }
+	if (props.noDigital) {
+		value = value.replace(/\d/g, '')
+	}
+	if (props.digital) {
+		value = value.replace(/[^\d]/g, '')
+	}
 
-    (event.target as HTMLInputElement).value = value
-    emits('update:modelValue', value)
-    emits('clear:error', props.name)
+	(event.target as HTMLInputElement).value = value
+	emits('update:modelValue', value)
+	emits('clear:error', props.name)
 }
 
 const setFocus = (value: boolean): void => {
-    isFocused.value = value
+	isFocused.value = value
 
-    if (!value) emits('focusout')
+	if (!value) emits('focusout')
 }
 
 const onScroll = (): void => {
-    if (!textareaRef.value) return
+	if (!textareaRef.value) return
 
-    const scrollTop = textareaRef.value.scrollTop
-    if (scrollTop >= 8) titleClasses.value = 'hidden'
-    if (scrollTop < 8) titleClasses.value = ''
+	const scrollTop = textareaRef.value.scrollTop
+	if (scrollTop >= 8) titleClasses.value = 'hidden'
+	if (scrollTop < 8) titleClasses.value = ''
 }
 
 const onClear = (): void => {
-    emits('update:modelValue', '')
+	emits('update:modelValue', '')
 }
 
 const onAutofocus = (): void => {
-    nextTick(() => {
-        if (!inputRef.value || !props.autofocus) return
-        inputRef.value.focus()
-        setFocus(true)
-    })
+	nextTick(() => {
+		if (!inputRef.value || !props.autofocus) return
+		inputRef.value.focus()
+		setFocus(true)
+	})
 }
 
 defineExpose({ onAutofocus })

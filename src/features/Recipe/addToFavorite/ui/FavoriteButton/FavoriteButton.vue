@@ -24,11 +24,11 @@ import { IconHeart } from '@/shared/components/Icon'
 import { toggleFavorite } from '../../api'
 
 const props = withDefaults(defineProps<{
-    bgColor?: string,
-    recipeId: string,
-    likes: number,
+	bgColor?: string,
+	recipeId: string,
+	likes: number,
 }>(), {
-    bgColor: 'bg-white',
+	bgColor: 'bg-white',
 })
 
 const isFavorite = ref(false)
@@ -36,7 +36,7 @@ const isFavorite = ref(false)
 const { execute } = toggleFavorite({ recipeId: props.recipeId })
 
 const handleClick = () => {
-    execute()
+	execute()
 }
 </script>
 

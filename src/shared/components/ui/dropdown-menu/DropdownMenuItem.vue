@@ -19,9 +19,9 @@ import { cn } from '../../../lib/utils/utils'
 const props = defineProps<DropdownMenuItemProps & { class?: HTMLAttributes['class'], inset?: boolean }>()
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+	const { class: _, ...delegated } = props
 
-  return delegated
+	return delegated
 })
 
 const forwardedProps = useForwardProps(delegatedProps)

@@ -27,7 +27,7 @@
 						{{ t('collection') }}
 					</span>
 					<input
-						v-model="selectedCollection"
+						v-model="selectedCollectionLabel"
 						type="text"
 						:placeholder="t('selectCollection')"
 						class="border rounded text-base w-full pt-[26px] pl-[12px] pb-[10px] cursor-pointer"
@@ -47,6 +47,7 @@
 					<div
 						v-for="collection in collectionOptions"
 						:key="collection.value"
+						v-loading="modalStore.isLoadingCollections"
 						class="px-4 py-2 hover:bg-lightGray cursor-pointer"
 						@click="selectCollection(collection.value)"
 					>
@@ -68,7 +69,7 @@
 			<VButton
 				:color="ButtonColors.Green"
 				class="mt-[8px]"
-				@click="onSaveRecipeToFavourite"
+				@click="onAddRecipeToCollection"
 			>
 				{{ t('save') }}
 			</VButton>
@@ -118,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { VModal } from 'shared/components/Modal'
 import { IconClose, IconArrow, IconArrowRight } from 'shared/components/Icon'
 import { useSearchStore } from '../store/search-store'
@@ -127,6 +128,8 @@ import { useTranslation } from 'shared/lib/i18n'
 import { VInput } from 'shared/components/Input'
 import Localization from './CreateCollection.localization.json'
 import { VButton, ButtonColors } from 'shared/components/Button'
+import { useModalStore } from 'entities/Сollection'
+import { ElMessage } from 'element-plus'
 
 const store = useSearchStore()
 const recipeStore = useRecipeStore()
@@ -134,10 +137,19 @@ const isOpen = ref(false)
 
 const { t } = useTranslation(Localization)
 
-const collectionOptions = ref([
-	{ label: 'Вкусняшки на завтра', value: 'Вкусняшки на завтра' },
-	{ label: 'Ещё одна коллекция', value: 'Ещё одна коллекция' },
-])
+const modalStore = useModalStore()
+
+// const {
+// 	collections,
+// 	isLoadingCollections
+// } = useCollectionList()
+
+const collectionOptions = computed(() => {
+	return (modalStore.savedCollections ?? []).map((collection) => ({
+		label: collection.name,
+		value: collection.id
+	}))
+})
 
 const isModalLifted = ref(false)
 
@@ -146,6 +158,10 @@ const selectedCollection = computed(() => {
 		return showSelectedCollection.value
 	}
 	return collectionOptions.value.length > 0 ? collectionOptions.value[0].label : ''
+})
+
+const selectedCollectionLabel = computed(() => {
+	return collectionOptions.value.find((collection) => collection.value === showSelectedCollection.value)?.label
 })
 
 const showSelectedCollection = ref('')
@@ -185,6 +201,14 @@ const backToFirstModal = () => {
 const setModalLifted= (isLifted: boolean) => {
 	isModalLifted.value = isLifted
 }
+
+const onAddRecipeToCollection = () => {
+	ElMessage.info('Функционал в разработке')
+}
+
+onMounted(() => {
+	modalStore.getCollections()
+})
 </script>
 
 <style scoped lang="scss">

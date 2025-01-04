@@ -73,11 +73,11 @@ import { ref, toRefs, watch } from 'vue'
 import { DragTypes, type VDragAndDropEmits } from './types'
 import { IconPlus, IconKebab, IconBin, IconMove, IconEdit } from 'shared/components/Icon'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './VDragAndDrop.localization.json'
@@ -85,10 +85,10 @@ import Localization from './VDragAndDrop.localization.json'
 const { t } = useTranslation(Localization)
 
 const props = defineProps({
-  items: {
-    type: Array as () => DragTypes[],
-    required: true
-  }
+	items: {
+		type: Array as () => DragTypes[],
+		required: true
+	}
 })
 const emits = defineEmits<VDragAndDropEmits>()
 
@@ -103,130 +103,130 @@ let touchStartX = 0
 let touchStartY = 0
 
 const onDragStart = (tab: DragTypes, event: DragEvent) => {
-  if (tab.id === draggableTabId.value) {
-    draggedTab.value = tab
-    const dataTransfer = event.dataTransfer
-    if (dataTransfer) {
-      dataTransfer.effectAllowed = 'move'
-      dataTransfer.setData('tab-id', tab.id.toString())
-    }
-  }
+	if (tab.id === draggableTabId.value) {
+		draggedTab.value = tab
+		const dataTransfer = event.dataTransfer
+		if (dataTransfer) {
+			dataTransfer.effectAllowed = 'move'
+			dataTransfer.setData('tab-id', tab.id.toString())
+		}
+	}
 }
 
 const onDragOver = (tab: DragTypes) => {
-  draggedOverTab.value = tab
+	draggedOverTab.value = tab
 }
 
 const onDragLeave = () => {
-  draggedOverTab.value = null
+	draggedOverTab.value = null
 }
 
 const onDrop = (event: DragEvent, tab: DragTypes) => {
-  const dataTransfer = event.dataTransfer
-  if (!dataTransfer) {
-    console.error('DragEvent\'s dataTransfer is null.')
-    return
-  }
+	const dataTransfer = event.dataTransfer
+	if (!dataTransfer) {
+		console.error('DragEvent\'s dataTransfer is null.')
+		return
+	}
 
-  const draggedTabId = parseInt(dataTransfer.getData('tab-id'))
-  if (isNaN(draggedTabId)) {
-    console.error('Failed to parse tab-id.')
-    return
-  }
+	const draggedTabId = parseInt(dataTransfer.getData('tab-id'))
+	if (isNaN(draggedTabId)) {
+		console.error('Failed to parse tab-id.')
+		return
+	}
 
-  const draggedTabIndex = items.value.findIndex((t) => t.id === draggedTabId)
-  const targetTabIndex = items.value.findIndex((t) => t.id === tab.id)
+	const draggedTabIndex = items.value.findIndex((t) => t.id === draggedTabId)
+	const targetTabIndex = items.value.findIndex((t) => t.id === tab.id)
 
-  if (draggedTabIndex !== -1 && targetTabIndex !== -1) {
-    const [movedTab] = items.value.splice(draggedTabIndex, 1)
-    items.value.splice(targetTabIndex, 0, movedTab)
-  }
+	if (draggedTabIndex !== -1 && targetTabIndex !== -1) {
+		const [movedTab] = items.value.splice(draggedTabIndex, 1)
+		items.value.splice(targetTabIndex, 0, movedTab)
+	}
 
-  draggedTab.value = null
-  draggedOverTab.value = null
-  draggableTabId.value = null
-  draggedActive.value = false
+	draggedTab.value = null
+	draggedOverTab.value = null
+	draggableTabId.value = null
+	draggedActive.value = false
 }
 
 const onTabClick = (tab: DragTypes) => {
-  selectedTab.value = tab
-  onChangeTab(tab.id)
+	selectedTab.value = tab
+	onChangeTab(tab.id)
 
-  if (draggableTabId.value !== tab.id) {
-    draggableTabId.value = null
-    draggedActive.value = false
-  }
+	if (draggableTabId.value !== tab.id) {
+		draggableTabId.value = null
+		draggedActive.value = false
+	}
 }
 
 const enableDragging = (tabId: number) => {
-  draggedActive.value = true
-  draggableTabId.value = tabId
+	draggedActive.value = true
+	draggableTabId.value = tabId
 }
 
 const onTouchStart = (tab: DragTypes, event: TouchEvent) => {
-  if (tab.id === draggableTabId.value) {
-    draggedTab.value = tab
-    const touch = event.touches[0]
-    touchStartX = touch.clientX
-    touchStartY = touch.clientY
-  }
+	if (tab.id === draggableTabId.value) {
+		draggedTab.value = tab
+		const touch = event.touches[0]
+		touchStartX = touch.clientX
+		touchStartY = touch.clientY
+	}
 }
 
 const onTouchMove = (event: TouchEvent) => {
-  if (!draggedTab.value) return
-  const touch = event.touches[0]
-  const deltaX = touch.clientX - touchStartX
-  const deltaY = touch.clientY - touchStartY
-  const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
-  if (element) {
-    element.style.transform = `translate(${deltaX}px, ${deltaY}px)`
-  }
+	if (!draggedTab.value) return
+	const touch = event.touches[0]
+	const deltaX = touch.clientX - touchStartX
+	const deltaY = touch.clientY - touchStartY
+	const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
+	if (element) {
+		element.style.transform = `translate(${deltaX}px, ${deltaY}px)`
+	}
 }
 
 const onTouchEnd = (event: TouchEvent) => {
-  if (!draggedTab.value) return
-  const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
-  if (element) {
-    element.style.transform = ''
-  }
-  const touch = event.changedTouches[0]
-  const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement
-  if (target && target.classList.contains('tab-column')) {
-    const targetTabId = target.getAttribute('data-id')
-    const targetTab = targetTabId ? items.value.find(tab => tab.id === Number(targetTabId)) : null
-    if (targetTab && draggedTab.value) {
-      onDrop(
-        {
-          dataTransfer: {
-            getData: () => draggedTab.value?.id.toString() || ''
-          }
-        } as unknown as DragEvent,
-        targetTab
-      )
-    }
-  }
-  draggedTab.value = null
+	if (!draggedTab.value) return
+	const element = (event.target as HTMLElement).closest('.tab-column') as HTMLElement
+	if (element) {
+		element.style.transform = ''
+	}
+	const touch = event.changedTouches[0]
+	const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement
+	if (target && target.classList.contains('tab-column')) {
+		const targetTabId = target.getAttribute('data-id')
+		const targetTab = targetTabId ? items.value.find(tab => tab.id === Number(targetTabId)) : null
+		if (targetTab && draggedTab.value) {
+			onDrop(
+				{
+					dataTransfer: {
+						getData: () => draggedTab.value?.id.toString() || ''
+					}
+				} as unknown as DragEvent,
+				targetTab
+			)
+		}
+	}
+	draggedTab.value = null
 }
 
 const editTab = (tab: DragTypes) => {
-  emits('edit', tab)
+	emits('edit', tab)
 }
 
 const deleteTab = (tab: DragTypes) => {
-  emits('delete', tab)
+	emits('delete', tab)
 }
 
 const addTab = () => {
-  emits('adding')
+	emits('adding')
 }
 
 const onChangeTab = (id:number) => {
-  emits('change', id)
+	emits('change', id)
 }
 
 watch(items, () => {
 	selectedTab.value = items.value[items.value.length - 1]
-  onChangeTab(selectedTab.value.id)
+	onChangeTab(selectedTab.value.id)
 }, { deep: true })
 </script>
 

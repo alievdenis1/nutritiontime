@@ -158,12 +158,12 @@ const handleImageUpload = () => {
 }
 
 const handleUploadImage = (_: string | null, imageFile: File) => {
-    reviewImage.value = imageFile
+	reviewImage.value = imageFile
 }
 
 const submitReview = () => {
 	if (rating.value === 0 || review.value.trim() === '') {
-        // TODO: добавить нормальную валидацию
+		// TODO: добавить нормальную валидацию
 		alert('Пожалуйста, поставьте оценку и напишите отзыв')
 		return
 	}
@@ -171,17 +171,17 @@ const submitReview = () => {
 	const newComment = {
 		text: review.value,
 		rating: rating.value,
-        ...(reviewImage.value && {
-            image: reviewImage.value,
-        })
+		...(reviewImage.value && {
+			image: reviewImage.value,
+		})
 	}
 
-    const { execute } = addComment({ recipeId: '1' }, newComment)
+	const { execute } = addComment({ recipeId: '1' }, newComment)
 
-    execute()
+	execute()
 
-    // TODO: после отправки отзыва - нужно перезапросить рецепт
-    // Отрефакторить этот код
+	// TODO: после отправки отзыва - нужно перезапросить рецепт
+	// Отрефакторить этот код
 
 	closeReviewModal()
 }

@@ -243,318 +243,318 @@
 </template>
 
 <script setup lang="ts">
- import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
- import { useTranslation } from '@/shared/lib/i18n'
- import { ElCalendar, CalendarInstance, CalendarDateType, ElButtonGroup, ElButton } from 'element-plus'
- import { VLoading } from '@/shared/components/Loading'
- import type { Profile, MealStats, MealItem } from '../model'
- import localization from './ProfileStats.localization.json'
- import { MealsList, WeightInput } from './index'
- import { ButtonColors, VButton } from 'shared/components/Button'
- import WebApp from '@twa-dev/sdk'
- import { sendToAddMeal, sendToProfile } from 'entities/Profile'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useTranslation } from '@/shared/lib/i18n'
+import { ElCalendar, CalendarInstance, CalendarDateType, ElButtonGroup, ElButton } from 'element-plus'
+import { VLoading } from '@/shared/components/Loading'
+import type { Profile, MealStats, MealItem } from '../model'
+import localization from './ProfileStats.localization.json'
+import { MealsList, WeightInput } from './index'
+import { ButtonColors, VButton } from 'shared/components/Button'
+import WebApp from '@twa-dev/sdk'
+import { sendToAddMeal, sendToProfile } from 'entities/Profile'
 
- interface Props {
-   modelValue: string
-   profile: Profile | null
-   mealStats: MealStats | null
-   loading: boolean
-   error: string | null
- }
+interface Props {
+	modelValue: string
+	profile: Profile | null
+	mealStats: MealStats | null
+	loading: boolean
+	error: string | null
+}
 
- const props = defineProps<Props>()
+const props = defineProps<Props>()
 
- const emit = defineEmits<{
-   (e: 'update:modelValue', date: string): void
-   (e: 'setGoals'): void
-   (e: 'retry'): void
-   (e: 'meal-deleted'): void
- }>()
+const emit = defineEmits<{
+	(e: 'update:modelValue', date: string): void
+	(e: 'setGoals'): void
+	(e: 'retry'): void
+	(e: 'meal-deleted'): void
+}>()
 
- const handleToProfile = async () => {
-   await sendToProfile().execute()
-   WebApp.close()
- }
+const handleToProfile = async () => {
+	await sendToProfile().execute()
+	WebApp.close()
+}
 
- const handleMealDeleted = () => {
-  emit('meal-deleted')
- }
+const handleMealDeleted = () => {
+	emit('meal-deleted')
+}
 
- const handleAddMeal = async () => {
-   await sendToAddMeal().execute()
-   WebApp.close()
- }
+const handleAddMeal = async () => {
+	await sendToAddMeal().execute()
+	WebApp.close()
+}
 
- // Локализация
- const { t } = useTranslation(localization)
+// Локализация
+const { t } = useTranslation(localization)
 
- // Состояние
- const showCalendar = ref(false)
- const today = computed(() => {
-   return getServerDate.value?.toISOString().split('T')[0] || ''
- })
- // Добавляем проверку на будущий месяц
- const isNextMonthDisabled = (chosenDate: Date | string) => {
-  const nextMonth = new Date(chosenDate).getMonth() + 1
-  const todayMonth = new Date(today.value).getMonth()
+// Состояние
+const showCalendar = ref(false)
+const today = computed(() => {
+	return getServerDate.value?.toISOString().split('T')[0] || ''
+})
+// Добавляем проверку на будущий месяц
+const isNextMonthDisabled = (chosenDate: Date | string) => {
+	const nextMonth = new Date(chosenDate).getMonth() + 1
+	const todayMonth = new Date(today.value).getMonth()
 
-  return nextMonth > todayMonth
- }
- // Добавляем проверку на будущую дату
- const isFutureDate = (date: string) => {
-   if (!getServerDate.value) return true
-   const selectedDate = new Date(date)
-   selectedDate.setHours(0, 0, 0, 0)
+	return nextMonth > todayMonth
+}
+// Добавляем проверку на будущую дату
+const isFutureDate = (date: string) => {
+	if (!getServerDate.value) return true
+	const selectedDate = new Date(date)
+	selectedDate.setHours(0, 0, 0, 0)
 
-   const serverDate = new Date(getServerDate.value)
-   serverDate.setHours(0, 0, 0, 0)
+	const serverDate = new Date(getServerDate.value)
+	serverDate.setHours(0, 0, 0, 0)
 
-   return selectedDate > serverDate
- }
- // Добавляем обработчик клика по дате
- const handleDateClick = (date: string) => {
-   if (isFutureDate(date)) return
-   emit('update:modelValue', new Date(date).toISOString().split('T')[0])
-   showCalendar.value = false
- }
+	return selectedDate > serverDate
+}
+// Добавляем обработчик клика по дате
+const handleDateClick = (date: string) => {
+	if (isFutureDate(date)) return
+	emit('update:modelValue', new Date(date).toISOString().split('T')[0])
+	showCalendar.value = false
+}
 
- // Календарь
- const calendarDateType = ref<CalendarDateType | null>(null)
- const calendar = ref<CalendarInstance>()
- const selectDate = (val: CalendarDateType) => {
-  if (!calendar.value) return
-  calendarDateType.value = val
-  calendar.value.selectDate(val)
- }
+// Календарь
+const calendarDateType = ref<CalendarDateType | null>(null)
+const calendar = ref<CalendarInstance>()
+const selectDate = (val: CalendarDateType) => {
+	if (!calendar.value) return
+	calendarDateType.value = val
+	calendar.value.selectDate(val)
+}
 
- const calendarDate = computed({
-   get: () => new Date(props.modelValue),
-   set: (value: Date) => {
-     const dateString = value.toISOString().split('T')[0]
-     if (!isFutureDate(dateString)) {
-       emit('update:modelValue', dateString)
-       if (calendarDateType.value !== 'next-month' && calendarDateType.value !== 'prev-month') {
-         showCalendar.value = false
-       }
-     }
-     calendarDateType.value = null
-   }
- })
+const calendarDate = computed({
+	get: () => new Date(props.modelValue),
+	set: (value: Date) => {
+		const dateString = value.toISOString().split('T')[0]
+		if (!isFutureDate(dateString)) {
+			emit('update:modelValue', dateString)
+			if (calendarDateType.value !== 'next-month' && calendarDateType.value !== 'prev-month') {
+				showCalendar.value = false
+			}
+		}
+		calendarDateType.value = null
+	}
+})
 
- // Форматирование даты для отображения
- const formatDateForDisplay = (date: string | Date): string => {
-   return new Date(date).toLocaleDateString('ru-RU')
- }
+// Форматирование даты для отображения
+const formatDateForDisplay = (date: string | Date): string => {
+	return new Date(date).toLocaleDateString('ru-RU')
+}
 
- // Закрытие календаря при клике вне
- const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.el-calendar') && showCalendar.value) {
-   showCalendar.value = false
-  }
- }
+// Закрытие календаря при клике вне
+const handleClickOutside = (event: MouseEvent) => {
+	const target = event.target as HTMLElement
+	if (!target.closest('.el-calendar') && showCalendar.value) {
+		showCalendar.value = false
+	}
+}
 
- onMounted(() => {
-   if (props.profile?.server_datetime) {
-     emit('update:modelValue', new Date(props.profile.server_datetime).toISOString().split('T')[0])
-   }
-   document.addEventListener('click', handleClickOutside)
- })
+onMounted(() => {
+	if (props.profile?.server_datetime) {
+		emit('update:modelValue', new Date(props.profile.server_datetime).toISOString().split('T')[0])
+	}
+	document.addEventListener('click', handleClickOutside)
+})
 
- onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
- })
+onBeforeUnmount(() => {
+	document.removeEventListener('click', handleClickOutside)
+})
 
- const getServerDate = computed(() => {
-   return props.profile?.server_datetime ?
-       new Date(props.profile.server_datetime) :
-       null
- })
+const getServerDate = computed(() => {
+	return props.profile?.server_datetime ?
+		new Date(props.profile.server_datetime) :
+		null
+})
 
- // Вычисляемые свойства
- const isToday = computed(() =>
+// Вычисляемые свойства
+const isToday = computed(() =>
 //  new Date().toLocaleDateString() === props.modelValue.toLocaleDateString()
-     props.modelValue === today.value
- )
+	props.modelValue === today.value
+)
 
- // Обновляем headerTitle
- const headerTitle = computed(() => {
-   if (!getServerDate.value) return ''
+// Обновляем headerTitle
+const headerTitle = computed(() => {
+	if (!getServerDate.value) return ''
 
-   const selectedDateTime = new Date(props.modelValue)
-   const serverDateTime = getServerDate.value
+	const selectedDateTime = new Date(props.modelValue)
+	const serverDateTime = getServerDate.value
 
-   // Сравниваем даты, игнорируя время
-   const isToday = selectedDateTime.toISOString().split('T')[0] ===
+	// Сравниваем даты, игнорируя время
+	const isToday = selectedDateTime.toISOString().split('T')[0] ===
        serverDateTime.toISOString().split('T')[0]
 
-   if (isToday) {
-     return t('reportToday')
-   }
+	if (isToday) {
+		return t('reportToday')
+	}
 
-   const yesterday = new Date(serverDateTime)
-   yesterday.setDate(yesterday.getDate() - 1)
+	const yesterday = new Date(serverDateTime)
+	yesterday.setDate(yesterday.getDate() - 1)
 
-   const isYesterday = selectedDateTime.toISOString().split('T')[0] ===
+	const isYesterday = selectedDateTime.toISOString().split('T')[0] ===
        yesterday.toISOString().split('T')[0]
 
-   if (isYesterday) {
-     return t('reportYesterday')
-   }
+	if (isYesterday) {
+		return t('reportYesterday')
+	}
 
-   return t('reportForDate').replace('{date}', formatDateForDisplay(selectedDateTime))
- })
+	return t('reportForDate').replace('{date}', formatDateForDisplay(selectedDateTime))
+})
 
- const macrosPercentages = computed(() => {
-  if (!dayStats.value || !props.profile) return [0, 0, 0]
+const macrosPercentages = computed(() => {
+	if (!dayStats.value || !props.profile) return [0, 0, 0]
 
-  return [
-   calculatePercentage(dayStats.value.total_proteins, props.profile.macro_proteins),
-   calculatePercentage(dayStats.value.total_fats, props.profile.macro_fats),
-   calculatePercentage(dayStats.value.total_carbs, props.profile.macro_carbs)
-  ]
- })
+	return [
+		calculatePercentage(dayStats.value.total_proteins, props.profile.macro_proteins),
+		calculatePercentage(dayStats.value.total_fats, props.profile.macro_fats),
+		calculatePercentage(dayStats.value.total_carbs, props.profile.macro_carbs)
+	]
+})
 
- const formatNumber = (value: string | number | undefined | null): string => {
-  if (value == null) return '0'
-  return Math.round(Number(value)).toString()
- }
+const formatNumber = (value: string | number | undefined | null): string => {
+	if (value == null) return '0'
+	return Math.round(Number(value)).toString()
+}
 
- const calculatePercentage = (current: string | number | null | undefined, target: number | null | undefined): number => {
-  if (!current || !target) return 0
-  return Math.round((Number(current) / target) * 100)
- }
+const calculatePercentage = (current: string | number | null | undefined, target: number | null | undefined): number => {
+	if (!current || !target) return 0
+	return Math.round((Number(current) / target) * 100)
+}
 
- const isExceeded = (current: string | number | null | undefined, target: number | null | undefined): boolean => {
-  if (!current || !target) return false
-  return Number(current) > target
- }
+const isExceeded = (current: string | number | null | undefined, target: number | null | undefined): boolean => {
+	if (!current || !target) return false
+	return Number(current) > target
+}
 
- const handlePrevDay = () => {
-   const date = new Date(props.modelValue)
-   date.setDate(date.getDate() - 1)
-   emit('update:modelValue', date.toISOString().split('T')[0])
- }
- const handleNextDay = () => {
-   if (isToday.value) return
-   const date = new Date(props.modelValue)
-   date.setDate(date.getDate() + 1)
-   emit('update:modelValue', date.toISOString().split('T')[0])
- }
- const toggleCalendar = (event: MouseEvent) => {
-  event.stopPropagation()
-  showCalendar.value = !showCalendar.value
- }
+const handlePrevDay = () => {
+	const date = new Date(props.modelValue)
+	date.setDate(date.getDate() - 1)
+	emit('update:modelValue', date.toISOString().split('T')[0])
+}
+const handleNextDay = () => {
+	if (isToday.value) return
+	const date = new Date(props.modelValue)
+	date.setDate(date.getDate() + 1)
+	emit('update:modelValue', date.toISOString().split('T')[0])
+}
+const toggleCalendar = (event: MouseEvent) => {
+	event.stopPropagation()
+	showCalendar.value = !showCalendar.value
+}
 
- const isFilledDate = (date: string) => {
-  return props.mealStats?.filled_dates?.includes(date) ?? false
- }
+const isFilledDate = (date: string) => {
+	return props.mealStats?.filled_dates?.includes(date) ?? false
+}
 
- const closeCalendar = () => {
-  showCalendar.value = false
- }
+const closeCalendar = () => {
+	showCalendar.value = false
+}
 
- const formatDate = (date: Date | string): string => {
-   return new Date(date).toISOString().split('T')[0]
- }
+const formatDate = (date: Date | string): string => {
+	return new Date(date).toISOString().split('T')[0]
+}
 
- const isCurrentDate = (date: string) => {
-  return formatDate(date) === props.modelValue
- }
+const isCurrentDate = (date: string) => {
+	return formatDate(date) === props.modelValue
+}
 
- const getProgressBarColor = () => {
-  const percentage = calculatePercentage(
-   dayStats.value?.total_calories,
-   props.profile?.target_calories
-  )
+const getProgressBarColor = () => {
+	const percentage = calculatePercentage(
+		dayStats.value?.total_calories,
+		props.profile?.target_calories
+	)
 
-  if (percentage > 100) return '#F04F4F'
-  if (percentage >= 90) return '#10B981'
-  return '#F59E0B'
- }
+	if (percentage > 100) return '#F04F4F'
+	if (percentage >= 90) return '#10B981'
+	return '#F59E0B'
+}
 
- const getMacrosChartOptions = () => ({
-  chart: {
-   fontFamily: 'inherit',
-   toolbar: { show: false }
-  },
-  plotOptions: {
-   radialBar: {
-    hollow: {
-     margin: 0,
-     size: '35%'
-    },
-    track: {
-     background: '#e5e7eb',
-     margin: 1,
-     strokeWidth: '12'
-    },
-    dataLabels: {
-     show: false
-    }
-   }
-  },
-  stroke: {
-   lineCap: 'round',
-   dashArray: 0
-  },
-  colors: ['#319A6E', '#FDC755', '#FFA767']
- })
+const getMacrosChartOptions = () => ({
+	chart: {
+		fontFamily: 'inherit',
+		toolbar: { show: false }
+	},
+	plotOptions: {
+		radialBar: {
+			hollow: {
+				margin: 0,
+				size: '35%'
+			},
+			track: {
+				background: '#e5e7eb',
+				margin: 1,
+				strokeWidth: '12'
+			},
+			dataLabels: {
+				show: false
+			}
+		}
+	},
+	stroke: {
+		lineCap: 'round',
+		dashArray: 0
+	},
+	colors: ['#319A6E', '#FDC755', '#FFA767']
+})
 
- const dayStats = computed(() => {
-   if (!props.mealStats?.daily_stats?.length) return null
-   const stats = props.mealStats.daily_stats.find(
-       day => day.date === props.modelValue
-   )
-   if (!stats) return null
+const dayStats = computed(() => {
+	if (!props.mealStats?.daily_stats?.length) return null
+	const stats = props.mealStats.daily_stats.find(
+		day => day.date === props.modelValue
+	)
+	if (!stats) return null
 
-   interface MealGroup {
-     meals: MealItem[]
-   }
+	interface MealGroup {
+		meals: MealItem[]
+	}
 
-   // Группируем приемы пищи по времени (разница менее часа)
-   const groupedMeals: MealGroup[] = []
-   let currentGroup: MealGroup | null = null
+	// Группируем приемы пищи по времени (разница менее часа)
+	const groupedMeals: MealGroup[] = []
+	let currentGroup: MealGroup | null = null
 
-   if (stats.meals) {
-     // Сортируем приемы пищи по времени
-     const sortedMeals = [...stats.meals].sort((a, b) =>
-         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-     )
+	if (stats.meals) {
+		// Сортируем приемы пищи по времени
+		const sortedMeals = [...stats.meals].sort((a, b) =>
+			new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+		)
 
-     sortedMeals.forEach((meal) => {
-       const mealTime = new Date(meal.created_at)
+		sortedMeals.forEach((meal) => {
+			const mealTime = new Date(meal.created_at)
 
-       if (!currentGroup || getTimeDifferenceInMinutes(
-           new Date(currentGroup.meals[currentGroup.meals.length - 1].created_at),
-           mealTime
-       ) > 60) {
-         if (currentGroup) {
-           groupedMeals.push(currentGroup)
-         }
-         currentGroup = {
-           meals: [meal]
-         }
-       } else {
-         currentGroup.meals.push(meal)
-       }
-     })
+			if (!currentGroup || getTimeDifferenceInMinutes(
+				new Date(currentGroup.meals[currentGroup.meals.length - 1].created_at),
+				mealTime
+			) > 60) {
+				if (currentGroup) {
+					groupedMeals.push(currentGroup)
+				}
+				currentGroup = {
+					meals: [meal]
+				}
+			} else {
+				currentGroup.meals.push(meal)
+			}
+		})
 
-     if (currentGroup) {
-       groupedMeals.push(currentGroup)
-     }
-   }
+		if (currentGroup) {
+			groupedMeals.push(currentGroup)
+		}
+	}
 
-   return {
-     ...stats,
-     meals_count: groupedMeals.length // Количество групп приемов пищи
-   }
- })
+	return {
+		...stats,
+		meals_count: groupedMeals.length // Количество групп приемов пищи
+	}
+})
 
- // Добавим функцию для подсчета разницы во времени
- const getTimeDifferenceInMinutes = (date1: Date, date2: Date): number => {
-   return Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60)
- }
+// Добавим функцию для подсчета разницы во времени
+const getTimeDifferenceInMinutes = (date1: Date, date2: Date): number => {
+	return Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60)
+}
 </script>
 
 <style>

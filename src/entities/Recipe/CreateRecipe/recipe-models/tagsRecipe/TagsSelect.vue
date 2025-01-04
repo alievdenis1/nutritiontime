@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div
-			v-for="(category, index) in categoriesTags"
+			v-for="(category, index) in chunkedTagsByCategories"
 			:key="index"
 			class="mb-5"
 		>
@@ -12,7 +12,7 @@
 			<div>
 				<div class="tag-grid">
 					<div
-						v-for="rowTags in chunkTags(category.tags, props.chunkAmount)"
+						v-for="rowTags in category.tags"
 						:key="rowTags[0].id"
 						class="tag-row mb-[10px]"
 						:class="{
@@ -22,14 +22,21 @@
 					>
 						<div
 							v-for="tag in rowTags"
-							:key="tag"
+							:key="tag.id"
 							class="tag-wrapper"
 						>
 							<button
-								:class="['tag-button', { 'bg-forestGreen text-white': hasTag(tag), 'bg-lightGray': !hasTag(tag) }]"
+								:class="[
+									'tag-button',
+									{
+										'bg-forestGreen text-white': selectedTagsSet.has(tag.id),
+										'bg-lightGray': !selectedTagsSet.has(tag.id)
+									}
+								]"
 								@click="selectTag(tag)"
 							>
 								<span class="tag-text">{{ tag.title ?? tag.name }}</span>
+
 								<span
 									v-if="hasTag(tag)"
 									class="tag-close"
@@ -50,19 +57,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs, watch } from 'vue'
+import { computed } from 'vue'
 import { IconClose } from 'shared/components/Icon'
 import { Tag } from 'entities/Tag'
 
 interface Category {
 	name: string;
- id?: number,
+	title?: string
+	id?: number,
 	tags: Tag[];
 }
 
+interface CategoryWithChunkedTags {
+	name: string
+	title?: string
+	id?: number
+	tags: Tag[][]
+}
+
 const props = withDefaults(defineProps<{
-	categoriesTags: Category[];
-	modalSelectedTags: number[];
+	/** Тэги, сгруппированные по категориям */
+	tagsByCategories: Category[];
 	isSubtitle?: boolean;
 	chunkAmount: number;
 }>(), {
@@ -74,16 +89,15 @@ const emit = defineEmits<{
 	(event: 'tagChanged', tags: number[]): void;
 }>()
 
-const { categoriesTags } = toRefs(props)
-const selectedTags = ref<number[]>([...props.modalSelectedTags])
+const selectedTags = defineModel<number[]>({ required: true })
 
-watch(() => props.modalSelectedTags, (newTags) => {
-	selectedTags.value = [...newTags]
+const selectedTagsSet = computed(() => {
+	return new Set(selectedTags.value)
 })
 
 // Разбиваем теги на строки по 5 элементов
-const chunkTags = (tags: Tag[], chunkSize: number) => {
-	const result = []
+const chunkTags = (tags: Tag[], chunkSize: number): Tag[][] => {
+	const result: Tag[][] = []
 
 	for (let i = 0; i < tags.length; i += chunkSize) {
 		result.push(tags.slice(i, i + chunkSize))
@@ -92,10 +106,21 @@ const chunkTags = (tags: Tag[], chunkSize: number) => {
 	return result
 }
 
+// type ChunkedTagsByCategories =
+
+const chunkedTagsByCategories = computed(() => {
+	return props.tagsByCategories.reduce((acc, category) => {
+		acc.push({
+			...category,
+			tags: chunkTags(category.tags, props.chunkAmount)
+		})
+		return acc
+	}, [] as CategoryWithChunkedTags[])
+})
+
 const selectTag = (tag: Tag) => {
 	if (!selectedTags.value.includes(tag.id)) {
 		selectedTags.value.push(tag.id)
-		emit('tagChanged', selectedTags.value)
 	}
 }
 
@@ -103,7 +128,6 @@ const removeTag = (tag: Tag) => {
 	const index = selectedTags.value.indexOf(tag.id)
 	if (index > -1) {
 		selectedTags.value.splice(index, 1)
-		emit('tagChanged', selectedTags.value)
 	}
 }
 

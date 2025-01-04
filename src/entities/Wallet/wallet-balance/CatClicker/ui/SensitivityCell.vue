@@ -15,13 +15,13 @@
 
 <script setup lang="ts">
 defineProps<{
-    label: string
-    value: string
-    active: boolean
+	label: string
+	value: string
+	active: boolean
 }>()
 
 defineEmits<{
-    (e: 'click'): void
+	(e: 'click'): void
 }>()
 </script>
 

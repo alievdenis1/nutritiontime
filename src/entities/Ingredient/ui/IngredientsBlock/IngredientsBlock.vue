@@ -26,7 +26,7 @@ const { t } = useTranslation(Localization)
 
 const props = defineProps<{
 	ingredients: Ingredient[],
-    totalWeight: number
+	totalWeight: number
 }>()
 
 </script>

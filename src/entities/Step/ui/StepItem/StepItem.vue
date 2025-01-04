@@ -23,9 +23,9 @@ import { useTranslation } from 'shared/lib/i18n'
 const { t } = useTranslation(Localization)
 
 const props = defineProps<{
-    description: string;
-    image: string;
-    order: number;
+	description: string;
+	image: string;
+	order: number;
 }>()
 
 </script>

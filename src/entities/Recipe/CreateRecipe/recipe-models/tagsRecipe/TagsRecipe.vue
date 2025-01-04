@@ -88,7 +88,7 @@ import { VModal } from '@/shared/components/Modal'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './TagsRecipe.localization.json'
 import { IconArrowRight, IconClose } from 'shared/components/Icon'
-import TagsCollectionsItem from './TagsCollectionsItem.vue'
+import TagsCollectionsItem from './TagsSelect.vue'
 import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
 import { useRoute } from 'vue-router'
 

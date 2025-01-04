@@ -27,7 +27,7 @@
 					<div
 						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-white bg-forestGreen rounded-[100px]"
 					>
-						{{ recipe.rating.toFixed(1) }}
+						{{ recipe.average_rating?.toFixed(1) }}
 					</div>
 				</div>
 
@@ -42,14 +42,14 @@
 							class="flex justify-center items-center	 gap-[5px] text-gray-500 text-sm px-[8px] py-[5px] rounded-[20px] bg-[#1C1C1C0D]"
 						>
 							<IconTime />
-							<span>{{ recipe.time }}</span>
+							<span>{{ recipe.cooking_time }}</span>
 						</div>
 						<div
 							class="flex justify-center items-center	 gap-[5px] text-gray-500 text-sm px-[8px] py-[5px] rounded-[20px] bg-[#1C1C1C0D]"
 						>
 							<IconFire />
 							<span>
-								{{ recipe.nutritionInfo.calories }}
+								{{ recipe.calories }}
 							</span>
 						</div>
 					</div>
@@ -63,8 +63,8 @@
 					<div class="flex justify-center items-center gap-[8px] mr-[20px]">
 						<el-image
 							class="h-[20px] w-[20px]"
-							:src="recipe.author.image"
-							:alt="recipe.author.name"
+							:src="recipe.author?.image"
+							:alt="recipe.author?.name"
 						>
 							<template #error>
 								<el-icon>
@@ -72,32 +72,35 @@
 								</el-icon>
 							</template>
 						</el-image>
-						{{ recipe.author.name }}
+						{{ recipe.author?.name }}
 					</div>
 					<button
 						class="flex justify-center items-center gap-[4px] text-[#535353] cursor-pointer"
 						@click="router.push(`/all-comment/${recipe.id}`)"
 					>
 						<IconComment />
-						{{ recipe.commentsCount }}
+						{{ recipe.total_comments_count }}
 					</button>
 				</div>
 				<div class="flex items-center justify-between gap-[16px]">
 					<IconFavorites
+						v-loading="collectionLoadingStates.has(recipe.id)"
 						:is-liked="!!recipe.collection_ids?.length"
 						active-color="#319A6E"
-						:disabled="!!isChangingCollection.get(recipe.id)"
+						:disabled="collectionLoadingStates.has(recipe.id)"
 					/>
 					<div @click="toggleLike(recipe.id)">
 						<div class="flex justify-center items-center gap-[8px] text-[#535353]">
 							<IconHeart
-								:is-liked="recipe.favourited"
+								v-loading="likeLoadingStates.has(recipe.id)"
+								:is-liked="recipe.is_favorited"
 								icon-color="#319A6E"
-								:disabled="!!isFavouriting.get(recipe.id)"
-								@toggle="toggleFavorite(recipe.id)"
+								:disabled="likeLoadingStates.has(recipe.id)"
+								@toggle="toggleCollection(recipe.id)"
 							/>
-							<p :class="{ 'text-green': recipe.favourited }">
-								{{ recipe.likes }}
+
+							<p :class="{ 'text-green': recipe.is_favorited }">
+								{{ recipe.likes_count }}
 							</p>
 						</div>
 					</div>
@@ -109,47 +112,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from 'shared/components/Icon'
-import { RecipesItem } from './type'
+import { RecipeItem } from './type'
 import { useRouter } from 'vue-router'
-import { useSearchStore } from '../Search/store/search-store'
 import CreateCollection from '../Search/modal/CreateCollection.vue'
 
-const store = useSearchStore()
 const router = useRouter()
-
-const isFavouriting = ref(new Map<number, boolean>())
-const isChangingCollection = ref(new Map<number, boolean>())
 
 // const emit = defineEmits<{
 //  toggleFavourite: [recipeId: number],
 //  toggle
 // }>()
 
+type LikeLoadingStates = Set<number>
+type CollectionLoadingStates = Set<number>
+
 interface Props {
-	recipesData: RecipesItem[]
+	recipesData: RecipeItem[]
+	likeLoadingStates: LikeLoadingStates
+	collectionLoadingStates: CollectionLoadingStates
 }
 
-// const isFavourited = (recipe: RecipesItem) => {
-//  return recipe.favourited
-// }
-//
-// const isLiked = (recipe: RecipesItem) => {
-//  return
-// }
+const emit = defineEmits<{
+	toggleLike: [recipeId: number]
+	toggleCollection: [recipeId: number]
+}>()
 
 const props = withDefaults(defineProps<Props>(), {
-	recipesData: () => []
+	recipesData: () => [],
+	likeLoadingStates: () => new Set<number>,
+	collectionLoadingStates: () => new Set<number>
 })
 
 const toggleLike = async (recipeId: number) => {
- //
+	emit('toggleLike', recipeId)
 }
 
-const toggleFavorite = async (recipeId: number) => {
-//
+const toggleCollection = async (recipeId: number) => {
+	emit('toggleCollection', recipeId)
 }
+
+// const toggleFavorite = async (recipeId: number) => {
+// //
+// }
 
 </script>
 

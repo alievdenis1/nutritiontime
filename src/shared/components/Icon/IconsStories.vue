@@ -21,8 +21,8 @@ import { defineProps } from 'vue'
 import * as Icons from './index'
 
 defineProps<{
-    color: string;
-    size: number;
+	color: string;
+	size: number;
 }>()
 
 const icons = Icons

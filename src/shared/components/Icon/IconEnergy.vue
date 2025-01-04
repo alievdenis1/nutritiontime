@@ -15,9 +15,9 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-    iconColor: string,
+	iconColor: string,
 }>(), {
-    iconColor: '#FEB635'
+	iconColor: '#FEB635'
 })
 </script>
 

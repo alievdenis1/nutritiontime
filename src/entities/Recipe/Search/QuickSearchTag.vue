@@ -42,6 +42,7 @@
 				</div>
 			</div>
 		</div>
+
 		<VModal
 			:show="showModal"
 			@close="closeModal"
@@ -58,12 +59,14 @@
 						/>
 					</div>
 				</div>
-				<TagsCollectionsItem
+
+				<TagsSelect
 					class="flex-grow overflow-y-auto custom-scrollbar"
-					:categories-tags="tagsByCategories"
-					:modal-selected-tags="modalSelectedTags"
-					@tag-changed="handleTagChanged"
+					:tags-by-categories="tagsByCategories"
+					:model-value="selectedTags"
+					@update:model-value="handleTagChanged"
 				/>
+
 				<button
 					:class="['block w-full mt-4 py-2 rounded-xl text-white text-center cursor-pointer', buttonClass]"
 					@click="closeModal"
@@ -83,133 +86,101 @@ import { useTranslation } from 'shared/lib/i18n'
 import localization from './QuickSearchTag.localization.json'
 import { useSearchStore } from './store/search-store'
 import { VModal } from 'shared/components/Modal'
-import TagsCollectionsItem  from '../CreateRecipe/recipe-models/tagsRecipe/TagsCollectionsItem.vue'
+import TagsSelect  from '../CreateRecipe/recipe-models/tagsRecipe/TagsSelect.vue'
 // TODO: вынести эту папку Search отдельно
-import { getCategoryList, CategoryList, Category } from '@/entities/Category'
+import { getCategoryList, CategoryList, useCategoryList, Category } from '@/entities/Category'
 import { ElLoading } from 'element-plus'
 import { getTagList, type Tag } from 'entities/Tag/@x/Recipe'
+import { groupTagsByCategories } from 'entities/Tag/model/mappings/group-tags-by-categories.ts'
+import { useTagList } from 'entities/Tag'
 
 const store = useSearchStore()
 const { t } = useTranslation(localization)
+
 const openModal = () => {
 	showModal.value = true
 }
-// interface Tag {
-//     id: number;
-//     text: string;
-//     isActive: boolean;
-// }
+
 const showModal = ref(false)
-const modalSelectedTags = ref<string[]>([])
-const categoryList = ref<CategoryList>([])
-const tagList = ref<Tag[]>([])
+const selectedTags = ref<number[]>([])
+
+const { tagList, isLoadingTags } = useTagList()
+const { categoryList, isLoadingCategories } = useCategoryList()
 
 const closeModal = () => {
 	showModal.value = false
 }
 
-const handleTagChanged = (updatedTags: string[]) => {
- store.filters.tags = updatedTags
- store.searchRecipes()
+const handleTagChanged = (updatedTags: number[]) => {
+	store.filters.tags = updatedTags
+	store.searchRecipes()
 }
 
 const selectedTagsCount = computed(() => {
- return store.filters.tags.length ?? 0
+	return store.filters.tags?.length ?? 0
 })
 
 const buttonClass = computed(() => {
- return 'bg-forestGreen'
-	// return modalSelectedTags.value.length > 0 ? 'bg-forestGreen' : 'bg-disabled cursor-not-allowed'
+	return 'bg-forestGreen'
+	// return selectedTags.value.length > 0 ? 'bg-forestGreen' : 'bg-disabled cursor-not-allowed'
 })
 
 onMounted(() => {
- modalSelectedTags.value = store.filters.tags ?? []
+	selectedTags.value = store.filters.tags ?? []
 })
 
 const isTagActive = (tag: Tag) => {
- if (tag.category === 'quick_search') {
-  return store.activeQuickSearchTag === tag.id
- }
+	if (tag.category === 'quick_search') {
+		return store.activeQuickSearchTag === tag.id
+	}
 
- return store.filters.tags.includes(tag.id)
+	return store.filters.tags.includes(tag.id)
 }
 
 const quickSearchTags = ref<Tag[]>([
-    { id: 1, name: 'Из индейки', category: 'quick_search' },
-    { id: 2, name: 'Завтраки', category: 'quick_search' },
-    { id: 3, name: 'Обед', category: 'quick_search'  },
-    { id: 4, name: 'Ужин', category: 'quick_search'  },
-    { id: 5, name: 'Белковые', category: 'quick_search'  },
+	{ id: 1, name: 'Из индейки', category: 'quick_search' },
+	{ id: 2, name: 'Завтраки', category: 'quick_search' },
+	{ id: 3, name: 'Обед', category: 'quick_search'  },
+	{ id: 4, name: 'Ужин', category: 'quick_search'  },
+	{ id: 5, name: 'Белковые', category: 'quick_search'  },
 ])
 
-// const categories = ref([
-// 	{ name: 'Категория 1', tags: ['#тег', '#тег1', '#тег2', '#тег3', '#тег4', '#тег5', '#тег6', '#тег7', '#тег8', '#тег9', '#тег10', '#тег11'] },
-// 	{ name: 'Категория 2', tags: ['#тег12', '#тег13', '#тег14', '#тег15', '#тег16', '#тег17', '#тег18', '#тег19', '#тег20', '#тег21', '#тег22', '#тег23'] },
-// 	{ name: 'Категория 3', tags: ['#тег24', '#тег25', '#тег26', '#тег27', '#тег28', '#тег29', '#тег30', '#тег31', '#тег32', '#тег33', '#тег34', '#тег35'] },
-// 	{ name: 'Категория 4', tags: ['#тег36', '#тег37', '#тег38', '#тег39', '#тег40', '#тег41', '#тег42', '#тег43', '#тег44', '#тег45', '#тег46', '#тег47'] },
-// 	{ name: 'Категория 5', tags: ['#тег48', '#тег49', '#тег50', '#тег51', '#тег52', '#тег53', '#тег54', '#тег55', '#тег56', '#тег57', '#тег58', '#тег59'] },
-// ])
-
 const tagsByCategories = computed(() => {
- return categoryList.value.reduce((acc, category) => {
-  const tags = tagList.value.filter(tag => tag.category === category.name)
+	return Object.values(
+		tagList.value.reduce((acc, tag) => {
+			if (!acc[tag.category]) {
+				acc[tag.category] = {
+					id: Object.keys(acc).length,
+					name: tag.category,
+					tags: []
+				}
+			}
 
-  acc.push({
-   ...category,
-   tags
-  })
+			acc[tag.category].tags.push(tag)
 
-  return acc
- }, [] as Category[])
+			return acc
+		}, {} as Record<string, Category & { tags: Tag[] }>)
+	)
+
 })
 
 const getTagClasses = computed(() => (tag: Tag) => {
-    return [
-        'px-[16px] py-[10px] inline-flex items-center rounded-[100px] text-sm',
-        isTagActive(tag)
-            ? 'bg-transparentGreen text-forestGreen'
-            : 'bg-lightGray text-slateGray cursor-pointer'
-    ]
+	return [
+		'px-[16px] py-[10px] inline-flex items-center rounded-[100px] text-sm',
+		isTagActive(tag)
+			? 'bg-transparentGreen text-forestGreen'
+			: 'bg-lightGray text-slateGray cursor-pointer'
+	]
 })
 
 const selectQuickSearchTag = (selectedTag: Tag) => {
- store.activeQuickSearchTag = selectedTag.id
+	store.activeQuickSearchTag = selectedTag.id
 	store.searchRecipes()
 }
 
 const deselectQuickSearchTag = () => {
- store.activeQuickSearchTag = null
+	store.activeQuickSearchTag = null
 }
-
-const fetchTagList = async () => {
- const { execute, data, error } = getTagList({})
-
- await execute()
-
- if (data.value && !error.value) {
-  return data.value.data
- }
-
- return []
-}
-
-const fetchCategoryList = async () => {
-	const { execute, data, error } = getCategoryList()
-
-	await execute()
-
-	if (data.value && !error.value) {
-		return data.value
-	}
-
-	return []
-}
-
-onMounted(async () => {
- const [categories, tags] = await Promise.all([fetchCategoryList(), fetchTagList()])
-	categoryList.value = categories
- tagList.value = tags
-})
 </script>
 
 <style scoped>

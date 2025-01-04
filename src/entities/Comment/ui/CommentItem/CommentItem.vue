@@ -26,10 +26,10 @@
 import { defineProps } from 'vue'
 
 const props = defineProps<{
-    authorName: string,
-    authorImage?: string;
-    text: string,
-    image?: string,
+	authorName: string,
+	authorImage?: string;
+	text: string,
+	image?: string,
 }>()
 
 </script>

@@ -81,7 +81,7 @@ const validateInput = (value: string) => {
 const handleSubmit = () => {
 	validateInput(store.inputValue)
 	if (!inputError.value) {
-  // createCollectionApi.execute()
+		// createCollectionApi.execute()
 		store.saveCollection()
 	}
 }

@@ -49,50 +49,54 @@ const lastScrollTop = ref(0)
 const showQuickSearchTag = ref(true)
 
 const handleScroll = (event: Event) => {
-    const scrollPosition = (event.target as HTMLElement).scrollTop
+	const scrollPosition = (event.target as HTMLElement).scrollTop
 
-    lastScrollTop.value = scrollTop.value
-    scrollTop.value = scrollPosition
+	lastScrollTop.value = scrollTop.value
+	scrollTop.value = scrollPosition
 
-    if (scrollPosition > 80) {
-        showQuickSearchTag.value = scrollTop.value < lastScrollTop.value
-    } else {
-        showQuickSearchTag.value = true
-    }
+	if (scrollPosition > 80) {
+		showQuickSearchTag.value = scrollTop.value < lastScrollTop.value
+	} else {
+		showQuickSearchTag.value = true
+	}
 }
 
 const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-    entries.forEach(entry => {
-        isSearchBarFixed.value = !entry.isIntersecting
-    })
+	entries.forEach(entry => {
+		isSearchBarFixed.value = !entry.isIntersecting
+	})
 }
 
 let observer: IntersectionObserver | null = null
 
+onMounted(() => {
+	store.searchRecipes()
+})
+
 onMounted(async () => {
-    await nextTick()
-    const mainElement = document.getElementById('main')
-    if (mainElement) {
-        mainElement.addEventListener('scroll', handleScroll)
-    }
+	await nextTick()
+	const mainElement = document.getElementById('main')
+	if (mainElement) {
+		mainElement.addEventListener('scroll', handleScroll)
+	}
 
-    if (searchBarRef.value) {
-        searchBarHeight.value = searchBarRef.value.offsetHeight
-        observer = new IntersectionObserver(handleIntersection, {
-            threshold: 0,
-            rootMargin: `-${searchBarHeight.value}px 0px 0px 0px`
-        })
+	if (searchBarRef.value) {
+		searchBarHeight.value = searchBarRef.value.offsetHeight
+		observer = new IntersectionObserver(handleIntersection, {
+			threshold: 0,
+			rootMargin: `-${searchBarHeight.value}px 0px 0px 0px`
+		})
 
-        observer.observe(searchBarRef.value)
-    } else {
-        console.warn('searchBarRef is null')
-    }
+		observer.observe(searchBarRef.value)
+	} else {
+		console.warn('searchBarRef is null')
+	}
 })
 
 onUnmounted(() => {
-    if (observer && searchBarRef.value) {
-        observer.unobserve(searchBarRef.value)
-    }
+	if (observer && searchBarRef.value) {
+		observer.unobserve(searchBarRef.value)
+	}
 })
 </script>
 

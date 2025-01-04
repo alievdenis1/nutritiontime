@@ -44,11 +44,11 @@ import localization from './ProfileStats.localization.json'
 import type { Profile } from '../model'
 
 const props = defineProps<{
-  profile: Profile | null
+	profile: Profile | null
 }>()
 
 const emit = defineEmits<{
-  (e: 'updated'): void
+	(e: 'updated'): void
 }>()
 
 const { t } = useTranslation(localization)
@@ -59,55 +59,55 @@ const error = ref<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout>
 
 const debouncedEmit = () => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer)
-  }
+	if (debounceTimer) {
+		clearTimeout(debounceTimer)
+	}
 
-  debounceTimer = setTimeout(async () => {
-    if (!isValid.value || loading.value) return
-    await handleSubmit()
-  }, 1000)
+	debounceTimer = setTimeout(async () => {
+		if (!isValid.value || loading.value) return
+		await handleSubmit()
+	}, 1000)
 }
 
 const incrementWeight = () => {
-  const current = Number(weightInput.value) || 0
-  weightInput.value = (current + 0.1).toFixed(1)
-  debouncedEmit()
+	const current = Number(weightInput.value) || 0
+	weightInput.value = (current + 0.1).toFixed(1)
+	debouncedEmit()
 }
 
 const decrementWeight = () => {
-  const current = Number(weightInput.value) || 0
-  weightInput.value = (current - 0.1).toFixed(1)
-  debouncedEmit()
+	const current = Number(weightInput.value) || 0
+	weightInput.value = (current - 0.1).toFixed(1)
+	debouncedEmit()
 }
 
 watch(() => props.profile?.weight, (newWeight) => {
-  if (newWeight) {
-    weightInput.value = newWeight.toString()
-  }
+	if (newWeight) {
+		weightInput.value = newWeight.toString()
+	}
 }, { immediate: true })
 
 const isValid = computed(() => {
-  const weight = Number(weightInput.value)
-  return weight > 0 && weight < 300
+	const weight = Number(weightInput.value)
+	return weight > 0 && weight < 300
 })
 
 const handleSubmit = async () => {
-  if (!isValid.value || loading.value) return
+	if (!isValid.value || loading.value) return
 
-  loading.value = true
-  error.value = null
+	loading.value = true
+	error.value = null
 
-  const weight = Number(weightInput.value)
+	const weight = Number(weightInput.value)
 
-  try {
-    const logApi = logWeight({ weight })
-    await logApi.execute()
-    emit('updated')
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Error saving weight'
-  } finally {
-    loading.value = false
-  }
+	try {
+		const logApi = logWeight({ weight })
+		await logApi.execute()
+		emit('updated')
+	} catch (e) {
+		error.value = e instanceof Error ? e.message : 'Error saving weight'
+	} finally {
+		loading.value = false
+	}
 }
 </script>

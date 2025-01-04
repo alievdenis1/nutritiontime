@@ -46,10 +46,10 @@ const placeholder = computed(() => {
 })
 
 const handleSearch = () => {
- const query = searchQuery.value.trim()
- store.filters.search = query
+	const query = searchQuery.value.trim()
+	store.filters.search = query
 
- store.searchRecipes()
+	store.searchRecipes()
 }
 
 const clearSearch = () => {

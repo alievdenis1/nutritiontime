@@ -108,8 +108,8 @@ import { Check as ElIconCheck } from '@element-plus/icons-vue'
 import { onClickOutside, useElementBounding } from '@vueuse/core'
 
 type Ingredient = {
- name: string
- id: number
+	name: string
+	id: number
 }
 
 const { t } = useTranslation(localization)
@@ -120,9 +120,9 @@ const dropdown = ref<HTMLElement>()
 const { top } = useElementBounding(dropdownParent)
 
 onClickOutside(dropdown, () => {
- if (isIngredientsDropdownVisible.value) {
-   isIngredientsDropdownVisible.value = false
- }
+	if (isIngredientsDropdownVisible.value) {
+		isIngredientsDropdownVisible.value = false
+	}
 })
 
 const store = useSearchStore()
@@ -132,79 +132,79 @@ const isLoadingIngredients = ref(false)
 const query = ref('')
 
 watch(query, (nV) => {
- isIngredientsDropdownVisible.value = !!nV.trim()
+	isIngredientsDropdownVisible.value = !!nV.trim()
 })
 
 const isIngredientsDropdownVisible = ref(false)
 
 const toggleIngredientsDropdown = () => {
- isIngredientsDropdownVisible.value = !isIngredientsDropdownVisible.value
+	isIngredientsDropdownVisible.value = !isIngredientsDropdownVisible.value
 
- if (!isIngredientsDropdownVisible.value) {
-  query.value = ''
- }
+	if (!isIngredientsDropdownVisible.value) {
+		query.value = ''
+	}
 }
 
 const searchIngredients = async () => {
- isLoadingIngredients.value = true
+	isLoadingIngredients.value = true
 
- const ingredientsListApi = getIngredientList({ search: query.value })
- await ingredientsListApi.execute()
- ingredientsList.value = ingredientsListApi.data.value.data
- isLoadingIngredients.value = false
+	const ingredientsListApi = getIngredientList({ search: query.value })
+	await ingredientsListApi.execute()
+	ingredientsList.value = ingredientsListApi.data.value.data
+	isLoadingIngredients.value = false
 }
 
 onMounted(() => {
- searchIngredients()
+	searchIngredients()
 })
 
 const selectedIngredients = ref<Ingredient[]>([])
 
 onScopeDispose(() => {
- store.selectedIngredients = selectedIngredients.value
+	store.selectedIngredients = selectedIngredients.value
 })
 
 onMounted(() => {
- selectedIngredients.value = store.selectedIngredients
+	selectedIngredients.value = store.selectedIngredients
 })
 
 const selectedIngredientsIdSet = computed(() => {
- return new Set(selectedIngredients.value.map(ingredient => ingredient.id))
+	return new Set(selectedIngredients.value.map(ingredient => ingredient.id))
 })
 
 const setIngredientsToStore = (ingredients: Ingredient[]) => {
- const mappedIngredients = ingredients.map(ingredient => ingredient.id)
- store.selectedIngredients = ingredients
+	const mappedIngredients = ingredients.map(ingredient => ingredient.id)
+	store.selectedIngredients = ingredients
 
- if (store.isExcludeIngredientsMode) {
-  store.filters.excluded_ingredients = mappedIngredients
- } else {
-  store.filters.included_ingredients = mappedIngredients
- }
+	if (store.isExcludeIngredientsMode) {
+		store.filters.excluded_ingredients = mappedIngredients
+	} else {
+		store.filters.included_ingredients = mappedIngredients
+	}
 }
 
 const toggleIngredient = (ingredient: Ingredient) => {
- const index = selectedIngredients.value.findIndex(ingredientItem => ingredientItem.id === ingredient.id)
+	const index = selectedIngredients.value.findIndex(ingredientItem => ingredientItem.id === ingredient.id)
 
- if (index === -1) {
-  selectedIngredients.value.push(ingredient)
- } else {
-  selectedIngredients.value.splice(index, 1)
- }
+	if (index === -1) {
+		selectedIngredients.value.push(ingredient)
+	} else {
+		selectedIngredients.value.splice(index, 1)
+	}
 
- setIngredientsToStore(selectedIngredients.value)
+	setIngredientsToStore(selectedIngredients.value)
 }
 
 const toggleExcludeMode = () => {
- store.isExcludeIngredientsMode = !store.isExcludeIngredientsMode
+	store.isExcludeIngredientsMode = !store.isExcludeIngredientsMode
 
- if (store.isExcludeIngredientsMode) {
-  store.filters.excluded_ingredients = store.filters.included_ingredients
-  store.filters.included_ingredients = undefined
- } else {
-  store.filters.included_ingredients = store.filters.excluded_ingredients
-  store.filters.excluded_ingredients = undefined
- }
+	if (store.isExcludeIngredientsMode) {
+		store.filters.excluded_ingredients = store.filters.included_ingredients
+		store.filters.included_ingredients = undefined
+	} else {
+		store.filters.included_ingredients = store.filters.excluded_ingredients
+		store.filters.excluded_ingredients = undefined
+	}
 }
 </script>
 

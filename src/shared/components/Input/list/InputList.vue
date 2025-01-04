@@ -24,10 +24,10 @@ import Localization from './InputList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 
 interface InputListProps {
-    list: InputListItem[]
+	list: InputListItem[]
 }
 type InputListEmits = {
-    select: [value: InputListItem]
+	select: [value: InputListItem]
 }
 
 const { t } = useTranslation(Localization)
@@ -38,7 +38,7 @@ const emits = defineEmits<InputListEmits>()
 const noResults = computed((): boolean => !props.list.length)
 
 const onSelect = (item: InputListItem): void => {
-    emits('select', item)
+	emits('select', item)
 }
 </script>
 

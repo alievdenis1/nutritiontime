@@ -20,7 +20,14 @@
 				@adding="onAdding"
 				@change="onCollectionSelected"
 			/>
-			<RecipesList :recipes-data="recipeList.data" />
+
+			<RecipesList
+				:recipes-data="recipeList.data"
+				:like-loading-states="recipesUnderLikePending"
+				@toggle-like="onToggleRecipeLike($event, store.collectionId)"
+				@change-collection="onToggleRecipeCollection($event, store.collectionId)"
+			/>
+
 			<VContentBlock
 				v-if="mockRecipes.length === 0"
 				:image="addPrefix('/image/start-screen-image.webp')"
@@ -46,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
- import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import RecipesList from '../../Recipe/RecipesList/RecipesList.vue'
 import { VContentBlock } from 'shared/components/ContentBlock'
 import { mockRecipes, addPrefix } from '../mocks/mock-recipes'
@@ -61,6 +68,11 @@ import ModalCollection from '../../Сollection/modal/ModalCollection.vue'
 
 import { useModalCreateStore } from '../../Recipe/CreateRecipe/modal-create/model/model-store'
 import { useRecipeStore } from 'entities/Recipe/DetailedCardRecipe'
+import { toggleFavourite } from 'entities/Recipe/api'
+import { useQueryClient } from '@tanstack/vue-query'
+import { ElMessage } from 'element-plus'
+
+const queryClient = useQueryClient()
 
 const modalCreateStore = useModalCreateStore()
 
@@ -101,33 +113,57 @@ const onAdding = () => {
 //   }
 // }
 const recipeList = computed(() => {
- if (typeof store.collectionId !== 'number') {
-  return { data: recipeStore.recipes }
- }
+	if (typeof store.collectionId !== 'number') {
+		return { data: recipeStore.recipes }
+	}
 
- if (store.collectionId === 0) {
-  return { data: recipeStore.favouriteRecipes }
- }
+	if (store.collectionId === 0) {
+		return { data: recipeStore.favouriteRecipes }
+	}
 
- return store.recipesByCollections.get(store.collectionId) ?? { data: [] }
+	return store.recipesByCollections.get(store.collectionId) ?? { data: [] }
 })
 
 const collectionListForDragAndDrop = computed(() => {
- return store.collectionList.map(({ id, name }) => ({ id, label: name, isActiveEdit: true }))
+	return (store.collectionList)
+		.filter(Boolean)
+		.map(({ id, name }) => ({ id, label: name, isActiveEdit: true }))
 })
 
 onMounted(() => {
- store.getCollections().then(() => {
-  if (store.savedCollections?.length > 0) {
-   store.getAllCollectionsRecipes(store.savedCollections.map(({ id }) => id))
-  }
- })
-
- recipeStore.getFavouriteRecipes()
+	store.getCollections().then(() => {
+		if (store.savedCollections?.length > 0) {
+			store.getAllCollectionsRecipes(store.savedCollections.map(({ id }) => id))
+		}
+	})
 })
 
 const onCollectionSelected = (id: number) => {
-  store.collectionId = id
+	store.collectionId = id
+}
+
+const recipesUnderLikePending = ref(new Set<number>())
+const recipesUnderCollectionPending = ref(new Set<number>())
+
+const collectionLoadingStates = ref(new Set<number>())
+
+async function onToggleRecipeLike(recipeId: number, collectionId: number) {
+	recipesUnderLikePending.value.add(recipeId)
+	const result = await toggleFavourite(recipeId)
+	ElMessage.success(result.message)
+	console.log(result)
+	/** Перезапрашиваем кэш */
+	await Promise.all([
+		await queryClient.invalidateQueries({
+			queryKey: ['recipes/favourite'],
+		}),
+		await store.getCollectionRecipeList(collectionId)
+	])
+	recipesUnderLikePending.value.delete(recipeId)
+}
+
+async function onToggleRecipeCollection(recipeId: number) {
+	await store.toggleRecipeCollection(recipeId)
 }
 </script>
 

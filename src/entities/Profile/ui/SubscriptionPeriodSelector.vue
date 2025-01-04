@@ -28,27 +28,27 @@
 </template>
 
 <script lang="ts">
- import { defineComponent, PropType } from 'vue'
- import { SubscriptionPeriod, SUBSCRIPTION_PERIODS } from '../model'
+import { defineComponent, PropType } from 'vue'
+import { SubscriptionPeriod, SUBSCRIPTION_PERIODS } from '../model'
 
- export default defineComponent({
-  name: 'SubscriptionPeriodSelector',
-  props: {
-   modelValue: {
-    type: Object as PropType<SubscriptionPeriod>,
-    required: true
-   }
-  },
-  emits: ['update:modelValue'],
-  setup(_, { emit }) {
-   const selectPeriod = (period: SubscriptionPeriod) => {
-    emit('update:modelValue', period)
-   }
+export default defineComponent({
+	name: 'SubscriptionPeriodSelector',
+	props: {
+		modelValue: {
+			type: Object as PropType<SubscriptionPeriod>,
+			required: true
+		}
+	},
+	emits: ['update:modelValue'],
+	setup(_, { emit }) {
+		const selectPeriod = (period: SubscriptionPeriod) => {
+			emit('update:modelValue', period)
+		}
 
-   return {
-    SUBSCRIPTION_PERIODS,
-    selectPeriod
-   }
-  }
- })
+		return {
+			SUBSCRIPTION_PERIODS,
+			selectPeriod
+		}
+	}
+})
 </script>

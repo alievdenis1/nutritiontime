@@ -8,8 +8,8 @@
 			<div class="flex items-center mb-[12px]">
 				<el-image
 					class="w-8 h-8 rounded-full mr-2"
-					:src="recipe.author.image"
-					:alt="recipe.author.name"
+					:src="recipe.author?.image"
+					:alt="recipe.author?.name"
 				>
 					<template #error>
 						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
@@ -19,7 +19,7 @@
 						</div>
 					</template>
 				</el-image>
-				<span class="text-sm text-gray-600">{{ recipe.author.name }}</span>
+				<span class="text-sm text-gray-600">{{ recipe.author?.name }}</span>
 			</div>
 			<div
 				class="relative"
@@ -42,14 +42,14 @@
 				<div
 					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"
 				>
-					{{ recipe.rating.toFixed(1) }}
+					{{ recipe.average_rating?.toFixed(1) }}
 				</div>
 			</div>
 
 			<div class="flex items-center text-sm text-gray-600 mb-4 mt-[12px]">
 				<div class="flex items-center bg-lightGray px-[9px] py-[5px] rounded-[12px] mr-[8px]">
 					<IconTime class="mr-1" />
-					<span>{{ recipe.cookingTime }} {{ t('min') }}</span>
+					<span>{{ recipe.cooking_time }} {{ t('min') }}</span>
 				</div>
 				<div class="flex items-center bg-lightGray px-[9px] py-[5px] rounded-[12px]">
 					<IconFire class="mr-1" />
@@ -66,7 +66,7 @@
 			>
 				<div class="flex items-center">
 					<IconComment class="mr-1" />
-					<span>{{ recipe.commentsCount }}</span>
+					<span>{{ recipe.total_comments_count }}</span>
 				</div>
 				<div class="flex items-center">
 					<IconFavorites
@@ -82,7 +82,7 @@
 							:is-liked="likesState[recipe.id]"
 							class="mr-1"
 						/>
-						<span>{{ recipe.likesCount }}</span>
+						<span>{{ recipe.likes_count }}</span>
 					</div>
 				</div>
 			</div>
@@ -95,7 +95,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { IconComment, IconFire, IconHeart, IconTime, IconFavorites } from 'shared/components/Icon'
-import type { RecipesItem } from '../RecipesList/type'
+import type { RecipeItem } from '../RecipesList/type'
 import CreateCollection from '../Search/modal/CreateCollection.vue'
 import { useTranslation } from 'shared/lib/i18n'
 import localization from './SearchBar.localization.json'
@@ -108,7 +108,7 @@ const { t } = useTranslation(localization)
 const store = useSearchStore()
 
 const props = defineProps<{
-	recipes: RecipesItem[]
+	recipes: RecipeItem[]
 }>()
 
 const favoritesState = ref<Record<number, boolean>>({})

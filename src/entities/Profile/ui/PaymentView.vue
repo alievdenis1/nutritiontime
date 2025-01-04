@@ -123,227 +123,227 @@
 </template>
 
 <script setup lang="ts">
- import { ref, computed, onMounted } from 'vue'
- import { storeToRefs } from 'pinia'
- import { useSessionStore } from '@/entities/Session'
- import { TabsContent, TabsList, TabsMain, TabsTrigger } from 'shared/components/ui/tabs'
- import { ButtonColors, VButton } from '@/shared/components/Button'
- import { VLoading } from '@/shared/components/Loading'
- import { SubscriptionPlan, PaymentMethod, PaymentsList } from './index.ts'
- import {
-   createPayment, getUserPayments, calculateAmount,
-   sendToSubscription
- } from '../api'
- import type { SubscriptionPayment } from '../model'
- import WebApp from '@twa-dev/sdk'
- import localization from './ProfileStats.localization.json'
- import { useTranslation } from '@/shared/lib/i18n'
- import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useSessionStore } from '@/entities/Session'
+import { TabsContent, TabsList, TabsMain, TabsTrigger } from 'shared/components/ui/tabs'
+import { ButtonColors, VButton } from '@/shared/components/Button'
+import { VLoading } from '@/shared/components/Loading'
+import { SubscriptionPlan, PaymentMethod, PaymentsList } from './index.ts'
+import {
+	createPayment, getUserPayments, calculateAmount,
+	sendToSubscription
+} from '../api'
+import type { SubscriptionPayment } from '../model'
+import WebApp from '@twa-dev/sdk'
+import localization from './ProfileStats.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
+import { useRoute } from 'vue-router'
 
- const route = useRoute()
+const route = useRoute()
 
- const { t } = useTranslation(localization)
+const { t } = useTranslation(localization)
 
- // Store и telegram_id
- const userStore = useSessionStore()
- const { userInfo } = storeToRefs(userStore)
- const telegramId = ref(~~(userInfo.value?.telegram_id ?? ''))
+// Store и telegram_id
+const userStore = useSessionStore()
+const { userInfo } = storeToRefs(userStore)
+const telegramId = ref(~~(userInfo.value?.telegram_id ?? ''))
 
  type SubscriptionPlanType = {
-  months: number
-  price: number
-  features: string[]
+ 	months: number
+ 	price: number
+ 	features: string[]
  }
  // Состояние
- const activeTab = ref('plans')
- const selectedPlan = ref<SubscriptionPlanType | null>(null)
+const activeTab = ref('plans')
+const selectedPlan = ref<SubscriptionPlanType | null>(null)
  type BasePaymentMethod = {
-  type: 'ton' | 'usdt' | 'yummy' | 'gram' | 'upay'
-  title: string
-  description: string
+ 	type: 'ton' | 'usdt' | 'yummy' | 'gram' | 'upay'
+ 	title: string
+ 	description: string
  }
 
- // Component state
- const selectedPaymentMethod = ref<BasePaymentMethod | null>(null)
+// Component state
+const selectedPaymentMethod = ref<BasePaymentMethod | null>(null)
 
- const isProcessing = ref(false)
- const userPayments = ref<SubscriptionPayment[]>([])
- const paymentsLoading = ref(false)
- const calculatedAmount = ref<{ amount: string; currency: string } | null>(null)
+const isProcessing = ref(false)
+const userPayments = ref<SubscriptionPayment[]>([])
+const paymentsLoading = ref(false)
+const calculatedAmount = ref<{ amount: string; currency: string } | null>(null)
 
- // Вычисляемые свойства
- // Функция для склонения месяцев
- const monthDeclension = computed(() => {
-  if (!selectedPlan.value?.months) return ''
-  const months = selectedPlan.value.months
-  const lastDigit = months % 10
-  const lastTwoDigits = months % 100
+// Вычисляемые свойства
+// Функция для склонения месяцев
+const monthDeclension = computed(() => {
+	if (!selectedPlan.value?.months) return ''
+	const months = selectedPlan.value.months
+	const lastDigit = months % 10
+	const lastTwoDigits = months % 100
 
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-   return t('monthPlural')
-  }
-  if (lastDigit === 1) {
-   return t('monthSingular')
-  }
-  if (lastDigit >= 2 && lastDigit <= 4) {
-   return t('monthFew')
-  }
-  return t('monthPlural')
- })
+	if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+		return t('monthPlural')
+	}
+	if (lastDigit === 1) {
+		return t('monthSingular')
+	}
+	if (lastDigit >= 2 && lastDigit <= 4) {
+		return t('monthFew')
+	}
+	return t('monthPlural')
+})
 
- // Данные тарифных планов
- const monthlyPrice = 490
+// Данные тарифных планов
+const monthlyPrice = 490
 
- const subscriptionPlans = [
-   { months: 1, price: 490, features: [] },
-   {
-     months: 3,
-     price: 1200,
-     features: [],
-     discount: Math.round((1 - (1200 / 3 / monthlyPrice)) * 100) // будет примерно 12%
-   },
-   {
-     months: 12,
-     price: 4000,
-     features: [],
-     discount: Math.round((1 - (4000 / 12 / monthlyPrice)) * 100) // будет примерно 23%
-   }
- ]
- // Методы оплаты
- const paymentMethods = [
-  {
-   type: 'ton' as const,
-   title: 'TON',
-   description: 'The Open Network'
-  },
-  {
-   type: 'usdt' as const,
-   title: 'USDT',
-   description: 'Tether USD'
-  },
-  {
-   type: 'yummy' as const,
-   title: 'YUMMY',
-   description: 'Yummy Token'
-  },
-  {
-   type: 'gram' as const,
-   title: 'GRAM',
-   description: 'Gram Token'
-  }
- ]
+const subscriptionPlans = [
+	{ months: 1, price: 490, features: [] },
+	{
+		months: 3,
+		price: 1200,
+		features: [],
+		discount: Math.round((1 - (1200 / 3 / monthlyPrice)) * 100) // будет примерно 12%
+	},
+	{
+		months: 12,
+		price: 4000,
+		features: [],
+		discount: Math.round((1 - (4000 / 12 / monthlyPrice)) * 100) // будет примерно 23%
+	}
+]
+// Методы оплаты
+const paymentMethods = [
+	{
+		type: 'ton' as const,
+		title: 'TON',
+		description: 'The Open Network'
+	},
+	{
+		type: 'usdt' as const,
+		title: 'USDT',
+		description: 'Tether USD'
+	},
+	{
+		type: 'yummy' as const,
+		title: 'YUMMY',
+		description: 'Yummy Token'
+	},
+	{
+		type: 'gram' as const,
+		title: 'GRAM',
+		description: 'Gram Token'
+	}
+]
 
- const rubPaymentMethod = {
-  type: 'upay' as const,
-  title: 'RUB',
-  description: 'UPay'
- }
+const rubPaymentMethod = {
+	type: 'upay' as const,
+	title: 'RUB',
+	description: 'UPay'
+}
 
- // Методы
- const selectPlan = (plan: typeof subscriptionPlans[0]) => {
-  selectedPlan.value = plan
-  selectedPaymentMethod.value = null
-  calculatedAmount.value = null
- }
+// Методы
+const selectPlan = (plan: typeof subscriptionPlans[0]) => {
+	selectedPlan.value = plan
+	selectedPaymentMethod.value = null
+	calculatedAmount.value = null
+}
 
- const handleBack = () => {
-  selectedPlan.value = null
-  selectedPaymentMethod.value = null
-  calculatedAmount.value = null
- }
+const handleBack = () => {
+	selectedPlan.value = null
+	selectedPaymentMethod.value = null
+	calculatedAmount.value = null
+}
 
- const selectPaymentMethod = async (method: BasePaymentMethod) => {
-  selectedPaymentMethod.value = method
+const selectPaymentMethod = async (method: BasePaymentMethod) => {
+	selectedPaymentMethod.value = method
 
-  if (!selectedPlan.value) return
+	if (!selectedPlan.value) return
 
-  if (method.type === 'upay') {
-   calculatedAmount.value = {
-    amount: selectedPlan.value.price.toString(),
-    currency: '₽'
-   }
-   return
-  }
+	if (method.type === 'upay') {
+		calculatedAmount.value = {
+			amount: selectedPlan.value.price.toString(),
+			currency: '₽'
+		}
+		return
+	}
 
-  try {
-   const calculateApi = calculateAmount({
-    payment_type: method.type,
-    months: selectedPlan.value.months
-   })
+	try {
+		const calculateApi = calculateAmount({
+			payment_type: method.type,
+			months: selectedPlan.value.months
+		})
 
-   await calculateApi.execute()
+		await calculateApi.execute()
 
-   if (!calculateApi.error.value && calculateApi.data.value) {
-    calculatedAmount.value = calculateApi.data.value
-   }
-  } catch (error) {
-   console.error('Calculate amount error:', error)
-  }
- }
+		if (!calculateApi.error.value && calculateApi.data.value) {
+			calculatedAmount.value = calculateApi.data.value
+		}
+	} catch (error) {
+		console.error('Calculate amount error:', error)
+	}
+}
 
- // Updated handlePayment function
- const handlePayment = async () => {
-  if (!selectedPlan.value || !selectedPaymentMethod.value) return
+// Updated handlePayment function
+const handlePayment = async () => {
+	if (!selectedPlan.value || !selectedPaymentMethod.value) return
 
-  try {
-   isProcessing.value = true
+	try {
+		isProcessing.value = true
 
-   if (selectedPaymentMethod.value.type === 'upay') {
-     await sendToSubscription({ months: selectedPlan.value.months }).execute()
-     WebApp.close()
-    return
-   }
+		if (selectedPaymentMethod.value.type === 'upay') {
+			await sendToSubscription({ months: selectedPlan.value.months }).execute()
+			WebApp.close()
+			return
+		}
 
-   const paymentApi = createPayment({
-    telegram_id: telegramId.value,
-    payment_type: selectedPaymentMethod.value.type,
-    months: selectedPlan.value.months
-   })
+		const paymentApi = createPayment({
+			telegram_id: telegramId.value,
+			payment_type: selectedPaymentMethod.value.type,
+			months: selectedPlan.value.months
+		})
 
-   await paymentApi.execute()
+		await paymentApi.execute()
 
-   if (!paymentApi.error.value && paymentApi.data.value?.paymentUrl) {
-    const paymentUrl = paymentApi.data.value.paymentUrl
-    WebApp.openLink(paymentUrl)
-    fetchUserPayments()
-   }
-  } catch (error) {
-   console.error('Payment creation error:', error)
-  } finally {
-   isProcessing.value = false
-  }
- }
+		if (!paymentApi.error.value && paymentApi.data.value?.paymentUrl) {
+			const paymentUrl = paymentApi.data.value.paymentUrl
+			WebApp.openLink(paymentUrl)
+			fetchUserPayments()
+		}
+	} catch (error) {
+		console.error('Payment creation error:', error)
+	} finally {
+		isProcessing.value = false
+	}
+}
 
- const fetchUserPayments = async () => {
-  paymentsLoading.value = true
-  try {
-   const paymentsApi = getUserPayments()
-   await paymentsApi.execute()
+const fetchUserPayments = async () => {
+	paymentsLoading.value = true
+	try {
+		const paymentsApi = getUserPayments()
+		await paymentsApi.execute()
 
-   if (!paymentsApi.error.value && paymentsApi.data.value) {
-    userPayments.value = paymentsApi.data.value
-   }
-  } catch (error) {
-   console.error('Fetch payments error:', error)
-  } finally {
-   paymentsLoading.value = false
-  }
- }
+		if (!paymentsApi.error.value && paymentsApi.data.value) {
+			userPayments.value = paymentsApi.data.value
+		}
+	} catch (error) {
+		console.error('Fetch payments error:', error)
+	} finally {
+		paymentsLoading.value = false
+	}
+}
 
- // Инициализация
- onMounted(() => {
-  const selectedMonths = route.query.months
+// Инициализация
+onMounted(() => {
+	const selectedMonths = route.query.months
 
-  if (selectedMonths && !Array.isArray(selectedMonths)) {
-   const months = parseInt(selectedMonths)
-   if (!isNaN(months)) {
-    const plan = subscriptionPlans.find(plan => plan.months === months)
-    if (plan) {
-     selectPlan(plan)
-    }
-   }
-  }
+	if (selectedMonths && !Array.isArray(selectedMonths)) {
+		const months = parseInt(selectedMonths)
+		if (!isNaN(months)) {
+			const plan = subscriptionPlans.find(plan => plan.months === months)
+			if (plan) {
+				selectPlan(plan)
+			}
+		}
+	}
 
-  fetchUserPayments()
- })
+	fetchUserPayments()
+})
 </script>

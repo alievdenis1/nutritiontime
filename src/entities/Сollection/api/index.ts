@@ -1,7 +1,7 @@
 import { Collection } from '../types/typesCollection.ts'
 import { emulateRequest } from 'shared/lib/debug'
 import { DEBUG_DATA } from '../@debug'
-import useApi from 'shared/lib/api/use-api.ts'
+import useApi, { api } from 'shared/lib/api/use-api.ts'
 import { MaybeRefOrGetter, toValue } from 'vue'
 
 export type GetSavedCollectionsResponseDto = {
@@ -16,6 +16,11 @@ export const getSavedCollectionsList = (): Promise<GetSavedCollectionsResponseDt
 
 export const getCollectionList = () => {
 	return useApi('get', '/collections', )
+}
+
+export const getCollectionListV2 = async () => {
+	const response = await api.get<Collection[]>('/collections')
+	return response.data
 }
 
 type CreateCollectionRequestDto = {

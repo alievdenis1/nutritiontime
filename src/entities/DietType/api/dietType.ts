@@ -1,12 +1,18 @@
-import useApi from '@/shared/lib/api/use-api'
+import { api } from '@/shared/lib/api/use-api'
 
 type DietDto = {
-    id: number;
-    name: string;
+  id: number
+  name: string
 }
 
 export type DietList = DietDto[]
 
-export function getDietTypeList() {
-    return useApi<DietList>('get', '/public/diet-types')
+/**
+ * Получение списка типов диет
+ * */
+export async function getDietTypeList({
+  signal
+}: { signal?: AbortSignal } = {}) {
+  const response = await api.get('/public/diet-types', { signal })
+  return response.data
 }

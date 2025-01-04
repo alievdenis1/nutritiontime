@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
- import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { IconCheck } from 'shared/components/Icon'
 import { VAccordion } from 'shared/components/Accordion'
 import { VButton, ButtonColors } from 'shared/components/Button'
@@ -111,55 +111,55 @@ const { t } = useTranslation(localization)
 const router = useRouter()
 
 interface FilterOption {
-    id: number;
-    name: string;
-    checked: boolean;
+	id: number;
+	name: string;
+	checked: boolean;
 }
 
 const cuisines = ref<FilterOption[]>([])
 
 const reduceFilterOptions = (filterOptions: FilterOption[]) => {
-  return filterOptions.reduce((acc, cur) => {
-   if (cur.checked) {
-    acc.push(cur.id)
-   }
+	return filterOptions.reduce((acc, cur) => {
+		if (cur.checked) {
+			acc.push(cur.id)
+		}
 
-   return acc
-  }, [] as number[])
+		return acc
+	}, [] as number[])
 }
 
 watch(cuisines, (newCuisines) => {
- store.filters.cuisine_id = reduceFilterOptions(newCuisines)
+	store.filters.cuisine_id = reduceFilterOptions(newCuisines)
 }, { deep: true })
 
 const diets = ref<FilterOption[]>([])
 
 watch(diets, (newDiets) => {
- store.filters.diet_type_id = reduceFilterOptions(newDiets)
+	store.filters.diet_type_id = reduceFilterOptions(newDiets)
 }, { deep: true })
 
 const showResetButton = computed(() => {
-    return cuisines.value.some(cuisine => cuisine.checked) || diets.value.some(diet => diet.checked)
+	return cuisines.value.some(cuisine => cuisine.checked) || diets.value.some(diet => diet.checked)
 })
 
 const searchFilter = () => {
-    store.searchRecipes()
-    router.push('/search')
+	store.searchRecipes()
+	router.push('/search')
 }
 
 const resetFilters = () => {
-    cuisines.value.forEach(cuisine => cuisine.checked = false)
-    diets.value.forEach(diet => diet.checked = false)
-    updateFilters()
+	cuisines.value.forEach(cuisine => cuisine.checked = false)
+	diets.value.forEach(diet => diet.checked = false)
+	updateFilters()
 }
 
 const toggleCheckbox = (option: FilterOption) => {
-    option.checked = !option.checked
-    updateFilters()
+	option.checked = !option.checked
+	updateFilters()
 }
 
 const updateFilters = () => {
-    // Здесь можно добавить логику обновления фильтров
+	// Здесь можно добавить логику обновления фильтров
 }
 
 const getCuisinesApi = getCuisineList()
@@ -174,10 +174,10 @@ onMounted(async () => {
 		}
 	}, 100)
 
- await Promise.allSettled([getCuisinesApi.execute(), getDietTypesApi.execute()])
+	await Promise.allSettled([getCuisinesApi.execute(), getDietTypesApi.execute()])
 
- cuisines.value = getCuisinesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
- diets.value = getDietTypesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
+	cuisines.value = getCuisinesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
+	diets.value = getDietTypesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
 })
 
 </script>

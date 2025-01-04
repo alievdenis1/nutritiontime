@@ -59,29 +59,29 @@
 </template>
 
 <script setup lang="ts">
- import { computed } from 'vue'
- import type { PaymentType } from '../model'
+import { computed } from 'vue'
+import type { PaymentType } from '../model'
 
- const props = defineProps<{
-  type: PaymentType
-  title: string
-  description?: string
-  selected: boolean
- }>()
+const props = defineProps<{
+	type: PaymentType
+	title: string
+	description?: string
+	selected: boolean
+}>()
 
- const getIcon = computed(() => {
-  const icons = {
-   ton: `${import.meta.env.BASE_URL}image/ton_logo.png`,
-   usdt: `${import.meta.env.BASE_URL}image/usdt_logo.png`,
-   gram: `${import.meta.env.BASE_URL}image/gram_logo.png`,
-   yummy: `${import.meta.env.BASE_URL}image/yummy_logo.png`,
-   upay: `${import.meta.env.BASE_URL}image/upay_logo.png`,
-  }
+const getIcon = computed(() => {
+	const icons = {
+		ton: `${import.meta.env.BASE_URL}image/ton_logo.png`,
+		usdt: `${import.meta.env.BASE_URL}image/usdt_logo.png`,
+		gram: `${import.meta.env.BASE_URL}image/gram_logo.png`,
+		yummy: `${import.meta.env.BASE_URL}image/yummy_logo.png`,
+		upay: `${import.meta.env.BASE_URL}image/upay_logo.png`,
+	}
 
-  return icons[props.type]
- })
+	return icons[props.type]
+})
 
- defineEmits<{
-  (e: 'select'): void
- }>()
+defineEmits<{
+	(e: 'select'): void
+}>()
 </script>

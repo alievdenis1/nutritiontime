@@ -11,8 +11,8 @@
 import { defineProps } from 'vue'
 
 const props = defineProps<{
-    title: string,
-    value: string,
+	title: string,
+	value: string,
 }>()
 
 </script>
