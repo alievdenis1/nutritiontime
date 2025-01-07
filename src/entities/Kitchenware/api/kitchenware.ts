@@ -1,6 +1,7 @@
 import { api } from '@/shared/lib/api/use-api'
+import { PaginationData } from 'shared/lib/types/pagination-data.ts'
 
-type KitchenwareDto = {
+export type KitchenwareDto = {
 	id: number
 	name: string
 }
@@ -15,7 +16,7 @@ export async function getKitchenwareList(
 	params: KitchenwareListParams = {},
 	signal?: AbortSignal
 ) {
-	const response = await api.get<KitchenwareDto[]>('/public/kitchenware', {
+	const response = await api.get<PaginationData<KitchenwareDto>>('/public/kitchenware', {
 		signal,
 		params
 	})

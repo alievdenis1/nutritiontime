@@ -119,7 +119,17 @@ export async function getFavoriteRecipeList() {
 	return response.data
 }
 
-export async function toggleFavourite(recipeId: number) {
-	const response = await api.post(`/recipes/${recipeId}/favorite`)
+export async function toggleFavourite(recipeId: number, signal?: AbortSignal) {
+	const response = await api.post<{ isFavourited: boolean }>(`/recipes/${recipeId}/favorite`, {
+		signal
+	})
+	return response.data
+}
+
+/** TODO: типизировать */
+export type CreateRecipeDto = Record<string, any>
+
+export async function createRecipe(recipeDto: CreateRecipeDto) {
+	const response = await api.postForm<{ message: string, recipe: RecipeDto }>('/recipes', recipeDto)
 	return response.data
 }

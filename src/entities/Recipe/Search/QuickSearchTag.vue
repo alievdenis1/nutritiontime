@@ -60,9 +60,9 @@
 					</div>
 				</div>
 
-				<TagsSelect
+				<TagSelect
+					v-loading="isLoadingTags"
 					class="flex-grow overflow-y-auto custom-scrollbar"
-					:tags-by-categories="tagsByCategories"
 					:model-value="selectedTags"
 					@update:model-value="handleTagChanged"
 				/>
@@ -86,13 +86,10 @@ import { useTranslation } from 'shared/lib/i18n'
 import localization from './QuickSearchTag.localization.json'
 import { useSearchStore } from './store/search-store'
 import { VModal } from 'shared/components/Modal'
-import TagsSelect  from '../CreateRecipe/recipe-models/tagsRecipe/TagsSelect.vue'
 // TODO: вынести эту папку Search отдельно
-import { getCategoryList, CategoryList, useCategoryList, Category } from '@/entities/Category'
 import { ElLoading } from 'element-plus'
-import { getTagList, type Tag } from 'entities/Tag/@x/Recipe'
-import { groupTagsByCategories } from 'entities/Tag/model/mappings/group-tags-by-categories.ts'
-import { useTagList } from 'entities/Tag'
+import type { Tag } from 'entities/Tag/@x/Recipe'
+import { TagSelect, useTagList } from 'entities/Tag'
 
 const store = useSearchStore()
 const { t } = useTranslation(localization)
@@ -103,9 +100,6 @@ const openModal = () => {
 
 const showModal = ref(false)
 const selectedTags = ref<number[]>([])
-
-const { tagList, isLoadingTags } = useTagList()
-const { categoryList, isLoadingCategories } = useCategoryList()
 
 const closeModal = () => {
 	showModal.value = false
@@ -144,25 +138,6 @@ const quickSearchTags = ref<Tag[]>([
 	{ id: 4, name: 'Ужин', category: 'quick_search'  },
 	{ id: 5, name: 'Белковые', category: 'quick_search'  },
 ])
-
-const tagsByCategories = computed(() => {
-	return Object.values(
-		tagList.value.reduce((acc, tag) => {
-			if (!acc[tag.category]) {
-				acc[tag.category] = {
-					id: Object.keys(acc).length,
-					name: tag.category,
-					tags: []
-				}
-			}
-
-			acc[tag.category].tags.push(tag)
-
-			return acc
-		}, {} as Record<string, Category & { tags: Tag[] }>)
-	)
-
-})
 
 const getTagClasses = computed(() => (tag: Tag) => {
 	return [

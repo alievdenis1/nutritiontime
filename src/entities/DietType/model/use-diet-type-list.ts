@@ -1,25 +1,18 @@
-import type { DietType } from './dietType.ts'
-import { ref } from 'vue'
 import { getDietTypeList } from '../api'
+import { useQuery } from '@tanstack/vue-query'
 
 export const useDietTypeList = () => {
- const dietTypeList = ref<DietType[]>([])
+	const {
+		data: dietTypeList,
+		isLoading: isLoadingDietTypes
+	} = useQuery({
+		queryKey: ['dietTypes'],
+		queryFn: getDietTypeList,
+		initialData: []
+	})
 
- const isLoadingDietTypes = ref(false)
-
- const loadDietTypeList = async () => {
-  isLoadingDietTypes.value = true
-  const { execute, data } = getDietTypeList()
-  await execute()
-  if (data.value) {
-   dietTypeList.value = data.value
-  }
-  isLoadingDietTypes.value = false
- }
-
- return {
-  dietTypeList,
-  isLoadingDietTypes,
-  loadDietTypeList,
- }
+	return {
+		dietTypeList,
+		isLoadingDietTypes
+	}
 }

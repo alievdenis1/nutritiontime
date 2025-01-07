@@ -6,11 +6,11 @@
 	>
 		<IconHeart
 			class="w-[20px] h-[20px]"
-			:is-liked="isFavorite"
+			:is-liked="value"
 			active-color="#319A6E"
 		/>
 		<span
-			:class="['text-slateGray text-sm font-medium', { 'text-green-500': isFavorite }]"
+			:class="['text-slateGray text-sm font-medium', { 'text-green-500': value }]"
 		>
 			{{ props.likes }}
 		</span>
@@ -18,25 +18,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, withDefaults } from 'vue'
+import { defineProps, withDefaults } from 'vue'
 import { IconHeart } from '@/shared/components/Icon'
-
-import { toggleFavorite } from '../../api'
+import { useRecipeLikeStore } from 'entities/Recipe/model/use-recipe-like-store.ts'
 
 const props = withDefaults(defineProps<{
 	bgColor?: string,
-	recipeId: string,
+	recipeId: number,
 	likes: number,
 }>(), {
 	bgColor: 'bg-white',
 })
 
-const isFavorite = ref(false)
+const value = defineModel<boolean>({ required: true })
 
-const { execute } = toggleFavorite({ recipeId: props.recipeId })
+const likeStore = useRecipeLikeStore()
 
-const handleClick = () => {
-	execute()
+const handleClick = async () => {
+	await likeStore.likeRecipe(props.recipeId)
 }
 </script>
 

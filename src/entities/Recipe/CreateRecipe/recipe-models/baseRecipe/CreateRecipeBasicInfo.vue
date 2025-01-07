@@ -146,8 +146,8 @@ import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
 import { useRoute } from 'vue-router'
 import { VButton } from '@/shared/components/Button'
 import { Category, useCategoryList } from 'entities/Category'
-import { Cuisine, useCuisineList } from 'entities/Cuisine'
-import { DietType, useDietTypeList } from 'entities/DietType'
+import { useCuisineList } from 'entities/Cuisine'
+import { useDietTypeList } from 'entities/DietType'
 
 const store = useRecipeStore()
 const route = useRoute()

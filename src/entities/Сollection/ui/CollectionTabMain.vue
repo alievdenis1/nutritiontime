@@ -23,7 +23,7 @@
 
 			<RecipesList
 				:recipes-data="recipeList.data"
-				:like-loading-states="recipesUnderLikePending"
+				:like-loading-states="likeLoadingStates"
 				@toggle-like="onToggleRecipeLike($event, store.collectionId)"
 				@change-collection="onToggleRecipeCollection($event, store.collectionId)"
 			/>
@@ -71,6 +71,7 @@ import { useRecipeStore } from 'entities/Recipe/DetailedCardRecipe'
 import { toggleFavourite } from 'entities/Recipe/api'
 import { useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
+import { useRecipeLikeStore } from 'entities/Recipe/model/use-recipe-like-store.ts'
 
 const queryClient = useQueryClient()
 
@@ -142,28 +143,26 @@ const onCollectionSelected = (id: number) => {
 	store.collectionId = id
 }
 
-const recipesUnderLikePending = ref(new Set<number>())
-const recipesUnderCollectionPending = ref(new Set<number>())
+const likeStore = useRecipeLikeStore()
 
-const collectionLoadingStates = ref(new Set<number>())
+const likeLoadingStates = computed(() => {
+	return new Set([...likeStore.recipesWithPendingLike.keys()])
+})
 
 async function onToggleRecipeLike(recipeId: number, collectionId: number) {
-	recipesUnderLikePending.value.add(recipeId)
-	const result = await toggleFavourite(recipeId)
-	ElMessage.success(result.message)
-	console.log(result)
+	await likeStore.likeRecipe(recipeId)
+
 	/** Перезапрашиваем кэш */
 	await Promise.all([
 		await queryClient.invalidateQueries({
 			queryKey: ['recipes/favourite'],
 		}),
-		await store.getCollectionRecipeList(collectionId)
+		await store.getAllCollectionsRecipes(store.collectionList.map(({ id }) => id))
 	])
-	recipesUnderLikePending.value.delete(recipeId)
 }
 
 async function onToggleRecipeCollection(recipeId: number) {
-	await store.toggleRecipeCollection(recipeId)
+	modalCreateStore.openModalRecipe()
 }
 </script>
 

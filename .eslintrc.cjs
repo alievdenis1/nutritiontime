@@ -20,13 +20,14 @@ module.exports = {
 	plugins: ['@typescript-eslint'],
 	ignorePatterns: ['dist'],
 	rules: {
-		'vue/html-indent': ['error', 'tab', {
+		'vue/html-indent': ['warn', 'tab', {
 			'attribute': 1,
 			'baseIndent': 1,
 			'closeBracket': 0,
 			'alignAttributesVertically': true,
 			'ignores': []
 		}],
+		'no-mixed-spaces-and-tabs': ['warn'],
 		"vue/max-attributes-per-line": ["error", {
 			"singleline": {
 				"max": 1

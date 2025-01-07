@@ -1,0 +1,16 @@
+{
+    "ru": {
+        "step": "Шаг {{idx}}",
+        "addStep": "Добавить шаг",
+        "uploadPhoto": "Загрузить фотографию шага",
+        "errorMessage": "Не удалось загрузить эту фотографию. Попробуйте другую",
+        "stepDescription": "Описание шага"
+    },
+    "en": {
+        "step": "Step {{idx}}",
+        "addStep": "Add step",
+        "uploadPhoto": "Upload step photo",
+        "stepDescription": "Step description",
+        "errorMessage": "Failed to upload this photo. Try another one"
+    }
+}

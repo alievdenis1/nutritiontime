@@ -1,6 +1,6 @@
 import { getKitchenwareList } from '../api'
 import { useQuery } from '@tanstack/vue-query'
-import { Kitchenware } from 'entities/Kitchenware'
+import type { KitchenwareDto } from 'entities/Kitchenware/api/kitchenware.ts'
 
 export const useKitchenwareList = () => {
 	const {
@@ -8,9 +8,11 @@ export const useKitchenwareList = () => {
 		isLoading: isLoadingKitchenwareList
 	} = useQuery({
 		queryKey: ['kitchenwareList'],
-		queryFn: getKitchenwareList,
-
-		initialData: [] as Kitchenware[]
+		queryFn: async () => {
+			const response = await getKitchenwareList()
+			return response.data
+		},
+		initialData: [] as KitchenwareDto[]
 	})
 
 	return {

@@ -1,0 +1,24 @@
+{
+  "ru": {
+    "basicInformation": "Основная информация",
+    "spicinessAndDifficulty": "Сложность и острота",
+    "cookingTime": "Время на приготовление",
+    "nutritionalValueTitle": "Пищевая ценность",
+    "ingredientsTitle": "Ингредиенты",
+    "stepByStep": "Пошаговая инструкция",
+    "kitchenware": "Кухонный инвентарь",
+    "tagsTitle": "Теги",
+    "further": "Далее"
+  },
+  "en": {
+    "stepByStep": "Step-by-step instructions",
+    "basicInformation": "Basic information",
+    "spicinessAndDifficulty": "Spiciness and Difficulty",
+    "cookingTime": "Cooking time",
+    "nutritionalValueTitle": "Nutritional value",
+    "ingredientsTitle": "Ingredients",
+    "kitchenware": "Kitchen tools",
+    "tagsTitle": "Tags",
+    "further": "Next"
+  }
+}

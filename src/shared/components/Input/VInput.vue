@@ -51,7 +51,7 @@
 		</span>
 		<div
 			v-if="$slots['list'] && props.searchable && isFocused"
-			class="absolute top-full right-0 left-0 bg-white"
+			class="absolute top-full right-0 left-0 bg-white custom-scrollbar max-h-[200px]"
 			:style="{
 				zIndex: props.zIndex
 			}"
@@ -125,7 +125,7 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const titleClasses = ref<string>('')
 
-const hasError = computed((): boolean => props.error || (!!props.errorMessage && props.error))
+const hasError = computed(() => props.error || (!!props.errorMessage && props.error))
 
 const inputClasses = computed(() => {
 	const classes = []
@@ -252,5 +252,25 @@ defineExpose({ onAutofocus })
     .readonly {
         pointer-events: none;
     }
+}
+
+.custom-scrollbar {
+  overflow-y: auto;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-lightGray;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-forestGreen rounded;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-darkGray;
 }
 </style>

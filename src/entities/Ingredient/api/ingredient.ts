@@ -14,7 +14,7 @@ export async function getIngredientList(
 	params: IngredientListParams = {},
 	signal?: AbortSignal
 ) {
-	const response = await api.get<PaginationData<IngredientDto[]>>(
+	const response = await api.get<PaginationData<IngredientDto>>(
 		'/public/ingredients',
 		{
 			signal,

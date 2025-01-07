@@ -17,7 +17,9 @@
 			class="accordion-content"
 			:style="contentStyle"
 		>
-			<slot />
+			<div ref="contentContainer">
+				<slot />
+			</div>
 		</div>
 	</div>
 </template>
@@ -25,6 +27,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUpdated } from 'vue'
 import { IconArrow } from 'shared/components/Icon'
+import { useElementSize } from '@vueuse/core'
 
 const props = withDefaults(defineProps<{
 	title: string;
@@ -36,31 +39,33 @@ const props = withDefaults(defineProps<{
 
 const isOpen = ref(props.isOpen || false)
 const content = ref<HTMLElement | null>(null)
+const contentContainer = ref<HTMLElement>()
+
+const { height } = useElementSize(contentContainer, undefined, { box: 'border-box' })
 
 const contentStyle = computed(() => ({
-	maxHeight: isOpen.value ? `${content.value?.scrollHeight}px` : '0',
+	maxHeight: isOpen.value ? `${height.value}px` : '0',
 }))
 
 const toggle = () => {
 	isOpen.value = !isOpen.value
 }
 
-const updateHeight = () => {
-	if (isOpen.value && content.value) {
-		content.value.style.maxHeight = `${content.value.scrollHeight}px`
-	}
-}
-
-onMounted(updateHeight)
-onUpdated(updateHeight)
-
-watch(isOpen, (newVal) => {
-	if (newVal) {
-		content.value?.style.setProperty('max-height', `${content.value.scrollHeight}px`)
-	} else {
-		content.value?.style.setProperty('max-height', '0')
-	}
-})
+// const updateHeight = () => {
+// 	if (isOpen.value && content.value) {
+// 		content.value.style.maxHeight = `${content.value.scrollHeight}px`
+// 	}
+// }
+//
+// onMounted(updateHeight)
+//
+// watch(isOpen, (newVal) => {
+// 	if (newVal) {
+// 		content.value?.style.setProperty('max-height', `${content.value.scrollHeight}px`)
+// 	} else {
+// 		content.value?.style.setProperty('max-height', '0')
+// 	}
+// })
 </script>
 
 <style scoped>

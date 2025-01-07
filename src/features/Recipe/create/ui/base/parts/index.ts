@@ -1,0 +1,8 @@
+export { default as MainInfo } from './main-info/MainInfo.vue'
+export { default as DifficultyAndSpiciness } from './difficulty-and-spiciness/DifficultyAndSpiciness.vue'
+export { default as CookingTime } from './cooking-time/CookingTime.vue'
+export { default as IngredientsPart } from './ingredients/IngredientsPart.vue'
+export { default as NutritionalValue } from './nutritional-value/NutritionalValue.vue'
+export { default as KitchenwarePart } from './kitchenware/KitchenwarePart.vue'
+export { default as TagsPart } from './tags/TagsPart.vue'
+export { default as PerStepInstruction } from './per-step-instruction/StepByStepRecipe.vue'

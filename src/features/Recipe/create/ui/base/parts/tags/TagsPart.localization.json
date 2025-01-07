@@ -1,0 +1,12 @@
+{
+    "ru": {
+        "selectTag": "Выбрать теги",
+        "addTagTitle": "Добавление тега",
+        "addSelectedTag": "Добавить выбранные"
+    },
+    "en": {
+        "selectTag": "Select tags",
+        "addTagTitle": "Add tag",
+        "addSelectedTag": "Add selected tags"
+    }
+}
