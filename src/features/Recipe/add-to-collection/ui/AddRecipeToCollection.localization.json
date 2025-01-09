@@ -1,0 +1,20 @@
+{
+  "ru": {
+    "saveToCollection": "Сохранить в коллекцию",
+    "collection": "Коллекция",
+    "newCollection": "Новая коллекция",
+    "save": "Сохранить",
+    "saveCollectionAndSaveRecipe": "Создать коллекцию и сохранить рецепт",
+    "nameIsRequiredMessage": "Поле название обязательно",
+    "collectionName": "Название коллекции"
+  },
+  "en": {
+    "saveToCollection": "Save to collection",
+    "collection": "Collection",
+    "newCollection": "New collection",
+    "save": "Save",
+    "saveCollectionAndSaveRecipe": "Create collection and save recipe",
+    "collectionName": "Collection name",
+    "nameIsRequiredMessage": "Field Name is required"
+  }
+}

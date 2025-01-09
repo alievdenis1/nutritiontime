@@ -12,6 +12,32 @@ export const useSearchStore = defineStore('search-store', () => {
 	const secondModalIsActive = ref(false)
 	const selectedIngredients = ref<Ingredient[]>([])
 
+	const addCollectionToRecipe = (recipeId: number, collectionId: number) => {
+		const recipeIndex = recipes.value.findIndex(recipe => recipe.id === recipeId)
+
+		if (recipeIndex === -1) {
+			return
+		}
+
+		if (!recipes.value[recipeIndex].collectionIds) {
+			recipes.value[recipeIndex].collection_ids = [collectionId]
+		} else {
+			recipes.value[recipeIndex].collection_ids.push(collectionId)
+		}
+	}
+
+	const addRecipeToFavourite = (recipeId: number, action: 'add' | 'remove') => {
+		const recipeIndex = recipes.value.findIndex(recipe => recipe.id === recipeId)
+
+		if (recipeIndex === -1) {
+			return
+		}
+
+		recipes.value[recipeIndex].is_favorited = action === 'add'
+
+		recipes.value[recipeIndex].likes_count += (action === 'add') ? 1 : -1
+	}
+
 	const isExcludeIngredientsMode = ref(false)
 
 	const filters = reactive<GetRecipeListRequestDto>({
@@ -115,6 +141,8 @@ export const useSearchStore = defineStore('search-store', () => {
 		totalRecipes,
 		filters,
 		isExcludeIngredientsMode,
-		selectedIngredients
+		selectedIngredients,
+		addCollectionToRecipe,
+		addRecipeToFavourite
 	}
 })

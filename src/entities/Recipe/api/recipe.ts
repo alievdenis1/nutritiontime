@@ -2,6 +2,7 @@ import useApi, { api } from '@/shared/lib/api/use-api'
 import { PaginationData } from '@/shared/lib/types/pagination-data'
 
 import { MaybeRefOrGetter } from 'vue'
+import { Author } from 'entities/Recipe/DetailedCardRecipe/types/recipe.ts'
 
 export interface RecipeDto {
 	'id': number,
@@ -54,6 +55,56 @@ export interface RecipeDto {
 	}
 }
 
+export type IngredientDto = {
+	'id': number,
+	'name': string,
+	'created_at': string,
+	'updated_at': string,
+	'pivot': {
+		'recipe_id': number,
+		'ingredient_id': number,
+		'amount': number,
+		'unit': 'g' | 'pcs',
+		'created_at': string,
+		'updated_at': string
+	}
+}
+
+type TagDto = {
+	'id': number,
+	'name': string,
+	'category': string,
+	'created_at': string,
+	'updated_at': string,
+	'pivot': {
+		'recipe_id': number,
+		'tag_id': number,
+		'created_at': string,
+		'updated_at': string
+	}
+}
+
+type KitchenwareDto = {
+	'id': number,
+	'name': string,
+	'created_at': string,
+	'updated_at': '2024-10-22T13:15:27.000000Z',
+	'pivot': {
+		'recipe_id': number,
+		'kitchenware_item_id': number,
+		'quantity': number,
+		'created_at': string,
+		'updated_at': string
+	}
+}
+
+export type FullRecipeDto = RecipeDto & {
+	author: Author
+	ingredients: IngredientDto[]
+	tags: TagDto[],
+	kitchenware: KitchenwareDto[]
+}
+
 export type GetRecipeListRequestDto = {
 	search?: string
 	category_id?: string
@@ -103,24 +154,36 @@ export function getRecipeList(params: MaybeRefOrGetter<GetRecipeListRequestDto>)
 }
 
 type RecipeParams = {
-	id: string;
+	id: number;
 }
 
 export function getRecipe(params: RecipeParams) {
 	return useApi<RecipeDto>('get', `/recipes/${params.id}`)
 }
 
+export async function getRecipeDetails(params: RecipeParams, signal?: AbortSignal) {
+	const response = await api.get<{ recipe: FullRecipeDto }>(`/recipes/${params.id}`, {
+		signal
+	})
+	return response.data.recipe
+}
+
 export function getMyRecipeList() {
 	return useApi<PaginationData<RecipeDto>>('get', '/recipes/my')
 }
 
+export async function getMyRecipes() {
+	const response = await api.get<PaginationData<RecipeDto[]>>('/recipes/my')
+	return response.data
+}
+
 export async function getFavoriteRecipeList() {
-	const response = await api.get<RecipeDto[]>('/recipes/favorites')
+	const response = await api.get<PaginationData<RecipeDto[]>>('/recipes/favorites')
 	return response.data
 }
 
 export async function toggleFavourite(recipeId: number, signal?: AbortSignal) {
-	const response = await api.post<{ isFavourited: boolean }>(`/recipes/${recipeId}/favorite`, {
+	const response = await api.post<{ is_favorited: boolean }>(`/recipes/${recipeId}/favorite`, {
 		signal
 	})
 	return response.data
@@ -131,5 +194,18 @@ export type CreateRecipeDto = Record<string, any>
 
 export async function createRecipe(recipeDto: CreateRecipeDto) {
 	const response = await api.postForm<{ message: string, recipe: RecipeDto }>('/recipes', recipeDto)
+	return response.data
+}
+
+export type UpdateRecipeCollectionsDto = {
+	id: number,
+	collection_ids: number[]
+}
+
+export async function updateRecipeCollections(dto: CreateRecipeDto) {
+	const response = await api.post(`/recipes/${dto.id}/collections`, {
+		collection_ids: dto.collection_ids
+	})
+
 	return response.data
 }

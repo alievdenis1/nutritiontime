@@ -1,6 +1,6 @@
 <template>
 	<VAccordion :title="t('nutritionalValue')">
-		<div class="mt-4 space-y-6">
+		<div class="pt-4 space-y-6">
 			<div
 				v-for="(nutrient, key) in nutrients"
 				:key="key"

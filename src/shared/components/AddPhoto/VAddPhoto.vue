@@ -29,6 +29,7 @@
 				ref="fileInput"
 				type="file"
 				class="hidden"
+				:accept="acceptedImageTypes"
 				@change="handleFileUpload"
 			>
 			<div class="photo-upload-content flex items-center gap-2">
@@ -74,6 +75,7 @@ const props = withDefaults(defineProps<AddPhoto & {
 
 const uploadedImage = ref<string | null>(props.initialImage)
 const imageTypes = ['jpeg', 'jpg', 'png']
+const acceptedImageTypes = imageTypes.map((type) => `image/${type}`).join(', ')
 
 const errorClasses = computed(() => props.error ? 'border-1 border-solid border-[#f04f4f]' : '')
 
@@ -92,7 +94,8 @@ const validateFileType = (file: File): boolean => {
 const validateResult = (file: File): void => {
 	const image = new Image()
 
-	image.onerror = (): void => {
+	image.onerror = (e): void => {
+		console.log('ERROR_EVENT', e)
 		onUploadError()
 	}
 
@@ -112,6 +115,7 @@ const handleFileUpload = (event: Event): void => {
 			const isValidType = validateFileType(file)
 
 			if (!isValidType) {
+				console.log('IS_VALID_TYPE', isValidType, file.type)
 				onUploadError()
 				return
 			}

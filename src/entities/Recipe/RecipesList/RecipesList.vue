@@ -13,7 +13,7 @@
 				<div class="relative">
 					<el-image
 						class="img object-cover rounded-[20px] h-full"
-						:src="recipe.image"
+						:src="normalizeImageUrl(recipe.image)"
 						alt="recipe image"
 					>
 						<template #error>
@@ -83,27 +83,37 @@
 					</button>
 				</div>
 				<div class="flex items-center justify-between gap-[16px]">
-					<IconFavorites
-						v-loading="collectionLoadingStates.has(recipe.id)"
-						:is-liked="!!recipe.collection_ids?.length"
-						active-color="#319A6E"
-						:disabled="collectionLoadingStates.has(recipe.id)"
+					<!--					<IconFavorites-->
+					<!--						v-loading="collectionLoadingStates.has(recipe.id)"-->
+					<!--						:is-liked="!!recipe.collection_ids?.length"-->
+					<!--						active-color="#319A6E"-->
+					<!--						:disabled="collectionLoadingStates.has(recipe.id)"-->
+					<!--					/>-->
+					<slot
+						name="addToCollection"
+						v-bind="{ recipe }"
 					/>
-					<div @click="toggleLike(recipe.id)">
-						<div class="flex justify-center items-center gap-[8px] text-[#535353]">
-							<IconHeart
-								v-loading="likeLoadingStates.has(recipe.id)"
-								:is-liked="recipe.is_favorited"
-								icon-color="#319A6E"
-								:disabled="likeLoadingStates.has(recipe.id)"
-								@toggle="toggleCollection(recipe.id)"
-							/>
 
-							<p :class="{ 'text-green': recipe.is_favorited }">
-								{{ recipe.likes_count }}
-							</p>
-						</div>
-					</div>
+					<slot
+						name="toggleFavourite"
+						v-bind="{ recipe }"
+					/>
+
+					<!--          <div @click="toggleLike(recipe.id)">-->
+					<!--						<div class="flex justify-center items-center gap-[8px] text-[#535353]">-->
+					<!--							<IconHeart-->
+					<!--								v-loading="likeLoadingStates.has(recipe.id)"-->
+					<!--								:is-liked="recipe.is_favorited"-->
+					<!--								icon-color="#319A6E"-->
+					<!--								:disabled="likeLoadingStates.has(recipe.id)"-->
+					<!--								@toggle="toggleCollection(recipe.id)"-->
+					<!--							/>-->
+
+					<!--							<p :class="{ 'text-green': recipe.is_favorited }">-->
+					<!--								{{ recipe.likes_count }}-->
+					<!--							</p>-->
+					<!--						</div>-->
+					<!--					</div>-->
 				</div>
 			</div>
 		</div>
@@ -116,6 +126,7 @@ import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from 'share
 import { RecipeItem } from './type'
 import { useRouter } from 'vue-router'
 import CreateCollection from '../Search/modal/CreateCollection.vue'
+import { normalizeImageUrl } from 'shared/lib/mapping/normalize-image-url.ts'
 
 const router = useRouter()
 
@@ -136,6 +147,11 @@ interface Props {
 const emit = defineEmits<{
 	toggleLike: [recipeId: number]
 	toggleCollection: [recipeId: number]
+}>()
+
+defineSlots<{
+	addToCollection(scope: { recipe: RecipeItem }): any,
+	toggleFavourite(scope: { recipe: RecipeItem }): any
 }>()
 
 const props = withDefaults(defineProps<Props>(), {

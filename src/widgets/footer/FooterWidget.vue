@@ -39,7 +39,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
-import { CreateRecipeModal } from 'features/Recipe/create'
+import { CreateRecipeModal } from '@/features/Recipe/manage'
 import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()

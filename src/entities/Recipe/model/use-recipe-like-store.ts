@@ -14,14 +14,23 @@ export const useRecipeLikeStore = defineStore('recipe-like-store', () => {
 
 		recipesWithPendingLike.value.set(recipeId, new AbortController())
 
-		const response = await toggleFavourite(
-			recipeId,
-			recipesWithPendingLike.value.get(recipeId)?.signal
-		)
+		let isFavourite: boolean | null = false
 
-		recipesWithPendingLike.value.delete(recipeId)
+		try {
+			const response = await toggleFavourite(
+				recipeId,
+				recipesWithPendingLike.value.get(recipeId)?.signal
+			)
 
-		return response.isFavourited
+			isFavourite = response.is_favorited
+		} catch(err) {
+			console.error(err)
+			isFavourite = null
+		} finally {
+			recipesWithPendingLike.value.delete(recipeId)
+		}
+
+		return isFavourite
 	}
 
 	return {

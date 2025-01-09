@@ -9,7 +9,7 @@
 					class="loading"
 				>
 					<div class="loading__spinner">
-						<v-loading />
+						<VLoading />
 					</div>
 				</div>
 				<router-view v-else />
@@ -32,6 +32,7 @@ import WebApp from '@twa-dev/sdk'
 import { ElConfigProvider } from 'element-plus'
 import ru from 'element-plus/es/locale/lang/ru'
 import en from 'element-plus/es/locale/lang/en'
+import { VLoading } from 'shared/components/Loading'
 
 const route = useRoute()
 const router = useRouter()
@@ -104,6 +105,8 @@ if (twa) {
 authUser()
 
 onMounted(() => {
+	console.log('hahahahahah')
+
 	authUser().then(() => {
 		handleStartParamRedirect()
 	})

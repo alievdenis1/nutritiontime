@@ -3,7 +3,7 @@
 		<div>
 			<div
 				ref="dropdownParent"
-				class="mt-4 relative"
+				class="pt-4 relative"
 			>
 				<div
 					@click="toggleIngredientsDropdown"
@@ -34,7 +34,6 @@
 									class="sticky py-1 px-4 w-full h-full"
 									autofocus
 									placeholder="Введите название ингредиента"
-									@update:model-value="searchIngredients"
 								>
 							</div>
 						</div>
@@ -60,14 +59,14 @@
 							always
 						>
 							<div
-								v-if="!ingredientsList.length"
+								v-if="!filteredIngredients.length"
 								class="h-4 px-4 py-2 h-full"
 							>
 								{{ t('no_ingredients_found') }}
 							</div>
 
 							<div
-								v-for="ingredient in ingredientsList"
+								v-for="ingredient in filteredIngredients"
 								:key="ingredient.id"
 								class="px-4 py-2 hover:bg-lightGray cursor-pointer"
 								:class="{ 'bg-lightGray': selectedIngredientsIdSet.has(ingredient.id) }"
@@ -103,9 +102,10 @@ import { useTranslation } from '@/shared/lib/i18n'
 import localization from './SearchFilter.localization.json'
 import { useSearchStore } from 'entities/Recipe/Search'
 import { computed, onMounted, onScopeDispose, ref, watch } from 'vue'
-import { getIngredientList } from 'entities/Ingredient'
+import { getIngredientList, useIngredientList } from 'entities/Ingredient'
 import { Check as ElIconCheck } from '@element-plus/icons-vue'
 import { onClickOutside, useElementBounding } from '@vueuse/core'
+import { softFilterBySearchQuery } from 'shared/lib/mapping/filtering.ts'
 
 type Ingredient = {
 	name: string
@@ -127,12 +127,19 @@ onClickOutside(dropdown, () => {
 
 const store = useSearchStore()
 
-const ingredientsList = ref([])
-const isLoadingIngredients = ref(false)
+const {
+	ingredientList,
+	isLoadingIngredients
+} = useIngredientList()
+
 const query = ref('')
 
-watch(query, (nV) => {
-	isIngredientsDropdownVisible.value = !!nV.trim()
+const filteredIngredients = computed(() => {
+	return softFilterBySearchQuery({
+		data: ingredientList.value,
+		key: 'name',
+		query: query.value
+	})
 })
 
 const isIngredientsDropdownVisible = ref(false)
@@ -144,19 +151,6 @@ const toggleIngredientsDropdown = () => {
 		query.value = ''
 	}
 }
-
-const searchIngredients = async () => {
-	isLoadingIngredients.value = true
-
-	const ingredientsListApi = getIngredientList({ search: query.value })
-	await ingredientsListApi.execute()
-	ingredientsList.value = ingredientsListApi.data.value.data
-	isLoadingIngredients.value = false
-}
-
-onMounted(() => {
-	searchIngredients()
-})
 
 const selectedIngredients = ref<Ingredient[]>([])
 

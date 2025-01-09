@@ -17,9 +17,9 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-	iconColor: string,
-	iconWidth: number,
-	iconHeight: number,
+	iconColor?: string,
+	iconWidth?: number,
+	iconHeight?: number,
 }>(), {
 	iconColor: '#ffffff',
 	iconWidth: 12,

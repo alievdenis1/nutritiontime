@@ -1,0 +1,10 @@
+{
+  "ru": {
+    "title": "Коллекция",
+    "placeholder": "Выбрать коллекцию"
+  },
+  "en": {
+    "title": "Collection",
+    "placeholder": "Choose collection"
+  }
+}

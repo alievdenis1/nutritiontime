@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-	iconColor: string,
+	iconColor?: string,
 }>(), {
 	iconColor: '#319A6E'
 })

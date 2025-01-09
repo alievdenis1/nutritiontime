@@ -5,9 +5,9 @@
 			class="w-full h-[361px]"
 		>
 			<img
-				:src="recipe?.image ?? ''"
+				:src="normalizeImageUrl(recipe?.image ?? '')"
 				:alt="recipe?.title ?? ''"
-				class="w-full h-[365px] object-cover absolute top-0 left-0"
+				class="w-full h-[365px] object-contain absolute top-0 left-0"
 			>
 		</div>
 
@@ -19,24 +19,18 @@
 		>
 			<div class="flex justify-end items-center p-[16px]">
 				<div class="flex space-x-2">
-					<button
-						v-for="(icon, index) in icons"
-						:key="index"
-						class="flex items-center justify-center rounded-full shadow-custom transition-colors duration-300 gap-1"
-						:class="[buttonBackgroundClass, icon.class]"
-						@click="toggleIcon(index)"
-					>
-						<component
-							:is="icon.component"
-							:class="icon.iconClass"
-							:is-liked="Number(icon.text) > 0 || icon.isActive"
-							:active-color="icon.activeColor || '#319A6E'"
-						/>
-						<span
-							v-if="icon.text"
-							:class="['text-slateGray text-sm font-medium', { 'text-green-500': Number(icon.text) > 0 }]"
-						>{{ icon.text }}</span>
-					</button>
+					<slot
+						name="shareRecipe"
+						v-bind="{ recipe }"
+					/>
+					<slot
+						name="addToCollection"
+						v-bind="{ recipe }"
+					/>
+					<slot
+						name="toggleFavourite"
+						v-bind="{ recipe }"
+					/>
 				</div>
 			</div>
 		</div>
@@ -63,11 +57,11 @@
 		<div class="mx-auto p-[16px]">
 			<div class="flex items-center mb-[16px] mt-[24px]">
 				<img
-					:src="recipe?.author.image"
-					:alt="recipe?.author.name"
+					:src="recipe?.author?.image"
+					:alt="recipe?.author?.name"
 					class="w-8 h-8 rounded-full mr-2"
 				>
-				<span class="text-sm text-slateGray">{{ recipe?.author.name }}</span>
+				<span class="text-sm text-slateGray">{{ recipe?.author?.name }}</span>
 				<div
 					v-if="recipe?.comments?.length && recipe.comments.length > 0"
 					class=" ml-auto flex items-center"
@@ -109,11 +103,7 @@
 			</div>
 
 			<RecipeDetailsTabs
-				:cooking-steps="recipe?.cookingSteps ?? []"
-				:recipe-info="recipe?.recipeInfo ?? {}"
-				:nutrition-info="recipe?.nutritionInfo ?? {}"
-				:kitchenware="recipe?.kitchenware ?? []"
-				:tags="recipe?.tags ?? []"
+				:recipe="recipe"
 			/>
 
 			<div class="shadow-custom mt-[40px] p-[16px] rounded-[12px] flex items-center justify-between">
@@ -222,12 +212,12 @@
 					</div>
 					<div class="flex items-center gap-[8px] mt-[12px]">
 						<img
-							:src="recipe?.nftOwner.image"
-							:alt="recipe?.nftOwner.name"
+							:src="recipe?.nftOwner?.image"
+							:alt="recipe?.nftOwner?.name"
 							class="w-[20px] h-[20px]"
 						>
 						<div class="text-xs text-slateGray">
-							{{ recipe?.nftOwner.name }}
+							{{ recipe?.nftOwner?.name }}
 						</div>
 					</div>
 				</div>
@@ -341,26 +331,34 @@ import { useRouter } from 'vue-router'
 import { Recipe } from './types/recipe'
 
 import CreateCollection from '../Search/modal/CreateCollection.vue'
+import { useQuery } from '@tanstack/vue-query'
+import { getRecipeDetails } from 'entities/Recipe/api'
+import { useRecipeLikeStore } from 'entities/Recipe/model/use-recipe-like-store.ts'
+import { normalizeImageUrl } from 'shared/lib/mapping/normalize-image-url.ts'
 
-const store = useRecipeStore()
+const props = defineProps<{
+	recipeId: number
+}>()
+
 const searchStore = useSearchStore()
 const router = useRouter()
+const likeStore = useRecipeLikeStore()
 
-const recipe: Ref<Recipe | undefined> = ref(store.currentRecipe)
+const {
+	data: recipe,
+	isLoading: isLoadingRecipe
+} = useQuery({
+	queryKey: ['recipe/details', () => props.recipeId],
+	queryFn: async () => await getRecipeDetails({ id: props.recipeId }),
+	cacheTime: 60 * 1000 /** 60 seconds */,
+	initialData: null
+})
 
 const { t } = useTranslation(Localization)
-const likedStates = ref<Record<string | number, boolean>>({})
-const isLiking = ref<Record<string | number, boolean>>({})
+
 const headerRef = ref<HTMLElement | null>(null)
 const imageContainer = ref<HTMLElement | null>(null)
 const isImageVisible = ref(true)
-
-if (Array.isArray(recipe.value)) {
-	recipe.value.forEach((rec: Recipe) => {
-		likedStates.value[rec.id] = false
-		isLiking.value[rec.id] = false
-	})
-}
 
 const isHeaderTransparent = computed(() => isImageVisible.value)
 

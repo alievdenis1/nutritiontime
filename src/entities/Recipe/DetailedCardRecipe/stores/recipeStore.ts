@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, MaybeRefOrGetter, Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Recipe } from '../types/recipe'
 import { mockRecipe } from '../mocks/mock-recipes-item'
-import { getFavoriteRecipeList, getRecipeList } from 'entities/Recipe/api'
+import { getFavoriteRecipeList, getRecipeDetails, getRecipeList } from 'entities/Recipe/api'
 import { RecipesItem } from 'entities/Recipe/RecipesList'
 import { useFavouriteRecipes } from 'entities/Recipe/model/use-favourite-recipes.ts'
+import { useQuery } from '@tanstack/vue-query'
+import { ReadonlyRefOrGetter } from '@vueuse/core'
 
 // TODO: похоже, что этот файл нужно перенести в Entity/Recipe/model/store.ts
 // Так как он много где используется

@@ -31,7 +31,7 @@
 		</TabsContent>
 
 		<TabsContent :value="RECIPE_CREATION_VARIANTS.AI">
-			<CreateAi />
+			<!--	<CreateAi /> -->
 		</TabsContent>
 	</TabsMain>
 </template>
@@ -41,8 +41,8 @@ import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/component
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateRecipeTabs.localization.json'
 import { IconAi } from 'shared/components/Icon'
-import { CreateBaseRecipe } from 'features/Recipe/create'
-import { RecipeCreationVariants } from 'features/Recipe/create/model/creation-variants.ts'
+import { CreateBaseRecipe } from 'features/Recipe/manage'
+import { RecipeCreationVariants } from 'features/Recipe/manage/model/creation-variants.ts'
 import { RECIPE_CREATION_VARIANTS } from 'entities/Recipe/model/use-navigate-to-recipe-creation.ts'
 
 const { t } = useTranslation(localizations)

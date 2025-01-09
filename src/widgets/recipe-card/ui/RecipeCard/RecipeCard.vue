@@ -221,7 +221,7 @@ import { IngredientsBlock } from '@/entities/Ingredient'
 import { CommentItem, CommentList } from '@/entities/Comment'
 // TODO: нужен метод для получения списка комментариев по recipeId
 
-import { ToggleFavoriteButton } from '@/features/Recipe/addToFavorite'
+import { ToggleFavoriteButton } from 'src/features/Recipe/toggle-favourite'
 import { AddCommentButton } from '@/features/Comment/addComment'
 
 import { useIntersectionObserver } from '../../lib/useIntersectionObserver'

@@ -20,7 +20,7 @@
 			:is-open="true"
 			class="flex-grow overflow-y-auto p-4 recipe-search"
 		>
-			<div class="mb-6">
+			<div class="pb-6">
 				<h3 class="text-darkGray text-sm mb-[16px] mt-[20px]">
 					{{ t('cuisine') }}
 				</h3>
@@ -69,6 +69,7 @@
 				</Simplebar>
 			</div>
 			<SearchSlider />
+			<div class="pb-5" />
 		</VAccordion>
 		<SearchIngredients />
 		<SearchNutritional />
@@ -87,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, watchEffect } from 'vue'
 import { IconCheck } from 'shared/components/Icon'
 import { VAccordion } from 'shared/components/Accordion'
 import { VButton, ButtonColors } from 'shared/components/Button'
@@ -102,8 +103,8 @@ import { Loading as ElIconLoading } from '@element-plus/icons-vue'
 
 import { useSearchStore } from 'entities/Recipe/Search'
 import { useRouter } from 'vue-router'
-import { getCuisineList } from 'entities/Cuisine'
-import { getDietTypeList } from 'entities/DietType'
+import { useCuisineList } from 'entities/Cuisine'
+import { useDietTypeList } from 'entities/DietType'
 
 const store = useSearchStore()
 const { t } = useTranslation(localization)
@@ -162,10 +163,7 @@ const updateFilters = () => {
 	// Здесь можно добавить логику обновления фильтров
 }
 
-const getCuisinesApi = getCuisineList()
-const getDietTypesApi = getDietTypeList()
-
-onMounted(async () => {
+onMounted(() => {
 	setTimeout(() => {
 		const simplebarElement = document.querySelector('.simplebar-content-wrapper')
 		if (simplebarElement) {
@@ -173,11 +171,20 @@ onMounted(async () => {
 			simplebarInstance.recalculate()
 		}
 	}, 100)
+})
 
-	await Promise.allSettled([getCuisinesApi.execute(), getDietTypesApi.execute()])
+const {
+	cuisines: cuisineList,
+	// isLoadingCuisines
+} = useCuisineList()
+const {
+	dietTypeList,
+	// isLoadingDietTypes
+} = useDietTypeList()
 
-	cuisines.value = getCuisinesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
-	diets.value = getDietTypesApi.data.value.map(({ id, name }) => ({ id, name, checked: false }))
+watchEffect(() => {
+	cuisines.value = cuisineList.value.map(({ id, name }) => ({ id, name, checked: false }))
+	diets.value = dietTypeList.value.map(({ id, name }) => ({ id, name, checked: false }))
 })
 
 </script>
