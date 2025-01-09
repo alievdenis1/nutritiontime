@@ -7,11 +7,19 @@
 			ref="imageContainer"
 			class="w-full h-[361px]"
 		>
-			<img
-				:src="normalizeImageUrl(recipe?.image ?? '')"
-				:alt="recipe?.title ?? ''"
-				class="w-full h-[365px] object-contain absolute top-0 left-0"
+			<ElImage
+				class="w-full h-[343px] object-cover rounded-[12px]"
+				:src="normalizeImageUrl(recipe.image ?? '')"
+				:alt="recipe.title"
 			>
+				<template #error>
+					<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+						<el-icon>
+							<el-icon-picture />
+						</el-icon>
+					</div>
+				</template>
+			</ElImage>
 		</div>
 
 		<div
@@ -61,11 +69,19 @@
 
 		<div class="mx-auto p-[16px]">
 			<div class="flex items-center mb-[16px] mt-[24px]">
-				<img
+				<ElImage
 					:src="recipe?.author?.image"
 					:alt="recipe?.author?.name"
 					class="w-8 h-8 rounded-full mr-2"
 				>
+					<template #error>
+						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+							<el-icon>
+								<el-icon-user />
+							</el-icon>
+						</div>
+					</template>
+				</ElImage>
 				<span class="text-sm text-slateGray">{{ recipe?.author?.name }}</span>
 				<div
 					v-if="recipe?.comments?.length && recipe.comments.length > 0"
@@ -335,6 +351,7 @@ import { useRecipeLikeStore } from 'entities/Recipe/model/use-recipe-like-store.
 import { normalizeImageUrl } from 'shared/lib/mapping/normalize-image-url.ts'
 import { useRecipeDetails } from 'entities/Recipe/model/use-recipe-details.ts'
 import { FullRecipe } from 'entities/Recipe/model/recipe.ts'
+import { ElImage } from 'element-plus'
 
 const props = defineProps<{
 	recipeId: number

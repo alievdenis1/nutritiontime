@@ -1,5 +1,5 @@
 <template>
-	<div
+	<label
 		class="photo-upload flex justify-center items-center"
 		:class="errorClasses"
 		:style="{ height: `${heightMain}px`, background: backgrounds }"
@@ -44,7 +44,7 @@
 				>{{ title }}</span>
 			</div>
 		</label>
-	</div>
+	</label>
 	<p
 		v-if="props.error"
 		class="text-xs text-coralRed max-w-xs mb-[24px]"

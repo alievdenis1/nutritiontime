@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watch, watchEffect } from 'vue'
 import { IconCheck } from 'shared/components/Icon'
 import { VAccordion } from 'shared/components/Accordion'
 import { VButton, ButtonColors } from 'shared/components/Button'
@@ -162,16 +162,6 @@ const toggleCheckbox = (option: FilterOption) => {
 const updateFilters = () => {
 	// Здесь можно добавить логику обновления фильтров
 }
-
-onMounted(() => {
-	setTimeout(() => {
-		const simplebarElement = document.querySelector('.simplebar-content-wrapper')
-		if (simplebarElement) {
-			const simplebarInstance = new SimpleBar(simplebarElement as HTMLElement)
-			simplebarInstance.recalculate()
-		}
-	}, 100)
-})
 
 const {
 	cuisines: cuisineList,
