@@ -100,10 +100,12 @@ export const useModalStore = defineStore('modal', () => {
 	}
 
 	const collectionListApi = getCollectionList()
-	const isLoadingCollections = computed(() => collectionListApi.loading.value)
+	const isLoadingCollections = ref(false)
 	const getCollections = async () => {
-		await collectionListApi.execute()
+		isLoadingCollections.value = true
+		await collectionListApi.execute(false)
 		savedCollections.value = collectionListApi.data.value
+		isLoadingCollections.value = false
 	}
 
 	const recipesByCollections = ref(new Map<number, Recipe[]>())
@@ -123,8 +125,12 @@ export const useModalStore = defineStore('modal', () => {
 		loadingCollectionsRecipesSet.value.delete(id)
 	}
 
+	const isLoadingAllRecipes = ref(false)
+
 	const getAllCollectionsRecipes = async (ids: number[]) => {
+		isLoadingAllRecipes.value = true
 		await Promise.allSettled(ids.map(id => getCollectionRecipeList(id)))
+		isLoadingAllRecipes.value = false
 	}
 
 	return {
@@ -141,7 +147,7 @@ export const useModalStore = defineStore('modal', () => {
 		deleteCollection,
 		collectionId,
 		currentCollection,
-
+		isLoadingAllRecipes,
 		getCollections,
 		isLoadingCollections,
 		getCollectionRecipeList,

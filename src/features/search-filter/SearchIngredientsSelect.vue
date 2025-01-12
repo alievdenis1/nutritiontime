@@ -1,7 +1,7 @@
 <template>
 	<div
 		ref="dropdownParent"
-		class="pt-4 relative"
+		class="relative"
 	>
 		<div
 			@click="toggleDropdown"

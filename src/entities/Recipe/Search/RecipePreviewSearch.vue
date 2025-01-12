@@ -61,7 +61,7 @@
 			</h2>
 
 			<div
-				class="flex justify-between items-center text-slateGray"
+				class="flex gap-2 justify-end items-center text-slateGray"
 				@click.stop
 			>
 				<AddRecipeToCollectionButton

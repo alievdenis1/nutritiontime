@@ -14,6 +14,7 @@
 		<TabsContent value="collections">
 			<VDragAndDrop
 				:items="collectionListForDragAndDrop"
+				:active-tab-key="store.collectionId"
 				class="mt-[16px]"
 				@edit="onEdit"
 				@delete="onDelete"

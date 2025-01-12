@@ -1,6 +1,6 @@
 <template>
 	<VAccordion :title="t('ingredients')">
-		<div>
+		<div class="pt-4">
 			<SearchIngredientsSelect
 				v-model="includedIngredients"
 				:placeholder="t('includeIngredients')"

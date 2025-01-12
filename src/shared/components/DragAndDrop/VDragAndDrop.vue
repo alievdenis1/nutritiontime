@@ -88,6 +88,10 @@ const props = defineProps({
 	items: {
 		type: Array as () => DragTypes[],
 		required: true
+	},
+	activeTabKey: {
+		type: String,
+		required: true
 	}
 })
 const emits = defineEmits<VDragAndDropEmits>()
@@ -225,9 +229,11 @@ const onChangeTab = (id:number) => {
 }
 
 watch(items, () => {
-	selectedTab.value = items.value[items.value.length - 1]
+	const activeTab = items.value.find(tab => props.activeTabKey === tab.id)
+
+	selectedTab.value = activeTab ?? items.value[items.value.length - 1]
 	onChangeTab(selectedTab.value.id)
-}, { deep: true })
+}, { deep: true, immediate: true })
 </script>
 
 <style lang="scss" scoped>
