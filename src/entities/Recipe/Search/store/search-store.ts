@@ -10,7 +10,8 @@ export const useSearchStore = defineStore('search-store', () => {
 	const activeQuickSearchTag = ref<number | null>(null)
 	const modalIsActive = ref(false)
 	const secondModalIsActive = ref(false)
-	const selectedIngredients = ref<Ingredient[]>([])
+	const includedIngredients = ref<Ingredient[]>([])
+	const excludedIngredients = ref<Ingredient[]>([])
 
 	const addCollectionToRecipe = (recipeId: number, collectionId: number) => {
 		const recipeIndex = recipes.value.findIndex(recipe => recipe.id === recipeId)
@@ -37,8 +38,6 @@ export const useSearchStore = defineStore('search-store', () => {
 
 		recipes.value[recipeIndex].likes_count += (action === 'add') ? 1 : -1
 	}
-
-	const isExcludeIngredientsMode = ref(false)
 
 	const filters = reactive<GetRecipeListRequestDto>({
 		tags: [],
@@ -71,7 +70,7 @@ export const useSearchStore = defineStore('search-store', () => {
 		max_rating: undefined,
 
 		excluded_ingredients: undefined,
-		included_ingredients: undefined,
+		required_ingredients: undefined,
 
 	})
 
@@ -140,8 +139,8 @@ export const useSearchStore = defineStore('search-store', () => {
 		toggleSecondModalClose,
 		totalRecipes,
 		filters,
-		isExcludeIngredientsMode,
-		selectedIngredients,
+		excludedIngredients,
+		includedIngredients,
 		addCollectionToRecipe,
 		addRecipeToFavourite
 	}

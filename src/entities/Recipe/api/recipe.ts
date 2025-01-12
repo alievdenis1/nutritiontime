@@ -132,8 +132,8 @@ export type GetRecipeListRequestDto = {
 	min_rating?: number
 	max_rating?: number
 
-	required_ingredients?: number
-	excluded_ingredients?: number
+	required_ingredients?: number[]
+	excluded_ingredients?: number[]
 
 	tags?: number[]
 

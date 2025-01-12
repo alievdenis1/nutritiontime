@@ -1,111 +1,26 @@
 <template>
 	<VAccordion :title="t('ingredients')">
 		<div>
-			<div
-				ref="dropdownParent"
-				class="pt-4 relative"
-			>
-				<div
-					@click="toggleIngredientsDropdown"
-				>
-					<div>
-						<div class="flex flex-wrap gap-2 mb-4 border border-gray-200 rounded-lg min-h-[50px]">
-							<div
-								v-if="selectedIngredients.length"
-								class="flex p-2 flex-wrap gap-2"
-							>
-								<div
-									v-for="ingredient in selectedIngredients"
-									:key="ingredient.id"
-									class="flex items-center bg-gray-100 rounded-full px-4 py-2"
-								>
-									<span class="mr-2 text-sm">{{ ingredient.name }}</span>
-									<button
-										class="text-gray-400 hover:text-gray-600"
-										@click="toggleIngredient(ingredient)"
-									>
-										<IconClose class="w-4 h-4" />
-									</button>
-								</div>
-							</div>
-							<div class="w-full">
-								<input
-									v-model="query"
-									class="sticky py-1 px-4 w-full h-full"
-									autofocus
-									placeholder="Введите название ингредиента"
-								>
-							</div>
-						</div>
-					</div>
-				</div>
+			<SearchIngredientsSelect
+				v-model="includedIngredients"
+				:placeholder="t('includeIngredients')"
+			/>
 
-				<div
-					v-if="isIngredientsDropdownVisible"
-					ref="dropdown"
-					class="fixed"
-					:style="{
-						width: dropdownParent?.clientWidth ? `${dropdownParent?.clientWidth}px` : '100%',
-						top: `${top + 10 + dropdownParent?.clientHeight ?? 0}px`
-					}"
-				>
-					<div
-						class="bg-white border rounded-md shadow-lg absolute left-0 top-[calc(100%)] right-0 z-10 max-h-[250px]"
-					>
-						<ElScrollbar
-							v-loading="isLoadingIngredients"
-							:max-height="150"
-							wrap-class="relative"
-							always
-						>
-							<div
-								v-if="!filteredIngredients.length"
-								class="h-4 px-4 py-2 h-full"
-							>
-								{{ t('no_ingredients_found') }}
-							</div>
-
-							<div
-								v-for="ingredient in filteredIngredients"
-								:key="ingredient.id"
-								class="px-4 py-2 hover:bg-lightGray cursor-pointer"
-								:class="{ 'bg-lightGray': selectedIngredientsIdSet.has(ingredient.id) }"
-								@click="toggleIngredient(ingredient)"
-							>
-								<span class="mr-1">
-									{{ ingredient.name }}
-								</span>
-
-								<el-icon v-if="selectedIngredientsIdSet.has(ingredient.id)">
-									<el-icon-check />
-								</el-icon>
-							</div>
-						</ElScrollbar>
-					</div>
-				</div>
-			</div>
-
-			<button
-				class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-400 hover:bg-gray-50 focus:outline-none"
-				@click="toggleExcludeMode"
-			>
-				{{ store.isExcludeIngredientsMode ? t('includeIngredients') : t('excludeIngredients') }}
-			</button>
+			<SearchIngredientsSelect
+				v-model="excludedIngredients"
+				:placeholder="t('excludeIngredients')"
+			/>
 		</div>
 	</VAccordion>
 </template>
 
 <script setup lang="ts">
 import { VAccordion } from '@/shared/components/Accordion'
-import { IconClose } from '@/shared/components/Icon'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './SearchFilter.localization.json'
 import { useSearchStore } from 'entities/Recipe/Search'
-import { computed, onMounted, onScopeDispose, ref, watch } from 'vue'
-import { getIngredientList, useIngredientList } from 'entities/Ingredient'
-import { Check as ElIconCheck } from '@element-plus/icons-vue'
-import { onClickOutside, useElementBounding } from '@vueuse/core'
-import { softFilterBySearchQuery } from 'shared/lib/mapping/filtering.ts'
+import { onMounted, onScopeDispose, ref, watch } from 'vue'
+import SearchIngredientsSelect from 'features/search-filter/SearchIngredientsSelect.vue'
 
 type Ingredient = {
 	name: string
@@ -114,92 +29,35 @@ type Ingredient = {
 
 const { t } = useTranslation(localization)
 
-const dropdownParent = ref<HTMLElement>()
-const dropdown = ref<HTMLElement>()
-
-const { top } = useElementBounding(dropdownParent)
-
-onClickOutside(dropdown, () => {
-	if (isIngredientsDropdownVisible.value) {
-		isIngredientsDropdownVisible.value = false
-	}
-})
-
 const store = useSearchStore()
 
-const {
-	ingredientList,
-	isLoadingIngredients
-} = useIngredientList()
-
-const query = ref('')
-
-const filteredIngredients = computed(() => {
-	return softFilterBySearchQuery({
-		data: ingredientList.value,
-		key: 'name',
-		query: query.value
-	})
-})
-
-const isIngredientsDropdownVisible = ref(false)
-
-const toggleIngredientsDropdown = () => {
-	isIngredientsDropdownVisible.value = !isIngredientsDropdownVisible.value
-
-	if (!isIngredientsDropdownVisible.value) {
-		query.value = ''
-	}
-}
-
-const selectedIngredients = ref<Ingredient[]>([])
+const includedIngredients = ref<Ingredient[]>([])
+const excludedIngredients = ref<Ingredient[]>([])
 
 onScopeDispose(() => {
-	store.selectedIngredients = selectedIngredients.value
+	store.includedIngredients = includedIngredients.value
+	store.excludedIngredients = excludedIngredients.value
 })
 
 onMounted(() => {
-	selectedIngredients.value = store.selectedIngredients
+	includedIngredients.value = store.includedIngredients
+	excludedIngredients.value = store.excludedIngredients
 })
 
-const selectedIngredientsIdSet = computed(() => {
-	return new Set(selectedIngredients.value.map(ingredient => ingredient.id))
+watch(() => [...includedIngredients.value], (included) => {
+	const ingredients = included.map(ingredient => ingredient.id)
+
+	store.includedIngredients = ingredients
+	store.filters.required_ingredients = ingredients
 })
 
-const setIngredientsToStore = (ingredients: Ingredient[]) => {
-	const mappedIngredients = ingredients.map(ingredient => ingredient.id)
-	store.selectedIngredients = ingredients
+watch(() => [...excludedIngredients.value], (excluded) => {
+	const ingredients = excluded.map(ingredient => ingredient.id)
 
-	if (store.isExcludeIngredientsMode) {
-		store.filters.excluded_ingredients = mappedIngredients
-	} else {
-		store.filters.included_ingredients = mappedIngredients
-	}
-}
+	store.excludedIngredients = ingredients
+	store.filters.excluded_ingredients = ingredients
+})
 
-const toggleIngredient = (ingredient: Ingredient) => {
-	const index = selectedIngredients.value.findIndex(ingredientItem => ingredientItem.id === ingredient.id)
-
-	if (index === -1) {
-		selectedIngredients.value.push(ingredient)
-	} else {
-		selectedIngredients.value.splice(index, 1)
-	}
-
-	setIngredientsToStore(selectedIngredients.value)
-}
-
-const toggleExcludeMode = () => {
-	store.isExcludeIngredientsMode = !store.isExcludeIngredientsMode
-
-	if (store.isExcludeIngredientsMode) {
-		store.filters.excluded_ingredients = store.filters.included_ingredients
-		store.filters.included_ingredients = undefined
-	} else {
-		store.filters.included_ingredients = store.filters.excluded_ingredients
-		store.filters.excluded_ingredients = undefined
-	}
-}
 </script>
 
 <style scoped>
