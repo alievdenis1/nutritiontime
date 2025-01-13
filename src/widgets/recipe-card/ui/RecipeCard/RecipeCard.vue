@@ -10,7 +10,7 @@
 
 					<!-- TODO: нужно добавить свойство likes -->
 					<ToggleFavoriteButton
-						v-model="recipe?.is_favorited"
+						v-model="recipe.is_favorited"
 						:bg-color="isImageVisible ? 'bg-white' : 'bg-lightGray'"
 						:likes="10"
 						:recipe-id="recipeId"
@@ -221,7 +221,7 @@ import { IngredientsBlock } from '@/entities/Ingredient'
 import { CommentItem, CommentList } from '@/entities/Comment'
 // TODO: нужен метод для получения списка комментариев по recipeId
 
-import { ToggleFavoriteButton } from 'src/features/Recipe/toggle-favourite'
+import { ToggleFavoriteButton } from '@/features/Recipe/toggle-favourite'
 import { AddCommentButton } from '@/features/Comment/addComment'
 
 import { useIntersectionObserver } from '../../lib/useIntersectionObserver'
@@ -257,7 +257,7 @@ const allCommentPage = () => {
 }
 
 const fetchRecipeData = async () => {
-	const { data, loading, execute } = await getRecipe({ id: recipeId.value })
+	const { execute } = await getRecipe({ id: recipeId.value })
 
 	await execute()
 
