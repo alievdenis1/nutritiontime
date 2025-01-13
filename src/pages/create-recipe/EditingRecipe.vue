@@ -6,7 +6,7 @@
 			</h2>
 		</div>
 		<div class="flex flex-col gap-[16px]">
-			<CreateRecipeBasicInfo />
+			<!--			<CreateRecipeBasicInfo />-->
 			<CreateRecipeGradation />
 			<CreateRecipeTime />
 			<CreateRecipeIngredients
@@ -37,7 +37,7 @@
 import { useRouter, useRoute } from 'vue-router'
 import { useTranslation } from '@/shared/lib/i18n'
 import {
-	CreateRecipeBasicInfo,
+	// CreateRecipeBasicInfo,
 	CreateRecipeGradation,
 	CreateRecipeIngredients,
 	KitchenToolsRecipe,

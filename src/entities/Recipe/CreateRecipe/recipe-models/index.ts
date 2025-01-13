@@ -1,5 +1,4 @@
 export { default as CheckRecipe } from './сheckRecipe/CheckRecipe.vue'
-export { default as CreateRecipeBasicInfo } from './baseRecipe/CreateRecipeBasicInfo.vue'
 export { default as CreateRecipeGradation } from './gradationRecipe/CreateRecipeGradation.vue'
 export { default as CreateRecipeIngredients } from './IngredientsRecipe/CreateRecipeIngredients.vue'
 export { default as KitchenToolsRecipe } from './kitchenToolsRecipe/KitchenToolsRecipe.vue'
