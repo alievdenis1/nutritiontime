@@ -1,62 +1,63 @@
 <template>
 	<VAccordion :title="t('ingredients')">
-		<div class="mt-4">
-			<div v-if="selectedIngredients.length">
-				<div class="flex flex-wrap gap-2 mb-4 p-4 border border-gray-200 rounded-lg">
-					<div
-						v-for="ingredient in selectedIngredients"
-						:key="ingredient"
-						class="flex items-center bg-gray-100 rounded-full px-4 py-2"
-					>
-						<span class="mr-2 text-sm">{{ ingredient }}</span>
-						<button
-							class="text-gray-400 hover:text-gray-600"
-							@click="removeIngredient(ingredient)"
-						>
-							<IconClose class="w-4 h-4" />
-						</button>
-					</div>
-				</div>
-			</div>
+		<div class="pt-4">
+			<SearchIngredientsSelect
+				v-model="includedIngredients"
+				:placeholder="t('includeIngredients')"
+			/>
 
-			<div
-				v-else
-				class="flex flex-wrap gap-2 mb-4 p-4 border border-gray-200 rounded-lg"
-			>
-				<span class="text-gray-400">
-					{{ t('requiredIngredients') }}
-				</span>
-			</div>
-
-			<button
-				class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-400 hover:bg-gray-50 focus:outline-none"
-				@click="toggleExcludeMode"
-			>
-				{{ excludeMode ? t('includeIngredients') : t('excludeIngredients') }}
-			</button>
+			<SearchIngredientsSelect
+				v-model="excludedIngredients"
+				:placeholder="t('excludeIngredients')"
+			/>
 		</div>
 	</VAccordion>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { VAccordion } from '@/shared/components/Accordion'
-import { IconClose } from '@/shared/components/Icon'
 import { useTranslation } from '@/shared/lib/i18n'
 import localization from './SearchFilter.localization.json'
+import { useSearchStore } from 'entities/Recipe/Search'
+import { onMounted, onScopeDispose, ref, watch } from 'vue'
+import SearchIngredientsSelect from 'features/search-filter/SearchIngredientsSelect.vue'
+
+type Ingredient = {
+	name: string
+	id: number
+}
 
 const { t } = useTranslation(localization)
 
-const selectedIngredients = ref<string[]>(['Картошка', 'Сыр'])
-const excludeMode = ref(false)
+const store = useSearchStore()
 
-const removeIngredient = (ingredient: string) => {
-    selectedIngredients.value = selectedIngredients.value.filter(item => item !== ingredient)
-}
+const includedIngredients = ref<Ingredient[]>([])
+const excludedIngredients = ref<Ingredient[]>([])
 
-const toggleExcludeMode = () => {
-    excludeMode.value = !excludeMode.value
-}
+onScopeDispose(() => {
+	store.includedIngredients = includedIngredients.value
+	store.excludedIngredients = excludedIngredients.value
+})
+
+onMounted(() => {
+	includedIngredients.value = store.includedIngredients
+	excludedIngredients.value = store.excludedIngredients
+})
+
+watch(() => [...includedIngredients.value], (included) => {
+	const ingredients = included.map(ingredient => ingredient.id)
+
+	store.includedIngredients = ingredients
+	store.filters.required_ingredients = ingredients
+})
+
+watch(() => [...excludedIngredients.value], (excluded) => {
+	const ingredients = excluded.map(ingredient => ingredient.id)
+
+	store.excludedIngredients = ingredients
+	store.filters.excluded_ingredients = ingredients
+})
+
 </script>
 
 <style scoped>

@@ -164,22 +164,22 @@ import localization from './ProfileStats.localization.json'
 const { t } = useTranslation({ ...localization })
 
 interface MealGroup {
-  startTime: string;
-  meals: MealItem[];
-  totalStats: {
-    calories: number;
-    proteins: number;
-    fats: number;
-    carbs: number;
-    weight: number;
-  };
+	startTime: string;
+	meals: MealItem[];
+	totalStats: {
+		calories: number;
+		proteins: number;
+		fats: number;
+		carbs: number;
+		weight: number;
+	};
 }
 
 const props = defineProps<{
-  dayStats: {
-    meals: MealItem[]
-  } | null,
-  profile: Profile | null,
+	dayStats: {
+		meals: MealItem[]
+	} | null,
+	profile: Profile | null,
 }>()
 
 const emit = defineEmits(['meal-deleted'])
@@ -189,101 +189,101 @@ const isDeleting = ref(false)
 
 // Группировка приемов пищи
 const mealGroups = computed(() => {
-  if (!props.dayStats?.meals?.length) return []
+	if (!props.dayStats?.meals?.length) return []
 
-  const groups: MealGroup[] = []
-  let currentGroup: MealGroup | null = null
+	const groups: MealGroup[] = []
+	let currentGroup: MealGroup | null = null
 
-  // Сортируем приемы пищи по времени
-  const sortedMeals = [...props.dayStats.meals].sort((a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  )
+	// Сортируем приемы пищи по времени
+	const sortedMeals = [...props.dayStats.meals].sort((a, b) =>
+		new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+	)
 
-  sortedMeals.forEach((meal) => {
-    const mealTime = new Date(meal.created_at)
+	sortedMeals.forEach((meal) => {
+		const mealTime = new Date(meal.created_at)
 
-    // Проверяем, нужно ли создать новую группу
-    if (!currentGroup || getTimeDifferenceInMinutes(
-        new Date(currentGroup.meals[currentGroup.meals.length - 1].created_at),
-        mealTime
-    ) > 60) {
-      // Сохраняем предыдущую группу
-      if (currentGroup) {
-        groups.push(currentGroup)
-      }
+		// Проверяем, нужно ли создать новую группу
+		if (!currentGroup || getTimeDifferenceInMinutes(
+			new Date(currentGroup.meals[currentGroup.meals.length - 1].created_at),
+			mealTime
+		) > 60) {
+			// Сохраняем предыдущую группу
+			if (currentGroup) {
+				groups.push(currentGroup)
+			}
 
-      // Создаем новую группу
-      currentGroup = {
-        startTime: meal.created_at,
-        meals: [meal],
-        totalStats: {
-          calories: meal.calories,
-          proteins: meal.proteins,
-          fats: meal.fats,
-          carbs: meal.carbs,
-          weight: meal.weight,
-        },
-      }
-    } else {
-      // Добавляем к существующей группе
-      currentGroup.meals.push(meal)
-      // Обновляем статистику группы
-      currentGroup.totalStats.calories += meal.calories
-      currentGroup.totalStats.proteins += meal.proteins
-      currentGroup.totalStats.fats += meal.fats
-      currentGroup.totalStats.carbs += meal.carbs
-      currentGroup.totalStats.weight += meal.weight
-    }
-  })
+			// Создаем новую группу
+			currentGroup = {
+				startTime: meal.created_at,
+				meals: [meal],
+				totalStats: {
+					calories: meal.calories,
+					proteins: meal.proteins,
+					fats: meal.fats,
+					carbs: meal.carbs,
+					weight: meal.weight,
+				},
+			}
+		} else {
+			// Добавляем к существующей группе
+			currentGroup.meals.push(meal)
+			// Обновляем статистику группы
+			currentGroup.totalStats.calories += meal.calories
+			currentGroup.totalStats.proteins += meal.proteins
+			currentGroup.totalStats.fats += meal.fats
+			currentGroup.totalStats.carbs += meal.carbs
+			currentGroup.totalStats.weight += meal.weight
+		}
+	})
 
-  // Добавляем последнюю группу
-  if (currentGroup) {
-    groups.push(currentGroup)
-  }
+	// Добавляем последнюю группу
+	if (currentGroup) {
+		groups.push(currentGroup)
+	}
 
-  return groups
+	return groups
 })
 
 // Функция для подсчета разницы во времени в минутах
 const getTimeDifferenceInMinutes = (date1: Date, date2: Date): number => {
-  return Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60)
+	return Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60)
 }
 
 // Функция подтверждения удаления
 const confirmDelete = async (meal: MealItem) => {
-  const confirmed = await openConfirm({
-    title: t('deleteMealTitle'),
-    description: t('deleteMealDescription'),
-    confirmButtonText: t('confirmDelete'),
-    cancelButtonText: t('cancelDelete')
-  })
+	const confirmed = await openConfirm({
+		title: t('deleteMealTitle'),
+		description: t('deleteMealDescription'),
+		confirmButtonText: t('confirmDelete'),
+		cancelButtonText: t('cancelDelete')
+	})
 
-  if (confirmed) {
-    isDeleting.value = true
-    try {
-      const { execute } = deleteMeal(meal.id)
-      await execute()
-      emit('meal-deleted', meal.id)
-    } catch (error) {
-      console.error('Error deleting meal:', error)
-    } finally {
-      isDeleting.value = false
-    }
-  }
+	if (confirmed) {
+		isDeleting.value = true
+		try {
+			const { execute } = deleteMeal(meal.id)
+			await execute()
+			emit('meal-deleted', meal.id)
+		} catch (error) {
+			console.error('Error deleting meal:', error)
+		} finally {
+			isDeleting.value = false
+		}
+	}
 }
 
 // Форматирование времени
 const formatTime = (dateString: string): string => {
-  const date = new Date(dateString)
-  return date.toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+	const date = new Date(dateString)
+	return date.toLocaleTimeString('ru-RU', {
+		hour: '2-digit',
+		minute: '2-digit',
+	})
 }
 
 // Форматирование чисел
 const formatNumber = (value: string | number | undefined | null): string => {
-  if (value == null) return '0'
-  return Math.round(Number(value)).toString()
+	if (value == null) return '0'
+	return Math.round(Number(value)).toString()
 }
 </script>

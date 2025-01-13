@@ -275,7 +275,7 @@ const setModalLifted= (isLifted: boolean) => {
 const maxIngredientName = computed(() => {
 	return ingredientSuggestions.reduce((longest: InputListItem, currentString: InputListItem) => {
 		return currentString.title.length > longest.title.length ? currentString : longest
-  })
+	})
 })
 
 const filteredList = computed((): InputListItem[] => {

@@ -3,9 +3,7 @@
 		:title="t('basicInformation')"
 		is-open
 	>
-		<div
-			class="mt-[20px]"
-		>
+		<div class="mt-[20px]">
 			<VAddPhoto
 				v-model:error="isUploadError"
 				:width-image="54"
@@ -18,23 +16,28 @@
 				:error-message="t('errorMessage')"
 				@upload:image="handleImageUpload"
 			/>
+
 			<p
 				v-if="!isUploadError"
 				class="text-xs text-gray max-w-xs mb-[24px]"
 			>
-				{{ t('additionalPhotosInfo') }}
+				{{ t("additionalPhotosInfo") }}
 			</p>
+
 			<div class="form-section flex flex-col gap-4">
 				<VInput
 					v-model="values.title"
+					name="title"
 					:title="t('recipeTitlePlaceholder')"
 					:error="!!errors?.title"
 					:error-message="errors?.title?.message"
 					:max-length="100"
 					@focusout="validateField('title')"
 				/>
+
 				<VInput
 					v-model="values.description"
+					name="description"
 					:title="t('recipeDescriptionPlaceholder')"
 					textarea
 					:error="!!errors?.description"
@@ -46,7 +49,7 @@
 
 			<div class="category-selection flex flex-col gap-[12px] mt-[12px]">
 				<span
-					v-for="category in categoryTypes"
+					v-for="category in categoryKeys"
 					:key="category"
 				>
 					<VInput
@@ -60,9 +63,7 @@
 						@focusout="validateField(category)"
 					>
 						<template #right-icon>
-							<IconArrowRight
-								icon-color="#1C1C1C"
-							/>
+							<IconArrowRight icon-color="#1C1C1C" />
 						</template>
 					</VInput>
 				</span>
@@ -94,9 +95,7 @@
 					clearable
 				>
 					<template #right-icon>
-						<IconSearch
-							icon-color="#1C1C1C"
-						/>
+						<IconSearch icon-color="#1C1C1C" />
 					</template>
 				</VInput>
 			</div>
@@ -104,7 +103,7 @@
 			<div class="category-list flex-1 overflow-y-auto">
 				<div
 					v-for="item in filteredCategories"
-					:key="item"
+					:key="item.id"
 					class="category-item p-2 border-b cursor-pointer flex items-center gap-[8px]"
 					@click="selectCategory(item)"
 				>
@@ -120,7 +119,7 @@
 				:disabled="isDisabled"
 				@click="onSave"
 			>
-				{{ t('save') }}
+				{{ t("save") }}
 			</VButton>
 		</div>
 	</VModal>
@@ -131,7 +130,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import { createRecipeBasicInfoSchema } from 'features/create-recipe/model'
 import { useForm } from 'shared/utils/useForm'
-import { IconArrowRight, IconSearch, IconClose, IconRadio, IconPhoto } from 'shared/components/Icon'
+import {
+	IconArrowRight,
+	IconSearch,
+	IconClose,
+	IconRadio,
+	IconPhoto,
+} from 'shared/components/Icon'
 import { VInput } from 'shared/components/Input'
 import { VAccordion } from '@/shared/components/Accordion'
 import { VAddPhoto } from '@/shared/components/AddPhoto'
@@ -140,69 +145,72 @@ import localization from './CreateRecipeBasicInfo.localization.json'
 import { useRecipeStore } from '../../../DetailedCardRecipe/stores/recipeStore'
 import { useRoute } from 'vue-router'
 import { VButton } from '@/shared/components/Button'
+import { Category, useCategoryList } from 'entities/Category'
+import { useCuisineList } from 'entities/Cuisine'
+import { useDietTypeList } from 'entities/DietType'
 
 const store = useRecipeStore()
 const route = useRoute()
 
 const { t } = useTranslation(localization)
 
-interface Category {
+export type RecipeBasicInfoModel = {
+	title: string;
+	description: string;
+	image: string;
 	dishCategory: string;
 	cuisine: string;
 	diet: string;
-}
+};
+
+const categoryKeys: (keyof RecipeBasicInfoModel)[] = [
+	'dishCategory',
+	'cuisine',
+	'diet',
+]
+
+const emit = defineEmits<{
+	change: [newModel: RecipeBasicInfoModel];
+}>()
 
 const show = ref(false)
 const searchQuery = ref('')
-const selectedType = ref<keyof Category | null>(null)
+const selectedType = ref<keyof RecipeBasicInfoModel | null>(null)
 const isUploadError = ref<boolean>(false)
 
-const selectedItem = ref<Category>({
-	dishCategory: '',
-	cuisine: '',
-	diet: ''
-})
-const selectedCategory = ref<Category>({
-	dishCategory: '',
-	cuisine: '',
-	diet: ''
-})
-
-const { errors, values, validateField, validate } = useForm(createRecipeBasicInfoSchema, {
-	defaultValues: {
-		title: '',
-		description: '',
-		image: '',
-		dishCategory: '',
-		cuisine: '',
-		diet: '',
+const { errors, values, validateField, validate } = useForm(
+	createRecipeBasicInfoSchema,
+	{
+		defaultValues: {
+			title: '',
+			description: '',
+			image: '',
+			dishCategory: '',
+			cuisine: '',
+			diet: '',
+		},
 	},
+)
+
+watch(
+	() => values,
+	(newValues) => {
+		emit('change', newValues)
+	},
+	{ deep: true },
+)
+
+const { categoryList, isLoadingCategories } = useCategoryList()
+const { cuisines, isLoadingCuisines } = useCuisineList()
+const { dietTypeList, isLoadingDietTypes, } = useDietTypeList()
+
+const filteredCategories = computed(() => {
+	return categoryList.value.filter((category) => {
+		return category.name
+			.toLowerCase()
+			.includes(searchQuery.value.trim().toLowerCase())
+	})
 })
-
-const categoryTypes: (keyof Category)[] = ['dishCategory', 'cuisine', 'diet']
-
-const categories = ref([
-	'Категория 1',
-	'Категория 2',
-	'Категория 3',
-	'Категория 4',
-	'Категория 5',
-	'Категория 6',
-	'Категория 7',
-	'Категория 8',
-	'Категория 9',
-	'Категория 10',
-	'Категория 11',
-	'Категория 12',
-	'Категория 13',
-	'Категория 14',
-	'Категория 15',
-	'Категория 16',
-	'Категория 17',
-	'Категория 18',
-	'Категория 19',
-	'Категория 20'
-])
 
 // TODO: функционал, который нужен будет для работы с конкретным разделом рецепта
 // можно вынести в отдельный хук, и в общем компоненте останутся только хуки для конкретных частей рецептов
@@ -210,16 +218,16 @@ const categories = ref([
 
 onMounted(() => {
 	const isCreateRoute = route.name === 'CreateRecipe'
+
 	if (!isCreateRoute && store.currentRecipe) {
 		values.title = store.currentRecipe.title
 		values.description = store.currentRecipe.description
 		values.image = store.currentRecipe.image
+
 		if (store.currentRecipe.recipeInfo) {
-			selectedCategory.value = {
-				dishCategory: store.currentRecipe.recipeInfo['Категория'] || '',
-				cuisine: store.currentRecipe.recipeInfo['Кухня'] || '',
-				diet: store.currentRecipe.recipeInfo['Тип диеты'] || ''
-			}
+			(values.dishCategory = store.currentRecipe.recipeInfo['Категория'] || ''),
+			(values.cuisine = store.currentRecipe.recipeInfo['Кухня'] || ''),
+			(values.diet = store.currentRecipe.recipeInfo['Тип диеты'] || '')
 		}
 	}
 })
@@ -236,53 +244,39 @@ const handleImageUpload = (imageUrl: string | null) => {
 	}
 }
 
-const selectedListItem = computed(() => {
-	if (selectedType.value !== null) {
-		return selectedItem.value[selectedType.value]
-	}
-
-	return ''
-})
-
-const filteredCategories = computed(() => {
-	if (selectedListItem.value) {
-		return categories.value
-	}
-
-	return categories.value.filter(category => category.toLowerCase().includes(searchQuery.value.toLowerCase()))
-})
-
 const categorySelectionTitle = computed(() => {
-	const titles: Record<keyof Category, string> = {
+	const titles: Record<
+	keyof Pick<RecipeBasicInfoModel, 'diet' | 'dishCategory' | 'cuisine'>,
+	string
+	> = {
 		dishCategory: t('categorySelection'),
 		cuisine: t('cuisineSelection'),
-		diet: t('dietSelection')
+		diet: t('dietSelection'),
 	}
 
 	return selectedType.value ? titles[selectedType.value] : ''
 })
 
 const isDisabled = computed((): boolean => {
-	return !selectedType.value || !selectedItem.value[selectedType.value].length
+	return !selectedType.value
 })
 
-const openCategoryModal = (type: keyof Category) => {
+const openCategoryModal = (type: keyof RecipeBasicInfoModel) => {
 	selectedType.value = type
 	show.value = true
 }
 
 const closeModal = (): void => {
+	searchQuery.value = ''
 	show.value = false
 }
 
 const onSave = (): void => {
 	closeModal()
-	if (selectedType.value !== null) {
-		values[selectedType.value] = selectedItem.value[selectedType.value]
-	}
+	emit('change', values)
 }
 
-const selectCategory = (category: string) => {
+const selectCategory = (category: Category) => {
 	if (selectedType.value !== null) {
 		selectedItem.value[selectedType.value] = category
 	}
@@ -294,65 +288,62 @@ const onValidate = (): boolean => {
 
 defineExpose({ onValidate })
 
-watch(selectedListItem, () => {
-	if (selectedListItem.value) {
-		searchQuery.value = selectedListItem.value
-	} else {
-		searchQuery.value = ''
-	}
-})
-
 // Watch for changes and update store
-watch(values, () => {
-	if (store.currentRecipe) {
-		store.currentRecipe.title = values.title
-		store.currentRecipe.description = values.description
-		store.currentRecipe.image = values.image
-		if (store.currentRecipe.recipeInfo) {
-			store.currentRecipe.recipeInfo['Категория'] = values.dishCategory
-			store.currentRecipe.recipeInfo['Кухня'] = values.cuisine
-			store.currentRecipe.recipeInfo['Тип диеты'] = values.diet
+watch(
+	values,
+	() => {
+		if (store.currentRecipe) {
+			store.currentRecipe.title = values.title
+			store.currentRecipe.description = values.description
+			store.currentRecipe.image = values.image
+
+			if (store.currentRecipe.recipeInfo) {
+				store.currentRecipe.recipeInfo['Категория'] = values.dishCategory
+				store.currentRecipe.recipeInfo['Кухня'] = values.cuisine
+				store.currentRecipe.recipeInfo['Тип диеты'] = values.diet
+			}
 		}
-	}
-}, { deep: true })
+	},
+	{ deep: true },
+)
 </script>
 
 <style scoped>
 textarea {
-	border: 1px solid #d1d5db;
+  border: 1px solid #d1d5db;
 }
 
 .border {
-	border: 1px solid #E1E1E1;
+  border: 1px solid #e1e1e1;
 }
 
 .modal-content {
-	height: 90vh;
-	display: flex;
-	flex-direction: column;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .category-list {
-	max-height: calc(100vh - 200px);
-	overflow-y: auto;
-	scrollbar-color: #319A6E #E1E1E1;
-	scrollbar-width: thin;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  scrollbar-color: #319a6e #e1e1e1;
+  scrollbar-width: thin;
 }
 
 .category-item:hover {
-	background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 .category-list::-webkit-scrollbar {
-	width: 8px;
+  width: 8px;
 }
 
 .category-list::-webkit-scrollbar-track {
-	background: #E1E1E1;
+  background: #e1e1e1;
 }
 
 .category-list::-webkit-scrollbar-thumb {
-	background-color: #319A6E;
-	border-radius: 10px;
+  background-color: #319a6e;
+  border-radius: 10px;
 }
 </style>

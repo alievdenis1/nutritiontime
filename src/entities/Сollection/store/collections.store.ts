@@ -1,86 +1,157 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { DragTypes } from 'shared/components/DragAndDrop/types'
+import {
+	createCollection,
+	deleteCollection as removeCollection,
+	getCollectionList,
+	getCollectionRecipes,
+	updateCollection,
+} from 'entities/Сollection/api'
+import { Recipe } from 'entities/Recipe'
 
 export const useModalStore = defineStore('modal', () => {
-  const isModalOpen = ref<boolean>(false)
-  const titleModal = ref<string>('')
-  const descModal = ref<string>('')
-  const inputValue = ref<string>('')
-  const initialInputValue = ref<string>('')
-  const collectionId = ref<number | null>(null)
-  const savedCollections = ref<DragTypes[]>(JSON.parse(localStorage.getItem('collections') || 'null'))
+	const isModalOpen = ref<boolean>(false)
+	const titleModal = ref<string>('')
+	const descModal = ref<string>('')
+	const inputValue = ref<string>('')
+	const initialInputValue = ref<string>('')
+	const collectionId = ref<number | null>(null)
+	const savedCollections = ref<DragTypes[]>([])
 
-  const dragAndDropItems = ref<DragTypes[]>(
-    savedCollections.value || [{ id: 1, label: 'Мне понравилось', isActiveEdit: false, count: 5 }]
-  )
+	// TODO: мне понравилось - динамическое значение, надо забирать с бэка
+	const collectionList = computed(() => {
+		return [{ id: 0, name: 'Мне понравилось', isActiveEdit: false, count: 5 }].concat(savedCollections.value)
+	})
 
-  const currentCollection = computed(() =>
-    dragAndDropItems.value.find(item => item.id === collectionId.value)
-  )
+	const currentCollection = computed(() =>
+		savedCollections.value.find(item => item.id === collectionId.value)
+	)
 
-  const openModal = (mode: 'create' | 'edit') => {
-    isModalOpen.value = true
-    if (mode === 'create') {
-      titleModal.value = 'Создание коллекции'
-      descModal.value = 'В коллекцию можно добавлять рецепты с помощью иконки'
-      inputValue.value = ''
-      initialInputValue.value = ''
-      collectionId.value = null
-    } else if (mode === 'edit' && currentCollection.value) {
-      titleModal.value = 'Редактирование коллекции'
-      descModal.value = ''
-      inputValue.value = currentCollection.value.label
-      initialInputValue.value = currentCollection.value.label
-    }
-  }
+	const openModal = (mode: 'create' | 'edit') => {
+		isModalOpen.value = true
+		if (mode === 'create') {
+			titleModal.value = 'Создание коллекции'
+			descModal.value = 'В коллекцию можно добавлять рецепты с помощью иконки'
+			inputValue.value = ''
+			initialInputValue.value = ''
+			collectionId.value = null
+		} else if (mode === 'edit' && currentCollection.value) {
+			titleModal.value = 'Редактирование коллекции'
+			descModal.value = ''
+			inputValue.value = currentCollection.value.name
+			initialInputValue.value = currentCollection.value.name
+		}
+	}
 
-  const closeModal = () => {
-    isModalOpen.value = false
-    collectionId.value = null
-    inputValue.value = ''
-  }
+	const closeModal = () => {
+		isModalOpen.value = false
+		collectionId.value = null
+		inputValue.value = ''
+	}
 
-  const saveCollection = () => {
-    if (inputValue.value.trim()) {
-      if (collectionId.value === null) {
-        const newId = Math.max(...dragAndDropItems.value.map(item => item.id), 0) + 1
-        dragAndDropItems.value.push({
-          id: newId,
-          label: inputValue.value.trim(),
-          isActiveEdit: true,
-          count: 0
-        })
+	const createCollectionApi = createCollection(() => ({
+		name: inputValue.value
+	}))
 
-        localStorage.setItem('collections', JSON.stringify(dragAndDropItems.value))
-      } else {
-        const index = dragAndDropItems.value.findIndex(item => item.id === collectionId.value)
-        if (index !== -1) {
-          dragAndDropItems.value[index].label = inputValue.value.trim()
-        }
-      }
-      closeModal()
-    }
-  }
+	const updateCollectionApi = updateCollection(() => ({
+		id: collectionId.value,
+		name: inputValue.value
+	}))
 
-  const deleteCollection = () => {
-      dragAndDropItems.value = dragAndDropItems.value.filter(item => item.id !== collectionId.value)
-      localStorage.setItem('collections', JSON.stringify(dragAndDropItems.value))
-      collectionId.value = null
-  }
+	const saveCollection = async () => {
+		if (inputValue.value.trim()) {
+			if (collectionId.value === null) {
+				await createCollectionApi.execute()
 
-  return {
-    isModalOpen,
-    openModal,
-    closeModal,
-    titleModal,
-    descModal,
-    inputValue,
-    initialInputValue,
-    dragAndDropItems,
-    saveCollection,
-    deleteCollection,
-    collectionId,
-    currentCollection
-  }
+				if (createCollectionApi.data.value?.collection) {
+					savedCollections.value.push(createCollectionApi.data.value.collection)
+				}
+			} else {
+				await updateCollectionApi.execute()
+				console.log(updateCollectionApi.data.value)
+
+				const index = savedCollections.value.findIndex(item => item.id === collectionId.value)
+
+				if (index !== -1) {
+					savedCollections.value[index].name = inputValue.value.trim()
+				}
+			}
+			closeModal()
+		}
+	}
+
+	const deleteCollection = async () => {
+		if (!collectionId.value) {
+			return
+		}
+
+		const deleteCollectionApi = removeCollection(collectionId.value)
+		await deleteCollectionApi.execute()
+
+		const exactCollectionIndex = savedCollections.value
+			.findIndex(item => item.id === collectionId.value)
+
+		if (exactCollectionIndex !== -1) {
+			savedCollections.value.splice(exactCollectionIndex, 1)
+		}
+
+		collectionId.value = null
+	}
+
+	const collectionListApi = getCollectionList()
+	const isLoadingCollections = ref(false)
+	const getCollections = async () => {
+		isLoadingCollections.value = true
+		await collectionListApi.execute(false)
+		savedCollections.value = collectionListApi.data.value
+		isLoadingCollections.value = false
+	}
+
+	const recipesByCollections = ref(new Map<number, Recipe[]>())
+
+	const loadingCollectionsRecipesSet = ref(new Set<number>())
+
+	const getCollectionRecipeList = async (id: number) => {
+		const getCollectionRecipesApi = getCollectionRecipes(id)
+
+		loadingCollectionsRecipesSet.value.add(id)
+		await getCollectionRecipesApi.execute()
+
+		if (getCollectionRecipesApi.data.value) {
+			recipesByCollections.value.set(id, getCollectionRecipesApi.data.value)
+		}
+
+		loadingCollectionsRecipesSet.value.delete(id)
+	}
+
+	const isLoadingAllRecipes = ref(false)
+
+	const getAllCollectionsRecipes = async (ids: number[]) => {
+		isLoadingAllRecipes.value = true
+		await Promise.allSettled(ids.map(id => getCollectionRecipeList(id)))
+		isLoadingAllRecipes.value = false
+	}
+
+	return {
+		isModalOpen,
+		openModal,
+		closeModal,
+		titleModal,
+		descModal,
+		inputValue,
+		initialInputValue,
+		collectionList,
+		saveCollection,
+		savedCollections,
+		deleteCollection,
+		collectionId,
+		currentCollection,
+		isLoadingAllRecipes,
+		getCollections,
+		isLoadingCollections,
+		getCollectionRecipeList,
+		getAllCollectionsRecipes,
+		recipesByCollections
+	}
 })

@@ -26,10 +26,10 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-    iconColor: string,
+	iconColor: string,
 	active: boolean,
 }>(), {
-    iconColor: '#ffffff',
+	iconColor: '#ffffff',
 	active: false,
 })
 </script>

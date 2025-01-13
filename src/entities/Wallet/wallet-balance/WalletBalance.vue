@@ -80,93 +80,93 @@
 </template>
 
 <script setup lang="ts">
- import { ref, computed, watch } from 'vue'
- import {
-  IconGold,
-  IconEnquiry,
-  IconEnergy,
-  IconClose,
- } from '@/shared/components/Icon'
- import { VModal } from '@/shared/components/Modal'
- import { VButton } from '@/shared/components/Button'
- import { ButtonColors } from '@/shared/components/Button'
- import { useTranslation } from '@/shared/lib/i18n'
- import Localization from './WalletBalance.localization.json'
- import CatClicker from './CatClicker/ui/CatClicker.vue'
- import Leaderboard from './LeaderBoard/LeaderBoard.vue'
- import CurrencyBalance from './CurrencyBalance.vue'
- import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
- import { TonConnectButton, useTonAddress } from '@townsquarelabs/ui-vue'
- import { TonApiClient, Api } from '@ton-api/client'
- import { Address } from '@ton/core'
+import { ref, computed, watch } from 'vue'
+import {
+	IconGold,
+	IconEnquiry,
+	IconEnergy,
+	IconClose,
+} from '@/shared/components/Icon'
+import { VModal } from '@/shared/components/Modal'
+import { VButton } from '@/shared/components/Button'
+import { ButtonColors } from '@/shared/components/Button'
+import { useTranslation } from '@/shared/lib/i18n'
+import Localization from './WalletBalance.localization.json'
+import CatClicker from './CatClicker/ui/CatClicker.vue'
+import Leaderboard from './LeaderBoard/LeaderBoard.vue'
+import CurrencyBalance from './CurrencyBalance.vue'
+import { useCatClickerStore } from './CatClicker/model/cat-clicker-store'
+import { TonConnectButton, useTonAddress } from '@townsquarelabs/ui-vue'
+import { TonApiClient, Api } from '@ton-api/client'
+import { Address } from '@ton/core'
 
- const { t } = useTranslation(Localization)
+const { t } = useTranslation(Localization)
 
- const show = ref(false)
+const show = ref(false)
 
- const openModal = () => {
-  show.value = true
- }
+const openModal = () => {
+	show.value = true
+}
 
- const closeModal = () => {
-  show.value = false
- }
+const closeModal = () => {
+	show.value = false
+}
 
- const store = useCatClickerStore()
+const store = useCatClickerStore()
 
- const currency = computed(() => store.currency)
- const energyCurrency = computed(() => store.energyCurrent)
+const currency = computed(() => store.currency)
+const energyCurrency = computed(() => store.energyCurrent)
 
- // Новый код для проверки NFT с использованием TonAPI.io
- const walletConnected = ref(false)
- const checkingNFT = ref(false)
- const hasNFT = ref(false)
- const userAddress = useTonAddress()
+// Новый код для проверки NFT с использованием TonAPI.io
+const walletConnected = ref(false)
+const checkingNFT = ref(false)
+const hasNFT = ref(false)
+const userAddress = useTonAddress()
 
- const COLLECTION_ADDRESS = 'EQDERkmRDrXxzEbZUMMgo3uDJwe24qUYpnasJ83WpQZaqjJ1'
- const collectionAddress = Address.parseFriendly(COLLECTION_ADDRESS).address
- // Инициализация TonAPI клиента
- const http = new TonApiClient({
-  baseUrl: 'https://tonapi.io',
-  // Замените на ваш реальный API ключ
-  apiKey: 'AHHT737POV45FDIAAAAETF62HOODTD6YZHYXOLDBRN56L6DKRI6KJE3FMCRWSOFDSKQ77XY'
- })
- const api = new Api(http)
+const COLLECTION_ADDRESS = 'EQDERkmRDrXxzEbZUMMgo3uDJwe24qUYpnasJ83WpQZaqjJ1'
+const collectionAddress = Address.parseFriendly(COLLECTION_ADDRESS).address
+// Инициализация TonAPI клиента
+const http = new TonApiClient({
+	baseUrl: 'https://tonapi.io',
+	// Замените на ваш реальный API ключ
+	apiKey: 'AHHT737POV45FDIAAAAETF62HOODTD6YZHYXOLDBRN56L6DKRI6KJE3FMCRWSOFDSKQ77XY'
+})
+const api = new Api(http)
 
- async function checkNFT() {
-  if (!userAddress.value) return
+async function checkNFT() {
+	if (!userAddress.value) return
 
-  checkingNFT.value = true
-  hasNFT.value = false
+	checkingNFT.value = true
+	hasNFT.value = false
 
-  try {
-   const rawAddress = Address.parseFriendly(userAddress.value).address
+	try {
+		const rawAddress = Address.parseFriendly(userAddress.value).address
 
-   const nftItems = await api.accounts.getAccountNftItems(rawAddress, {
-    collection: collectionAddress,
-    limit: 1,
-    offset: 0
-   })
+		const nftItems = await api.accounts.getAccountNftItems(rawAddress, {
+			collection: collectionAddress,
+			limit: 1,
+			offset: 0
+		})
 
-   hasNFT.value = nftItems.nftItems?.length > 0
-  } catch (error) {
-   console.error('Error checking NFT:', error)
-  } finally {
-   checkingNFT.value = false
-  }
- }
+		hasNFT.value = nftItems.nftItems?.length > 0
+	} catch (error) {
+		console.error('Error checking NFT:', error)
+	} finally {
+		checkingNFT.value = false
+	}
+}
 
- // Следим за изменением адреса кошелька
- watch(userAddress, (newUserAddress) => {
-  walletConnected.value = !!newUserAddress
-  if (newUserAddress) {
-   checkNFT()
-  } else {
-   hasNFT.value = false
-  }
- }, {
-   immediate: true,
- })
+// Следим за изменением адреса кошелька
+watch(userAddress, (newUserAddress) => {
+	walletConnected.value = !!newUserAddress
+	if (newUserAddress) {
+		checkNFT()
+	} else {
+		hasNFT.value = false
+	}
+}, {
+	immediate: true,
+})
 </script>
 
 <style scoped lang="scss">

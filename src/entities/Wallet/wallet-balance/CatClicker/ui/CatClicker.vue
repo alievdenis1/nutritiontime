@@ -151,20 +151,20 @@ const { t } = useTranslation(Localization)
 const store = useCatClickerStore()
 
 const {
-  startAudioAnalysis,
-  stopAudioAnalysis,
-  getMicrophonePermissionRequest,
-  resetMicrophonePermission,
+	startAudioAnalysis,
+	stopAudioAnalysis,
+	getMicrophonePermissionRequest,
+	resetMicrophonePermission,
 } = useAudioAnalysis()
 
 const { addCardAndAnimate, cards, removeCard, animateClick } = useCards()
 
 const props = withDefaults(
-  defineProps<{ walletConnected?: boolean; hasNft?: boolean }>(),
-  {
-    walletConnected: false,
-    hasNft: false,
-  },
+	defineProps<{ walletConnected?: boolean; hasNft?: boolean }>(),
+	{
+		walletConnected: false,
+		hasNft: false,
+	},
 )
 
 const imgContainer = ref<HTMLElement | null>(null)
@@ -182,11 +182,11 @@ const isShowConnectWalletModal = ref(false)
 const isShowBuyNftModal = ref(false)
 
 const closeConnectWalletModal = () => {
-  isShowConnectWalletModal.value = false
+	isShowConnectWalletModal.value = false
 }
 
 const closeBuyNftModal = () => {
-  isShowBuyNftModal.value = false
+	isShowBuyNftModal.value = false
 }
 
 const isMicrophoneAvailable = ref(false)
@@ -194,26 +194,26 @@ const isShowMicrophoneModal = ref(false)
 const microphoneStatus = ref<MicrophoneStatus | null>(null)
 
 const closeMicrophoneModal = () => {
-  isShowMicrophoneModal.value = false
+	isShowMicrophoneModal.value = false
 }
 
 const handleRequestMicrophone = async () => {
-  if (isMicrophoneAvailable.value) {
-    resetMicrophonePermission()
-    stopAudioAnalysis()
-    isMicrophoneAvailable.value = false
+	if (isMicrophoneAvailable.value) {
+		resetMicrophonePermission()
+		stopAudioAnalysis()
+		isMicrophoneAvailable.value = false
 
-    return
-  }
+		return
+	}
 
-  const status = await getMicrophonePermissionRequest()
-  microphoneStatus.value = status
-  isShowMicrophoneModal.value = status !== 'Success'
-  isMicrophoneAvailable.value = status === 'Success'
+	const status = await getMicrophonePermissionRequest()
+	microphoneStatus.value = status
+	isShowMicrophoneModal.value = status !== 'Success'
+	isMicrophoneAvailable.value = status === 'Success'
 
-  if (status === 'Success') {
-    startAudioAnalysis()
-  }
+	if (status === 'Success') {
+		startAudioAnalysis()
+	}
 }
 
 const isMotionAvailable = ref(false)
@@ -221,27 +221,27 @@ const isShowMotionModal = ref(false)
 const motionStatus = ref<'Success' | 'Error' | null>(null)
 
 const closeMotionModal = () => {
-  isShowMotionModal.value = false
+	isShowMotionModal.value = false
 }
 
 const handleRequestMotion = async () => {
-  if (isMotionAvailable.value) {
-    resetDeviceMotion()
-    isMotionAvailable.value = false
+	if (isMotionAvailable.value) {
+		resetDeviceMotion()
+		isMotionAvailable.value = false
 
-    return
-  }
+		return
+	}
 
-  if (isDeviceMotionSupported.value) {
-      const status = await requestMotionPermission()
-      motionStatus.value = status
-      isShowMotionModal.value = status !== 'Success'
-      isMotionAvailable.value = status === 'Success'
-  }
+	if (isDeviceMotionSupported.value) {
+		const status = await requestMotionPermission()
+		motionStatus.value = status
+		isShowMotionModal.value = status !== 'Success'
+		isMotionAvailable.value = status === 'Success'
+	}
 }
 
 const checkClickerAvailability = () => {
-  const { hasNft, walletConnected } = props
+	const { hasNft, walletConnected } = props
 
 	if (!walletConnected) {
 		isShowConnectWalletModal.value = true
@@ -257,184 +257,184 @@ const checkClickerAvailability = () => {
 }
 
 const debounceSyncWithBackend = () => {
-    let timer: NodeJS.Timeout
+	let timer: NodeJS.Timeout
 
-    const { syncWithBackend } = store
+	const { syncWithBackend } = store
 
-    return () => {
-      if (timer) {
-        clearTimeout(timer)
-      }
-      timer = setTimeout(() => {
-        syncWithBackend()
-      }, 700)
-    }
+	return () => {
+		if (timer) {
+			clearTimeout(timer)
+		}
+		timer = setTimeout(() => {
+			syncWithBackend()
+		}, 700)
+	}
 }
 
 const syncWithBackendFetch = debounceSyncWithBackend()
 
 const handleClick = (event: MouseEvent) => {
-  if (!checkClickerAvailability()) return
+	if (!checkClickerAvailability()) return
 
-  if (!canClick.value) return
+	if (!canClick.value) return
 
-  let energySpent = 1
-  let shakeClicks = store.isShaking ? 1 : 0
-  let shoutClicks = store.isShouting ? 1 : 0
+	let energySpent = 1
+	let shakeClicks = store.isShaking ? 1 : 0
+	let shoutClicks = store.isShouting ? 1 : 0
 
-  // Мультитап не вычисляется здесь, а просто передается текущее состояние
-  const isMultiClick = !!store.stats?.multi_tap_enabled
+	// Мультитап не вычисляется здесь, а просто передается текущее состояние
+	const isMultiClick = !!store.stats?.multi_tap_enabled
 
-  let multiplier = 1
-  if (store.isShouting) {
-    multiplier = 4
-  } else if (store.isShaking) {
-    multiplier = 2
-  }
+	let multiplier = 1
+	if (store.isShouting) {
+		multiplier = 4
+	} else if (store.isShaking) {
+		multiplier = 2
+	}
 
-  const clickResult = store.click(energySpent, isMultiClick, shakeClicks, shoutClicks)
+	const clickResult = store.click(energySpent, isMultiClick, shakeClicks, shoutClicks)
 
-  if (clickResult) {
-    if (imgContainer.value) {
-      const rect = imgContainer.value.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
-      animateClick(x, y, imgContainer.value)
-      addCardAndAnimate(x, y, multiplier)
-    }
+	if (clickResult) {
+		if (imgContainer.value) {
+			const rect = imgContainer.value.getBoundingClientRect()
+			const x = event.clientX - rect.left
+			const y = event.clientY - rect.top
+			animateClick(x, y, imgContainer.value)
+			addCardAndAnimate(x, y, multiplier)
+		}
 
-    // if (!isAudioInitialized.value && isMicrophoneAvailable.value) {
-    //   startAudioAnalysis()
-    // }
-  }
+		// if (!isAudioInitialized.value && isMicrophoneAvailable.value) {
+		//   startAudioAnalysis()
+		// }
+	}
 }
 
 const handleClickAndSync = (event: MouseEvent) => {
-  const { energyThresholdSyncRequest } = store
+	const { energyThresholdSyncRequest } = store
 
-  handleClick(event)
+	handleClick(event)
 
-  energyThresholdSyncRequest()
+	energyThresholdSyncRequest()
 
-  syncWithBackendFetch()
+	syncWithBackendFetch()
 }
 
 const handleDeviceMotion = (event: DeviceMotionEvent) => {
-  try {
-    eventCount.value++
-    console.log('Device motion event received', event)
+	try {
+		eventCount.value++
+		console.log('Device motion event received', event)
 
-    const { accelerationIncludingGravity } = event
+		const { accelerationIncludingGravity } = event
 
-    if (accelerationIncludingGravity) {
-      const acceleration = Math.sqrt(
-          Math.pow(accelerationIncludingGravity.x || 0, 2) +
+		if (accelerationIncludingGravity) {
+			const acceleration = Math.sqrt(
+				Math.pow(accelerationIncludingGravity.x || 0, 2) +
           Math.pow(accelerationIncludingGravity.y || 0, 2) +
           Math.pow(accelerationIncludingGravity.z || 0, 2)
-      ) - 9.81
+			) - 9.81
 
-      console.log('Calculated acceleration:', acceleration)
+			console.log('Calculated acceleration:', acceleration)
 
-      let threshold = CLICKER_CONFIG.shake.thresholdMedium
+			let threshold = CLICKER_CONFIG.shake.thresholdMedium
 
-      if (acceleration > threshold) {
-        console.log('Shake detected!')
-        store.setShaking(true)
+			if (acceleration > threshold) {
+				console.log('Shake detected!')
+				store.setShaking(true)
 
-        twa && twa.HapticFeedback.impactOccurred('heavy')
+				twa && twa.HapticFeedback.impactOccurred('heavy')
 
-        if (shakeTimeout) clearTimeout(shakeTimeout)
-        shakeTimeout = window.setTimeout(() => {
-          store.setShaking(false)
-        }, CLICKER_CONFIG.shake.timeout)
-      }
-    }
-  } catch (error) {
-    console.error('Error in handleDeviceMotion:', error)
-    lastError.value = error instanceof Error ? error.message : 'Unknown error in handleDeviceMotion'
-  }
+				if (shakeTimeout) clearTimeout(shakeTimeout)
+				shakeTimeout = window.setTimeout(() => {
+					store.setShaking(false)
+				}, CLICKER_CONFIG.shake.timeout)
+			}
+		}
+	} catch (error) {
+		console.error('Error in handleDeviceMotion:', error)
+		lastError.value = error instanceof Error ? error.message : 'Unknown error in handleDeviceMotion'
+	}
 }
 
 const requestMotionPermission = async () => {
-  try {
-    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
-      const permissionState = await (DeviceMotionEvent as any).requestPermission()
-      if (permissionState === 'granted') {
-        window.addEventListener('devicemotion', handleDeviceMotion)
-        console.log('Motion permission granted')
-        return 'Success'
-      } else {
-        console.error('Motion permission denied')
-        lastError.value = 'Motion permission denied. Please enable it in your device settings.'
-        return 'Error'
-      }
-    } else {
-      window.addEventListener('devicemotion', handleDeviceMotion)
-      console.log('Motion listener added without permission request')
-      return 'Success'
-    }
-  } catch (error: any) {
-    console.error('Error requesting motion permission:', error)
-    lastError.value = error.message
-    return 'Error'
-  }
+	try {
+		if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+			const permissionState = await (DeviceMotionEvent as any).requestPermission()
+			if (permissionState === 'granted') {
+				window.addEventListener('devicemotion', handleDeviceMotion)
+				console.log('Motion permission granted')
+				return 'Success'
+			} else {
+				console.error('Motion permission denied')
+				lastError.value = 'Motion permission denied. Please enable it in your device settings.'
+				return 'Error'
+			}
+		} else {
+			window.addEventListener('devicemotion', handleDeviceMotion)
+			console.log('Motion listener added without permission request')
+			return 'Success'
+		}
+	} catch (error: any) {
+		console.error('Error requesting motion permission:', error)
+		lastError.value = error.message
+		return 'Error'
+	}
 }
 
 const resetDeviceMotion = () => {
-  window.removeEventListener('devicemotion', handleDeviceMotion)
+	window.removeEventListener('devicemotion', handleDeviceMotion)
 }
 
 const checkDeviceMotionSupport = () => {
-  isDeviceMotionSupported.value = 'DeviceMotionEvent' in window
-  console.log('Device motion supported:', isDeviceMotionSupported.value)
-  if (!isDeviceMotionSupported.value) {
-    lastError.value = 'Device motion is not supported on this device. Using alternative shake detection.'
-  }
+	isDeviceMotionSupported.value = 'DeviceMotionEvent' in window
+	console.log('Device motion supported:', isDeviceMotionSupported.value)
+	if (!isDeviceMotionSupported.value) {
+		lastError.value = 'Device motion is not supported on this device. Using alternative shake detection.'
+	}
 }
 
 const handleVisibilityChange = () => {
-  if (document.hidden) {
-    store.setRapidClicking(false)
-    store.setShaking(false)
-    if (shakeTimeout) clearTimeout(shakeTimeout)
-  }
+	if (document.hidden) {
+		store.setRapidClicking(false)
+		store.setShaking(false)
+		if (shakeTimeout) clearTimeout(shakeTimeout)
+	}
 }
 
 onMounted(() => {
-  const fetch = async () => {
-    const { initialStatsRequest, syncInterval, regenerateEnergy } = store
+	const fetch = async () => {
+		const { initialStatsRequest, syncInterval, regenerateEnergy } = store
 
-    await initialStatsRequest()
+		await initialStatsRequest()
 
-    regenerateEnergyIntervalId.value = setInterval(() => {
-      regenerateEnergy()
-    }, syncInterval)
-  }
+		regenerateEnergyIntervalId.value = setInterval(() => {
+			regenerateEnergy()
+		}, syncInterval)
+	}
 
-  fetch()
+	fetch()
 })
 
 onUnmounted(() => {
-  const { resetLastEnergyUpdateTimestamp } = store
+	const { resetLastEnergyUpdateTimestamp } = store
 
-  if (regenerateEnergyIntervalId.value) {
-    clearInterval(regenerateEnergyIntervalId.value)
-  }
+	if (regenerateEnergyIntervalId.value) {
+		clearInterval(regenerateEnergyIntervalId.value)
+	}
 
-  resetLastEnergyUpdateTimestamp()
+	resetLastEnergyUpdateTimestamp()
 })
 
 onMounted(async () => {
-  window.addEventListener('visibilitychange', handleVisibilityChange)
-  checkDeviceMotionSupport()
+	window.addEventListener('visibilitychange', handleVisibilityChange)
+	checkDeviceMotionSupport()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('visibilitychange', handleVisibilityChange)
-  window.removeEventListener('devicemotion', handleDeviceMotion)
-  if (shakeTimeout) clearTimeout(shakeTimeout)
-  resetMicrophonePermission()
-  stopAudioAnalysis()
+	window.removeEventListener('visibilitychange', handleVisibilityChange)
+	window.removeEventListener('devicemotion', handleDeviceMotion)
+	if (shakeTimeout) clearTimeout(shakeTimeout)
+	resetMicrophonePermission()
+	stopAudioAnalysis()
 })
 </script>
 

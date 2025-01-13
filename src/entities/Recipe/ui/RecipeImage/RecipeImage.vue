@@ -11,7 +11,7 @@ import { defineProps } from 'vue'
 
 const props = defineProps<{
 	image: string,
-    title: string
+	title: string
 }>()
 
 </script>

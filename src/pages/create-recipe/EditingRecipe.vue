@@ -37,14 +37,14 @@
 import { useRouter, useRoute } from 'vue-router'
 import { useTranslation } from '@/shared/lib/i18n'
 import {
-    CreateRecipeBasicInfo,
-    CreateRecipeGradation,
-    CreateRecipeIngredients,
-    KitchenToolsRecipe,
-    CreateRecipeNutritional,
-    StepByStepRecipe,
-    TagsRecipe,
-    CreateRecipeTime
+	CreateRecipeBasicInfo,
+	CreateRecipeGradation,
+	CreateRecipeIngredients,
+	KitchenToolsRecipe,
+	CreateRecipeNutritional,
+	StepByStepRecipe,
+	TagsRecipe,
+	CreateRecipeTime
 } from 'entities/Recipe/CreateRecipe/recipe-models'
 import { ButtonColors, VButton } from '@/shared/components/Button'
 import { IconArrowRight } from '@/shared/components/Icon'

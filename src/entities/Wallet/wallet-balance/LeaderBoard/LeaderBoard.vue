@@ -67,11 +67,11 @@ const leaderData = ref<ILeader | null>(null)
 const isUserInTop = ref(false)
 
 const openLeaderboardModal = () => {
-    isShowLeaderboardModal.value = true
+	isShowLeaderboardModal.value = true
 }
 
 const closeLeaderboardModal = () => {
-    isShowLeaderboardModal.value = false
+	isShowLeaderboardModal.value = false
 }
 
 const checkUserInTop = (leaderData: ILeader | null) => {

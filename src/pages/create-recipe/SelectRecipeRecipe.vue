@@ -65,27 +65,27 @@ const router = useRouter()
 const loading = ref(true)
 
 const recipes = [
-    {
-        id: 1,
-        title: 'Вкуснейший домашний бургер',
-        image: '/image/recipes1.png',
-        time: '35 мин',
-        calories: '300 ккал'
-    },
-    {
-        id: 2,
-        title: 'Вкуснейший домашний бургер',
-        image: '/image/recipes1.png',
-        time: '35 мин',
-        calories: '300 ккал'
-    },
-    {
-        id: 3,
-        title: 'Вкуснейший домашний бургер',
-        image: '/image/recipes1.png',
-        time: '35 мин',
-        calories: '300 ккал'
-    }
+	{
+		id: 1,
+		title: 'Вкуснейший домашний бургер',
+		image: '/image/recipes1.png',
+		time: '35 мин',
+		calories: '300 ккал'
+	},
+	{
+		id: 2,
+		title: 'Вкуснейший домашний бургер',
+		image: '/image/recipes1.png',
+		time: '35 мин',
+		calories: '300 ккал'
+	},
+	{
+		id: 3,
+		title: 'Вкуснейший домашний бургер',
+		image: '/image/recipes1.png',
+		time: '35 мин',
+		calories: '300 ккал'
+	}
 ]
 
 const choiceRecipe = () => {
@@ -93,9 +93,9 @@ const choiceRecipe = () => {
 }
 
 onMounted(() => {
-    setTimeout(() => {
-        loading.value = false
-    }, 2000)
+	setTimeout(() => {
+		loading.value = false
+	}, 2000)
 })
 </script>
 

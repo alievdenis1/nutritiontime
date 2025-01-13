@@ -15,11 +15,11 @@
 </template>
 
 <script setup lang="ts">
-    withDefaults(defineProps<{
-        iconColor: string,
-    }>(), {
-        iconColor: '#319A6E'
-    })
+withDefaults(defineProps<{
+	iconColor: string,
+}>(), {
+	iconColor: '#319A6E'
+})
 </script>
 
 <style scoped>

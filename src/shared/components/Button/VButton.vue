@@ -22,12 +22,12 @@ const props = withDefaults(defineProps<{
 	color?: ButtonColors,
 	size?: 'large' | 'default' | 'small',
 	borderRadius?: number,
-    disabled?: boolean
+	disabled?: boolean
 }>(), {
 	color: ButtonColors.Green,
 	size: 'default',
 	borderRadius: 15,
-    disabled: false
+	disabled: false
 })
 
 const { color, size, borderRadius, disabled } = toRefs(props)

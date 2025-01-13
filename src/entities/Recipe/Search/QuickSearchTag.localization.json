@@ -2,11 +2,13 @@
     "en": {
         "tags": "Tags",
         "SearchByTag": "Search by tag",
-        "addSelectedTag": " recipe"
+        "addSelectedTag": " recipe",
+        "anotherTags": "Another Tags"
     },
     "ru": {
         "tags": "Теги",
         "SearchByTag": "Поиск по тегу",
-        "addSelectedTag": " рецептов"
+        "addSelectedTag": " рецептов",
+        "anotherTags": "Другие теги"
     }
 }

@@ -1,12 +1,11 @@
-import useApi from '@/shared/lib/api/use-api'
+import { api } from '@/shared/lib/api/use-api'
 
 type CategoryDto = {
     id: number;
     name: string;
 }
 
-export type CategoryList = CategoryDto[]
-
-export function getCategoryList() {
-    return useApi<CategoryList>('get', '/public/categories')
+export async function getCategoryList() {
+    const response = await api.get<CategoryDto[]>('/public/categories')
+    return response.data
 }

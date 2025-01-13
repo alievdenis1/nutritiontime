@@ -1,16 +1,25 @@
-import useApi from '@/shared/lib/api/use-api'
+import { api } from '@/shared/lib/api/use-api'
+import { PaginationData } from 'shared/lib/types/pagination-data.ts'
 
-type KitchenwareDto = {
-    id: number;
-    name: string;
+export type KitchenwareDto = {
+	id: number
+	name: string
 }
 
 export type KitchenwareList = KitchenwareDto[]
 
 type KitchenwareListParams = {
-    search?: string;
+	search?: string
 }
 
-export function getKitchenwareList(params: KitchenwareListParams) {
-    return useApi<KitchenwareList>('get', '/public/kitchenware', params)
+export async function getKitchenwareList(
+	params: KitchenwareListParams = {},
+	signal?: AbortSignal
+) {
+	const response = await api.get<PaginationData<KitchenwareDto>>('/public/kitchenware', {
+		signal,
+		params
+	})
+
+	return response.data
 }

@@ -1,3 +1,4 @@
 export { getTagList } from './api'
 export type { TagList } from './api'
-export type { Tag } from './model'
+export { default as TagSelect } from './ui/TagSelect.vue'
+export * from './model'

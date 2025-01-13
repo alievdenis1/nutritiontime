@@ -6,33 +6,50 @@
 	>
 		<div class="recipe-card-inner">
 			<div class="flex items-center mb-[12px]">
-				<img
+				<el-image
 					class="w-8 h-8 rounded-full mr-2"
-					:src="recipe.author.image"
-					:alt="recipe.author.name"
+					:src="normalizeImageUrl(recipe.author?.image ?? '')"
+					:alt="recipe.author?.name"
 				>
-				<span class="text-sm text-gray-600">{{ recipe.author.name }}</span>
+					<template #error>
+						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+							<el-icon>
+								<el-icon-user />
+							</el-icon>
+						</div>
+					</template>
+				</el-image>
+				<span class="text-sm text-gray-600">{{ recipe.author?.name }}</span>
 			</div>
 			<div
 				class="relative"
 				@click="router.push(`/recipe/${recipe.id}`)"
 			>
-				<img
+				<ElImage
 					class="w-full h-[343px] object-cover rounded-[12px]"
-					:src="recipe.image"
+					:src="normalizeImageUrl(recipe.image ?? '')"
 					:alt="recipe.title"
 				>
-				<div
-					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"
-				>
-					{{ recipe.rating.toFixed(1) }}
-				</div>
+					<template #error>
+						<div class="h-full w-full flex justify-center items-center bg-[#1C1C1C0D]">
+							<el-icon>
+								<el-icon-picture />
+							</el-icon>
+						</div>
+					</template>
+				</ElImage>
+
+				<!--				<div-->
+				<!--					class="absolute top-2 left-2 bg-forestGreen text-white rounded-full w-[32px] h-[32px] flex items-center justify-center text-sm font-bold"-->
+				<!--				>-->
+				<!--					{{ recipe.average_rating?.toFixed(1) }}-->
+				<!--				</div>-->
 			</div>
 
 			<div class="flex items-center text-sm text-gray-600 mb-4 mt-[12px]">
 				<div class="flex items-center bg-lightGray px-[9px] py-[5px] rounded-[12px] mr-[8px]">
 					<IconTime class="mr-1" />
-					<span>{{ recipe.cookingTime }} {{ t('min') }}</span>
+					<span>{{ recipe.cooking_time }} {{ t('min') }}</span>
 				</div>
 				<div class="flex items-center bg-lightGray px-[9px] py-[5px] rounded-[12px]">
 					<IconFire class="mr-1" />
@@ -44,69 +61,87 @@
 			</h2>
 
 			<div
-				class="flex justify-between items-center text-slateGray"
+				class="flex gap-2 justify-end items-center text-slateGray"
 				@click.stop
 			>
-				<div class="flex items-center">
-					<IconComment class="mr-1" />
-					<span>{{ recipe.commentsCount }}</span>
-				</div>
-				<div class="flex items-center">
-					<IconFavorites
-						:is-liked="favoritesState[recipe.id]"
-						class="mr-[12px]"
-						@toggle="toggleFavorite(recipe.id)"
-					/>
-					<div
-						class="flex items-center"
-						@click="toggleLike(recipe.id)"
-					>
-						<IconHeart
-							:is-liked="likesState[recipe.id]"
-							class="mr-1"
-						/>
-						<span>{{ recipe.likesCount }}</span>
-					</div>
-				</div>
+				<AddRecipeToCollectionButton
+					:recipe="recipe"
+					@click="onStartAddRecipeToCollectionFlow(recipe)"
+				/>
+
+				<ToggleFavoriteButton
+					:model-value="recipe.is_favorited"
+					:recipe-id="recipe.id"
+					:likes="recipe.likes_count"
+					@success="onRecipeSuccessfullyToggledFavourite"
+				/>
 			</div>
-			<CreateCollection />
 		</div>
 	</div>
+
+	<AddRecipeToCollectionFlow
+		ref="addRecipeToCollectionFlowRef"
+		@success="onRecipeCollectionChangeSuccess"
+	/>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { IconComment, IconFire, IconHeart, IconTime, IconFavorites } from 'shared/components/Icon'
-import type { RecipesItem } from '../RecipesList/type'
-import CreateCollection from '../Search/modal/CreateCollection.vue'
+import { IconFire, IconTime } from 'shared/components/Icon'
+import type { RecipeItem } from '../RecipesList/type'
 import { useTranslation } from 'shared/lib/i18n'
 import localization from './SearchBar.localization.json'
 import { useSearchStore } from './store/search-store'
+import { ElImage } from 'element-plus'
+import { Picture as ElIconPicture, User as ElIconUser } from '@element-plus/icons-vue'
+import AddRecipeToCollectionButton from 'features/Recipe/add-to-collection/ui/AddRecipeToCollectionButton.vue'
+import { ToggleFavoriteButton } from 'features/Recipe/toggle-favourite'
+import AddRecipeToCollectionFlow from 'features/Recipe/add-to-collection/ui/AddRecipeToCollectionFlow.vue'
+import { useQueryClient } from '@tanstack/vue-query'
+import { normalizeImageUrl } from 'shared/lib/mapping/normalize-image-url.ts'
 
 const router = useRouter()
 const { t } = useTranslation(localization)
 const store = useSearchStore()
 
+const queryClient = useQueryClient()
+
 const props = defineProps<{
-	recipes: RecipesItem[]
+	recipes: RecipeItem[]
 }>()
 
-const favoritesState = ref<Record<number, boolean>>({})
-const likesState = ref<Record<number, boolean>>({})
+const addRecipeToCollectionFlowRef = ref<InstanceType<typeof AddRecipeToCollectionFlow>>()
 
-props.recipes.forEach(recipe => {
-	favoritesState.value[recipe.id] = false
-	likesState.value[recipe.id] = false
-})
-
-const toggleFavorite = (recipeId: number) => {
-	store.toggleModalOpen()
-	favoritesState.value[recipeId] = !favoritesState.value[recipeId]
+function onStartAddRecipeToCollectionFlow(recipe: RecipeItem) {
+	addRecipeToCollectionFlowRef.value?.start(recipe)
 }
 
-const toggleLike = (recipeId: number) => {
-	likesState.value[recipeId] = !likesState.value[recipeId]
+async function onRecipeCollectionChangeSuccess(data: { recipeId: number, collectionId: number }) {
+	store.addCollectionToRecipe(data.recipeId, data.collectionId)
+
+	await Promise.all([
+		await queryClient.invalidateQueries({
+			queryKey: ['recipes/my']
+		}),
+		await queryClient.invalidateQueries({
+			queryKey: ['recipes/favourite'],
+		}),
+	])
+}
+
+async function onRecipeSuccessfullyToggledFavourite(data: { recipeId: number, isFavorited: boolean}) {
+	console.log(data)
+	store.addRecipeToFavourite(data.recipeId, data.isFavorited ? 'add' : 'remove')
+
+	await Promise.all([
+		await queryClient.invalidateQueries({
+			queryKey: ['recipes/my'],
+		}),
+		await queryClient.invalidateQueries({
+			queryKey: ['recipes/favourite']
+		}),
+	])
 }
 </script>
 

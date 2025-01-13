@@ -14,6 +14,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.62.12",
     "@ton-api/client": "^0.1.1",
     "@ton/core": "^0.58.1",
     "@ton/crypto": "^3.3.0",
@@ -28,7 +29,6 @@
     "clsx": "^2.1.1",
     "element-plus": "^2.7.5",
     "lucide-vue-next": "^0.412.0",
-    "nuxt": "^3.12.1",
     "pinia": "^2.0.36",
     "pinia-plugin-persistedstate": "^3.2.1",
     "radix-vue": "^1.8.5",

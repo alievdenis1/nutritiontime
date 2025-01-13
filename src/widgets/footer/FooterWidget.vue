@@ -28,7 +28,8 @@
 				{{ t('recipes') }}
 			</button>
 		</footer>
-		<ModalCreateRecipe />
+
+		<CreateRecipeModal v-model:visible="store.isModalCreateOpen" />
 	</div>
 </template>
 
@@ -38,7 +39,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTranslation } from '@/shared/lib/i18n'
 import Localization from './FooterWidget.localization.json'
-import { ModalCreateRecipe } from 'entities/Recipe/CreateRecipe/modal-create/ui'
+import { CreateRecipeModal } from '@/features/Recipe/manage'
 import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 const store = useModalCreateStore()
 const router = useRouter()

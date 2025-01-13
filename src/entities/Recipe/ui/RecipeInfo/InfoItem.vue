@@ -9,11 +9,11 @@
 import { defineProps } from 'vue'
 
 const props = withDefaults(defineProps<{
-    title?: string,
-    value?: string,
+	title?: string,
+	value?: string,
 }>(), {
-    title: '',
-    value: '',
+	title: '',
+	value: '',
 })
 
 </script>

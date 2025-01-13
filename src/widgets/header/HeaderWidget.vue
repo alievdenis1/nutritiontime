@@ -82,7 +82,7 @@ const navigateToProfile = () => {
 }
 
 const navigateToMain = () => {
- router.push('/')
+	router.push('/')
 }
 </script>
 

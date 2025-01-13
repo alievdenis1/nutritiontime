@@ -1,0 +1,30 @@
+{
+    "ru": {
+        "desc": "То, что нужно для приготовления блюда. Например, 250 грамм картошки",
+        "unitGrams": "г.",
+        "unitPieces": "шт.",
+        "ingredientsTitle": "Ингредиенты",
+        "ingredientsDescription": "То, что нужно для приготовления блюда. Например, 250 грамм картошки ",
+        "addIngredientButton": "Добавить ингредиент",
+        "addIngredientTitle": "Добавление ингредиента",
+        "ingredientPlaceholderName": "Название ингредиента",
+        "ingredientPlaceholderQuantity": "Количество",
+        "InGrams": "В граммах",
+        "InPieces": "В штуках",
+        "saveIngredientButton": "Сохранить"
+    },
+    "en": {
+        "desc": "What you need for cooking. For example, 250 grams of potatoes.",
+        "unitGrams": "g.",
+        "unitPieces": "pcs.",
+        "ingredientsTitle": "Ingredients",
+        "ingredientsDescription": "What you need for cooking. For example, 250 grams of potatoes.",
+        "addIngredientButton": "Add Ingredient",
+        "addIngredientTitle": "Adding Ingredient",
+        "ingredientPlaceholderName": "Ingredient Name",
+        "ingredientPlaceholderQuantity": "Quantity",
+        "InGrams": "In grams",
+        "InPieces": "In pieces",
+        "saveIngredientButton": "Save"
+    }
+}

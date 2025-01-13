@@ -27,14 +27,14 @@
 
 <script setup lang="ts">
 import {
-CreateRecipeBasicInfo,
-CreateRecipeGradation,
-CreateRecipeIngredients,
-KitchenToolsRecipe,
-CreateRecipeNutritional,
-StepByStepRecipe,
-TagsRecipe,
-CreateRecipeTime
+	CreateRecipeBasicInfo,
+	CreateRecipeGradation,
+	CreateRecipeIngredients,
+	KitchenToolsRecipe,
+	CreateRecipeNutritional,
+	StepByStepRecipe,
+	TagsRecipe,
+	CreateRecipeTime
 }
 	from
 	'entities/Recipe/CreateRecipe/recipe-models'
@@ -44,6 +44,8 @@ import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateOwn.localization.json'
 import { ref } from 'vue'
 import { IconArrowRight } from '@/shared/components/Icon'
+import { useRecipeCreation } from 'features/create-recipe/model/use-recipe-creation.ts'
+import { createRecipeCreationContext } from 'features/create-recipe/model/recipe-creation-context.ts'
 
 const router = useRouter()
 const { t } = useTranslation(localizations)
@@ -63,6 +65,10 @@ const CheckRecipe = () => {
 		router.push({ path: 'check-recipe' })
 	}
 }
+
+const { model } = useRecipeCreation()
+
+createRecipeCreationContext({ model })
 </script>
 
 <style scoped></style>

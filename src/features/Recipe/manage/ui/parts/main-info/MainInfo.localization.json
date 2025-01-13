@@ -1,0 +1,33 @@
+{
+    "ru": {
+        "uploadMainPhoto": "Загрузить главную фотографию",
+        "additionalPhotosInfo": "Дополнительные фото можно будет загрузить при заполнении шагов рецепта",
+        "recipeTitlePlaceholder": "Название рецепта *",
+        "recipeDescriptionPlaceholder": "Описание рецепта *",
+        "category_id": "Категория блюда *",
+        "cuisine_id": "Национальность кухни *",
+        "diet_type_id": "Тип диеты *",
+        "categorySelection": "Выбор категории",
+        "cuisineSelection": "Выбор национальности кухни",
+        "dietSelection": "Выбор типа диеты",
+        "searchCategory": "Поиск категории",
+        "errorMessage": "Не удалось загрузить эту фотографию. Попробуйте другую",
+        "save": "Сохранить"
+    },
+    "en": {
+
+        "uploadMainPhoto": "Upload main photo",
+        "additionalPhotosInfo": "Additional photos can be uploaded when filling out the recipe steps",
+        "recipeTitlePlaceholder": "Recipe title *",
+        "recipeDescriptionPlaceholder": "Recipe description *",
+        "category_id": "Dish category *",
+        "cuisine_id": "Cuisine nationality *",
+        "diet_type_id": "Diet type *",
+        "categorySelection": "Category selection",
+        "searchCategory": "Search category",
+        "cuisineSelection": "Cuisine nationality selection",
+        "dietSelection": "Diet type selection",
+        "errorMessage": "Failed to upload this photo. Try another one",
+        "save": "Save"
+    }
+}

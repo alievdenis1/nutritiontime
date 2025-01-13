@@ -7,10 +7,10 @@
 	>
 		<slot />
 	</main>
-	<!--	<footer-widget-->
-	<!--		v-show="isLoading"-->
-	<!--		class="sticky bottom-[20px]"-->
-	<!--	/>-->
+	<footer-widget
+		v-show="isLoading"
+		class="sticky bottom-[20px]"
+	/>
 	<VSkeletonLocalization
 		v-show="!isLoading"
 		class="p-[16px] bg-mainBg skeletonContainer"
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-// import { FooterWidget } from 'widgets/footer'
+import { FooterWidget } from 'widgets/footer'
 import { HeaderWidget } from 'widgets/header'
 import { VSkeletonLocalization } from 'shared/components/ui/skeleton'
 import { useLocaleStore } from '@/shared/lib/i18n'

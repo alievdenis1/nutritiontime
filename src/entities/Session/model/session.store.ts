@@ -6,7 +6,6 @@ type State = {
 	userInfo: User | null,
 	error: string | null,
 	token: string | null,
-	isAuthenticated: boolean,
 	lang: Locales,
 };
 
@@ -16,7 +15,6 @@ export const useSessionStore = defineStore({
 		userInfo: null,
 		error: null,
 		token: null,
-		isAuthenticated: false,
 		lang: 'ru',
 	}),
 	getters: {

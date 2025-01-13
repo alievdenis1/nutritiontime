@@ -20,33 +20,27 @@ module.exports = {
 	plugins: ['@typescript-eslint'],
 	ignorePatterns: ['dist'],
 	rules: {
-		'vue/html-indent': ['error', 'tab', {
+		'vue/html-indent': ['warn', 'tab', {
 			'attribute': 1,
 			'baseIndent': 1,
 			'closeBracket': 0,
 			'alignAttributesVertically': true,
 			'ignores': []
 		}],
-		'vue/attributes-order': ['error', {
-			'order': [
-				'DEFINITION',
-				'CONDITIONALS',
-				'LIST_RENDERING',
-				'RENDER_MODIFIERS',
-				'GLOBAL',
-				['UNIQUE', 'SLOT'],
-				'TWO_WAY_BINDING',
-				'OTHER_DIRECTIVES',
-				'OTHER_ATTR',
-				'EVENTS',
-				'CONTENT'
-			],
-			'alphabetical': false
+		'no-mixed-spaces-and-tabs': ['warn'],
+		"vue/max-attributes-per-line": ["error", {
+			"singleline": {
+				"max": 1
+			},
+			"multiline": {
+				"max": 1
+			}
 		}],
 		'object-curly-spacing': ['error', 'always'],
 		'quotes': ['error', 'single'],
 		'no-trailing-spaces': 'error',
 		'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
-		'semi': ['error', 'never']
+		'semi': ['error', 'never'],
+		'@typescript-eslint/indent': ['warn', 'tab'],
 	}
 }

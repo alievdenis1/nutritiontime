@@ -62,38 +62,38 @@
 </template>
 
 <script setup lang="ts">
- import { VButton } from '@/shared/components/Button'
- import localization from './ProfileStats.localization.json'
- import { useTranslation } from '@/shared/lib/i18n'
+import { VButton } from '@/shared/components/Button'
+import localization from './ProfileStats.localization.json'
+import { useTranslation } from '@/shared/lib/i18n'
 
- const { t } = useTranslation(localization)
+const { t } = useTranslation(localization)
 
- withDefaults(defineProps<{
-  months: number
-  price: number
-  features: string[]
-  selected: boolean
-  discount: number
+withDefaults(defineProps<{
+	months: number
+	price: number
+	features: string[]
+	selected: boolean
+	discount: number
 }>(), {
-   discount: 0
- })
+	discount: 0
+})
 
- const getMonthDeclension = (months: number) => {
-  const lastDigit = months % 10
-  const lastTwoDigits = months % 100
+const getMonthDeclension = (months: number) => {
+	const lastDigit = months % 10
+	const lastTwoDigits = months % 100
 
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'monthPlural'
-  if (lastDigit === 1) return 'monthSingular'
-  if (lastDigit >= 2 && lastDigit <= 4) return 'monthFew'
-  return 'monthPlural'
- }
+	if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'monthPlural'
+	if (lastDigit === 1) return 'monthSingular'
+	if (lastDigit >= 2 && lastDigit <= 4) return 'monthFew'
+	return 'monthPlural'
+}
 
- const getMonthForm = (months: number) => {
-  const monthKey = getMonthDeclension(months)
-  return t(monthKey)
- }
+const getMonthForm = (months: number) => {
+	const monthKey = getMonthDeclension(months)
+	return t(monthKey)
+}
 
- defineEmits<{
-  (e: 'select'): void
- }>()
+defineEmits<{
+	(e: 'select'): void
+}>()
 </script>

@@ -42,26 +42,26 @@ const props =
   defineProps<{ isShowBuyNftModal: boolean; hasNft: boolean }>()
 
 const emit = defineEmits<{
-  (e: 'closeBuyNftModal'): void
+	(e: 'closeBuyNftModal'): void
 }>()
 
 const handleCloseBuyNftModal = () => {
-    emit('closeBuyNftModal')
+	emit('closeBuyNftModal')
 }
 
 const buyNft = () => {
-    window.open(
-        import.meta.env.VITE_NFT_COLLECTION_LINK
+	window.open(
+		import.meta.env.VITE_NFT_COLLECTION_LINK
             || 'https://getgems.io/collection/EQDERkmRDrXxzEbZUMMgo3uDJwe24qUYpnasJ83WpQZaqjJ1',
-        '_blank'
-    )
+		'_blank'
+	)
 }
 
 watch(() => props.hasNft, (hasNft) => {
-  if (hasNft) {
-    handleCloseBuyNftModal()
-  }
- })
+	if (hasNft) {
+		handleCloseBuyNftModal()
+	}
+})
 </script>
 
 <style scoped>

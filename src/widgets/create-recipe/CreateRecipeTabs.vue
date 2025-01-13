@@ -1,55 +1,53 @@
 <template>
 	<TabsMain
-		v-model="activeTab"
-		:default-value="store.defaultValueTabs"
+		v-model="mode"
+		:default-value="RECIPE_CREATION_VARIANTS.BASE"
 		class="p-[16px]"
 	>
 		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
 			<h2 class="text-center text-lg text-darkGray">
-				{{ t('addRecipe') }}
+				{{ t('createRecipe') }}
 			</h2>
 		</div>
+
 		<TabsList>
 			<TabsTrigger
-				value="ownRecepie"
+				:value="RECIPE_CREATION_VARIANTS.BASE"
 			>
 				{{ t('manualCreation') }}
 			</TabsTrigger>
+
 			<TabsTrigger
-				value="aiRecepie"
+				:value="RECIPE_CREATION_VARIANTS.AI"
 				class="flex gap-[8px] items-center"
 			>
 				{{ t('aiCreation') }}
-				<IconAi :icon-color="activeTab === 'aiRecepie' ? '#319A6E' : '#E1E1E1'" />
+				<IconAi :icon-color="mode === 'AI' ? '#319A6E' : '#E1E1E1'" />
 			</TabsTrigger>
 		</TabsList>
-		<TabsContent value="ownRecepie">
-			<CreateOwn />
+
+		<TabsContent :value="RECIPE_CREATION_VARIANTS.BASE">
+			<CreateBaseRecipe />
 		</TabsContent>
-		<TabsContent value="aiRecepie">
-			<CreateAi />
+
+		<TabsContent :value="RECIPE_CREATION_VARIANTS.AI">
+			<!--	<CreateAi /> -->
 		</TabsContent>
 	</TabsMain>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { CreateOwn, CreateAi } from 'features/create-recipe'
 import { TabsMain, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { useModalCreateStore } from 'entities/Recipe/CreateRecipe/modal-create/model/model-store'
 import { useTranslation } from '@/shared/lib/i18n'
 import localizations from './CreateRecipeTabs.localization.json'
 import { IconAi } from 'shared/components/Icon'
+import { CreateBaseRecipe } from 'features/Recipe/manage'
+import { RecipeCreationVariants } from 'features/Recipe/manage/model/creation-variants.ts'
+import { RECIPE_CREATION_VARIANTS } from 'entities/Recipe/model/use-navigate-to-recipe-creation.ts'
 
-const store = useModalCreateStore()
 const { t } = useTranslation(localizations)
 
-const activeTab = computed({
-	get: () => store.defaultValueTabs,
-	set: (value) => {
-		store.defaultValueTabs = value
-	}
-})
+const mode = defineModel<RecipeCreationVariants>('mode', { required: true })
 </script>
 
 <style scoped></style>

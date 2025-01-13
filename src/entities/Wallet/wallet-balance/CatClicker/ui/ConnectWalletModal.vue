@@ -48,22 +48,22 @@ const props =
   defineProps<{ isShowConnectWalletModal: boolean; walletConnected: boolean }>()
 
 const emit = defineEmits<{
-  (e: 'closeConnectWalletModal'): void
+	(e: 'closeConnectWalletModal'): void
 }>()
 
 const handleCloseConnectWalletModal = () => {
-    emit('closeConnectWalletModal')
+	emit('closeConnectWalletModal')
 }
 
 const openWallet = () => {
-    open()
+	open()
 }
 
 watch(() => props.walletConnected, (isWalletConnected) => {
-  if (isWalletConnected) {
-    handleCloseConnectWalletModal()
-  }
- })
+	if (isWalletConnected) {
+		handleCloseConnectWalletModal()
+	}
+})
 </script>
 
 <style scoped>

@@ -1,0 +1,18 @@
+{
+    "ru": {
+        "max": "Максимальное количество символов",
+        "maxNumber": "Максимальное число",
+        "required": "Введите данные",
+        "min": "Минимальное значение",
+        "minNumber": "Минимальное число",
+        "number": "Значение должно содержать только цифры"
+    },
+    "en": {
+        "max": "Maximum number of characters",
+        "maxNumber": "Maximum number",
+        "required": "Enter data",
+        "min": "Minimum value",
+        "minNumber": "Minimum number",
+        "number": "The value must contain only digits"
+    }
+}

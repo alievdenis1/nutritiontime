@@ -17,17 +17,17 @@
 	</div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="ValueType">
 import { computed } from 'vue'
 import type { InputListItem } from '../types'
 import Localization from './InputList.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 
 interface InputListProps {
-    list: InputListItem[]
+	list: InputListItem<ValueType>[]
 }
 type InputListEmits = {
-    select: [value: InputListItem]
+	select: [value: InputListItem<ValueType>]
 }
 
 const { t } = useTranslation(Localization)
@@ -37,14 +37,14 @@ const emits = defineEmits<InputListEmits>()
 
 const noResults = computed((): boolean => !props.list.length)
 
-const onSelect = (item: InputListItem): void => {
-    emits('select', item)
+const onSelect = (item: InputListItem<ValueType>): void => {
+	emits('select', item)
 }
 </script>
 
 <style lang="scss" scoped>
 .input-list {
-	@apply border-1 border-solid border;
+	@apply border-1 border-solid border-gray;
 	border-top-color: transparent;
 	border-top-left-radius: 0px;
 	border-top-right-radius: 0px;

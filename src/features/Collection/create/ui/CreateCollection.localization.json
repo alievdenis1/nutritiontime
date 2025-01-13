@@ -1,0 +1,16 @@
+{
+  "ru": {
+    "collectionCreation": "Создание коллекции",
+    "description": "В коллекцию можно добавлять рецепты с помощью иконки",
+    "collectionName": "Название коллекции",
+    "createCollection": "Создать коллекцию",
+    "requiredMessage": "Нужно придумать название для коллекции"
+  },
+  "en": {
+    "collectionCreation": "Collection creation",
+    "description": "You can add recipes to collection using icon",
+    "collectionName": "Collection name",
+    "createCollection": "Create collection",
+    "requiredMessage": "Field is required"
+  }
+}

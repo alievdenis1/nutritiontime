@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
- import { CryptoPayment } from '@/entities/Profile'
+import { CryptoPayment } from '@/entities/Profile'
 
 </script>
 

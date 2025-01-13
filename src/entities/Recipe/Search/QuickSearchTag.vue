@@ -7,7 +7,7 @@
 			>
 				<span class="text-sm">{{ t('tags') }}</span>
 				<IconTabs
-					v-if="tabCount <= 0"
+					v-if="selectedTagsCount <= 0"
 					icon-color="#FFFFFF"
 					class="ml-[6px]"
 				/>
@@ -15,7 +15,7 @@
 					v-else
 					class="ml-[6px] bg-orange text-white rounded-full px-2 py-1 text-xs"
 				>
-					{{ tabCount }}
+					{{ selectedTagsCount }}
 				</div>
 			</button>
 			<div class="w-[2px] h-[40px] bg-lightGray ml-[12px] mr-[12px]" />
@@ -25,13 +25,13 @@
 						v-for="tag in quickSearchTags"
 						:key="tag.id"
 						:class="getTagClasses(tag)"
-						@click="selectTag(tag)"
+						@click="selectQuickSearchTag(tag)"
 					>
-						{{ tag.text }}
+						{{ tag.name }}
 						<button
-							v-if="tag.isActive"
+							v-if="isTagActive(tag)"
 							class="ml-2 text-forestGreen"
-							@click.stop="deselectTag()"
+							@click.stop="deselectQuickSearchTag"
 						>
 							<IconClose
 								class="w-[12px] h-[12px] cursor-pointer"
@@ -42,6 +42,7 @@
 				</div>
 			</div>
 		</div>
+
 		<VModal
 			:show="showModal"
 			@close="closeModal"
@@ -58,17 +59,20 @@
 						/>
 					</div>
 				</div>
-				<TagsCollectionsItem
+
+				<TagSelect
+					v-loading="isLoadingTags"
 					class="flex-grow overflow-y-auto custom-scrollbar"
-					:categories-tags="categories"
-					:modal-selected-tags="modalSelectedTags"
-					@tag-changed="handleTagChanged"
+					:model-value="selectedTags"
+					@update:model-value="handleTagChanged"
 				/>
+
 				<button
 					:class="['block w-full mt-4 py-2 rounded-xl text-white text-center cursor-pointer', buttonClass]"
 					@click="closeModal"
 				>
-					0{{ t('addSelectedTag') }}
+					<ElLoading v-if="store.isLoading" />
+					{{ store.totalRecipes }} {{ t('addSelectedTag') }}
 				</button>
 			</div>
 		</VModal>
@@ -82,94 +86,76 @@ import { useTranslation } from 'shared/lib/i18n'
 import localization from './QuickSearchTag.localization.json'
 import { useSearchStore } from './store/search-store'
 import { VModal } from 'shared/components/Modal'
-import TagsCollectionsItem  from '../CreateRecipe/recipe-models/tagsRecipe/TagsCollectionsItem.vue'
 // TODO: вынести эту папку Search отдельно
-import { getCategoryList, CategoryList } from '@/entities/Category'
+import { ElLoading } from 'element-plus'
+import type { Tag } from 'entities/Tag/@x/Recipe'
+import { TagSelect, useTagList } from 'entities/Tag'
 
 const store = useSearchStore()
 const { t } = useTranslation(localization)
+
 const openModal = () => {
 	showModal.value = true
 }
-interface Tag {
-    id: number;
-    text: string;
-    isActive: boolean;
-}
+
 const showModal = ref(false)
-const modalSelectedTags = ref<string[]>([])
-const tabCount = ref(0)
-const activeCategoryId = ref<number | null>(null)
-const categoryList = ref<CategoryList | null>(null)
+const selectedTags = ref<number[]>([])
 
 const closeModal = () => {
 	showModal.value = false
-	updateTabCount()
 }
-const updateTabCount = () => {
-	tabCount.value = modalSelectedTags.value.length
+
+const handleTagChanged = (updatedTags: number[]) => {
+	store.filters.tags = updatedTags
+	store.searchRecipes()
 }
-const handleTagChanged = (updatedTags: string[]) => {
-	modalSelectedTags.value = updatedTags
-	// tabCount.value = updatedTags.length
-}
+
+const selectedTagsCount = computed(() => {
+	return store.filters.tags?.length ?? 0
+})
 
 const buttonClass = computed(() => {
-	return modalSelectedTags.value.length > 0 ? 'bg-forestGreen' : 'bg-disabled cursor-not-allowed'
+	return 'bg-forestGreen'
+	// return selectedTags.value.length > 0 ? 'bg-forestGreen' : 'bg-disabled cursor-not-allowed'
 })
-const quickSearchTags = ref<Tag[]>([
-    { id: 1, text: 'Из индейки', isActive: false },
-    { id: 2, text: 'Завтраки', isActive: false },
-    { id: 3, text: 'Обед', isActive: false },
-    { id: 4, text: 'Ужин', isActive: false },
-    { id: 5, text: 'Белковые', isActive: false },
-])
 
-const categories = ref([
-	{ name: 'Категория 1', tags: ['#тег', '#тег1', '#тег2', '#тег3', '#тег4', '#тег5', '#тег6', '#тег7', '#тег8', '#тег9', '#тег10', '#тег11'] },
-	{ name: 'Категория 2', tags: ['#тег12', '#тег13', '#тег14', '#тег15', '#тег16', '#тег17', '#тег18', '#тег19', '#тег20', '#тег21', '#тег22', '#тег23'] },
-	{ name: 'Категория 3', tags: ['#тег24', '#тег25', '#тег26', '#тег27', '#тег28', '#тег29', '#тег30', '#тег31', '#тег32', '#тег33', '#тег34', '#тег35'] },
-	{ name: 'Категория 4', tags: ['#тег36', '#тег37', '#тег38', '#тег39', '#тег40', '#тег41', '#тег42', '#тег43', '#тег44', '#тег45', '#тег46', '#тег47'] },
-	{ name: 'Категория 5', tags: ['#тег48', '#тег49', '#тег50', '#тег51', '#тег52', '#тег53', '#тег54', '#тег55', '#тег56', '#тег57', '#тег58', '#тег59'] },
+onMounted(() => {
+	selectedTags.value = store.filters.tags ?? []
+})
+
+const isTagActive = (tag: Tag) => {
+	if (tag.category === 'quick_search') {
+		return store.activeQuickSearchTag === tag.id
+	}
+
+	return store.filters.tags.includes(tag.id)
+}
+
+const quickSearchTags = ref<Tag[]>([
+	{ id: 1, name: 'Из индейки', category: 'quick_search' },
+	{ id: 2, name: 'Завтраки', category: 'quick_search' },
+	{ id: 3, name: 'Обед', category: 'quick_search'  },
+	{ id: 4, name: 'Ужин', category: 'quick_search'  },
+	{ id: 5, name: 'Белковые', category: 'quick_search'  },
 ])
 
 const getTagClasses = computed(() => (tag: Tag) => {
-    return [
-        'px-[16px] py-[10px] inline-flex items-center rounded-[100px] text-sm',
-        tag.isActive
-            ? 'bg-transparentGreen text-forestGreen'
-            : 'bg-lightGray text-slateGray cursor-pointer'
-    ]
+	return [
+		'px-[16px] py-[10px] inline-flex items-center rounded-[100px] text-sm',
+		isTagActive(tag)
+			? 'bg-transparentGreen text-forestGreen'
+			: 'bg-lightGray text-slateGray cursor-pointer'
+	]
 })
 
-const selectTag = (selectedTag: Tag) => {
+const selectQuickSearchTag = (selectedTag: Tag) => {
+	store.activeQuickSearchTag = selectedTag.id
 	store.searchRecipes()
-    quickSearchTags.value.forEach(tag => {
-        tag.isActive = tag.id === selectedTag.id
-    })
 }
 
-const deselectTag = () => {
-    quickSearchTags.value.forEach(tag => {
-        tag.isActive = false
-    })
+const deselectQuickSearchTag = () => {
+	store.activeQuickSearchTag = null
 }
-
-const fetchCategoryList = async () => {
-	const { execute, data, error } = getCategoryList()
-
-	await execute()
-
-	if (data.value && !error.value) {
-		return data.value
-	}
-
-	return []
-}
-
-onMounted(async () => {
-	categoryList.value = await fetchCategoryList()
-})
 </script>
 
 <style scoped>

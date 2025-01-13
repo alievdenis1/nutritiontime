@@ -240,21 +240,21 @@ import { useSessionStore } from '@/entities/Session'
 const router = useRouter()
 
 const navigateToWallet = () => {
-  router.push('/wallet')
+	router.push('/wallet')
 }
 
 const sortedReferrals = computed(() =>
-    [...(profile.value?.user?.referrals || [])].sort((a, b) =>
-        b.current_streak - a.current_streak
-    )
+	[...(profile.value?.user?.referrals || [])].sort((a, b) =>
+		b.current_streak - a.current_streak
+	)
 )
 
 const getSubscriptionStatus = (referral: ReferralUser | null): string => {
-  if (!referral) return ''
+	if (!referral) return ''
 
-  if (referral.has_active_subscription) return t('subscriptionActive')
-  if (referral.has_trial) return t('subscriptionTrial')
-  return t('subscriptionNone')
+	if (referral.has_active_subscription) return t('subscriptionActive')
+	if (referral.has_trial) return t('subscriptionTrial')
+	return t('subscriptionNone')
 }
 
 const { t } = useTranslation(localization)
@@ -268,31 +268,31 @@ const { userInfo } = sessionStore
 // Функция копирования реферальной ссылки
 const copyShareLink = async () => {
 
-  const referralCode = userInfo?.referral_code || ''
-  WebApp.openTelegramLink(`https://t.me/share/url?url=https://t.me/nutritiontime_bot?start=${referralCode}`)
+	const referralCode = userInfo?.referral_code || ''
+	WebApp.openTelegramLink(`https://t.me/share/url?url=https://t.me/nutritiontime_bot?start=${referralCode}`)
 
-  const textToCopy = `https://t.me/nutritiontime_bot?start=${referralCode}`
+	const textToCopy = `https://t.me/nutritiontime_bot?start=${referralCode}`
 
-  try {
-    await navigator.clipboard.writeText(textToCopy)
+	try {
+		await navigator.clipboard.writeText(textToCopy)
 
-    // Показываем уведомление
-    showCopyNotification.value = true
-    fadeOutNotification.value = false
+		// Показываем уведомление
+		showCopyNotification.value = true
+		fadeOutNotification.value = false
 
-    // Начинаем анимацию исчезновения через 2 секунды
-    setTimeout(() => {
-      fadeOutNotification.value = true
-    }, 2000)
+		// Начинаем анимацию исчезновения через 2 секунды
+		setTimeout(() => {
+			fadeOutNotification.value = true
+		}, 2000)
 
-    // Скрываем уведомление полностью через 2.3 секунды
-    setTimeout(() => {
-      showCopyNotification.value = false
-      fadeOutNotification.value = false
-    }, 2300)
-  } catch (error) {
-    console.error('Ошибка при копировании текста:', error)
-  }
+		// Скрываем уведомление полностью через 2.3 секунды
+		setTimeout(() => {
+			showCopyNotification.value = false
+			fadeOutNotification.value = false
+		}, 2300)
+	} catch (error) {
+		console.error('Ошибка при копировании текста:', error)
+	}
 }
 
 // Состояние
@@ -307,42 +307,42 @@ const profile = computed(() => profileApi.data.value ?? null)
 
 // Методы
 const handleToProfile = async () => {
-  await sendToProfile().execute()
-  WebApp.close()
+	await sendToProfile().execute()
+	WebApp.close()
 }
 
 const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
+	return new Date(dateString).toLocaleString('ru-RU', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit'
+	})
 }
 
 const formatGender = (gender: string): string => {
-  return gender === 'male' ? 'Мужской' : 'Женский'
+	return gender === 'male' ? 'Мужской' : 'Женский'
 }
 
 const formatGoal = (goal: string): string => {
-  return t(`${goal}`) || goal
+	return t(`${goal}`) || goal
 }
 
 const showUserStats = (user: ReferralUser) => {
-  selectedUser.value = user
-  showModal.value = true
+	selectedUser.value = user
+	showModal.value = true
 }
 
 const closeModal = () => {
-  showModal.value = false
-  selectedUser.value = null
+	showModal.value = false
+	selectedUser.value = null
 }
 
 // Инициализация
 onMounted(() => {
-  profileApi.execute()
+	profileApi.execute()
 })
 </script>
 

@@ -28,7 +28,8 @@
         "dishRating": "Рейтинг блюда",
         "recipes": "рецептов",
         "gramUnit": "г.",
-        "caloriesUnit": "ккал"
+        "caloriesUnit": "ккал",
+        "no_ingredients_found": "Ингредиенты не найдены"
     },
     "en": {
         "filters": "Filters",
@@ -59,6 +60,7 @@
         "dishRating": "Dish Rating",
         "recipes": "recipes",
         "gramUnit": "g",
-        "caloriesUnit": "kcal"
+        "caloriesUnit": "kcal",
+        "no_ingredients_found": "No Ingredients Found"
     }
 }

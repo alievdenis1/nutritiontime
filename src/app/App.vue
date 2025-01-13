@@ -9,7 +9,7 @@
 					class="loading"
 				>
 					<div class="loading__spinner">
-						<v-loading />
+						<VLoading />
 					</div>
 				</div>
 				<router-view v-else />
@@ -32,6 +32,7 @@ import WebApp from '@twa-dev/sdk'
 import { ElConfigProvider } from 'element-plus'
 import ru from 'element-plus/es/locale/lang/ru'
 import en from 'element-plus/es/locale/lang/en'
+import { VLoading } from 'shared/components/Loading'
 
 const route = useRoute()
 const router = useRouter()
@@ -52,60 +53,63 @@ const elementPlusLocale = computed(() => {
 })
 
 const authUser = async () => {
-  if (!sessionStore.isAuthenticated) {
-    await authorize()
-    localeStore.initializeLocale(sessionStore.lang)
-  }
+	if (!sessionStore.isAuthenticated) {
+		await authorize()
+		localeStore.initializeLocale(sessionStore.lang)
+	}
 }
+
 const options = {
- manifestUrl: 'https://alievdenis1.github.io/nutritiontime/tonconnect-manifest.json',
- language: sessionStore.lang
+	manifestUrl: 'https://alievdenis1.github.io/nutritiontime/tonconnect-manifest.json',
+	language: sessionStore.lang
 }
 
 const handleStartParamRedirect = () => {
-  const startParam = WebApp.initDataUnsafe.start_param
+	const startParam = WebApp.initDataUnsafe.start_param
 
-  if (!startParam) return
+	if (!startParam) return
 
-  // Обработка параметра payment
-  if (startParam.startsWith('payment_')) {
-    const months = startParam.replace('payment_', '')
-    if (['1', '3', '12'].includes(months)) {
-      router.push({
-        name: 'payment',
-        query: { months }
-      })
-    }
-    return
-  }
+	// Обработка параметра payment
+	if (startParam.startsWith('payment_')) {
+		const months = startParam.replace('payment_', '')
+		if (['1', '3', '12'].includes(months)) {
+			router.push({
+				name: 'payment',
+				query: { months }
+			})
+		}
+		return
+	}
 
-  // Обработка параметра statistics
-  if (startParam === 'statistics') {
-    router.push({
-      name: 'main',
-      query: { tab: 'statistics' }
-    })
-  }
+	// Обработка параметра statistics
+	if (startParam === 'statistics') {
+		router.push({
+			name: 'main',
+			query: { tab: 'statistics' }
+		})
+	}
 }
 
 if (twa) {
-  twa.ready()
-  twa.enableClosingConfirmation()
-  twa.disableVerticalSwipes()
-  twa.expand()
-  twa.onEvent('viewportChanged', ({ isStateStable }) => {
-	if (isStateStable) {
-		twa && twa.expand()
-	}
-  })
+	twa.ready()
+	twa.enableClosingConfirmation()
+	twa.disableVerticalSwipes()
+	twa.expand()
+	twa.onEvent('viewportChanged', ({ isStateStable }) => {
+		if (isStateStable) {
+			twa && twa.expand()
+		}
+	})
 }
 
 authUser()
 
 onMounted(() => {
- authUser().then(() => {
-   handleStartParamRedirect()
- })
+	console.log('hahahahahah')
+
+	authUser().then(() => {
+		handleStartParamRedirect()
+	})
 })
 
 watch(() => route?.path, () => {

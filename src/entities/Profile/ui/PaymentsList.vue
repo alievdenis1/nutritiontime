@@ -73,99 +73,99 @@
 </template>
 
 <script setup lang="ts">
- import { ref, computed } from 'vue'
- import { VLoading } from '@/shared/components/Loading'
- import { VButton } from '@/shared/components/Button'
- import WebApp from '@twa-dev/sdk'
- import type { SubscriptionPayment } from '../model'
- import { cancelPayment } from '../api'
- import localization from './ProfileStats.localization.json'
- import { useTranslation, useLocaleStore } from '@/shared/lib/i18n'
+import { ref, computed } from 'vue'
+import { VLoading } from '@/shared/components/Loading'
+import { VButton } from '@/shared/components/Button'
+import WebApp from '@twa-dev/sdk'
+import type { SubscriptionPayment } from '../model'
+import { cancelPayment } from '../api'
+import localization from './ProfileStats.localization.json'
+import { useTranslation, useLocaleStore } from '@/shared/lib/i18n'
 
- const { t } = useTranslation(localization)
- const localStore = useLocaleStore()
+const { t } = useTranslation(localization)
+const localStore = useLocaleStore()
 
- const props = defineProps<{
-  payments: SubscriptionPayment[]
-  loading: boolean
- }>()
+const props = defineProps<{
+	payments: SubscriptionPayment[]
+	loading: boolean
+}>()
 
- const emit = defineEmits<{
-  (e: 'refresh'): void
- }>()
+const emit = defineEmits<{
+	(e: 'refresh'): void
+}>()
 
- const cancellingPaymentId = ref<number | null>(null)
+const cancellingPaymentId = ref<number | null>(null)
 
- // Сортировка платежей по дате (новые сверху)
- const sortedPayments = computed(() => {
-  return [...props.payments].sort(
-   (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  )
- })
+// Сортировка платежей по дате (новые сверху)
+const sortedPayments = computed(() => {
+	return [...props.payments].sort(
+		(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+	)
+})
 
- // Форматирование даты
- const formatDate = (date: string) => {
-  const isRu = localStore.currentLocale === 'ru'
-  return new Date(date).toLocaleString(isRu ? 'ru-RU' : 'en-US', {
-   year: 'numeric',
-   month: 'long',
-   day: 'numeric',
-   hour: '2-digit',
-   minute: '2-digit'
-  })
- }
+// Форматирование даты
+const formatDate = (date: string) => {
+	const isRu = localStore.currentLocale === 'ru'
+	return new Date(date).toLocaleString(isRu ? 'ru-RU' : 'en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit'
+	})
+}
 
- // Получение текста статуса
- const getStatusText = (status: string) => {
-  return t(status.toLowerCase()) || status
- }
+// Получение текста статуса
+const getStatusText = (status: string) => {
+	return t(status.toLowerCase()) || status
+}
 
- // Получение классов для статуса
- const getStatusClasses = (status: string) => {
-  const baseClasses = 'inline-block'
-  const statusClassMap: Record<string, string> = {
-   'PENDING': 'bg-yellow-900/50 text-yellow-400',
-   'COMPLETED': 'bg-green-900/50 text-green-400',
-   'CANCELED': 'bg-red-900/50 text-red-400',
-   'canceled': 'bg-red-900/50 text-red-400',
-   'CANCELLED': 'bg-red-900/50 text-red-400',
-   'FAILED': 'bg-red-900/50 text-red-400'
-  }
-  return `${baseClasses} ${statusClassMap[status] || 'bg-gray-900/50 text-gray-400'}`
- }
+// Получение классов для статуса
+const getStatusClasses = (status: string) => {
+	const baseClasses = 'inline-block'
+	const statusClassMap: Record<string, string> = {
+		'PENDING': 'bg-yellow-900/50 text-yellow-400',
+		'COMPLETED': 'bg-green-900/50 text-green-400',
+		'CANCELED': 'bg-red-900/50 text-red-400',
+		'canceled': 'bg-red-900/50 text-red-400',
+		'CANCELLED': 'bg-red-900/50 text-red-400',
+		'FAILED': 'bg-red-900/50 text-red-400'
+	}
+	return `${baseClasses} ${statusClassMap[status] || 'bg-gray-900/50 text-gray-400'}`
+}
 
- // Обработчики действий
- const handlePaymentUrl = (url: string) => {
-  WebApp.openLink(url)
- }
+// Обработчики действий
+const handlePaymentUrl = (url: string) => {
+	WebApp.openLink(url)
+}
 
- const handleCancelPayment = async (paymentId: number) => {
-  try {
-   cancellingPaymentId.value = paymentId
-   const { execute } = cancelPayment(paymentId)
-   await execute()
+const handleCancelPayment = async (paymentId: number) => {
+	try {
+		cancellingPaymentId.value = paymentId
+		const { execute } = cancelPayment(paymentId)
+		await execute()
 
-    emit('refresh')
+		emit('refresh')
 
-  } catch (error) {
-   console.error('Payment cancellation error:', error)
-  } finally {
-   cancellingPaymentId.value = null
-  }
- }
+	} catch (error) {
+		console.error('Payment cancellation error:', error)
+	} finally {
+		cancellingPaymentId.value = null
+	}
+}
 
- const getMonthForm = (months: number) => {
-  const monthKey = getMonthDeclension(months)
-  return t(monthKey)
- }
+const getMonthForm = (months: number) => {
+	const monthKey = getMonthDeclension(months)
+	return t(monthKey)
+}
 
- const getMonthDeclension = (months: number) => {
-  const lastDigit = months % 10
-  const lastTwoDigits = months % 100
+const getMonthDeclension = (months: number) => {
+	const lastDigit = months % 10
+	const lastTwoDigits = months % 100
 
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'monthPlural'
-  if (lastDigit === 1) return 'monthSingular'
-  if (lastDigit >= 2 && lastDigit <= 4) return 'monthFew'
-  return 'monthPlural'
- }
+	if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return 'monthPlural'
+	if (lastDigit === 1) return 'monthSingular'
+	if (lastDigit >= 2 && lastDigit <= 4) return 'monthFew'
+	return 'monthPlural'
+}
 </script>
