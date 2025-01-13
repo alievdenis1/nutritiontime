@@ -24,11 +24,11 @@
 							</div>
 						</template>
 					</el-image>
-					<div
-						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-white bg-forestGreen rounded-[100px]"
-					>
-						{{ recipe.average_rating?.toFixed(1) }}
-					</div>
+					<!--					<div-->
+					<!--						class="absolute top-[8px] left-[8px] py-[6px] px-[6px] text-white bg-forestGreen rounded-[100px]"-->
+					<!--					>-->
+					<!--						{{ recipe.average_rating?.toFixed(1) }}-->
+					<!--					</div>-->
 				</div>
 
 				<div class="p-[12px] flex flex-col justify-between">

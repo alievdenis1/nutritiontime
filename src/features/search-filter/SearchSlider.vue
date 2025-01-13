@@ -129,46 +129,46 @@
 			</div>
 		</div>
 
-		<div>
-			<h3 class="text-darkGray text-sm mb-2">
-				{{ t('dishRating') }}
-			</h3>
-			<div class="flex items-center justify-center mb-2 gap-[12px]">
-				<div class="relative border-slide w-full">
-					<span class="absolute top-[6px] left-[12px] text-xs text-gray">
-						{{ t('from') }}
-					</span>
-					<input
-						v-model="ratingInputStart"
-						type="number"
-						min="1"
-						max="5"
-						class="h-[56px] px-[12px] pt-[26px] pb-[12px] text-slateGray rounded text-sm w-full"
-						@input="validateRatingInput"
-					>
-				</div>
-				<div class="relative border-slide w-full">
-					<span class="absolute top-[6px] left-[12px] text-xs text-gray">
-						{{ t('to') }}
-					</span>
-					<input
-						v-model="ratingInputEnd"
-						type="number"
-						min="1"
-						max="5"
-						class="h-[56px] px-[12px] pt-[26px] pb-[12px] text-slateGray rounded text-sm w-full"
-						@input="validateRatingInput"
-					>
-				</div>
-			</div>
-			<VSlider
-				v-model="ratingModelValue"
-				:min="1"
-				:max="5"
-				:step="1"
-				class="mt-[12px] mb-[20px] h-[28px]"
-			/>
-		</div>
+		<!--		<div>-->
+		<!--			<h3 class="text-darkGray text-sm mb-2">-->
+		<!--				{{ t('dishRating') }}-->
+		<!--			</h3>-->
+		<!--			<div class="flex items-center justify-center mb-2 gap-[12px]">-->
+		<!--				<div class="relative border-slide w-full">-->
+		<!--					<span class="absolute top-[6px] left-[12px] text-xs text-gray">-->
+		<!--						{{ t('from') }}-->
+		<!--					</span>-->
+		<!--					<input-->
+		<!--						v-model="ratingInputStart"-->
+		<!--						type="number"-->
+		<!--						min="1"-->
+		<!--						max="5"-->
+		<!--						class="h-[56px] px-[12px] pt-[26px] pb-[12px] text-slateGray rounded text-sm w-full"-->
+		<!--						@input="validateRatingInput"-->
+		<!--					>-->
+		<!--				</div>-->
+		<!--				<div class="relative border-slide w-full">-->
+		<!--					<span class="absolute top-[6px] left-[12px] text-xs text-gray">-->
+		<!--						{{ t('to') }}-->
+		<!--					</span>-->
+		<!--					<input-->
+		<!--						v-model="ratingInputEnd"-->
+		<!--						type="number"-->
+		<!--						min="1"-->
+		<!--						max="5"-->
+		<!--						class="h-[56px] px-[12px] pt-[26px] pb-[12px] text-slateGray rounded text-sm w-full"-->
+		<!--						@input="validateRatingInput"-->
+		<!--					>-->
+		<!--				</div>-->
+		<!--			</div>-->
+		<!--			<VSlider-->
+		<!--				v-model="ratingModelValue"-->
+		<!--				:min="1"-->
+		<!--				:max="5"-->
+		<!--				:step="1"-->
+		<!--				class="mt-[12px] mb-[20px] h-[28px]"-->
+		<!--			/>-->
+		<!--		</div>-->
 	</div>
 </template>
 
