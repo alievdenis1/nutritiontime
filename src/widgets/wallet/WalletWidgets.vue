@@ -1,10 +1,10 @@
 <template>
 	<TabsMain :default-value="'balance'">
-		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">
-			<h2 class="text-center text-lg text-darkGray">
-				{{ t('wallet') }}
-			</h2>
-		</div>
+		<!--		<div class="flex justify-center items-center mb-[16px] min-h-[44px]">-->
+		<!--			<h2 class="text-center text-lg text-darkGray">-->
+		<!--				{{ t('wallet') }}-->
+		<!--			</h2>-->
+		<!--		</div>-->
 		<TabsList>
 			<TabsTrigger value="balance">
 				{{ t('balance') }}

@@ -21,38 +21,38 @@
 					<IconProfile />
 				</button>
 
-				<button
-					aria-label="Settings"
-					:aria-expanded="languageDropDownOpen"
-					class="settings-button p-[12px]"
-					role="button"
-					@click="languageDropDownOpen = !languageDropDownOpen"
-				>
-					{{ t('lang') }}
-					<IconArrow
-						:icon-color="'#1C1C1C'"
-						:icon-width="14"
-						:icon-height="14"
-						:class="{ 'rotate-180': languageDropDownOpen }"
-					/>
-					<div
-						v-show="languageDropDownOpen"
-						class="language-dropdown"
-					>
-						<button
-							:class="{ 'active': isActiveLocale('ru') }"
-							@click="localeStore.setLocale('ru')"
-						>
-							Rus
-						</button>
-						<button
-							:class="{ 'active': isActiveLocale('en') }"
-							@click="localeStore.setLocale('en')"
-						>
-							Eng
-						</button>
-					</div>
-				</button>
+				<!--				<button-->
+				<!--					aria-label="Settings"-->
+				<!--					:aria-expanded="languageDropDownOpen"-->
+				<!--					class="settings-button p-[12px]"-->
+				<!--					role="button"-->
+				<!--					@click="languageDropDownOpen = !languageDropDownOpen"-->
+				<!--				>-->
+				<!--					{{ t('lang') }}-->
+				<!--					<IconArrow-->
+				<!--						:icon-color="'#1C1C1C'"-->
+				<!--						:icon-width="14"-->
+				<!--						:icon-height="14"-->
+				<!--						:class="{ 'rotate-180': languageDropDownOpen }"-->
+				<!--					/>-->
+				<!--					<div-->
+				<!--						v-show="languageDropDownOpen"-->
+				<!--						class="language-dropdown"-->
+				<!--					>-->
+				<!--						<button-->
+				<!--							:class="{ 'active': isActiveLocale('ru') }"-->
+				<!--							@click="localeStore.setLocale('ru')"-->
+				<!--						>-->
+				<!--							Rus-->
+				<!--						</button>-->
+				<!--						<button-->
+				<!--							:class="{ 'active': isActiveLocale('en') }"-->
+				<!--							@click="localeStore.setLocale('en')"-->
+				<!--						>-->
+				<!--							Eng-->
+				<!--						</button>-->
+				<!--					</div>-->
+				<!--				</button>-->
 			</div>
 		</header>
 	</div>

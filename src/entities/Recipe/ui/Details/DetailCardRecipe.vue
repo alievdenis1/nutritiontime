@@ -212,11 +212,11 @@
 						{{ t('recipeAuthor') }}
 					</div>
 					<div class="flex items-center gap-[8px] mt-[12px]">
-						<img
-							:src="recipe.author?.image"
-							:alt="recipe.author?.name"
-							class="w-[20px] h-[20px]"
-						>
+						<!--						<img-->
+						<!--							:src="recipe.author?.image"-->
+						<!--							:alt="recipe.author?.name"-->
+						<!--							class="w-[20px] h-[20px]"-->
+						<!--						>-->
 						<div class="text-xs text-slateGray">
 							{{ recipe.author?.name }}
 						</div>

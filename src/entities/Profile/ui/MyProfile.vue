@@ -110,13 +110,13 @@
 							{{ t('editProfile') }}
 						</VButton>
 
-						<div
-							class="cursor-pointer relative flex items-center gap-[2px] rounded-[16px] shadow-lg font-bold p-5 justify-center"
-							@click="navigateToWallet"
-						>
-							<IconGold />
-							<span class="ml-2">$RECIPETON</span>
-						</div>
+						<!--						<div-->
+						<!--							class="cursor-pointer relative flex items-center gap-[2px] rounded-[16px] shadow-lg font-bold p-5 justify-center"-->
+						<!--							@click="navigateToWallet"-->
+						<!--						>-->
+						<!--							<IconGold />-->
+						<!--							<span class="ml-2">$RECIPETON</span>-->
+						<!--						</div>-->
 					</template>
 				</div>
 			</TabsContent>
@@ -231,17 +231,19 @@ import localization from './ProfileStats.localization.json'
 import { useTranslation } from '@/shared/lib/i18n'
 import { ButtonColors, VButton } from 'shared/components/Button'
 import { VModal } from '@/shared/components/Modal'
-import { IconClose, IconGold } from '@/shared/components/Icon'
+import { IconClose,
+	// IconGold
+} from '@/shared/components/Icon'
 import WebApp from '@twa-dev/sdk'
 import type { ReferralUser } from '../model'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/entities/Session'
 
-const router = useRouter()
+// const router = useRouter()
 
-const navigateToWallet = () => {
-	router.push('/wallet')
-}
+// const navigateToWallet = () => {
+// 	router.push('/wallet')
+// }
 
 const sortedReferrals = computed(() =>
 	[...(profile.value?.user?.referrals || [])].sort((a, b) =>
