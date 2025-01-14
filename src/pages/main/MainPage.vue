@@ -92,10 +92,10 @@ const navigateToWallet = () => {
 	router.push('/wallet')
 }
 const navigateToBook = () => {
-	router.push('/book')
+	router.push('/diary')
 }
 const navigateToDiary = () => {
-	router.push('/diary')
+	router.push('/book')
 }
 </script>
 
