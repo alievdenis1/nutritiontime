@@ -60,27 +60,27 @@
 				@click.stop
 			>
 				<div class="flex justify-center items-center">
-					<div class="flex justify-center items-center gap-[8px] mr-[20px]">
-						<el-image
-							class="h-[20px] w-[20px]"
-							:src="recipe.author?.image"
-							:alt="recipe.author?.name"
-						>
-							<template #error>
-								<el-icon>
-									<el-icon-user />
-								</el-icon>
-							</template>
-						</el-image>
-						{{ recipe.author?.name }}
-					</div>
-					<button
-						class="flex justify-center items-center gap-[4px] text-[#535353] cursor-pointer"
-						@click="router.push(`/all-comment/${recipe.id}`)"
-					>
-						<IconComment />
-						{{ recipe.total_comments_count }}
-					</button>
+					<!--					<div class="flex justify-center items-center gap-[8px] mr-[20px]">-->
+					<!--						<el-image-->
+					<!--							class="h-[20px] w-[20px]"-->
+					<!--							:src="recipe.author?.image"-->
+					<!--							:alt="recipe.author?.name"-->
+					<!--						>-->
+					<!--							<template #error>-->
+					<!--								<el-icon>-->
+					<!--									<el-icon-user />-->
+					<!--								</el-icon>-->
+					<!--							</template>-->
+					<!--						</el-image>-->
+					<!--						{{ recipe.author?.name }}-->
+					<!--					</div>-->
+					<!--					<button-->
+					<!--						class="flex justify-center items-center gap-[4px] text-[#535353] cursor-pointer"-->
+					<!--						@click="router.push(`/all-comment/${recipe.id}`)"-->
+					<!--					>-->
+					<!--						<IconComment />-->
+					<!--						{{ recipe.total_comments_count }}-->
+					<!--					</button>-->
 				</div>
 				<div class="flex items-center justify-between gap-[16px]">
 					<!--					<IconFavorites-->
@@ -122,7 +122,13 @@
 </template>
 
 <script setup lang="ts">
-import { IconComment, IconFavorites, IconFire, IconHeart, IconTime } from 'shared/components/Icon'
+import {
+	// IconComment,
+	// IconFavorites,
+	IconFire,
+	// IconHeart,
+	IconTime
+} from 'shared/components/Icon'
 import { RecipeItem } from './type'
 import { useRouter } from 'vue-router'
 import CreateCollection from '../Search/modal/CreateCollection.vue'
@@ -160,13 +166,13 @@ const props = withDefaults(defineProps<Props>(), {
 	collectionLoadingStates: () => new Set<number>
 })
 
-const toggleLike = async (recipeId: number) => {
-	emit('toggleLike', recipeId)
-}
-
-const toggleCollection = async (recipeId: number) => {
-	emit('toggleCollection', recipeId)
-}
+// const toggleLike = async (recipeId: number) => {
+// 	emit('toggleLike', recipeId)
+// }
+//
+// const toggleCollection = async (recipeId: number) => {
+// 	emit('toggleCollection', recipeId)
+// }
 
 // const toggleFavorite = async (recipeId: number) => {
 // //

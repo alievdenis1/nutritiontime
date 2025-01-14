@@ -8,7 +8,7 @@
 			]"
 		>
 			<SearchBar />
-			<QuickSearchTag v-if="showQuickSearchTag" />
+			<!--			<QuickSearchTag v-if="showQuickSearchTag" />-->
 		</div>
 		<div
 			v-if="isSearchBarFixed"

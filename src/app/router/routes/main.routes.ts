@@ -31,5 +31,25 @@ export default [
 			layout: MainLayout,
 			requiresAuth: true
 		}
-	}
+	},
+	{
+		path: '/book/',
+		component: () => import('pages/book/BookPage.vue'),
+		name: 'book',
+		meta: {
+			title: 'NutritionTime',
+			layout: MainLayout,
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/diary/',
+		component: () => import('pages/diary/DiaryPage.vue'),
+		name: 'diary',
+		meta: {
+			title: 'NutritionTime',
+			layout: MainLayout,
+			requiresAuth: true
+		}
+	},
 ] as RouteRecordRaw[]
