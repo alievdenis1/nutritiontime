@@ -1,6 +1,6 @@
 <template>
 	<button
-		class="text-gray-400 hover:text-red-500 transition-colors duration-200"
+		class="text-[#9F9FA0] hover:text-red-500 transition-colors duration-200"
 		:disabled="isDeleting"
 		@click.stop="confirmDelete"
 	>
@@ -10,7 +10,7 @@
 				class="h-5 w-5"
 				fill="none"
 				viewBox="0 0 24 24"
-				stroke="currentColor"
+				stroke="#9F9FA0"
 			>
 				<path
 					stroke-linecap="round"
