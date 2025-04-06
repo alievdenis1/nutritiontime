@@ -1,0 +1,19 @@
+{
+  "ru": {
+    "deleteRecipeTitle": "Удаление рецепта",
+    "deleteRecipeDescription": "Вы уверены, что хотите удалить этот рецепт? Это действие нельзя отменить.",
+    "confirmDelete": "Удалить",
+    "cancelDelete": "Отмена",
+    "deleteSuccess": "Рецепт успешно удален",
+    "deleteError": "Ошибка при удалении рецепта"
+  },
+  "en": {
+    "deleteRecipeTitle": "Delete Recipe",
+    "deleteRecipeDescription": "Are you sure you want to delete this recipe? This action cannot be undone.",
+    "confirmDelete": "Delete",
+    "cancelDelete": "Cancel",
+    "deleteSuccess": "Recipe successfully deleted",
+    "deleteError": "Error deleting recipe"
+  }
+}
+
