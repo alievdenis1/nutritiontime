@@ -74,6 +74,14 @@
 						@success="onRecipeSuccesfullyToggledFavourite"
 					/>
 				</template>
+
+				<template #deleteRecipe="{ recipe }">
+					<DeleteRecipe
+						:recipe-id="recipe.id"
+						@recipe-deleted="onRecipeDeleted"
+						@delete-error="onRecipeDeleteError"
+					/>
+				</template>
 			</RecipesList>
 
 			<VContentBlock
@@ -132,6 +140,7 @@ import { useMyRecipeList } from 'entities/Recipe/model/use-my-recipe-list.ts'
 import { ToggleFavoriteButton } from 'features/Recipe/toggle-favourite'
 import AddRecipeToCollectionButton from 'features/Recipe/add-to-collection/ui/AddRecipeToCollectionButton.vue'
 import AddRecipeToCollectionFlow from 'features/Recipe/add-to-collection/ui/AddRecipeToCollectionFlow.vue'
+import { DeleteRecipe } from 'features/Recipe/delete/ui'
 import { RecipeItem } from 'entities/Recipe/RecipesList'
 import { Collection } from 'entities/Сollection/types/typesCollection.ts'
 import { EditCollection } from 'features/Collection/edit'
@@ -276,6 +285,16 @@ const onRecipeSuccessfullyAddedToCollection = async (data: { recipeId: number, c
 
 const onStartAddRecipeToCollectionFlow = (recipe: RecipeItem) => {
 	addRecipeToCollectionFlowRef.value?.start(recipe)
+}
+
+const onRecipeDeleted = async () => {
+	await queryClient.invalidateQueries({
+		queryKey: ['recipes/my']
+	})
+}
+
+const onRecipeDeleteError = (error: any) => {
+	ElMessage.error(error.message)
 }
 </script>
 

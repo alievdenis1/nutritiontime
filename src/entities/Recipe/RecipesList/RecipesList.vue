@@ -99,6 +99,11 @@
 						v-bind="{ recipe }"
 					/>
 
+					<slot
+						name="deleteRecipe"
+						v-bind="{ recipe }"
+					/>
+
 					<!--          <div @click="toggleLike(recipe.id)">-->
 					<!--						<div class="flex justify-center items-center gap-[8px] text-[#535353]">-->
 					<!--							<IconHeart-->
@@ -157,7 +162,8 @@ const emit = defineEmits<{
 
 defineSlots<{
 	addToCollection(scope: { recipe: RecipeItem }): any,
-	toggleFavourite(scope: { recipe: RecipeItem }): any
+	toggleFavourite(scope: { recipe: RecipeItem }): any,
+	deleteRecipe(scope: { recipe: RecipeItem }): any
 }>()
 
 const props = withDefaults(defineProps<Props>(), {
