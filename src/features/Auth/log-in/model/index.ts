@@ -65,6 +65,7 @@ export const useAuthorization = () => {
 			const { referralCode } = processStartParam(startParam)
 
 			const { data, error: loginError, execute } = login({
+				initData: twa.initData,
 				telegram_id: twaUser.id.toString(),
 				first_name: twaUser.first_name,
 				last_name: twaUser.last_name || '',

@@ -102,11 +102,7 @@ if (twa) {
 	})
 }
 
-authUser()
-
 onMounted(() => {
-	console.log('hahahahahah')
-
 	authUser().then(() => {
 		handleStartParamRedirect()
 	})
