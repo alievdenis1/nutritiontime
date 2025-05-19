@@ -5,7 +5,7 @@
 
 			<component :is="layout">
 				<div
-					v-if="isLoading"
+					v-if="isLoading || !sessionStore.isAuthenticated"
 					class="loading"
 				>
 					<div class="loading__spinner">

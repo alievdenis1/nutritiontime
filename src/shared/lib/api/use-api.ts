@@ -16,9 +16,6 @@ export const api: AxiosInstance = axios.create({
 		'Content-Type': 'application/json'
 	}
 })
-
-const isLocal = import.meta.env.VITE_USE_TWA_MOCK
-
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 	const token = localStorage.getItem('auth_token')
 	if (token && config.headers) {
@@ -29,9 +26,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 		config.headers['Telegram-Init-Data'] = twa.initData
 	}
 
-	if (isLocal) {
-		config.headers['Env-Mode'] = 'dev'
-	}
 	return config
 })
 

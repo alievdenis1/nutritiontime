@@ -44,6 +44,9 @@
 			</TabsContent>
 		</TabsMain>
 	</div>
+	<div v-else-if="loading">
+		<VLoading />
+	</div>
 	<div
 		v-else
 		class="p-5 text-center"
@@ -85,6 +88,7 @@ import { ButtonColors, VButton } from 'shared/components/Button'
 import WebApp from '@twa-dev/sdk'
 import { useRoute } from 'vue-router'
 import { IconGold } from 'shared/components/Icon'
+import { VLoading } from 'shared/components/Loading'
 
 const route = useRoute()
 
